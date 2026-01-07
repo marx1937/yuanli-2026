@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>苑裡土地公地圖 (2026版)</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<style>
+  body{margin:0;font-family:"Microsoft JhengHei",sans-serif;background:#f0f2f5}
+  #map{height:60vh;width:100%}
+  .controls{padding:20px;background:#fff;border-radius:20px 20px 0 0;margin-top:-20px;position:relative;z-index:999;text-align:center;box-shadow:0 -2px 10px rgba(0,0,0,0.1)}
+  input[type="text"]{padding:12px;width:80%;margin-bottom:15px;border:1px solid #ddd;border-radius:8px;font-size:16px}
+  .btn{background:#007bff;color:white;padding:15px 40px;border:none;border-radius:50px;font-size:18px;font-weight:bold;box-shadow:0 4px 6px rgba(0,123,255,0.3);cursor:pointer}
+  .btn:active{transform:scale(0.98)}
+  #status{margin-top:10px;color:#666}
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+<div class="controls">
+    <h3>📍 土地公在哪裡？</h3>
+    <input type="text" id="note" placeholder="請輸入備註 (例: 某某里大樹下)">
+    
+    <input type="hidden" id="lat"><input type="hidden" id="lng">
+    <input type="file" id="photoInput" accept="image/*" capture="camera" style="display:none">
+    
+    <button class="btn" onclick="startProcess()">📷 拍照上傳</button>
+    <p id="status">請站在廟前再按上傳</p>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // 1. 初始化地圖 (預設苑裡)
+    var map = L.map('map').setView([24.4429, 120.6493], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    // 2. 抓取所有土地公資料
+    $.getJSON('/api/temples', function(data) {
+        data.forEach(function(item) {
+            L.marker([item.lat, item.lng])
+             .addTo(map)
+             .bindPopup(`<b>${item.note}</b><br><img src="${item.image}" width="150" style="border-radius:8px;margin-top:5px">`);
+        });
+    });
+
+    // 3. 點擊按鈕流程
+    function startProcess() {
+        var note = document.getElementById('note').value;
+        if(!note){ alert("請先輸入備註(例如地點名稱)！"); return; }
+
+        document.getElementById('status').innerText = "📡 正在抓取 GPS...";
+        
+        if (!navigator.geolocation) { alert("手機不支援定位"); return; }
+        
+        navigator.geolocation.getCurrentPosition(function(position) {
+            var lat = position.coords.latitude;
+            var lng = position.coords.longitude;
+            
+            document.getElementById('lat').value = lat;
+            document.getElementById('lng').value = lng;
+            document.getElementById('status').innerText = `✅ 定位成功！請拍張照...`;
+            
+            // 觸發相機
+            document.getElementById('photoInput').click();
+            
+        }, function(err) {
+            alert("定位失敗：請確認已開啟 GPS");
+            document.getElementById('status').innerText = "定位失敗";
+        }, { enableHighAccuracy: true });
+    }
+
+    // 4. 選好照片後自動上傳
+    document.getElementById('photoInput').onchange = function() {
+        var file = this.files[0];
+        if (!file) return;
+
+        var formData = new FormData();
+        formData.append('photo', file);
+        formData.append('lat', document.getElementById('lat').value);
+        formData.append('lng', document.getElementById('lng').value);
+        formData.append('note', document.getElementById('note').value);
+
+        document.getElementById('status').innerText = "🚀 上傳中...請勿關閉";
+        document.querySelector('.btn').disabled = true;
+        document.querySelector('.btn').style.background = "#ccc";
+
+        $.ajax({
+            url: '/upload',
+            type: 'POST',
+            data: formData,
+            processData: false, contentType: false,
+            success: function(res) {
+                alert(res.message);
+                location.reload(); // 重新整理
+            },
+            error: function(err) {
+                alert("上傳失敗，請稍後再試");
+                document.querySelector('.btn').disabled = false;
+                document.querySelector('.btn').style.background = "#007bff";
+                document.getElementById('status').innerText = "上傳失敗";
+            }
+        });
+    };
+</script>
+</body>
+</html>
