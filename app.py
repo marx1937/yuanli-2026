@@ -72,6 +72,7 @@ def index():
     return render_template('index.html')
 
 @app.route('/upload', methods=['POST'])
+@app.route('/upload', methods=['POST'])
 def upload_file():
     try:
         file = request.files.get('photo')
@@ -79,49 +80,47 @@ def upload_file():
         lng = request.form.get('lng')
         note = request.form.get('note')
 
-    # --- 🔵 新增：檢查苑裡結界 ---
-      try:
-        # 轉成數字
-        lat_val = float(lat)
-        lng_val = float(lng)
+        # --- 🔵 新增：檢查苑裡結界 ---
+        try:
+            # 轉成數字
+            lat_val = float(lat)
+            lng_val = float(lng)
 
-        # 設定苑裡範圍 (大致包含市區與周邊)
-        # 緯度 24.30 ~ 24.48 / 經度 120.58 ~ 120.75
-        if not (24.30 <= lat_val <= 24.48 and 120.58 <= lng_val <= 120.75):
-            return jsonify({'status': 'error', 'message': '抱歉！這裡不是苑裡，土地公只保佑在地喔 🙅‍♂️'})
-    except:
-        pass # 如果座標讀不到，就交給後面處理
-    # --- 🔵 結界結束 ---
+            # 設定苑裡範圍 (緯度 24.30 ~ 24.48 / 經度 120.58 ~ 120.75)
+            if not (24.30 <= lat_val <= 24.48 and 120.58 <= lng_val <= 120.75):
+                return jsonify({'status': 'error', 'message': '抱歉！這裡不是苑裡，土地公只保佑在地喔 🙅‍♂️'})
+        except:
+            pass # 如果座標讀不到，就交給後面處理
+        # --- 🔵 結界結束 ---
 
-
-        
         if file and lat and lng:
-            # 1. 上傳照片
+            # # 1. 上傳照片
             if IS_PRODUCTION:
                 upload_result = cloudinary.uploader.upload(file)
                 image_url = upload_result['secure_url']
             else:
                 image_url = "local_test.jpg"
 
-            # 2. 寫入資料庫
+            # # 2. 寫入資料庫
             conn = get_db_connection()
             c = conn.cursor()
-            
+
             if IS_PRODUCTION:
-                c.execute("INSERT INTO temples (lat, lng, image_url, note, created_at) VALUES (%s, %s, %s, %s, NOW())",
-                          (lat, lng, image_url, note))
+                c.execute("INSERT INTO temples (lat, lng, image_url, note, created_at) VALUES (%s, %s, %s, %s, %s)",
+                        (lat, lng, image_url, note, datetime.now()))
             else:
                 c.execute("INSERT INTO temples (lat, lng, image_url, note, created_at) VALUES (?, ?, ?, ?, ?)",
-                          (lat, lng, image_url, note, datetime.now()))
-            
+                        (lat, lng, image_url, note, datetime.now()))
+
             conn.commit()
             conn.close()
-              return jsonify({'message': 'Bingo！抓到一隻土地公了！📸 成功插旗！🚩'})
+            return jsonify({'message': 'Bingo！抓到一隻土地公了！📸 成功插旗！🚩'})
 
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)})
-    
+
     return jsonify({'status': 'error', 'message': '資料不完整'})
+
 
 @app.route('/api/temples')
 def get_temples():
