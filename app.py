@@ -80,7 +80,7 @@ def upload_file():
         note = request.form.get('note')
 
     # --- 🔵 新增：檢查苑裡結界 ---
-    try:
+      try:
         # 轉成數字
         lat_val = float(lat)
         lng_val = float(lng)
