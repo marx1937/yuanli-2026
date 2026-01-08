@@ -100,7 +100,7 @@ def upload_file():
             
             conn.commit()
             conn.close()
-return jsonify({'message': 'Bingo！抓到一隻土地公了！📸 成功插旗！🚩'})
+              return jsonify({'message': 'Bingo！抓到一隻土地公了！📸 成功插旗！🚩'})
 
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)})
