@@ -137,15 +137,42 @@ def get_temples():
         
         results = []
         for row in rows:
-            results.append({
-                'lat': row['lat'],
-                'lng': row['lng'],
-                'image': row['image_url'],
-                'note': row['note']
+                    results.append({
+            'id': row['id'],      # <--- 🟢 請插入這一行！
+            'lat': row['lat'],
+            'lng': row['lng'],
+            'image': row['image_url'],
+            'note': row['note']
+        })
+
             })
         return jsonify(results)
     except:
         return jsonify([])
+# --- 🔴 新增：刪除功能 ---
+@app.route('/delete/<int:id>', methods=['POST'])
+def delete_temple(id):
+    try:
+        # 檢查密碼 (預設是 8888)
+        password = request.form.get('password')
+        if password != '8888':
+            return jsonify({'status': 'error', 'message': '密碼錯誤！禁止刪除 🛡️'})
+
+        # 連線資料庫並刪除
+        conn = get_db_connection()
+        c = conn.cursor()
+        if IS_PRODUCTION:
+             c.execute("DELETE FROM temples WHERE id = %s", (id,))
+        else:
+             c.execute("DELETE FROM temples WHERE id = ?", (id,))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'status': 'success', 'message': '刪除成功！再見了 👋'})
+
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)})
+# --- 🔴 刪除功能結束 ---
 
 if __name__ == '__main__':
     app.run(debug=True)
