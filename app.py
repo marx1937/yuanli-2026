@@ -79,6 +79,22 @@ def upload_file():
         lng = request.form.get('lng')
         note = request.form.get('note')
 
+    # --- 🔵 新增：檢查苑裡結界 ---
+    try:
+        # 轉成數字
+        lat_val = float(lat)
+        lng_val = float(lng)
+
+        # 設定苑裡範圍 (大致包含市區與周邊)
+        # 緯度 24.30 ~ 24.48 / 經度 120.58 ~ 120.75
+        if not (24.30 <= lat_val <= 24.48 and 120.58 <= lng_val <= 120.75):
+            return jsonify({'status': 'error', 'message': '抱歉！這裡不是苑裡，土地公只保佑在地喔 🙅‍♂️'})
+    except:
+        pass # 如果座標讀不到，就交給後面處理
+    # --- 🔵 結界結束 ---
+
+
+        
         if file and lat and lng:
             # 1. 上傳照片
             if IS_PRODUCTION:
