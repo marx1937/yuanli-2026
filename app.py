@@ -87,7 +87,7 @@ def upload_file():
             lng_val = float(lng)
 
             # 設定苑裡範圍 (緯度 24.30 ~ 24.48 / 經度 120.58 ~ 120.75)
-            if not (24.40 <= lat_val <= 24.48 and 120.58 <= lng_val <= 120.75):
+            if not (24.30 <= lat_val <= 24.48 and 120.58 <= lng_val <= 120.75):
                 return jsonify({'status': 'error', 'message': '抱歉！這裡不是苑裡，土地公只保佑在地喔 🙅‍♂️'})
         except:
             pass # 如果座標讀不到，就交給後面處理
@@ -138,7 +138,7 @@ def get_temples():
         results = []
         for row in rows:
             results.append({
-                'id': row['id'],
+               # 'id': row['id'],
                 'lat': row['lat'],
                 'lng': row['lng'],
                 'image': row['image_url'],
