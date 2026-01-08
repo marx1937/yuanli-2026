@@ -1,107 +1,153 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>苑裡土地公地圖 (2026版)</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-<style>
-  body{margin:0;font-family:"Microsoft JhengHei",sans-serif;background:#f0f2f5}
-  #map{height:60vh;width:100%}
-  .controls{padding:20px;background:#fff;border-radius:20px 20px 0 0;margin-top:-20px;position:relative;z-index:999;text-align:center;box-shadow:0 -2px 10px rgba(0,0,0,0.1)}
-  input[type="text"]{padding:12px;width:80%;margin-bottom:15px;border:1px solid #ddd;border-radius:8px;font-size:16px}
-  .btn{background:#007bff;color:white;padding:15px 40px;border:none;border-radius:50px;font-size:18px;font-weight:bold;box-shadow:0 4px 6px rgba(0,123,255,0.3);cursor:pointer}
-  .btn:active{transform:scale(0.98)}
-  #status{margin-top:10px;color:#666}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>苑裡土地公地圖 (By 苑裡人)</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        body{margin:0;font-family:"Microsoft JhengHei",sans-serif;background:#f0f2f5}
+        #map{height:60vh;width:100%}
+        .controls{padding:20px;background:#fff;border-radius:20px 20px 0 0;margin-top:-20px;position:relative;z-index:999;text-align:center;box-shadow:0 -2px 10px rgba(0,0,0,0.1)}
+        input[type="text"]{padding:12px;width:80%;margin-bottom:15px;border:1px solid #ddd;border-radius:8px;font-size:16px}
+        .btn{background:#007bff;color:white;padding:15px 40px;border:none;border-radius:50px;font-size:18px;font-weight:bold;box-shadow:0 4px 6px rgba(0,123,255,0.3);transition:transform 0.1s}
+        .btn:active{transform: scale(0.98)}
+        #status{margin-top:10px;color:#666}
+    </style>
 </head>
 <body>
 
-<div id="map"></div>
-<div class="controls">
-    <h3>苑裡串起來<br>📍 土地公在哪裡？</h3 土地公在哪裡？</h3>
-    <input type="text" id="note" placeholder="請輸入備註 (例: 某某里)">
-    
-    <input type="hidden" id="lat"><input type="hidden" id="lng">
-    <input type="file" id="photoInput" accept="image/*" capture="camera" style="display:none">
-    
-    <button class="btn" onclick="startProcess()">📷 拍照上傳</button>
-    <p id="status">請站在廟前再按上傳</p>
-</div>
+    <div id="map"></div>
+    <div class="controls">
+        <h3>苑裡串起來 🚩<br>土地公在哪裡？</h3>
+        <input type="text" id="note" placeholder="輸入備註 (例: 某某里)">
+        
+        <input type="hidden" id="lat"><input type="hidden" id="lng">
+        <input type="file" id="photoInput" accept="image/*" capture="camera" style="display:none">
+        
+        <button class="btn" onclick="startProcess()">📷 拍照上傳</button>
+        <p id="status">請站在廟前再按上傳</p>
+    </div>
 
-<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    // 1. 初始化地圖 (預設苑裡)
-    var map = L.map('map').setView([24.4429, 120.6493], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // 1. 初始化地圖 (預設苑裡)
+        var map = L.map('map').setView([24.4429, 120.6493], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    // 2. 抓取所有土地公資料
-    $.getJSON('/api/temples', function(data) {
-        data.forEach(function(item) {
-            L.marker([item.lat, item.lng])
-             .addTo(map)
-             .bindPopup(`<b>${item.note}</b><br><img src="${item.image}" width="150" style="border-radius:8px;margin-top:5px">`);
+        // 2. 抓取所有土地公資料
+        $.getJSON('/api/temples', function(data) {
+            data.forEach(function(item) {
+                L.marker([item.lat, item.lng])
+                    .addTo(map)
+                    .bindPopup(
+                        '<b>' + item.note + '</b><br>' +
+                        '<img src="' + item.image + '" width="150" style="border-radius:8px;margin-top:5px;"><br>' +
+                        '<button onclick="deleteTemple(' + item.id + ')" style="background:#ff4d4d;color:white;border:none;padding:5px 10px;border-radius:4px;margin-top:5px;cursor:pointer;">🗑️ 刪除</button>'
+                    );
+            });
         });
-    });
 
-    // 3. 點擊按鈕流程
-    function startProcess() {
-        var note = document.getElementById('note').value;
-        if(!note){ alert("請先輸入備註(例如地點名稱)！"); return; }
+        // 3. 拍照流程 (取得定位 -> 壓縮 -> 上傳)
+        function startProcess() {
+            var note = $('#note').val();
+            if(!note) { alert('請先輸入備註 (例如: 客庄里)'); return; }
 
-        document.getElementById('status').innerText = "📡 正在抓取 GPS...";
-        
-        if (!navigator.geolocation) { alert("手機不支援定位"); return; }
-        
-        navigator.geolocation.getCurrentPosition(function(position) {
-            var lat = position.coords.latitude;
-            var lng = position.coords.longitude;
+            $('#status').text('🚀 正在定位中...');
             
-            document.getElementById('lat').value = lat;
-            document.getElementById('lng').value = lng;
-            document.getElementById('status').innerText = `✅ 定位成功！請拍張照...`;
+            navigator.geolocation.getCurrentPosition(function(position) {
+                $('#lat').val(position.coords.latitude);
+                $('#lng').val(position.coords.longitude);
+                $('#status').text('📸 請選擇照片...');
+                $('#photoInput').click(); // 觸發相機
+            }, function() {
+                alert('定位失敗，請允許 GPS 權限');
+                $('#status').text('定位失敗');
+            });
+        }
+
+        // 當選好照片後
+        $('#photoInput').change(function() {
+            if(this.files.length === 0) return;
+            var file = this.files[0];
+            $('#status').text('⏳ 壓縮照片中...');
             
-            // 觸發相機
-            document.getElementById('photoInput').click();
+            compressImage(file, function(blob) {
+                uploadFile(blob);
+            });
+        });
+
+        // 4. 上傳功能
+        function uploadFile(fileBlob) {
+            $('#status').text('🚀 上傳中...請勿關閉');
             
-        }, function(err) {
-            alert("定位失敗：請確認已開啟 GPS");
-            document.getElementById('status').innerText = "定位失敗";
-        }, { enableHighAccuracy: true });
-    }
+            var formData = new FormData();
+            formData.append('photo', fileBlob);
+            formData.append('lat', $('#lat').val());
+            formData.append('lng', $('#lng').val());
+            formData.append('note', $('#note').val());
 
-    // 4. 選好照片後自動上傳
-    document.getElementById('photoInput').onchange = function() {
-        var file = this.files[0];
-        if (!file) return;
+            $.ajax({
+                url: '/upload',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(res) {
+                    if(res.status === 'error') {
+                        alert(res.message);
+                        $('#status').text('❌ 上傳失敗: ' + res.message);
+                    } else {
+                        alert(res.message);
+                        location.reload();
+                    }
+                },
+                error: function() {
+                    alert('上傳發生錯誤，請重試');
+                    $('#status').text('❌ 伺服器錯誤');
+                }
+            });
+        }
 
-        var formData = new FormData();
-        formData.append('photo', file);
-        formData.append('lat', document.getElementById('lat').value);
-        formData.append('lng', document.getElementById('lng').value);
-        formData.append('note', document.getElementById('note').value);
+        // 5. 圖片壓縮工具
+        function compressImage(file, callback) {
+            var reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(event) {
+                var img = new Image();
+                img.src = event.target.result;
+                img.onload = function() {
+                    var canvas = document.createElement('canvas');
+                    var ctx = canvas.getContext('2d');
+                    
+                    var width = 800; // 縮小到寬度 800
+                    var scale = width / img.width;
+                    var height = img.height * scale;
 
-        document.getElementById('status').innerText = "🚀 上傳中...請勿關閉";
-        document.querySelector('.btn').disabled = true;
-        document.querySelector('.btn').style.background = "#ccc";
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
 
-        $.ajax({
-            url: '/upload',
-            type: 'POST',
-            data: formData,
-            processData: false, contentType: false,
-            success: function(res) {
-                alert(res.message);
-                location.reload(); // 重新整理
-            },
-            error: function(err) {
-                alert("上傳失敗，請稍後再試");
-                document.querySelector('.btn').disabled = false;
-                document.querySelector('.btn').style.background = "#007bff";
-                document.getElementById('status').innerText = "上傳失敗";
+                    canvas.toBlob(function(blob) {
+                        callback(blob);
+                    }, 'image/jpeg', 0.7); // 70% 品質
+                }
             }
-        });
-    };
-</script>
+        }
+  // --- 🔴 新增：刪除功能的函式 ---
+        function deleteTemple(id) {
+            var password = prompt("請輸入管理員密碼 (預設 8888)：");
+            if (password) {
+                $.post('/delete/' + id, { password: password }, function(res) {
+                    alert(res.message);
+                    if (res.status === 'success') {
+                        location.reload(); // 刪除成功後重新整理
+                    }
+                });
+            }
+        }
+
+    </script>
 </body>
 </html>
