@@ -130,25 +130,25 @@ def get_temples():
             c = conn.cursor(cursor_factory=RealDictCursor)
         else:
             c = conn.cursor()
-            
+
         c.execute("SELECT * FROM temples")
         rows = c.fetchall()
         conn.close()
-        
+
         results = []
         for row in rows:
-                    results.append({
-            'id': row['id'],      # <--- 🟢 請插入這一行！
-            'lat': row['lat'],
-            'lng': row['lng'],
-            'image': row['image_url'],
-            'note': row['note']
-        })
-
+            results.append({
+                'id': row['id'],
+                'lat': row['lat'],
+                'lng': row['lng'],
+                'image': row['image_url'],
+                'note': row['note']
             })
+
         return jsonify(results)
     except:
         return jsonify([])
+
 # --- 🔴 新增：刪除功能 ---
 @app.route('/delete/<int:id>', methods=['POST'])
 def delete_temple(id):
