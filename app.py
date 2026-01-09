@@ -73,65 +73,62 @@ except Exception as e:
 @app.route('/')
 def index():
     return render_template('index.html')
-
-@app.route('/upload', methods=['POST'])
+# --- 📸 上傳照片 API (扁平化改良版) ---
 @app.route('/upload', methods=['POST'])
 def upload_file():
     try:
+        # 1. 接收資料
         file = request.files.get('photo')
         lat = request.form.get('lat')
         lng = request.form.get('lng')
         note = request.form.get('note')
-        nickname = request.form.get('nickname') # 新增：接收暱稱
-        area = request.form.get('area')         # 新增：接收地區
+        nickname = request.form.get('nickname')
+        area = request.form.get('area')
 
-        # --- 🔵 新增：檢查苑裡結界 ---
+        # 2. 門神檢查：如果有缺資料，直接報錯踢出去
+        if not file or not lat or not lng:
+            return jsonify({
+                'status': 'error', 
+                'message': f'資料缺漏 Debug: lat={lat}, lng={lng}, file={file}'
+            })
+
+        # 3. 範圍檢查 (簡單版)
         try:
-            # 轉成數字
-            lat_val = float(lat)
-            lng_val = float(lng)
-
-            # 設定苑裡範圍 (緯度 24.30 ~ 24.48 / 經度 120.58 ~ 120.75)
-            if not (24.30 <= lat_val <= 24.48 and 120.58 <= lng_val <= 120.75):
-                return jsonify({'status': 'error', 'message': '抱歉！這裡不是苑裡，土地公只保佑在地喔 🙅‍♂️'})
+            if not (24.30 <= float(lat) <= 24.48 and 120.58 <= float(lng) <= 120.75):
+                return jsonify({'status': 'error', 'message': '抱歉！這裡不是苑裡鎮喔 (座標不在範圍內) 📍'})
         except:
-            pass # 如果座標讀不到，就交給後面處理
-        # --- 🔵 結界結束 ---
+            pass # 如果座標轉不過來，就放過它，讓後面上傳
 
-        if file and lat and lng:
-            # # 1. 上傳照片
-            if IS_PRODUCTION:
-                upload_result = cloudinary.uploader.upload(file)
-                image_url = upload_result['secure_url']
-            else:
-                image_url = "local_test.jpg"
-
-            # # 2. 寫入資料庫
-            conn = get_db_connection()
-            c = conn.cursor()
-
-                    # SQL 指令：寫入 lat, lng, image_url, note, nickname, area
+        # 4. 上傳照片
         if IS_PRODUCTION:
-            c.execute("""
-                INSERT INTO temples (lat, lng, image_url, note, nickname, area, created_at)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (lat, lng, image_url, note, nickname, area, datetime.now()))
+            upload_result = cloudinary.uploader.upload(file)
+            image_url = upload_result['secure_url']
         else:
-            c.execute("""
-                INSERT INTO temples (lat, lng, image_url, note, nickname, area, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (lat, lng, image_url, note, nickname, area, datetime.now()))
+            image_url = "local_test.jpg"
 
-            conn.commit()
-            conn.close()
-            return jsonify({'message': 'Bingo！抓到一隻土地公了！📸 成功插旗！🚩'})
+        # 5. 寫入資料庫
+        conn = get_db_connection()
+        c = conn.cursor()
+        
+        # 根據環境選擇 SQL 指令
+        sql = """
+            INSERT INTO temples (lat, lng, image_url, note, nickname, area, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """
+        params = (lat, lng, image_url, note, nickname, area, datetime.now())
+        
+        if not IS_PRODUCTION:
+             # 本機測試用 ? 當佔位符
+            sql = sql.replace('%s', '?')
+
+        c.execute(sql, params)
+        conn.commit()
+        conn.close()
+
+        return jsonify({'message': 'Bingo！抓到一隻土地公了！📸 成功插旗！🚩'})
 
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)})
-    return jsonify({'status': 'error', 'message': f'資料不完整 Debug: lat={lat}, lng={lng}, file={file}'})
-
-    #return jsonify({'status': 'error', 'message': '資料不完整'})
-
+        return jsonify({'status': 'error', 'message
 
 @app.route('/api/temples')
 def get_temples():
