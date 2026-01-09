@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>苑裡土地公地圖 (By 苑裡人)</title>
+    <title>苑裡土地公地圖 (By 苑串)</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
         body{margin:0;font-family:"Microsoft JhengHei",sans-serif;background:#f0f2f5}
@@ -137,7 +137,7 @@
         }
   // --- 🔴 新增：刪除功能的函式 ---
         function deleteTemple(id) {
-            var password = prompt("請輸入管理員密碼 (預設 8888)：");
+            var password = prompt("請輸入管理員密碼 ：");
             if (password) {
                 $.post('/delete/' + id, { password: password }, function(res) {
                     alert(res.message);
