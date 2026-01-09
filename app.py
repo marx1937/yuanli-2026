@@ -82,6 +82,8 @@ def upload_file():
         lat = request.form.get('lat')
         lng = request.form.get('lng')
         note = request.form.get('note')
+        nickname = request.form.get('nickname') # 新增：接收暱稱
+        area = request.form.get('area')         # 新增：接收地區
 
         # --- 🔵 新增：檢查苑裡結界 ---
         try:
@@ -108,12 +110,17 @@ def upload_file():
             conn = get_db_connection()
             c = conn.cursor()
 
-            if IS_PRODUCTION:
-                c.execute("INSERT INTO temples (lat, lng, image_url, note, created_at) VALUES (%s, %s, %s, %s, %s)",
-                        (lat, lng, image_url, note, datetime.now()))
-            else:
-                c.execute("INSERT INTO temples (lat, lng, image_url, note, created_at) VALUES (?, ?, ?, ?, ?)",
-                        (lat, lng, image_url, note, datetime.now()))
+                    # SQL 指令：寫入 lat, lng, image_url, note, nickname, area
+        if IS_PRODUCTION:
+            c.execute("""
+                INSERT INTO temples (lat, lng, image_url, note, nickname, area, created_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (lat, lng, image_url, note, nickname, area, datetime.now()))
+        else:
+            c.execute("""
+                INSERT INTO temples (lat, lng, image_url, note, nickname, area, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (lat, lng, image_url, note, nickname, area, datetime.now()))
 
             conn.commit()
             conn.close()
