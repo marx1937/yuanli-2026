@@ -70,15 +70,6 @@
 
     <div class="container">
 
-    <div class="header">
-            <div style="background: #fff5f5; padding: 12px; border: 1px solid #ffcccc; margin: 15px auto; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 95%;">
-        <p style="margin: 0; color: #d63031; font-size: 14px; text-align: center; line-height: 1.6;">
-            <strong>【 📌 操作小撇步 】</strong><br>
-            若無法自動定位，請點選右上角<strong>「...」</strong><br>
-            選擇 <strong>「開啟瀏覽器」</strong> 即可順利通報
-        </p>
-    </div>
-
         <h1><i class="fas fa-shield-alt"></i> 苑裡土地公-調查統計</h1>
         <div class="header-icons">
             <i class="fas fa-trophy"></i>
@@ -94,7 +85,20 @@
 
         <input type="file" id="photoInput" accept="image/*" capture="camera" style="display:none">
         
-        <div class="camera-box" onclick="triggerCamera()">
+            <div class="camera-box" onclick="triggerCamera()">
+        <div style="background: #fff5f5; padding: 12px; border: 1px solid #ffcccc; margin: 5px 10px 15px 10px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+            <p style="margin: 0; color: #d63031; font-size: 13px; text-align: center; line-height: 1.6;">
+                <strong>【 📌 操作小撇步 】</strong><br>
+                若無法定位，請點擊右上角<strong>「...」</strong><br>
+                選擇 <strong>「開啟瀏覽器」</strong> 即可通報
+            </p>
+        </div>
+        <img id="previewImg">
+        <i class="fas fa-camera"></i>
+        <span>點擊拍照 / 上傳</span>
+    </div>
+
+
             <img id="previewImg">
             <i class="fas fa-camera"></i>
             <span>點擊拍照 / 上傳</span>
@@ -261,12 +265,18 @@ function uploadData() {
         alert('請選擇「里別」喔！'); 
         return; // 沒選就停在這裡，不會往下執行
     }
+    // 🔊 強力喚醒版：清除卡頓並延遲播放
+    window.speechSynthesis.cancel(); 
+    
+    var text = '感謝 ' + area + ' ' + name + ' 上傳成功';
+    var msg = new SpeechSynthesisUtterance(text);
+    msg.lang = 'zh-TW';
+    msg.rate = 0.9;
 
-    // --- ✅ 通過檢查了！開始慶祝特效 ---
+    setTimeout(function() {
+        window.speechSynthesis.speak(msg);
+    }, 150); 
 
-    // 3. 準備名字 (沒填就叫熱心民眾)
-    var name = $('#nickname').val();
-    if (!name) name = '熱心民眾';
 
     // 4. 語音廣播：感謝 + 里別 + 名字 + 上傳成功
     var text = '感謝 ' + area + ' ' + name + ' 上傳成功';
