@@ -237,10 +237,27 @@
     // 6. 上傳資料
         // 6. 上傳資料
     // 6. 上傳資料
+// 6. 上傳資料
 function uploadData() {
-    // 👇 直接叫手機講話 (0延遲)
-    var msg = new SpeechSynthesisUtterance('Bingo! 上傳成功');
+    // 👇 1. 抓取你選的「里別」和填寫的「暱稱」
+    var area = $('#area').val();     
+    var name = $('#nickname').val(); 
+    
+    // 👇 2. 如果沒填暱稱，就幫他取名「熱心民眾」
+    if (!name) name = '熱心民眾';
+
+    // 👇 3. 組合句子：感謝 + 苑東里 + 小明 + 上傳成功
+    var text = '感謝 ' + area + ' ' + name + ' 上傳成功';
+
+    // 👇 4. 設定發音 (中文台灣 + 0.8倍慢速)
+    var msg = new SpeechSynthesisUtterance(text);
+    msg.lang = 'zh-TW';
+    msg.rate = 0.8; 
     window.speechSynthesis.speak(msg);
+
+    // (下面接著原本的 if(!fileBlob...) 檢查程式碼，不要動喔！)
+    if(!fileBlob || !currentLat) return;
+
 
     
 
