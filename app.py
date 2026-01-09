@@ -180,18 +180,18 @@ def delete_temple(id):
 
 
 # --- 🛠️ 資料庫維修工具 (貼在這裡！) ---
-@app.route('/fix_db')
-def fix_data():
-    conn = get_db_connection()
-    c = conn.cursor()
-    try:
-        c.execute("ALTER TABLE temples ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;")
-        conn.commit()
-        return "✅ 維修成功！資料庫現在有 ID 了！快去把 app.py 的註解打開吧！"
-    except Exception as e:
-        return f"維修報告: {e}"
-    finally:
-        conn.close()
+#@app.route('/fix_db')
+#def fix_data():
+    #conn = get_db_connection()
+   # c = conn.cursor()
+   # try:
+   #     c.execute("ALTER TABLE temples ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;")
+   #     conn.commit()
+   #     return "✅ 維修成功！資料庫現在有 ID 了！快去把 app.py 的註解打開吧！"
+   # except Exception as e:
+   #     return f"維修報告: {e}"
+   # finally:
+     #   conn.close()
 
 if __name__ == '__main__':
     app.run(debug=True)
