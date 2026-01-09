@@ -98,9 +98,7 @@
             </div>
         </div>
         <div class="browser-warning" id="browserWarning">⚠️ 請使用 Chrome 或 Safari 開啟以免定位失敗</div>
-            <button type="button" class="btn btn-info btn-block mb-3" onclick="window.speechSynthesis.speak(new SpeechSynthesisUtterance('測試聲音正常'))">
-    🔊 點我測試聲音
-</button>
+            
 
 
             <button id="submitBtn" type="button" class="btn btn-primary btn-block" disabled>
@@ -235,73 +233,63 @@
     }
 
     // 6. 上傳資料
-        // 6. 上傳資料
-    // 6. 上傳資料
-// 6. 上傳資料
 function uploadData() {
-    // 👇 1. 抓取你選的「里別」和填寫的「暱稱」
-    var area = $('#area').val();     
-    var name = $('#nickname').val(); 
-    
-    // 👇 2. 如果沒填暱稱，就幫他取名「熱心民眾」
+    // 1. 先做基本檢查 (如果沒照片或沒定位，就什麼都不做)
+    if(!fileBlob || !currentLat) return;
+
+    // 2. 抓取里別，並檢查有沒有選
+    var area = $('#area').val();
+    if(!area) { 
+        alert('請選擇「里別」喔！'); 
+        return; // 沒選就停在這裡，不會往下執行
+    }
+
+    // --- ✅ 通過檢查了！開始慶祝特效 ---
+
+    // 3. 準備名字 (沒填就叫熱心民眾)
+    var name = $('#nickname').val();
     if (!name) name = '熱心民眾';
 
-    // 👇 3. 組合句子：感謝 + 苑東里 + 小明 + 上傳成功
+    // 4. 語音廣播：感謝 + 里別 + 名字 + 上傳成功
     var text = '感謝 ' + area + ' ' + name + ' 上傳成功';
-
-    // 👇 4. 設定發音 (中文台灣 + 0.8倍慢速)
     var msg = new SpeechSynthesisUtterance(text);
     msg.lang = 'zh-TW';
-    msg.rate = 0.8; 
+    msg.rate = 0.8;
     window.speechSynthesis.speak(msg);
 
-    // (下面接著原本的 if(!fileBlob...) 檢查程式碼，不要動喔！)
-    if(!fileBlob || !currentLat) return;
+    // 5. 按鈕變身：綠色 + 機器人圖示
+    $('#submitBtn').html('<i class="fas fa-robot"></i> 收到！傳送中...')
+                 .removeClass('btn-info btn-secondary') // 移除舊顏色
+                 .addClass('btn-success')               // 變綠色
+                 .prop('disabled', true);               // 鎖住不讓連點
 
+    // 6. 打包資料準備上傳
+    var formData = new FormData();
+    formData.append('photo', fileBlob);
+    formData.append('lat', currentLat);
+    formData.append('lng', currentLng);
+    formData.append('note', $('#note').val());
+    formData.append('nickname', $('#nickname').val());
+    formData.append('area', area);
 
-    
+    $.ajax({
+        url: '/upload',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(res) {
+            alert(res.message);
+            location.reload();
+        },
+        error: function() {
+            alert('上傳失敗，請重試');
+            // 如果失敗，把按鈕變回來讓它可以再按一次
+            $('#submitBtn').text('確認上傳').prop('disabled', false).removeClass('btn-success').addClass('btn-info');
+        }
+    });
+}
 
-    // (下面接著原本的檢查程式碼...)
-    if(!fileBlob || !currentLat) return;
-
-
-        // (下面接著原本的檢查程式碼...)
-
-
-        if(!fileBlob || !currentLat) return;
-        
-        var area = $('#area').val();
-        if(!area) { alert('請選擇「里別」喔！'); return; }
-
-        $('#submitBtn').text('🚀 上傳中...').prop('disabled', true);
-
-        var formData = new FormData();
-        formData.append('photo', fileBlob);
-        formData.append('lat', currentLat);
-        formData.append('lng', currentLng);
-        formData.append('note', $('#note').val());
-        formData.append('nickname', $('#nickname').val()); // 新增
-        formData.append('area', area); // 新增
-
-        $.ajax({
-            url: '/upload',
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-                                    success: function(res) {
-                // 這裡只要單純的顯示訊息跟重整
-                alert(res.message);
-                location.reload();
-            },
-
-
-            error: function() {
-                alert('上傳失敗，請重試');
-                $('#submitBtn').text('確認上傳').prop('disabled', false);
-            }
-        });
-    }
 </script>
 </body>
 </html>
