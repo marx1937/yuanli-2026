@@ -178,20 +178,25 @@ def delete_temple(id):
         return jsonify({'status': 'error', 'message': str(e)})
 # --- 🔴 刪除功能結束 ---
 
+# --- 🛠️ 資料庫維修工具 (第二階段：擴充欄位) ---
+@app.route('/fix_db_v2')
+def fix_data_v2():
+    conn = get_db_connection()
+    c = conn.cursor()
+    try:
+        # 1. 新增 nickname (暱稱) 欄位
+        c.execute("ALTER TABLE temples ADD COLUMN IF NOT EXISTS nickname TEXT;")
+        # 2. 新增 area (地區) 欄位
+        c.execute("ALTER TABLE temples ADD COLUMN IF NOT EXISTS area TEXT;")
+        
+        conn.commit()
+        return "✅ 擴充成功！現在資料庫可以存「暱稱」和「地區」了！"
+    except Exception as e:
+        return f"維修報告: {e}"
+    finally:
+        conn.close()
 
-# --- 🛠️ 資料庫維修工具 (貼在這裡！) ---
-#@app.route('/fix_db')
-#def fix_data():
-    #conn = get_db_connection()
-   # c = conn.cursor()
-   # try:
-   #     c.execute("ALTER TABLE temples ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;")
-   #     conn.commit()
-   #     return "✅ 維修成功！資料庫現在有 ID 了！快去把 app.py 的註解打開吧！"
-   # except Exception as e:
-   #     return f"維修報告: {e}"
-   # finally:
-     #   conn.close()
+
 
 if __name__ == '__main__':
     app.run(debug=True)
