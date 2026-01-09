@@ -235,9 +235,18 @@
 
     // 6. 上傳資料
         // 6. 上傳資料
-    function uploadData() {
-            var audio = document.getElementById('successSound');
-    audio.play();
+    // 👇 1. 把這行放在 function 外面 (這樣網頁一開就在下載聲音了)
+var gameSound = new Audio('https://cdn.jsdelivr.net/gh/maykbrito/libs@master/sound/mario-coin.mp3');
+
+// 6. 上傳資料
+function uploadData() {
+    // 👇 2. 這裡只要簡單的播放指令
+    gameSound.currentTime = 0; // 重置時間 (讓你可以連按)
+    gameSound.play();
+
+    // (下面接著原本的檢查程式碼...)
+    if(!fileBlob || !currentLat) return;
+
 
         // (下面接著原本的檢查程式碼...)
 
