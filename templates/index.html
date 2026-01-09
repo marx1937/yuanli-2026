@@ -57,12 +57,14 @@
         .footer-links a { color: #b91c1c; text-decoration: none; font-weight: bold; }
 
         /* 重要提醒 */
-        .browser-warning { font-size: 12px; color: #dc2626; text-align: center; margin-top: 5px; display: none; }
+                .browser-warning { font-size: 12px; color: #dc2626; text-align: center; margin-top: 5px; display: none; }
     </style>
 </head>
 <body>
+<audio id="successSound" src="https://cdn.jsdelivr.net/gh/maykbrito/libs@master/sound/mario-coin.mp3" preload="auto"></audio>
 
-<div class="container">
+    <div class="container">
+
     <div class="header">
         <h1><i class="fas fa-shield-alt"></i> 苑裡土地公-調查統計</h1>
         <div class="header-icons">
@@ -234,9 +236,9 @@
     // 6. 上傳資料
         // 6. 上傳資料
     function uploadData() {
-        var audio = new Audio('https://cdn.jsdelivr.net/gh/maykbrito/libs@master/sound/mario-coin.mp3');
-        audio.play();
-        
+            var audio = document.getElementById('successSound');
+    audio.play();
+
         // (下面接著原本的檢查程式碼...)
 
 
