@@ -7,6 +7,9 @@ import cloudinary
 import cloudinary.uploader
 from psycopg2.extras import RealDictCursor
 
+
+
+
 app = Flask(__name__)
 
 # --- 設定區 ---
@@ -150,10 +153,11 @@ def get_temples():
         return jsonify([])
 
 # --- 🔴 新增：刪除功能 ---
+# --- 🔴 新增：刪除功能 ---
 @app.route('/delete/<int:id>', methods=['POST'])
 def delete_temple(id):
     try:
-        # 檢查密碼 (預設是 8888)
+        # 檢查密碼 (預設 8888)
         password = request.form.get('password')
         if password != '8888':
             return jsonify({'status': 'error', 'message': '密碼錯誤！禁止刪除 🛡️'})
@@ -173,6 +177,21 @@ def delete_temple(id):
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)})
 # --- 🔴 刪除功能結束 ---
+
+
+# --- 🛠️ 資料庫維修工具 (貼在這裡！) ---
+@app.route('/fix_db')
+def fix_data():
+    conn = get_db_connection()
+    c = conn.cursor()
+    try:
+        c.execute("ALTER TABLE temples ADD COLUMN IF NOT EXISTS id SERIAL PRIMARY KEY;")
+        conn.commit()
+        return "✅ 維修成功！資料庫現在有 ID 了！快去把 app.py 的註解打開吧！"
+    except Exception as e:
+        return f"維修報告: {e}"
+    finally:
+        conn.close()
 
 if __name__ == '__main__':
     app.run(debug=True)
