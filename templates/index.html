@@ -61,6 +61,13 @@
     </style>
 </head>
 <body>
+<div class="alert alert-danger text-center mt-3" style="font-weight: bold; border: 2px solid red;">
+    ⚠️ 如果無法定位：<br>
+    請點擊右下角或右上角「...」<br>
+    選擇「開啟瀏覽器」或「Chrome」
+</div>
+
+    
 <audio id="successSound" src="https://cdn.jsdelivr.net/gh/maykbrito/libs@master/sound/mario-coin.mp3" preload="auto"></audio>
 
     <div class="container">
@@ -101,9 +108,7 @@
             
 
 
-            <button id="submitBtn" type="button" class="btn btn-primary btn-block" disabled>
-                確認上傳
-            </button>
+            
 
         <div class="form-group">
             <input type="text" class="form-input" id="nickname" placeholder="您的暱稱 (選填)">
@@ -226,11 +231,18 @@
     }
 
     // 5. 檢查是否可以上傳
-    function checkReady() {
-        if(currentLat && fileBlob) {
-            $('#submitBtn').addClass('ready').prop('disabled', false).text('確認上傳');
-        }
+    // 5. 檢查是否可以上傳
+function checkReady() {
+    if(currentLat && fileBlob) {
+        // 👇 請貼上這段：變亮藍色 + 火箭圖示
+        $('#submitBtn').removeClass('btn-secondary btn-info') // 移除舊顏色
+                       .addClass('btn-primary')               // 變藍色
+                       .prop('disabled', false)               // 解鎖
+                       .html('🚀 準備好了！確認上傳');        // 加圖示
     }
+}
+        
+    
 
     // 6. 上傳資料
 function uploadData() {
