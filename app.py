@@ -128,7 +128,7 @@ def upload_file():
 
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)})
-return jsonify({'status': 'error', 'message': f'資料不完整 Debug: lat={lat}, lng={lng}, file={file}'})
+    return jsonify({'status': 'error', 'message': f'資料不完整 Debug: lat={lat}, lng={lng}, file={file}'})
 
     #return jsonify({'status': 'error', 'message': '資料不完整'})
 
