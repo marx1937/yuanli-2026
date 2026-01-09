@@ -127,8 +127,8 @@ def upload_file():
 
         return jsonify({'message': 'Bingo！抓到一隻土地公了！📸 成功插旗！🚩'})
 
-    except Exception as e:
-        return jsonify({'status': 'error', 'message
+        except Exception as e:
+        return jsonify({'status': 'error', 'message': f'系統錯誤: {str(e)}'})
 
 @app.route('/api/temples')
 def get_temples():
