@@ -246,10 +246,18 @@
             data: formData,
             processData: false,
             contentType: false,
-            success: function(res) {
-                alert(res.message);
-                location.reload();
+                        success: function(res) {
+                // 1. 播放音效 (馬利歐吃金幣 🍄💰)
+                var audio = new Audio('https://raw.githubusercontent.com/maykbrito/libs/master/sound/mario-coin.mp3');
+                audio.play();
+
+                // 2. 稍微延遲一下再跳出視窗，讓聲音出來
+                setTimeout(function() {
+                    alert(res.message);
+                    location.reload();
+                }, 100); 
             },
+
             error: function() {
                 alert('上傳失敗，請重試');
                 $('#submitBtn').text('確認上傳').prop('disabled', false);
