@@ -98,9 +98,10 @@
             </div>
         </div>
         <div class="browser-warning" id="browserWarning">⚠️ 請使用 Chrome 或 Safari 開啟以免定位失敗</div>
-            <button type="button" class="btn btn-info btn-block mb-3" onclick="new Audio('https://cdn.jsdelivr.net/gh/maykbrito/libs@master/sound/mario-coin.mp3').play()">
-                🔊 點我測試聲音
-            </button>
+            <button type="button" class="btn btn-info btn-block mb-3" onclick="window.speechSynthesis.speak(new SpeechSynthesisUtterance('測試聲音正常'))">
+    🔊 點我測試聲音
+</button>
+
 
             <button id="submitBtn" type="button" class="btn btn-primary btn-block" disabled>
                 確認上傳
@@ -235,13 +236,12 @@
 
     // 6. 上傳資料
         // 6. 上傳資料
-    // 👇 1. 把這行放在 function 外面 (這樣網頁一開就在下載聲音了)
-var gameSound = new Audio('https://cdn.jsdelivr.net/gh/maykbrito/libs@master/sound/mario-coin.mp3');
-
-// 6. 上傳資料
+    // 6. 上傳資料
 function uploadData() {
-    // 👇 2. 這裡只要簡單的播放指令
-    gameSound.currentTime = 0; // 重置時間 (讓你可以連按)
+    // 👇 直接叫手機講話 (0延遲)
+    var msg = new SpeechSynthesisUtterance('Bingo! 上傳成功');
+    window.speechSynthesis.speak(msg);
+
     gameSound.play();
 
     // (下面接著原本的檢查程式碼...)
