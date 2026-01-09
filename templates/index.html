@@ -3,151 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>苑裡土地公地圖 (By 苑串)</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <title>苑裡土地公-調查統計</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body{margin:0;font-family:"Microsoft JhengHei",sans-serif;background:#f0f2f5}
-        #map{height:60vh;width:100%}
-        .controls{padding:20px;background:#fff;border-radius:20px 20px 0 0;margin-top:-20px;position:relative;z-index:999;text-align:center;box-shadow:0 -2px 10px rgba(0,0,0,0.1)}
-        input[type="text"]{padding:12px;width:80%;margin-bottom:15px;border:1px solid #ddd;border-radius:8px;font-size:16px}
-        .btn{background:#007bff;color:white;padding:15px 40px;border:none;border-radius:50px;font-size:18px;font-weight:bold;box-shadow:0 4px 6px rgba(0,123,255,0.3);transition:transform 0.1s}
-        .btn:active{transform: scale(0.98)}
-        #status{margin-top:10px;color:#666}
+        body { margin: 0; font-family: "Microsoft JhengHei", sans-serif; background: #f0f2f5; display: flex; justify-content: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 480px; background: #fff; display: flex; flex-direction: column; height: 100vh; position: relative; }
+        
+        /* 頂部標題 */
+        .header { background: #b91c1c; color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .header h1 { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 10px; }
+        .header-icons i { font-size: 20px; margin-left: 15px; cursor: pointer; opacity: 0.9; }
+
+        /* 內容區 */
+        .content { padding: 20px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        
+        /* 提示卡片 */
+        .alert-box { background: #fff1f2; border: 1px solid #fecdd3; color: #9f1239; padding: 12px; border-radius: 8px; font-size: 14px; line-height: 1.5; display: flex; align-items: start; gap: 10px; }
+
+        /* 相機區塊 */
+        .camera-box { 
+            border: 2px dashed #cbd5e1; border-radius: 12px; height: 200px; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            color: #64748b; cursor: pointer; background: #f8fafc; transition: 0.2s; position: relative; overflow: hidden;
+        }
+        .camera-box:active { background: #e2e8f0; }
+        .camera-box i { font-size: 40px; margin-bottom: 10px; }
+        .camera-box img { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; display:none; }
+
+        /* 狀態燈號 */
+        .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .status-card { border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: #334155; }
+        .status-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: #94a3b8; }
+        .status-active { background: #dcfce7; color: #166534; } /* 綠燈 */
+        .status-error { background: #fee2e2; color: #991b1b; } /* 紅燈 */
+
+        /* 輸入表單 */
+        .form-group { display: flex; gap: 10px; }
+        .form-input { flex: 1; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; }
+        .form-input:focus { border-color: #b91c1c; }
+        
+        select.form-input { background: white; }
+
+        /* 按鈕 */
+        .submit-btn { 
+            background: #cbd5e1; color: white; border: none; padding: 15px; 
+            border-radius: 8px; font-size: 16px; font-weight: bold; cursor: not-allowed; width: 100%;
+        }
+        .submit-btn.ready { background: #b91c1c; cursor: pointer; box-shadow: 0 4px 10px rgba(185, 28, 28, 0.3); }
+        
+        /* 底部連結 */
+        .footer-links { margin-top: auto; display: flex; justify-content: space-between; padding-top: 20px; color: #64748b; font-size: 14px; }
+        .footer-links a { color: #b91c1c; text-decoration: none; font-weight: bold; }
+
+        /* 重要提醒 */
+        .browser-warning { font-size: 12px; color: #dc2626; text-align: center; margin-top: 5px; display: none; }
     </style>
 </head>
 <body>
 
-    <div id="map"></div>
-    <div class="controls">
-        <h3>苑裡串起來 🚩<br>土地公在哪裡？</h3>
-        <input type="text" id="note" placeholder="輸入備註 (例: 某某里)">
-        
-        <input type="hidden" id="lat"><input type="hidden" id="lng">
-        <input type="file" id="photoInput" accept="image/*" capture="camera" style="display:none">
-        
-        <button class="btn" onclick="startProcess()">📷 拍照上傳</button>
-        <p id="status">請站在廟前再按上傳</p>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-shield-alt"></i> 苑裡土地公-調查統計</h1>
+        <div class="header-icons">
+            <i class="fas fa-trophy"></i>
+            <i class="fas fa-cog"></i>
+        </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        // 1. 初始化地圖 (預設苑裡)
-        var map = L.map('map').setView([24.4429, 120.6493], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    <div class="content">
+        <div class="alert-box">
+            <i class="fas fa-info-circle" style="margin-top: 3px;"></i>
+            <div>歡迎參與苑裡鎮土地公廟普查計畫，請協助我們建立完整的數位地圖！</div>
+        </div>
 
-        // 2. 抓取所有土地公資料
-        $.getJSON('/api/temples', function(data) {
-            data.forEach(function(item) {
-                L.marker([item.lat, item.lng])
-                    .addTo(map)
-                    .bindPopup(
-                        '<b>' + item.note + '</b><br>' +
-                        '<img src="' + item.image + '" width="150" style="border-radius:8px;margin-top:5px;"><br>' +
-                        '<button onclick="deleteTemple(' + item.id + ')" style="background:#ff4d4d;color:white;border:none;padding:5px 10px;border-radius:4px;margin-top:5px;cursor:pointer;">🗑️ 刪除</button>'
-                    );
-            });
-        });
+        <input type="file" id="photoInput" accept="image/*" capture="camera" style="display:none">
+        
+        <div class="camera-box" onclick="triggerCamera()">
+            <img id="previewImg">
+            <i class="fas fa-camera"></i>
+            <span>點擊拍照 / 上傳</span>
+        </div>
 
-        // 3. 拍照流程 (取得定位 -> 壓縮 -> 上傳)
-        function startProcess() {
-            var note = $('#note').val();
-            if(!note) { alert('請先輸入備註 (例如: 客庄里)'); return; }
+        <div class="status-grid">
+            <div class="status-card">
+                <div class="status-icon" id="gpsIcon"><i class="fas fa-map-marker-alt"></i></div>
+                <div id="gpsText">定位中...</div>
+            </div>
+            <div class="status-card">
+                <div class="status-icon" id="aiIcon"><i class="fas fa-robot"></i></div>
+                <div id="aiText">等待照片</div>
+            </div>
+        </div>
+        <div class="browser-warning" id="browserWarning">⚠️ 請使用 Chrome 或 Safari 開啟以免定位失敗</div>
 
-            $('#status').text('🚀 正在定位中...');
-            
+        <div class="form-group">
+            <input type="text" class="form-input" id="nickname" placeholder="您的暱稱 (選填)">
+            <select class="form-input" id="area">
+                <option value="" disabled selected>選擇里別</option>
+                <option value="苑裡鎮">苑裡鎮(全)</option>
+                <option value="客庄里">客庄里</option>
+                <option value="苑港里">苑港里</option>
+                <option value="西平里">西平里</option>
+                <option value="西勢里">西勢里</option>
+                <option value="海岸里">海岸里</option>
+                <option value="房裡里">房裡里</option>
+                <option value="新復里">新復里</option>
+                <option value="苑東里">苑東里</option>
+                <option value="苑南里">苑南里</option>
+                <option value="苑北里">苑北里</option>
+                <option value="苑坑里">苑坑里</option>
+                <option value="水坡里">水坡里</option>
+                <option value="福田里">福田里</option>
+                <option value="山腳里">山腳里</option>
+                <option value="舊社里">舊社里</option>
+                <option value="社苓里">社苓里</option>
+                <option value="山柑里">山柑里</option>
+                <option value="田心里">田心里</option>
+                <option value="玉田里">玉田里</option>
+                <option value="泰田里">泰田里</option>
+                <option value="上館里">上館里</option>
+                <option value="南勢里">南勢里</option>
+                <option value="石鎮里">石鎮里</option>
+                <option value="蕉埔里">蕉埔里</option>
+            </select>
+        </div>
+
+        <input type="text" class="form-input" id="note" placeholder="補充說明 (例如: 活動中心旁)">
+
+        <button class="submit-btn" id="submitBtn" onclick="uploadData()">確認上傳</button>
+        
+        <div class="footer-links">
+            <span>最近上傳 (0)</span>
+            <a href="#"><i class="fas fa-list-ol"></i> 榜單</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // 檢查瀏覽器
+    var isLine = navigator.userAgent.includes("Line");
+    var isFB = navigator.userAgent.includes("FBAN") || navigator.userAgent.includes("FBAV");
+    if(isLine || isFB) {
+        document.getElementById('browserWarning').style.display = 'block';
+    }
+
+    // 1. 自動定位
+    var currentLat = null, currentLng = null;
+    function initGPS() {
+        if(navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
-                $('#lat').val(position.coords.latitude);
-                $('#lng').val(position.coords.longitude);
-                $('#status').text('📸 請選擇照片...');
-                $('#photoInput').click(); // 觸發相機
-            }, function() {
-                alert('定位失敗，請允許 GPS 權限');
-                $('#status').text('定位失敗');
+                currentLat = position.coords.latitude;
+                currentLng = position.coords.longitude;
+                updateStatus('gps', true, '定位完成');
+                checkReady();
+            }, function(e) {
+                updateStatus('gps', false, '定位失敗');
+                alert('定位失敗，請確認 GPS 權限');
             });
+        } else {
+            updateStatus('gps', false, '不支援 GPS');
         }
+    }
+    initGPS();
 
-        // 當選好照片後
-        $('#photoInput').change(function() {
-            if(this.files.length === 0) return;
-            var file = this.files[0];
-            $('#status').text('⏳ 壓縮照片中...');
+    // 2. 觸發相機
+    function triggerCamera() {
+        document.getElementById('photoInput').click();
+    }
+
+    // 3. 照片預覽與壓縮
+    var fileBlob = null;
+    $('#photoInput').change(function() {
+        if(this.files.length === 0) return;
+        var file = this.files[0];
+        
+        // 顯示預覽
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            $('#previewImg').attr('src', e.target.result).show();
+            updateStatus('ai', true, '照片已載入');
             
-            compressImage(file, function(blob) {
-                uploadFile(blob);
-            });
+            // 壓縮
+            var img = new Image();
+            img.src = e.target.result;
+            img.onload = function() {
+                var canvas = document.createElement('canvas');
+                var ctx = canvas.getContext('2d');
+                var width = 800;
+                var scale = width / img.width;
+                canvas.width = width;
+                canvas.height = img.height * scale;
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                canvas.toBlob(function(blob) {
+                    fileBlob = blob;
+                    checkReady();
+                }, 'image/jpeg', 0.7);
+            }
+        }
+        reader.readAsDataURL(file);
+    });
+
+    // 4. 更新燈號
+    function updateStatus(type, isSuccess, text) {
+        var icon = $('#' + type + 'Icon');
+        var label = $('#' + type + 'Text');
+        label.text(text);
+        if(isSuccess) {
+            icon.addClass('status-active').removeClass('status-error');
+        } else {
+            icon.addClass('status-error').removeClass('status-active');
+        }
+    }
+
+    // 5. 檢查是否可以上傳
+    function checkReady() {
+        if(currentLat && fileBlob) {
+            $('#submitBtn').addClass('ready').prop('disabled', false).text('確認上傳');
+        }
+    }
+
+    // 6. 上傳資料
+    function uploadData() {
+        if(!fileBlob || !currentLat) return;
+        
+        var area = $('#area').val();
+        if(!area) { alert('請選擇「里別」喔！'); return; }
+
+        $('#submitBtn').text('🚀 上傳中...').prop('disabled', true);
+
+        var formData = new FormData();
+        formData.append('photo', fileBlob);
+        formData.append('lat', currentLat);
+        formData.append('lng', currentLng);
+        formData.append('note', $('#note').val());
+        formData.append('nickname', $('#nickname').val()); // 新增
+        formData.append('area', area); // 新增
+
+        $.ajax({
+            url: '/upload',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(res) {
+                alert(res.message);
+                location.reload();
+            },
+            error: function() {
+                alert('上傳失敗，請重試');
+                $('#submitBtn').text('確認上傳').prop('disabled', false);
+            }
         });
-
-        // 4. 上傳功能
-        function uploadFile(fileBlob) {
-            $('#status').text('🚀 上傳中...請勿關閉');
-            
-            var formData = new FormData();
-            formData.append('photo', fileBlob);
-            formData.append('lat', $('#lat').val());
-            formData.append('lng', $('#lng').val());
-            formData.append('note', $('#note').val());
-
-            $.ajax({
-                url: '/upload',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(res) {
-                    if(res.status === 'error') {
-                        alert(res.message);
-                        $('#status').text('❌ 上傳失敗: ' + res.message);
-                    } else {
-                        alert(res.message);
-                        location.reload();
-                    }
-                },
-                error: function() {
-                    alert('上傳發生錯誤，請重試');
-                    $('#status').text('❌ 伺服器錯誤');
-                }
-            });
-        }
-
-        // 5. 圖片壓縮工具
-        function compressImage(file, callback) {
-            var reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = function(event) {
-                var img = new Image();
-                img.src = event.target.result;
-                img.onload = function() {
-                    var canvas = document.createElement('canvas');
-                    var ctx = canvas.getContext('2d');
-                    
-                    var width = 800; // 縮小到寬度 800
-                    var scale = width / img.width;
-                    var height = img.height * scale;
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    canvas.toBlob(function(blob) {
-                        callback(blob);
-                    }, 'image/jpeg', 0.7); // 70% 品質
-                }
-            }
-        }
-  // --- 🔴 新增：刪除功能的函式 ---
-        function deleteTemple(id) {
-            var password = prompt("請輸入管理員密碼 ：");
-            if (password) {
-                $.post('/delete/' + id, { password: password }, function(res) {
-                    alert(res.message);
-                    if (res.status === 'success') {
-                        location.reload(); // 刪除成功後重新整理
-                    }
-                });
-            }
-        }
-
-    </script>
+    }
+</script>
 </body>
 </html>
