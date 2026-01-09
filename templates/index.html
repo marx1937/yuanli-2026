@@ -224,7 +224,14 @@
     }
 
     // 6. 上傳資料
+        // 6. 上傳資料
     function uploadData() {
+        var audio = new Audio('https://raw.githubusercontent.com/maykbrito/libs/master/sound/mario-coin.mp3');
+        audio.play();
+        
+        // (下面接著原本的檢查程式碼...)
+
+
         if(!fileBlob || !currentLat) return;
         
         var area = $('#area').val();
@@ -246,17 +253,12 @@
             data: formData,
             processData: false,
             contentType: false,
-                        success: function(res) {
-                // 1. 播放音效 (馬利歐吃金幣 🍄💰)
-                var audio = new Audio('https://raw.githubusercontent.com/maykbrito/libs/master/sound/mario-coin.mp3');
-                audio.play();
-
-                // 2. 稍微延遲一下再跳出視窗，讓聲音出來
-                setTimeout(function() {
-                    alert(res.message);
-                    location.reload();
-                }, 100); 
+                                    success: function(res) {
+                // 這裡只要單純的顯示訊息跟重整
+                alert(res.message);
+                location.reload();
             },
+
 
             error: function() {
                 alert('上傳失敗，請重試');
