@@ -123,11 +123,10 @@ def upload_file():
 
         c.execute(sql, params)
         conn.commit()
-        conn.close()
+                conn.close()
+        return jsonify({'message': 'Bingo! 抓到一隻土地公了！📸 成功插旗！🚩'})
 
-        return jsonify({'message': 'Bingo！抓到一隻土地公了！📸 成功插旗！🚩'})
-
-        except Exception as e:
+    except Exception as e:
         return jsonify({'status': 'error', 'message': f'系統錯誤: {str(e)}'})
 
 @app.route('/api/temples')
