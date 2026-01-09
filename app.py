@@ -141,7 +141,7 @@ def get_temples():
         results = []
         for row in rows:
             results.append({
-               # 'id': row['id'],
+                'id': row['id'],
                 'lat': row['lat'],
                 'lng': row['lng'],
                 'image': row['image_url'],
