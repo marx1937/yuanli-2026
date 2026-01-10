@@ -166,10 +166,11 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-            // --- 1. 全域變數設定 ---
-    var currentLat = null;
-    var currentLng = null;
-    var fileBlob = null; // 儲存照片檔案
+                // --- 1. 全域變數設定 (作弊測試版) ---
+    var currentLat = 24.4432; // <--- 強制設定假座標
+    var currentLng = 120.6547; // <--- 強制設定假座標
+    var fileBlob = null; 
+
 
     // --- 2. 初始化與 GPS 定位 ---
     $(document).ready(function() {
