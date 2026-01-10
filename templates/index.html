@@ -83,7 +83,7 @@
             
 
 
-                <div class="upload-card" onclick="$('#fileInput').click()" style="border: 2px dashed #cbd5e0; padding: 30px 20px; text-align: center; border-radius: 15px; margin: 20px 0; background: #fff; cursor: pointer; position: relative;">
+                    <div class="upload-card" onclick="document.getElementById('fileInput').click()" style="border: 2px dashed #cbd5e0; padding: 30px 20px; text-align: center; border-radius: 15px; margin: 20px 0; background: #fff; cursor: pointer; position: relative;">
         
         <img id="previewImg" style="max-width: 100%; max-height: 300px; display: none; border-radius: 10px; margin: 0 auto;">
         
@@ -94,7 +94,6 @@
         
         <input type="file" id="fileInput" accept="image/*" capture="camera" onchange="previewFile()" style="display: none;">
     </div>
-
 
         <div class="status-grid">
             <div class="status-card">
