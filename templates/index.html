@@ -10,14 +10,14 @@
     <style>
         /* --- APP 風格樣式表 --- */
         body {
-            background-color: #f8f9fa; /* 淺灰背景 */
-            padding-bottom: 80px; /* 留位置給底部按鈕 */
+            background-color: #f8f9fa;
+            padding-bottom: 90px; /* 底部留白增加，避開按鈕 */
             font-family: "Microsoft JhengHei", sans-serif;
         }
 
         /* 頂部標題列 */
         .app-header {
-            background: linear-gradient(135deg, #d32f2f, #b71c1c); /* 廟宇紅 */
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
             color: white;
             padding: 15px;
             text-align: center;
@@ -29,12 +29,23 @@
             z-index: 100;
         }
 
-        /* 相機區塊 (模仿 IG 限動) */
+        /* FB/LINE 警告條 (預設隱藏) */
+        #browser-warning {
+            display: none; /* 預設不顯示 */
+            background-color: #ffc107;
+            color: #856404;
+            padding: 10px;
+            font-size: 0.9rem;
+            text-align: center;
+            border-bottom: 1px solid #ffeeba;
+        }
+
+        /* 相機區塊 */
         .camera-zone {
             background-color: #e9ecef;
             border-radius: 15px;
             width: 100%;
-            height: 250px; /* 高度固定 */
+            height: 250px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -45,21 +56,9 @@
             cursor: pointer;
         }
         
-        .camera-zone:active {
-            background-color: #dee2e6; /* 按下去的特效 */
-        }
-
-        .camera-icon {
-            font-size: 3rem;
-            color: #6c757d;
-        }
-
-        #previewImg {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* 讓照片填滿不變形 */
-            display: none;
-        }
+        .camera-zone:active { background-color: #dee2e6; }
+        .camera-icon { font-size: 3rem; color: #6c757d; }
+        #previewImg { width: 100%; height: 100%; object-fit: cover; display: none; }
 
         /* 狀態文字小藥丸 */
         .status-pill {
@@ -89,7 +88,7 @@
             height: 50px;
             font-size: 1.1rem;
             font-weight: bold;
-            border-radius: 25px; /* 圓角按鈕 */
+            border-radius: 25px;
         }
     </style>
 </head>
@@ -97,6 +96,11 @@
 
     <div class="app-header">
         <i class="fas fa-temple"></i> 苑裡土地公查報
+    </div>
+
+    <div id="browser-warning">
+        <i class="fas fa-exclamation-triangle"></i> <strong>建議使用 Chrome/Safari</strong><br>
+        臉書瀏覽器可能無法定位，請點右上角選「以瀏覽器開啟」
     </div>
 
     <div class="container mt-3">
@@ -137,7 +141,7 @@
 
                 <div class="form-group">
                     <label><i class="fas fa-comment-alt text-primary"></i> 備註事項</label>
-                    <textarea class="form-control" id="note" rows="2" placeholder="例如：路燈不亮、路面坑洞..."></textarea>
+                    <textarea class="form-control" id="note" rows="2" placeholder="例如：這座土地公有特別的故事..."></textarea>
                 </div>
 
                 <div class="form-group mb-0">
@@ -156,21 +160,25 @@
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script>
-    // --- 1. 全域變數設定 (作弊模式：強制鎖定苑裡) ---
+    // --- 1. 全域變數 (作弊模式中) ---
     var currentLat = 24.4432;  
     var currentLng = 120.6547; 
     var fileBlob = null; 
 
-    // --- 2. 初始化 (一開機就喊成功) ---
     $(document).ready(function() {
-        // 直接更新畫面，不等待衛星
+        // --- 🌟 臉書/LINE 偵測邏輯 ---
+        var ua = navigator.userAgent || navigator.vendor || window.opera;
+        // 偵測 Facebook (FBAN/FBAV) 或 LINE
+        if ((ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1) || (ua.indexOf("Line") > -1)) {
+            $('#browser-warning').show(); // 顯示黃色警告條
+        }
+
+        // --- 初始化 (作弊模式：直接成功) ---
         $('#statusText').html('<i class="fas fa-check-circle text-success"></i> 測試定位成功 (苑裡車站)');
-        
-        // 嘗試讓按鈕亮起來
         checkReady();
     });
 
-    // --- 3. 照片預覽與壓縮 ---
+    // --- 3. 照片處理 ---
     function previewFile() {
         var fileInput = document.getElementById('fileInput');
         var file = fileInput.files[0];
@@ -210,20 +218,19 @@
         };
     }
 
-    // --- 4. 檢查是否可以上傳 ---
+    // --- 4. 檢查 ---
     function checkReady() {
         if (currentLat && fileBlob) {
             $('#submitBtn').prop('disabled', false)
                           .removeClass('btn-secondary')
-                          .addClass('btn-danger') // 改成顯眼的紅色按鈕
+                          .addClass('btn-danger')
                           .html('確認上傳');
         }
     }
 
-    // --- 5. 上傳資料 ---
+    // --- 5. 上傳 ---
     function uploadData() {
         if(!fileBlob || !currentLat) return;
-
         var area = $('#area').val();
         var rawName = $('#nickname').val();
         
@@ -244,17 +251,16 @@
         formData.append('area', area);
 
         $.ajax({
-            url: '/upload', // ✅ 這裡已經幫你改成正確的 /upload 了
+            url: '/upload',
             type: 'POST',
             data: formData,
             processData: false,
             contentType: false,
             success: function(response) {
-                var sayText = '感謝 ' + area + ' 的善心人士，土地公收到囉！';
+                var sayText = '感謝 ' + area + ' ' + rawName+ ' 的善心人士提供，土地公庇佑您！';
                 var msg = new SpeechSynthesisUtterance(sayText);
                 msg.lang = 'zh-TW';
                 window.speechSynthesis.speak(msg);
-
                 alert('✅ 上傳成功！\n\n' + sayText);
                 location.reload();
             },
