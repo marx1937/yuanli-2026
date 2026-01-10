@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>苑裡土地公文化地圖</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background-color: #fff8e1; /* 米色文化風 */
+            font-family: "Microsoft JhengHei", sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+        .logo-area {
+            margin-bottom: 40px;
+        }
+        .temple-icon {
+            font-size: 5rem;
+            color: #d32f2f;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 15px;
+        }
+        .app-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .app-subtitle {
+            color: #666;
+            font-size: 1rem;
+        }
+        
+        /* 大按鈕樣式 */
+        .btn-entry {
+            width: 100%;
+            max-width: 300px;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            text-decoration: none; /* 去除底線 */
+        }
+        .btn-entry:active {
+            transform: scale(0.98);
+        }
+        .btn-entry i {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+
+        /* 紅色按鈕 (查報) */
+        .btn-report {
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+            color: white;
+            border: none;
+        }
+        .btn-report:hover { color: white; text-decoration: none; }
+
+        /* 黃色按鈕 (地圖) */
+        .btn-map {
+            background: linear-gradient(135deg, #ffc107, #ffb300);
+            color: #5d4037;
+            border: none;
+        }
+        .btn-map:hover { color: #5d4037; text-decoration: none; }
+
+        .footer {
+            padding: 15px;
+            text-align: center;
+            color: #999;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="logo-area">
+            <i class="fas fa-temple temple-icon"></i>
+            <div class="app-title">苑裡土地公</div>
+            <div class="app-subtitle">文化查報平台</div>
+        </div>
+
+        <a href="/report" class="btn-entry btn-report">
+            <i class="fas fa-camera"></i> 我要查報
+        </a>
+        
+        <a href="/map" class="btn-entry btn-map">
+            <i class="fas fa-map-marked-alt"></i> 文化地圖
+        </a>
+    </div>
+
+    <div class="footer">
+        苑裡串起來 &copy; 2026<br>
+        守護在地文化
+    </div>
+
+</body>
+</html>
