@@ -191,42 +191,63 @@
     }
     initGPS();
 
-    // 2. 觸發相機
-    function triggerCamera() {
-        document.getElementById('photoInput').click();
-    }
+        // 2. (原本的觸發相機功能已由 HTML 直接處理，這裡留空即可)
 
-    // 3. 照片預覽與壓縮
-    var fileBlob = null;
-    $('#photoInput').change(function() {
-        if(this.files.length === 0) return;
-        var file = this.files[0];
+    // 3. 照片預覽與壓縮 (安全版：自動清理舊檔)
+    var fileBlob = null; // 全域變數：用來存最後要上傳的檔案
+
+    function previewFile() {
+        var fileInput = document.getElementById('fileInput');
+        var file = fileInput.files[0];
+
+        // ⚠️ 如果使用者打開相機但沒拍照就返回，什麼都不做 (保留原畫面)
+        if (!file) return;
+
+        // 🔄 如果有新照片，先清空舊的 fileBlob，避免混亂
+        fileBlob = null; 
+
+        // 1. 介面切換：顯示照片，隱藏相機 icon
+        document.getElementById('cameraPlaceholder').style.display = 'none';
+        var previewImg = document.getElementById('previewImg');
+        previewImg.style.display = 'block';
         
-        // 顯示預覽
+        // 顯示原始圖 (讓使用者立刻看到)
+        previewImg.src = URL.createObjectURL(file);
+
+        // 2. 更新狀態：告訴使用者 AI 正在處理
+        updateStatus('ai', true, '照片壓縮處理中...');
+
+        // 3. 壓縮圖片邏輯
         var reader = new FileReader();
-        reader.onload = function(e) {
-            $('#previewImg').attr('src', e.target.result).show();
-            updateStatus('ai', true, '照片已載入');
-            
-            // 壓縮
+        reader.readAsDataURL(file);
+        reader.onload = function(event) {
             var img = new Image();
-            img.src = e.target.result;
+            img.src = event.target.result;
             img.onload = function() {
+                // 創建畫布進行壓縮
                 var canvas = document.createElement('canvas');
                 var ctx = canvas.getContext('2d');
-                var width = 800;
-                var scale = width / img.width;
+                
+                // 設定最大寬度 (800px)
+                var maxWidth = 800;
+                var scale = maxWidth / img.width;
+                var width = (img.width > maxWidth) ? maxWidth : img.width;
+                var height = (img.width > maxWidth) ? (img.height * scale) : img.height;
+
                 canvas.width = width;
-                canvas.height = img.height * scale;
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // 轉成壓縮後的檔案 (存入 fileBlob)
                 canvas.toBlob(function(blob) {
-                    fileBlob = blob;
-                    checkReady();
-                }, 'image/jpeg', 0.7);
-            }
-        }
-        reader.readAsDataURL(file);
-    });
+                    fileBlob = blob; // ✅ 成功更新為新照片
+                    updateStatus('ai', true, '照片已準備好');
+                    checkReady(); // 檢查是否可以上傳
+                }, 'image/jpeg', 0.8);
+            };
+        };
+    }
+
 
     // 4. 更新燈號
     function updateStatus(type, isSuccess, text) {
