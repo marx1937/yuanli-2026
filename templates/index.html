@@ -166,45 +166,35 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-                    // --- 1. 全域變數設定 (作弊模式生效中) ---
-    var currentLat = 24.4432;  // 假裝在苑裡
-    var currentLng = 120.6547; // 假裝在苑裡
+                        // --- 1. 全域變數設定 (作弊模式：強制鎖定苑裡) ---
+    var currentLat = 24.4432;  
+    var currentLng = 120.6547; 
     var fileBlob = null; 
 
-    // --- 2. 初始化 (直接宣布定位成功) ---
+    // --- 2. 初始化 (一開機就喊成功) ---
     $(document).ready(function() {
-        // 不去問衛星了，直接更新畫面
+        // 直接更新畫面，不等待衛星
         updateStatus('gps', true, '定位完成 (作弊模式)');
         $('#statusText').text('📍 作弊成功！位置已鎖定 (24.4432, 120.6547)');
         
-        // 嘗試解鎖按鈕
+        // 嘗試讓按鈕亮起來
         checkReady();
     });
 
-        
-
-    // --- 3. 照片處理 (預覽 + 壓縮) ---
+    // --- 3. 照片預覽與壓縮 ---
     function previewFile() {
         var fileInput = document.getElementById('fileInput');
         var file = fileInput.files[0];
-
-        // 如果沒檔案 (使用者按取消)，就直接結束
         if (!file) return; 
 
-        // 重置舊照片
         fileBlob = null;
-
-        // 介面切換：隱藏相機 icon，顯示預覽圖
         $('#cameraPlaceholder').hide();
         var previewImg = document.getElementById('previewImg');
         previewImg.style.display = 'block';
-        
-        // 先顯示原始圖讓使用者安心
         previewImg.src = URL.createObjectURL(file);
 
         updateStatus('ai', true, '照片壓縮中...');
 
-        // 壓縮邏輯
         var reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = function(event) {
@@ -213,7 +203,7 @@
             img.onload = function() {
                 var canvas = document.createElement('canvas');
                 var ctx = canvas.getContext('2d');
-                var maxWidth = 800; // 限制寬度
+                var maxWidth = 800;
                 var scale = maxWidth / img.width;
                 var width = (img.width > maxWidth) ? maxWidth : img.width;
                 var height = (img.width > maxWidth) ? (img.height * scale) : img.height;
@@ -223,7 +213,7 @@
                 ctx.drawImage(img, 0, 0, width, height);
 
                 canvas.toBlob(function(blob) {
-                    fileBlob = blob; // 存入全域變數
+                    fileBlob = blob;
                     updateStatus('ai', true, '照片已準備好');
                     checkReady();
                 }, 'image/jpeg', 0.8);
@@ -233,7 +223,6 @@
 
     // --- 4. 檢查是否可以上傳 ---
     function checkReady() {
-        // 必須要有 GPS 也要有照片
         if (currentLat && fileBlob) {
             $('#submitBtn').prop('disabled', false)
                           .removeClass('btn-secondary')
@@ -242,16 +231,60 @@
         }
     }
 
-    // --- 5. 更新狀態顯示小工具 ---
+    // --- 5. 更新狀態小工具 ---
     function updateStatus(type, isReady, text) {
         var iconId = type === 'gps' ? '#gpsIcon' : '#aiIcon';
-        var color = isReady ? '#28a745' : '#dc3545'; // 綠色 vs 紅色
+        var color = isReady ? '#28a745' : '#dc3545';
         $(iconId).css('color', color);
+        if(type === 'gps') $('#gpsText').text(text);
+        if(type === 'ai') $('#aiText').text(text);
     }
 
-    // --- 6. 上傳資料 (Python 版 + 語音
+    // --- 6. 上傳資料 ---
+    function uploadData() {
+        if(!fileBlob || !currentLat) return;
 
+        var area = $('#area').val();
+        var rawName = $('#nickname').val();
         
+        if(!area) {
+            alert('請選擇「里別」喔！');
+            return;
+        }
+
+        $('#submitBtn').html('<i class="fas fa-robot"></i> 傳送中...')
+                      .prop('disabled', true);
+
+        var formData = new FormData();
+        formData.append('photo', fileBlob);
+        formData.append('lat', currentLat);
+        formData.append('lng', currentLng);
+        formData.append('note', $('#note').val());
+        formData.append('nickname', rawName);
+        formData.append('area', area);
+
+        $.ajax({
+            url: '/submit',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                var sayText = '感謝 ' + area + ' 的善心人士，土地公收到囉！';
+                var msg = new SpeechSynthesisUtterance(sayText);
+                msg.lang = 'zh-TW';
+                window.speechSynthesis.speak(msg);
+
+                alert('✅ 上傳成功！\n\n' + sayText);
+                location.reload();
+            },
+            error: function() {
+                alert('❌ 上傳失敗，請檢查網路連線。');
+                $('#submitBtn').html('確認上傳').prop('disabled', false);
+            }
+        });
+    }
+
 </script>
 </body>
 </html>
