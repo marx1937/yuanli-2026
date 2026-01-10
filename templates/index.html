@@ -166,7 +166,7 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-        // --- 1. 全域變數設定 ---
+            // --- 1. 全域變數設定 ---
     var currentLat = null;
     var currentLng = null;
     var fileBlob = null; // 儲存照片檔案
@@ -262,57 +262,9 @@
         $(iconId).css('color', color);
     }
 
-    // --- 6. 上傳資料 (Python 版 + 語音播報) ---
-    function uploadData() {
-        if(!fileBlob || !currentLat) return;
+    // --- 6. 上傳資料 (Python 版 + 語音
 
-        var area = $('#area').val();
-        var rawName = $('#nickname').val();
-        var displayName = rawName ? rawName : '熱心民眾';
-
-        if(!area) {
-            alert('請選擇「里別」喔！');
-            return;
-        }
-
-        // 按鈕鎖定
-        $('#submitBtn').html('<i class="fas fa-robot"></i> 傳送中...')
-                      .prop('disabled', true);
-
-        var formData = new FormData();
-        formData.append('photo', fileBlob);
-        formData.append('lat', currentLat);
-        formData.append('lng', currentLng);
-        formData.append('note', $('#note').val());
-        formData.append('nickname', rawName);
-        formData.append('area', area);
-
-        $.ajax({
-            url: '/submit', // 指向 Python 後端
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                var sayText = '感謝 ' + area + ' 的 ' + displayName + ' 熱心提供，土地公收到囉！';
-                
-                // 語音播報
-                var msg = new SpeechSynthesisUtterance(sayText);
-                msg.lang = 'zh-TW';
-                window.speechSynthesis.speak(msg);
-
-                alert('✅ 上傳成功！\n\n' + sayText);
-                location.reload();
-            },
-            error: function() {
-                alert('❌ 上傳失敗，請檢查網路連線或稍後再試。');
-                $('#submitBtn').html('確認上傳').prop('disabled', false);
-            }
-        });
-    }
-
-
-
+        
 </script>
 </body>
 </html>
