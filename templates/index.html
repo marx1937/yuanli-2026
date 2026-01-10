@@ -166,36 +166,22 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-                // --- 1. 全域變數設定 (作弊測試版) ---
-    var currentLat = 24.4432; // <--- 強制設定假座標
-    var currentLng = 120.6547; // <--- 強制設定假座標
+                    // --- 1. 全域變數設定 (作弊模式生效中) ---
+    var currentLat = 24.4432;  // 假裝在苑裡
+    var currentLng = 120.6547; // 假裝在苑裡
     var fileBlob = null; 
 
-
-    // --- 2. 初始化與 GPS 定位 ---
+    // --- 2. 初始化 (直接宣布定位成功) ---
     $(document).ready(function() {
-        // 嘗試取得位置
-        if (navigator.geolocation) {
-            updateStatus('gps', true, '定位中...');
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    currentLat = position.coords.latitude;
-                    currentLng = position.coords.longitude;
-                    updateStatus('gps', true, '定位完成');
-                    // 顯示經緯度給使用者看 (確認有定位)
-                    $('#statusText').text('📍 位置已鎖定 (' + currentLat.toFixed(4) + ', ' + currentLng.toFixed(4) + ')');
-                    checkReady();
-                },
-                function(error) {
-                    updateStatus('gps', false, '無法取得位置');
-                    alert('請允許手機存取位置資訊，才能紀錄地點喔！');
-                },
-                { enableHighAccuracy: true }
-            );
-        } else {
-            updateStatus('gps', false, '您的裝置不支援 GPS');
-        }
+        // 不去問衛星了，直接更新畫面
+        updateStatus('gps', true, '定位完成 (作弊模式)');
+        $('#statusText').text('📍 作弊成功！位置已鎖定 (24.4432, 120.6547)');
+        
+        // 嘗試解鎖按鈕
+        checkReady();
     });
+
+        
 
     // --- 3. 照片處理 (預覽 + 壓縮) ---
     function previewFile() {
