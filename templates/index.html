@@ -83,10 +83,18 @@
             
 
 
-            <img id="previewImg">
-            <i class="fas fa-camera"></i>
-            <span>點擊拍照 / 上傳</span>
+                <div class="upload-card" onclick="$('#fileInput').click()" style="border: 2px dashed #cbd5e0; padding: 30px 20px; text-align: center; border-radius: 15px; margin: 20px 0; background: #fff; cursor: pointer; position: relative;">
+        
+        <img id="previewImg" style="max-width: 100%; max-height: 300px; display: none; border-radius: 10px; margin: 0 auto;">
+        
+        <div id="cameraPlaceholder" style="color: #718096;">
+            <i class="fas fa-camera" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
+            <span style="font-size: 16px; font-weight: 500;">點擊拍照 / 上傳</span>
         </div>
+        
+        <input type="file" id="fileInput" accept="image/*" capture="camera" onchange="previewFile()" style="display: none;">
+    </div>
+
 
         <div class="status-grid">
             <div class="status-card">
@@ -139,6 +147,15 @@
         <input type="text" class="form-input" id="note" placeholder="補充說明 (例如: 活動中心旁)">
 
         <button class="submit-btn" id="submitBtn" onclick="uploadData()">確認上傳</button>
+    
+    <div style="background: #fff5f5; padding: 12px; border: 1px solid #ffcccc; margin: 20px 0; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+        <p style="margin: 0; color: #d63031; font-size: 13px; text-align: center; line-height: 1.6;">
+            <strong>【 📌 操作小撇步 】</strong><br>
+            若無法自動定位，請點擊右上方<strong>「...」</strong><br>
+            選擇 <strong>「開啟瀏覽器」</strong> 即可順利通報
+        </p>
+    </div>
+
         
         <div class="footer-links">
             <span>最近上傳 (0)</span>
