@@ -311,11 +311,13 @@ function uploadData() {
 
     // 5. 發送上傳請求
     $.ajax({
-        url: 'https://script.google.com/macros/s/AKfycbzTf4dC-uUvG_b_qGfqH55x0W3v7F4_XQ/exec', // ⚠️ 注意：這裡要確認是你自己的 Google Script 網址
+        url: '/submit', 
+        
         type: 'POST',
         data: formData,
         processData: false,
         contentType: false,
+        success: function(response) {
         success: function(response) {
             // ✅ 上傳成功！開始播報
             
