@@ -166,77 +166,58 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    // 檢查瀏覽器
-    var isLine = navigator.userAgent.includes("Line");
-    var isFB = navigator.userAgent.includes("FBAN") || navigator.userAgent.includes("FBAV");
-    if(isLine || isFB) {
-        document.getElementById('browserWarning').style.display = 'block';
-    }
+        // --- 1. 全域變數設定 ---
+    var currentLat = null;
+    var currentLng = null;
+    var fileBlob = null; // 儲存照片檔案
 
-    // 1. 自動定位
-    var currentLat = null, currentLng = null;
-    function initGPS() {
-        if(navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                currentLat = position.coords.latitude;
-                currentLng = position.coords.longitude;
-                updateStatus('gps', true, '定位完成');
-                checkReady();
-            }, function(e) {
-                updateStatus('gps', false, '定位失敗');
-                alert('定位失敗，請確認 GPS 權限');
-            });
+    // --- 2. 初始化與 GPS 定位 ---
+    $(document).ready(function() {
+        // 嘗試取得位置
+        if (navigator.geolocation) {
+            updateStatus('gps', true, '定位中...');
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    currentLat = position.coords.latitude;
+                    currentLng = position.coords.longitude;
+                    updateStatus('gps', true, '定位完成');
+                    // 顯示經緯度給使用者看 (確認有定位)
+                    $('#statusText').text('📍 位置已鎖定 (' + currentLat.toFixed(4) + ', ' + currentLng.toFixed(4) + ')');
+                    checkReady();
+                },
+                function(error) {
+                    updateStatus('gps', false, '無法取得位置');
+                    alert('請允許手機存取位置資訊，才能紀錄地點喔！');
+                },
+                { enableHighAccuracy: true }
+            );
         } else {
-            updateStatus('gps', false, '不支援 GPS');
+            updateStatus('gps', false, '您的裝置不支援 GPS');
         }
-    }
-    initGPS();
+    });
 
-        // 2. (原本的觸發相機功能已由 HTML 直接處理，這裡留空即可)
-
-        // 3. 照片預覽與壓縮 (測試偵測版)
-    var fileBlob = null;
-
+    // --- 3. 照片處理 (預覽 + 壓縮) ---
     function previewFile() {
-        // 🚨 測試點 1：如果有跳出這個視窗，代表按鈕沒壞，是程式能跑
-        alert('測試 1：成功呼叫！有感覺到拍照動作！');
-
         var fileInput = document.getElementById('fileInput');
-        
-        // 🚨 測試點 2：檢查有沒有抓到 ID
-        if (!fileInput) {
-            alert('測試 2：慘了，找不到 fileInput 這個 ID！');
-            return;
-        }
-
         var file = fileInput.files[0];
-        
-        // 🚨 測試點 3：檢查有沒有抓到檔案
-        if (!file) {
-            alert('測試 3：使用者好像沒選照片就取消了？(檔案是空的)');
-            return;
-        }
 
-        alert('測試 4：抓到照片了！準備顯示！(檔名：' + file.name + ')');
+        // 如果沒檔案 (使用者按取消)，就直接結束
+        if (!file) return; 
 
-        // --- 下面是原本的正常邏輯 ---
-        fileBlob = null; 
-        
-        // 嘗試隱藏相機 icon
-        var cameraPlaceholder = document.getElementById('cameraPlaceholder');
-        if(cameraPlaceholder) cameraPlaceholder.style.display = 'none';
+        // 重置舊照片
+        fileBlob = null;
 
-        // 嘗試顯示預覽圖
+        // 介面切換：隱藏相機 icon，顯示預覽圖
+        $('#cameraPlaceholder').hide();
         var previewImg = document.getElementById('previewImg');
-        if(previewImg) {
-            previewImg.style.display = 'block';
-            previewImg.src = URL.createObjectURL(file);
-        } else {
-             alert('測試 5：找不到 previewImg 圖片框，無法顯示！');
-        }
+        previewImg.style.display = 'block';
+        
+        // 先顯示原始圖讓使用者安心
+        previewImg.src = URL.createObjectURL(file);
 
-        updateStatus('ai', true, '照片處理中...');
+        updateStatus('ai', true, '照片壓縮中...');
 
+        // 壓縮邏輯
         var reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = function(event) {
@@ -245,7 +226,7 @@
             img.onload = function() {
                 var canvas = document.createElement('canvas');
                 var ctx = canvas.getContext('2d');
-                var maxWidth = 800;
+                var maxWidth = 800; // 限制寬度
                 var scale = maxWidth / img.width;
                 var width = (img.width > maxWidth) ? maxWidth : img.width;
                 var height = (img.width > maxWidth) ? (img.height * scale) : img.height;
@@ -255,7 +236,7 @@
                 ctx.drawImage(img, 0, 0, width, height);
 
                 canvas.toBlob(function(blob) {
-                    fileBlob = blob;
+                    fileBlob = blob; // 存入全域變數
                     updateStatus('ai', true, '照片已準備好');
                     checkReady();
                 }, 'image/jpeg', 0.8);
@@ -263,103 +244,73 @@
         };
     }
 
-
-
-    // 4. 更新燈號
-    function updateStatus(type, isSuccess, text) {
-        var icon = $('#' + type + 'Icon');
-        var label = $('#' + type + 'Text');
-        label.text(text);
-        if(isSuccess) {
-            icon.addClass('status-active').removeClass('status-error');
-        } else {
-            icon.addClass('status-error').removeClass('status-active');
+    // --- 4. 檢查是否可以上傳 ---
+    function checkReady() {
+        // 必須要有 GPS 也要有照片
+        if (currentLat && fileBlob) {
+            $('#submitBtn').prop('disabled', false)
+                          .removeClass('btn-secondary')
+                          .addClass('btn-info')
+                          .html('確認上傳');
         }
     }
 
-    
-    // 5. 檢查是否可以上傳
-function checkReady() {
-    if(currentLat && fileBlob) {
-        // 👇 請貼上這段：變亮藍色 + 火箭圖示
-        $('#submitBtn').removeClass('btn-secondary btn-info') // 移除舊顏色
-                       .addClass('btn-primary')               // 變藍色
-                       .prop('disabled', false)               // 解鎖
-                       .html('🚀 準備好了！確認上傳');        // 加圖示
-    }
-}
-        
-    
-
-    
-
-    
-    // 6. 上傳資料 (包含語音播報修復版)
-function uploadData() {
-    // 1. 先做基本檢查
-    if(!fileBlob || !currentLat) return;
-
-    // 2. 抓取資料
-    var area = $('#area').val();
-    var rawName = $('#nickname').val(); // 抓取暱稱
-    // 如果沒填暱稱，就叫他「熱心民眾」
-    var displayName = rawName ? rawName : '熱心民眾';
-
-    if(!area) {
-        alert('請選擇「里別」喔！');
-        return;
+    // --- 5. 更新狀態顯示小工具 ---
+    function updateStatus(type, isReady, text) {
+        var iconId = type === 'gps' ? '#gpsIcon' : '#aiIcon';
+        var color = isReady ? '#28a745' : '#dc3545'; // 綠色 vs 紅色
+        $(iconId).css('color', color);
     }
 
-    // 3. 按鈕變身 (防止重複點擊)
-    $('#submitBtn').html('<i class="fas fa-robot"></i> 收到！傳送中...')
-                  .removeClass('btn-info btn-secondary')
-                  .addClass('btn-success')
-                  .prop('disabled', true);
+    // --- 6. 上傳資料 (Python 版 + 語音播報) ---
+    function uploadData() {
+        if(!fileBlob || !currentLat) return;
 
-    // 4. 打包資料
-    var formData = new FormData();
-    formData.append('photo', fileBlob);
-    formData.append('lat', currentLat);
-    formData.append('lng', currentLng);
-    formData.append('note', $('#note').val());
-    formData.append('nickname', rawName);
-    formData.append('area', area);
+        var area = $('#area').val();
+        var rawName = $('#nickname').val();
+        var displayName = rawName ? rawName : '熱心民眾';
 
-    // 5. 發送上傳請求
-    $.ajax({
-        url: '/submit', 
-        
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function(response) {
-        success: function(response) {
-            // ✅ 上傳成功！開始播報
-            
-            // 準備台詞
-            var sayText = '感謝 ' + area + ' 的 ' + displayName + ' 熱心提供，土地公收到囉！';
-            
-            // 1. 執行語音
-            var msg = new SpeechSynthesisUtterance(sayText);
-            msg.lang = 'zh-TW'; // 設定為中文
-            msg.rate = 1.0;     // 設定語速
-            window.speechSynthesis.speak(msg);
-
-            // 2. 跳出成功視窗
-            alert('✅ 上傳成功！\n\n' + sayText);
-
-            // 3. 重新整理頁面 (讓使用者可以傳下一張)
-            location.reload();
-        },
-        error: function() {
-            // ❌ 上傳失敗
-            alert('上傳失敗，請檢查網路連線 😭');
-            // 恢復按鈕
-            $('#submitBtn').html('確認上傳').prop('disabled', false);
+        if(!area) {
+            alert('請選擇「里別」喔！');
+            return;
         }
-    });
-}
+
+        // 按鈕鎖定
+        $('#submitBtn').html('<i class="fas fa-robot"></i> 傳送中...')
+                      .prop('disabled', true);
+
+        var formData = new FormData();
+        formData.append('photo', fileBlob);
+        formData.append('lat', currentLat);
+        formData.append('lng', currentLng);
+        formData.append('note', $('#note').val());
+        formData.append('nickname', rawName);
+        formData.append('area', area);
+
+        $.ajax({
+            url: '/submit', // 指向 Python 後端
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                var sayText = '感謝 ' + area + ' 的 ' + displayName + ' 熱心提供，土地公收到囉！';
+                
+                // 語音播報
+                var msg = new SpeechSynthesisUtterance(sayText);
+                msg.lang = 'zh-TW';
+                window.speechSynthesis.speak(msg);
+
+                alert('✅ 上傳成功！\n\n' + sayText);
+                location.reload();
+            },
+            error: function() {
+                alert('❌ 上傳失敗，請檢查網路連線或稍後再試。');
+                $('#submitBtn').html('確認上傳').prop('disabled', false);
+            }
+        });
+    }
+
 
 
 </script>
