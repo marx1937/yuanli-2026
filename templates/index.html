@@ -261,7 +261,7 @@
         }
     }
 
-    // 5. 檢查是否可以上傳
+    
     // 5. 檢查是否可以上傳
 function checkReady() {
     if(currentLat && fileBlob) {
@@ -275,63 +275,74 @@ function checkReady() {
         
     
 
-    // 6. 上傳資料
+    
+
+    
+    // 6. 上傳資料 (包含語音播報修復版)
 function uploadData() {
-    // 1. 先做基本檢查 (如果沒照片或沒定位，就什麼都不做)
+    // 1. 先做基本檢查
     if(!fileBlob || !currentLat) return;
 
-    // 2. 抓取里別，並檢查有沒有選
+    // 2. 抓取資料
     var area = $('#area').val();
-    if(!area) { 
-        alert('請選擇「里別」喔！'); 
-        return; // 沒選就停在這裡，不會往下執行
+    var rawName = $('#nickname').val(); // 抓取暱稱
+    // 如果沒填暱稱，就叫他「熱心民眾」
+    var displayName = rawName ? rawName : '熱心民眾';
+
+    if(!area) {
+        alert('請選擇「里別」喔！');
+        return;
     }
-    // 🔊 強力喚醒版：清除卡頓並延遲播放
-    window.speechSynthesis.cancel(); 
-    
-    var text = '感謝 ' + area + ' ' + name + ' 上傳成功';
-    var msg = new SpeechSynthesisUtterance(text);
-    msg.lang = 'zh-TW';
-    msg.rate = 0.9;
 
-    setTimeout(function() {
-        window.speechSynthesis.speak(msg);
-    }, 150); 
-
-
-
-    // 5. 按鈕變身：綠色 + 機器人圖示
+    // 3. 按鈕變身 (防止重複點擊)
     $('#submitBtn').html('<i class="fas fa-robot"></i> 收到！傳送中...')
-                 .removeClass('btn-info btn-secondary') // 移除舊顏色
-                 .addClass('btn-success')               // 變綠色
-                 .prop('disabled', true);               // 鎖住不讓連點
+                  .removeClass('btn-info btn-secondary')
+                  .addClass('btn-success')
+                  .prop('disabled', true);
 
-    // 6. 打包資料準備上傳
+    // 4. 打包資料
     var formData = new FormData();
     formData.append('photo', fileBlob);
     formData.append('lat', currentLat);
     formData.append('lng', currentLng);
     formData.append('note', $('#note').val());
-    formData.append('nickname', $('#nickname').val());
+    formData.append('nickname', rawName);
     formData.append('area', area);
 
+    // 5. 發送上傳請求
     $.ajax({
-        url: '/upload',
+        url: 'https://script.google.com/macros/s/AKfycbzTf4dC-uUvG_b_qGfqH55x0W3v7F4_XQ/exec', // ⚠️ 注意：這裡要確認是你自己的 Google Script 網址
         type: 'POST',
         data: formData,
         processData: false,
         contentType: false,
-        success: function(res) {
-            alert(res.message);
+        success: function(response) {
+            // ✅ 上傳成功！開始播報
+            
+            // 準備台詞
+            var sayText = '感謝 ' + area + ' 的 ' + displayName + ' 熱心提供，土地公收到囉！';
+            
+            // 1. 執行語音
+            var msg = new SpeechSynthesisUtterance(sayText);
+            msg.lang = 'zh-TW'; // 設定為中文
+            msg.rate = 1.0;     // 設定語速
+            window.speechSynthesis.speak(msg);
+
+            // 2. 跳出成功視窗
+            alert('✅ 上傳成功！\n\n' + sayText);
+
+            // 3. 重新整理頁面 (讓使用者可以傳下一張)
             location.reload();
         },
         error: function() {
-            alert('上傳失敗，請重試');
-            // 如果失敗，把按鈕變回來讓它可以再按一次
-            $('#submitBtn').text('確認上傳').prop('disabled', false).removeClass('btn-success').addClass('btn-info');
+            // ❌ 上傳失敗
+            alert('上傳失敗，請檢查網路連線 😭');
+            // 恢復按鈕
+            $('#submitBtn').html('確認上傳').prop('disabled', false);
         }
     });
 }
+
 
 </script>
 </body>
