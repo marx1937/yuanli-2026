@@ -3,62 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>苑裡土地公地圖</title>
+    <title>苑裡土地公文化地圖</title>
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
     <style>
-        body, html { height: 100%; margin: 0; padding: 0; font-family: "Microsoft JhengHei", sans-serif; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: "Microsoft JhengHei", sans-serif; overflow: hidden; }
+        
+        /* 地圖滿版 */
         #map { height: 100%; width: 100%; z-index: 1; }
-        .back-btn {
+
+        /* 🌟 懸浮控制島 (設計感的核心) */
+        .control-island {
             position: absolute;
-            top: 20px; left: 20px; z-index: 1000;
-            background: white; padding: 10px 15px;
-            border-radius: 30px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            text-decoration: none; color: #333; font-weight: bold;
-            display: flex; align-items: center;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 1000; /* 壓在地圖上面 */
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            backdrop-filter: blur(5px);
         }
-        .back-btn i { margin-right: 5px; }
-        .custom-popup .leaflet-popup-content-wrapper { border-radius: 10px; overflow: hidden; padding: 0; }
-        .custom-popup .leaflet-popup-content { margin: 0; width: 280px !important; }
-        .popup-img { width: 100%; height: 180px; object-fit: cover; }
-        .popup-info { padding: 15px; }
-        .popup-title { font-size: 1.1rem; font-weight: bold; color: #d32f2f; margin-bottom: 5px; }
-        .popup-note { font-size: 0.9rem; color: #555; background: #f8f9fa; padding: 8px; border-radius: 5px; margin-top: 5px; }
-        .popup-footer { margin-top: 10px; font-size: 0.8rem; color: #999; text-align: right; }
+
+        /* 標題列 */
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            margin-bottom: 5px;
+        }
+        .control-title {
+            font-weight: bold;
+            color: #d32f2f;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        .badge-count {
+            background: #d32f2f;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+
+        /* 下拉選單美化 */
+        .custom-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #f0f0f0;
+            border-radius: 15px;
+            font-size: 1rem;
+            background-color: #f9f9f9;
+            color: #333;
+            font-weight: bold;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .custom-select:focus {
+            border-color: #d32f2f;
+            background-color: white;
+        }
+
+        /* 頂部回首頁按鈕 (懸浮左上) */
+        .btn-home {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: white;
+            color: #333;
+            padding: 10px 15px;
+            border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+        .btn-home i { margin-right: 5px; }
+
+        /* 彈出視窗樣式 */
+        .popup-img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+        .popup-title { font-weight: bold; font-size: 1rem; color: #d32f2f; margin-bottom: 2px; }
+        .popup-note { font-size: 0.85rem; color: #666; }
     </style>
 </head>
 <body>
-    <a href="/" class="back-btn"><i class="fas fa-chevron-left"></i> 回首頁</a>
+
+    <a href="/" class="btn-home">
+        <i class="fas fa-chevron-left"></i> 回首頁
+    </a>
+
     <div id="map"></div>
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+    <div class="control-island">
+        <div class="control-header">
+            <h5 class="control-title"><i class="fas fa-map-marked-alt"></i> 土地公分佈圖</h5>
+            <span class="badge-count" id="marker-count">載入中...</span>
+        </div>
+        
+        <select id="areaFilter" class="custom-select">
+            <option value="all">📍 顯示全苑裡 (預設)</option>
+            <option value="苑東里">苑東里</option>
+            <option value="苑南里">苑南里</option>
+            <option value="苑北里">苑北里</option>
+            <option value="西勢里">西勢里</option>
+            <option value="中正里">中正里</option>
+            <option value="客庄里">客庄里</option>
+            <option value="苑港里">苑港里</option>
+            <option value="西平里">西平里</option>
+            <option value="海岸里">海岸里</option>
+            <option value="房裡里">房裡里</option>
+            <option value="新復里">新復里</option>
+            <option value="田心里">田心里</option>
+            <option value="舊社里">舊社里</option>
+            <option value="山腳里">山腳里</option>
+            <option value="福田里">福田里</option>
+            <option value="蕉埔里">蕉埔里</option>
+            <option value="石鎮里">石鎮里</option>
+            <option value="南勢里">南勢里</option>
+            <option value="玉田里">玉田里</option>
+            <option value="泰田里">泰田里</option>
+            <option value="上館里">上館里</option>
+            <option value="水坡里">水坡里</option>
+            <option value="社苓里">社苓里</option>
+            <option value="山柑里">山柑里</option>
+            <option value="其他">其他</option>
+        </select>
+    </div>
+
     <script>
-        var map = L.map('map').setView([24.4432, 120.6547], 14);
+        // 1. 初始化地圖 (預設中心：苑裡車站附近)
+        var map = L.map('map', { zoomControl: false }).setView([24.443, 120.645], 13);
+
+        // 把縮放按鈕移到右上角 (避免擋到手指)
+        L.control.zoom({ position: 'topright' }).addTo(map);
+
+        // 載入地圖圖層 (OpenStreetMap)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
+            attribution: '&copy; 串友貢獻'
         }).addTo(map);
-        var templeIcon = L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-        });
+
+        // 定義全域變數
+        var allMarkers = []; // 存所有圖釘資料
+        var layerGroup = L.layerGroup().addTo(map); // 圖釘圖層
+
+        // 2. 抓取資料
         $.getJSON('/api/data', function(data) {
-            data.forEach(function(item) {
-                var popupContent = `
-                    <div>
-                        <img src="${item.image_url}" class="popup-img">
-                        <div class="popup-info">
-                            <div class="popup-title">📍 ${item.area} 土地公</div>
-                            <div>提供者：${item.nickname || '熱心串友'}</div>
-                            <div class="popup-note">📖 ${item.note || '無詳細記載'}</div>
-                            <div class="popup-footer">${item.created_at.substring(0, 10)}</div>
-                        </div>
-                    </div>`;
-                L.marker([item.lat, item.lng], {icon: templeIcon})
-                 .bindPopup(popupContent, {className: 'custom-popup'}).addTo(map);
-            });
+            
+            // 存下來，方便等一下篩選用
+            allMarkers = data;
+            
+            // 一開始先顯示全部
+            renderMarkers('all');
         });
+
+        // 3. 核心功能：渲染圖釘與切換視角
+        function renderMarkers(filterArea) {
+            layerGroup.clearLayers(); // 清空地圖上的點
+            var visibleCount = 0;
+            var bounds = []; // 用來計算鏡頭要飛去哪
+
+            allMarkers.forEach(function(item) {
+                // 判斷是否符合篩選條件
+                if (filterArea === 'all' || item.area === filterArea) {
+                    
+                    // 建立彈出視窗內容 (有照片、名字、備註)
+                    var popupContent = `
+                        <div style="width: 200px;">
+                            <img src="${item.image_url}" class="popup-img">
+                            <div class="popup-title">${item.nickname || '熱心串友'}</div>
+                            <div class="popup-note">${item.note || '沒有備註'}</div>
+                            <div class="text-muted small mt-1"><i class="fas fa-map-marker-alt"></i> ${item.area}</div>
+                        </div>
+                    `;
+
+                    // 建立圖釘
+                    var marker = L.marker([item.lat, item.lng])
+                        .bindPopup(popupContent);
+                    
+                    layerGroup.addLayer(marker);
+                    
+                    // 收集座標，為了等一下鏡頭自動對焦
+                    bounds.push([item.lat, item.lng]);
+                    visibleCount++;
+                }
+            });
+
+            // 更新計數器
+            $('#marker-count').text(visibleCount + ' 處');
+
+            // 🌟 鏡頭自動運鏡 (Smart Lens)
+            if (bounds.length > 0) {
+                // 如果有點，就飛過去包覆住所有點
+                map.flyToBounds(bounds, { padding: [50, 50], maxZoom: 16 });
+            } else if (filterArea !== 'all') {
+                // 如果選了某里但沒資料
+                alert('報告大哥！「' + filterArea + '」目前還沒有人查報喔！\n趕快去當第一名！');
+            } else {
+                // 如果是全選但沒資料 (完全空的狀態)
+                map.setView([24.443, 120.645], 13);
+            }
+        }
+
+        // 4. 監聽選單改變
+        $('#areaFilter').change(function() {
+            var selectedArea = $(this).val();
+            renderMarkers(selectedArea);
+        });
+
     </script>
 </body>
 </html>
