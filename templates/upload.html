@@ -141,8 +141,6 @@
         </div>
 
         <input type="file" id="fileInput" accept="image/*" capture="environment" style="display: none;" onchange="previewFile()">
-
-        <div class="card border-0 shadow-sm mb-3" style="background-color: rgba(255,255,255,0.9);">
             <div class="card-body">
                 <div class="form-group">
                     <label><i class="fas fa-map-marker-alt text-danger"></i> 所在位置 (里別)</label>
@@ -162,15 +160,17 @@
                 </div>
 
                 <div class="form-group">
-                    <label><i class="fas fa-book-open text-warning"></i> 廟宇故事 / 特殊事蹟</label>
-                    <textarea class="form-control" id="note" rows="3" placeholder="例如：這座土地公廟很靈驗、有特別的歷史故事..."></textarea>
-                </div>
-
-                <div class="form-group mb-0">
                     <label><i class="fas fa-user text-info"></i> 您的稱呼 (選填)</label>
                     <input type="text" class="form-control" id="nickname" placeholder="熱心串友">
                     <small class="text-muted">如果不填，土地公會稱呼您為「熱心串友」</small>
                 </div>
+
+                <div class="form-group mb-0">
+                    <label><i class="fas fa-book-open text-warning"></i> 廟宇故事 / 特殊事蹟 (選填)</label>
+                    <textarea class="form-control" id="note" rows="3" placeholder="例如：這座土地公廟很靈驗...（沒空寫也沒關係，可以直接按上傳！）"></textarea>
+                </div>
+            </div>
+
             </div>
         </div>
     </div>
