@@ -42,14 +42,18 @@ def init_db():
     except Exception as e:
         print("資料庫錯誤:", e)
 
+# 初始化
 init_db()
 
-# ================= 路由區 (導航核心) =================
+# ================= 路由區 (這裡最重要！) =================
 
-# 1. 首頁 (這就是你現在 404 缺少的東西！)
+# 1. 首頁 (救回 404 的關鍵)
 @app.route('/')
 def home():
-    return render_template('index.html')
+    try:
+        return render_template('index.html')
+    except Exception as e:
+        return f"首頁讀取失敗，請檢查 templates/index.html 是否存在。錯誤訊息: {str(e)}"
 
 # 2. 查報頁
 @app.route('/report')
@@ -61,15 +65,12 @@ def report_page():
 def map_page():
     return render_template('map.html')
 
-# 4. 顯示歡迎圖片 (讀取根目錄照片)
+# 4. 歡迎圖片
 @app.route('/welcome.jpg')
 def welcome_image():
-    try:
-        return send_from_directory('.', 'welcome.jpg')
-    except:
-        return "圖片讀取錯誤", 404
+    return send_from_directory('.', 'welcome.jpg')
 
-# 5. 排行榜 API (給首頁用的)
+# 5. 排行榜 API
 @app.route('/api/rank')
 def get_rank():
     try:
@@ -85,16 +86,11 @@ def get_rank():
         rows = cur.fetchall()
         cur.close()
         conn.close()
-        
         rank_data = []
         for row in rows:
-            rank_data.append({
-                'name': row[0] if row[0] else "熱心串友",
-                'count': row[1]
-            })
+            rank_data.append({'name': row[0] if row[0] else "熱心串友", 'count': row[1]})
         return jsonify(rank_data)
-    except Exception as e:
-        print(e)
+    except:
         return jsonify([])
 
 # 6. 地圖資料 API
@@ -106,7 +102,6 @@ def get_data():
     rows = cur.fetchall()
     cur.close()
     conn.close()
-    
     data = []
     for row in rows:
         data.append({
@@ -129,22 +124,16 @@ def upload_file():
     note = request.form['note']
     nickname = request.form['nickname']
     area = request.form['area']
-
     if file:
         upload_result = cloudinary.uploader.upload(file)
         image_url = upload_result['secure_url']
-
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute(
-            'INSERT INTO land_gods (image_url, lat, lng, note, nickname, area) VALUES (%s, %s, %s, %s, %s, %s)',
-            (image_url, lat, lng, note, nickname, area)
-        )
+        cur.execute('INSERT INTO land_gods (image_url, lat, lng, note, nickname, area) VALUES (%s, %s, %s, %s, %s, %s)', (image_url, lat, lng, note, nickname, area))
         conn.commit()
         cur.close()
         conn.close()
         return jsonify({'status': 'success', 'url': image_url})
-    
     return jsonify({'status': 'error'}), 400
 
 if __name__ == '__main__':
