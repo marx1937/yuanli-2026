@@ -7,13 +7,31 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
-        body {
+                body {
+            /* 預設底色 */
             background-color: #fff8e1;
+            
+            /* 🌟 設定背景圖片：指向 static 資料夾 */
+            background-image: url('/static/bg.jpg');
+            
+            /* 讓背景固定不動 (Fixed)，滑動時更有質感 */
+            background-attachment: fixed;
+            
+            /* 圖片置中、靠下對齊 (確保廟宇沈在下面) */
+            background-position: center bottom;
+            
+            /* 不重複平鋪 */
+            background-repeat: no-repeat;
+            
+            /* 讓圖片充滿螢幕 */
+            background-size: cover;
+            
             font-family: "Microsoft JhengHei", sans-serif;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
+
         .main-container {
             flex: 1;
             display: flex;
@@ -101,7 +119,9 @@
 
     <div class="main-container">
                         <div class="logo-area">
-            <img src="/banner.jpg" alt="苑裡土地公文化平台" class="welcome-img shadow" 
+                        <img src="/static/banner.jpg" alt="苑裡土地公文化平台" class="welcome-img shadow" 
+                 style="width: 100%; height: auto; border-radius: 15px; margin-bottom: 15px;">
+
                  style="width: 100%; height: auto; border-radius: 15px; margin-bottom: 15px;">
             
             <h2 class="app-title">苑裡土地公文化平台</h2>
