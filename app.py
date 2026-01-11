@@ -119,6 +119,18 @@ def delete_post(id):
     
     return redirect(url_for('admin_page'))
 
+# 3.5 圖庫頁 (新增這段)
+@app.route('/gallery')
+def gallery_page():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    # 撈出所有資料，按照時間新到舊排序
+    cur.execute('SELECT image_url, nickname, area, note, created_at FROM land_gods ORDER BY created_at DESC;')
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    return render_template('gallery.html', rows=rows)
+
 # --- API 區 ---
 
 @app.route('/api/rank')
