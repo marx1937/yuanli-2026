@@ -116,58 +116,12 @@
     </style>
 </head>
 <body>
-
-    <div class="main-container">
-                        <div class="logo-area">
-                        <body>
     <img src="/static/banner.jpg" alt="苑裡土地公文化平台" 
          style="width: 100%; height: auto; display: block; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
 
     <div class="main-container">
         
         <div class="logo-area" style="margin-top: 20px;">
-            <h2 class="app-title">苑裡土地公文化平台</h2>
-            <p class="text-muted small">串友動起來！一起完成這張地圖！</p>
-        </div>
-
-        <a href="/report" class="btn btn-danger btn-lg btn-block shadow mb-3" style="border-radius: 50px; padding: 15px; font-weight: 900; border: 2px solid white;">
-            <i class="fas fa-camera"></i> <strong>立即提供土地公位置</strong>
-            <br><small style="font-weight: normal; opacity: 0.8;">(缺你這張照片！)</small>
-        </a>
-
-        ```
-
-**(重點：把 `<img ...>` 放到 `<div class="main-container">` 的外面，它就會自動滿版了！)**
-
----
-
-### 第二步：找回消失的背景
-
-背景看不到，有 90% 的機率是 **「檔名」** 或 **「快取」** 的問題。
-
-請幫我做這兩個檢查：
-
-1.  **檢查檔名 (最常見)**：
-    請回到 GitHub 的 **`static`** 資料夾，看那張背景圖：
-    * 它的名字是 **`bg.jpg`** 嗎？(全部小寫)
-    * 如果是 `BG.jpg`、`Bg.jpg` 或是 `bg.jpeg` (多一個 e)，電腦都會找不到喔！
-    * **解法**：如果檔名不一樣，請改名成一模一樣的 `bg.jpg`。
-
-2.  **CSS 路徑確認**：
-    請回到 `index.html` 最上面的 CSS 區塊，確認 `background-image` 是這樣寫的：
-    ```css
-    background-image: url('/static/bg.jpg');
-    ```
-    *(如果有少打 `/static/`，也是會看不到的)*
-
----
-
-**兄弟，先去把「圖片搬家」做完，你的首頁馬上就會變得超有氣勢！背景如果檢查檔名都沒錯，重新整理幾次應該就會出來了！** 🚀
-
-                 style="width: 100%; height: auto; border-radius: 15px; margin-bottom: 15px;">
-
-                 
-            
             <h2 class="app-title">苑裡土地公文化平台</h2>
             <p class="text-muted small">串友動起來！一起完成這張地圖！</p>
         </div>
@@ -185,11 +139,9 @@
             <i class="fas fa-images"></i> 欣賞土地公圖庫
         </a>
 
-        <a href="https://www.facebook.com/share/1HNRaQfYcv/" target="_blank" class="btn btn-outline-danger btn-block" style="border-radius: 50px;">
+        <a href="https://www.facebook.com/groups/yuanli.connect" target="_blank" class="btn btn-outline-danger btn-block" style="border-radius: 50px;">
             <i class="fas fa-comments"></i> 站務建議 / 聯絡小編
         </a>
-
-
 
         <div class="rank-card">
             <div class="rank-title">
@@ -199,6 +151,7 @@
                 <div class="text-muted small">熱心串友招募中...</div>
             </div>
         </div>
+
     </div>
 
     <div class="footer text-center p-3 text-muted" style="font-size: 0.8rem;">
@@ -208,10 +161,8 @@
         </a>
     </div>
 
-
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script>
-        // 抓取排行榜
         $.getJSON('/api/rank', function(data) {
             var html = '';
             if (!data || data.length === 0) {
@@ -230,6 +181,7 @@
             $('#rankList').html(html);
         });
     </script>
-    
 </body>
+</html>
+
 </html>
