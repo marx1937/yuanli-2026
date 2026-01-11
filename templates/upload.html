@@ -142,22 +142,38 @@
 
         <input type="file" id="fileInput" accept="image/*" capture="environment" style="display: none;" onchange="previewFile()">
             <div class="card-body">
-                <div class="form-group">
-                    <label><i class="fas fa-map-marker-alt text-danger"></i> 所在位置 (里別)</label>
-                    <select class="form-control" id="area" style="font-size: 1.1rem;">
-                        <option value="" disabled selected>-- 請選擇 --</option>
-                        <option value="苑東里">苑東里</option>
-                        <option value="苑南里">苑南里</option>
-                        <option value="苑北里">苑北里</option>
-                        <option value="西勢里">西勢里</option>
-                        <option value="中正里">中正里</option>
-                        <option value="客庄里">客庄里</option>
-                        <option value="苑港里">苑港里</option>
-                        <option value="西平里">西平里</option>
-                        <option value="海岸里">海岸里</option>
-                        <option value="其他">其他</option>
-                    </select>
-                </div>
+                            <div class="form-group">
+                <label for="area"><i class="fas fa-map-marker-alt"></i> 土地公在哪個里？</label>
+                <select class="form-control" id="area" name="area" required style="border-radius: 20px; height: 50px;">
+                    <option value="" disabled selected>-- 請選擇里別 --</option>
+                    <option value="苑東里">苑東里</option>
+                    <option value="苑南里">苑南里</option>
+                    <option value="苑北里">苑北里</option>
+                    <option value="西勢里">西勢里</option>
+                    <option value="中正里">中正里</option>
+                    <option value="客庄里">客庄里</option>
+                    <option value="苑港里">苑港里</option>
+                    <option value="西平里">西平里</option>
+                    <option value="海岸里">海岸里</option>
+                    <option value="房裡里">房裡里</option>
+                    <option value="新復里">新復里</option>
+                    <option value="田心里">田心里</option>
+                    <option value="舊社里">舊社里</option>
+                    <option value="山腳里">山腳里</option>
+                    <option value="福田里">福田里</option>
+                    <option value="泰田里">泰田里</option>
+                    <option value="玉田里">玉田里</option>
+                    <option value="上館里">上館里</option>
+                    <option value="南勢里">南勢里</option>
+                    <option value="石鎮里">石鎮里</option>
+                    <option value="蕉埔里">蕉埔里</option>
+                    <option value="山柑里">山柑里</option>
+                    <option value="社苓里">社苓里</option>
+                    <option value="水坡里">水坡里</option>
+                    <option value="其他">其他 / 不確定</option>
+                </select>
+            </div>
+
 
                 <div class="form-group">
                     <label><i class="fas fa-user text-info"></i> 您的稱呼 (選填)</label>
@@ -176,7 +192,8 @@
     </div>
 
     <div class="fixed-footer">
-        <button id="submitBtn" class="btn btn-secondary btn-main" onclick="uploadData()" disabled>
+        <button id="submitBtn" class="btn btn-secondary btn-main" type="button" disabled>
+
             <i class="fas fa-sync fa-spin"></i> 等待 GPS 定位...
         </button>
     </div>
@@ -283,52 +300,89 @@
     }
     function deg2rad(deg) { return deg * (Math.PI/180) }
 
-    function uploadData() {
-        if(!fileBlob || !currentLat) return;
-        var area = $('#area').val();
-        var rawName = $('#nickname').val();
+    <script>
+    // 🌟 最強融合版上傳程式 (取代舊的 uploadData)
+    $('#submitBtn').on('click', function(e) {
+        e.preventDefault();
         
-        if(!area) {
-            alert('請選擇「里別」喔！');
+        // 1. 檢查 GPS 是否定位完成
+        if (!currentLat || !currentLng) {
+            alert("⚠️ GPS 定位中... 請稍等一下，或檢查是否有開啟定位功能！");
             return;
         }
 
-        $('#submitBtn').html('<i class="fas fa-robot"></i> 傳送中...')
-                      .prop('disabled', true);
+        // 2. 檢查是否有拍照 (檢查 fileBlob 變數)
+        if (!fileBlob) {
+            alert("⚠️ 請先拍攝或選擇照片喔！");
+            return;
+        }
 
+        // 3. 準備按鈕動畫
+        var btn = $(this);
+        var originalText = btn.html();
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 上傳中...');
+
+        // 4. 打包資料 (手動打包，確保萬無一失)
         var formData = new FormData();
-        formData.append('photo', fileBlob);
-        formData.append('lat', currentLat);
-        formData.append('lng', currentLng);
-        formData.append('note', $('#note').val());
-        formData.append('nickname', rawName);
-        formData.append('area', area);
+        formData.append('photo', fileBlob);      // 照片
+        formData.append('lat', currentLat);      // 緯度
+        formData.append('lng', currentLng);      // 經度
+        formData.append('area', $('#area').val()); // 區域
+        formData.append('nickname', $('#nickname').val() || '熱心串友'); // 暱稱
+        formData.append('note', $('#note').val()); // 備註
 
+        // 5. 發送資料
         $.ajax({
-            url: '/upload',
+            url: '/upload',  // 修正：依照你舊代碼的路徑
             type: 'POST',
             data: formData,
             processData: false,
             contentType: false,
             success: function(response) {
-                var displayName = rawName ? rawName : '熱心串友';
-                var sayText = '感謝 ' + area + ' 的 ' + displayName + '，土地公收到囉！';
-                
-                var msg = new SpeechSynthesisUtterance(sayText);
-                msg.lang = 'zh-TW';
-                msg.rate = 0.9;
-                window.speechSynthesis.speak(msg);
-
-                // 🌟 改良重點：彈窗按確定後，直接帶你去地圖頁面看成果！
-                alert('✅ 上傳成功！\n\n點擊確定後，帶您去地圖看看成果！');
-                window.location.href = '/map'; 
+                // 成功！
+                alert("🎉 感謝您的查報！\n\n土地公會保佑您的！\n我們會盡快審核並更新地圖。");
+                window.location.href = '/map'; // 跳轉回地圖
             },
-            error: function() {
-                alert('❌ 上傳失敗，請檢查網路連線。');
-                $('#submitBtn').html('確認上傳').prop('disabled', false);
+            error: function(xhr) {
+                // 失敗
+                alert("❌ 上傳失敗！請檢查網路連線。\n" + (xhr.responseText || ""));
+                btn.prop('disabled', false).html(originalText); // 恢復按鈕
             }
         });
+    });
+</script>
+
     }
     </script>
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $('form').on('submit', function(e) {
+            e.preventDefault(); 
+            var form = this;
+            var submitBtn = $(form).find('button[type="submit"]');
+            
+            // 顯示上傳中
+            submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 上傳中...');
+
+            var formData = new FormData(form);
+
+            $.ajax({
+                url: '/api/upload', 
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    alert("🎉 感謝查報！土地公會保佑您的！");
+                    window.location.href = '/map'; 
+                },
+                error: function() {
+                    alert("❌ 上傳失敗，請檢查網路！");
+                    submitBtn.prop('disabled', false).html('確認送出'); 
+                }
+            });
+        });
+    </script>
+
 </body>
 </html>
