@@ -8,14 +8,31 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     
     <style>
-        /* --- APP 風格樣式表 --- */
         body {
-            background-color: #fff8e1; /* 米黃色背景，帶有文化氣息 */
+            background-color: #fff8e1;
             padding-bottom: 90px;
             font-family: "Microsoft JhengHei", sans-serif;
         }
 
-        /* 頂部標題列 (廟宇紅 + 金邊) */
+        /* 🌟 新增：左上角回首頁按鈕 */
+        .back-btn {
+            position: fixed; /* 固定在螢幕上，滑動也不會跑 */
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 15px;
+            border-radius: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            text-decoration: none;
+            color: #d32f2f;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+        .back-btn i { margin-right: 5px; }
+
         .app-header {
             background: linear-gradient(135deg, #d32f2f, #8e0000);
             color: #ffeb3b;
@@ -28,9 +45,9 @@
             top: 0;
             z-index: 100;
             border-bottom: 3px solid #ffc107;
+            padding-top: 20px; /* 為了避開回首頁按鈕，稍微加高一點 */
         }
 
-        /* FB/LINE 警告條 */
         #browser-warning {
             display: none;
             background-color: #ffc107;
@@ -40,7 +57,6 @@
             text-align: center;
         }
 
-        /* 相機區塊 */
         .camera-zone {
             background-color: #ffffff;
             border-radius: 15px;
@@ -50,7 +66,7 @@
             justify-content: center;
             align-items: center;
             margin-bottom: 20px;
-            border: 2px dashed #d32f2f; /* 紅色虛線 */
+            border: 2px dashed #d32f2f;
             position: relative;
             overflow: hidden;
             cursor: pointer;
@@ -61,7 +77,6 @@
         .camera-icon { font-size: 3rem; color: #d32f2f; }
         #previewImg { width: 100%; height: 100%; object-fit: cover; display: none; }
 
-        /* 狀態文字小藥丸 */
         .status-pill {
             background: white;
             padding: 8px 15px;
@@ -73,7 +88,6 @@
             border: 1px solid #dee2e6;
         }
 
-        /* 底部固定按鈕區 */
         .fixed-footer {
             position: fixed;
             bottom: 0;
@@ -96,8 +110,12 @@
 </head>
 <body>
 
+    <a href="/" class="back-btn">
+        <i class="fas fa-chevron-left"></i> 回首頁
+    </a>
+
     <div class="app-header">
-        <i class="fas fa-temple"></i> 苑裡土地公文化地圖
+        <i class="fas fa-camera"></i> 土地公查報
     </div>
 
     <div id="browser-warning">
@@ -144,7 +162,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label><i class="fas fa-book-open text-warning"></i> 廟宇故事</label>
+                    <label><i class="fas fa-book-open text-warning"></i> 廟宇故事 / 特殊事蹟</label>
                     <textarea class="form-control" id="note" rows="3" placeholder="例如：這座土地公廟很靈驗、有特別的歷史故事..."></textarea>
                 </div>
 
@@ -165,27 +183,22 @@
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script>
-    // --- 1. 全域變數 ---
     var currentLat = null;
     var currentLng = null;
     var fileBlob = null; 
 
-    // --- 2. 啟動真實定位與結界 ---
     $(document).ready(function() {
-        // A. 臉書/LINE 偵測
         var ua = navigator.userAgent || navigator.vendor || window.opera;
         if ((ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1) || (ua.indexOf("Line") > -1)) {
             $('#browser-warning').show();
         }
 
-        // B. 真實 GPS 邏輯
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 function(position) {
                     currentLat = position.coords.latitude;
                     currentLng = position.coords.longitude;
                     
-                    // 🛡️ 結界設定：苑裡火車站半徑 15km
                     var dist = getDistanceFromLatLonInKm(currentLat, currentLng, 24.4432, 120.6547);
                     
                     if (dist > 15) {
@@ -208,7 +221,6 @@
         }
     });
 
-    // --- 3. 照片處理 ---
     function previewFile() {
         var fileInput = document.getElementById('fileInput');
         var file = fileInput.files[0];
@@ -248,7 +260,6 @@
         };
     }
 
-    // --- 4. 檢查邏輯 ---
     function checkReady() {
         if (currentLat && fileBlob) {
             $('#submitBtn').prop('disabled', false)
@@ -260,7 +271,6 @@
         }
     }
 
-    // --- 5. 距離計算 ---
     function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
         var R = 6371; 
         var dLat = deg2rad(lat2-lat1);  
@@ -273,7 +283,6 @@
     }
     function deg2rad(deg) { return deg * (Math.PI/180) }
 
-    // --- 6. 上傳資料 (含熱心串友語音) ---
     function uploadData() {
         if(!fileBlob || !currentLat) return;
         var area = $('#area').val();
@@ -302,19 +311,17 @@
             processData: false,
             contentType: false,
             success: function(response) {
-                // 🌟 這裡修改了：預設名字改成「熱心串友」
                 var displayName = rawName ? rawName : '熱心串友';
-                
-                // 🗣️ 語音台詞：包含里名、名字、串友、賜福
-                var sayText = '感謝 ' + area + ' 的 ' + displayName + '，土地公收到囉！土地公會庇佑你！';
+                var sayText = '感謝 ' + area + ' 的 ' + displayName + '，土地公收到囉！';
                 
                 var msg = new SpeechSynthesisUtterance(sayText);
                 msg.lang = 'zh-TW';
-                msg.rate = 0.9; // 語速莊嚴
+                msg.rate = 0.9;
                 window.speechSynthesis.speak(msg);
 
-                alert('✅ 上傳成功！\n\n' + sayText);
-                location.reload();
+                // 🌟 改良重點：彈窗按確定後，直接帶你去地圖頁面看成果！
+                alert('✅ 上傳成功！\n\n點擊確定後，帶您去地圖看看成果！');
+                window.location.href = '/map'; 
             },
             error: function() {
                 alert('❌ 上傳失敗，請檢查網路連線。');
@@ -323,6 +330,5 @@
         });
     }
     </script>
-    
 </body>
 </html>
