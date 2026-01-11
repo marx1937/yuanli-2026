@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask import Flask, render_template, request, jsonify, send_from_directory, redirect, url_for, session
 import cloudinary
 import cloudinary.uploader
 import os
@@ -7,6 +7,11 @@ import psycopg2
 app = Flask(__name__)
 
 # --- 設定區 ---
+# 設定加密鑰匙 (這是 Session 運作需要的)
+app.secret_key = os.environ.get('SECRET_KEY', 'yuanli_secret_key')
+# 設定管理員密碼 (從環境變數抓，如果沒設預設是 1234)
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '1234')
+
 cloudinary.config(
     cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME'),
     api_key = os.environ.get('CLOUDINARY_API_KEY'),
@@ -38,62 +43,97 @@ def init_db():
         conn.commit()
         cur.close()
         conn.close()
-        print("資料庫連線成功")
     except Exception as e:
         print("資料庫錯誤:", e)
 
-# 初始化
 init_db()
 
-# ================= 路由區 (這裡最重要！) =================
+# ================= 路由區 =================
 
-# 1. 首頁 (救回 404 的關鍵)
 @app.route('/')
 def home():
-    try:
-        return render_template('index.html')
-    except Exception as e:
-        return f"首頁讀取失敗，請檢查 templates/index.html 是否存在。錯誤訊息: {str(e)}"
+    return render_template('index.html')
 
-# 2. 查報頁
 @app.route('/report')
 def report_page():
     return render_template('upload.html')
 
-# 3. 地圖頁
 @app.route('/map')
 def map_page():
     return render_template('map.html')
 
-# 4. 歡迎圖片
 @app.route('/welcome.jpg')
 def welcome_image():
     return send_from_directory('.', 'welcome.jpg')
 
-# 5. 排行榜 API
+# --- 🔒 登入系統 ---
+
+# 1. 登入頁面
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        password = request.form.get('password')
+        if password == ADMIN_PASSWORD:
+            session['is_admin'] = True  # 發給通行證
+            return redirect(url_for('admin_page'))
+        else:
+            return render_template('login.html', error="密碼錯誤，只有大哥能進來！")
+    return render_template('login.html')
+
+# 2. 登出
+@app.route('/logout')
+def logout():
+    session.pop('is_admin', None) # 撕掉通行證
+    return redirect(url_for('home'))
+
+# 3. 管理後台 (有加保全檢查)
+@app.route('/admin')
+def admin_page():
+    # 檢查有沒有通行證
+    if not session.get('is_admin'):
+        return redirect(url_for('login')) # 沒票就踢去登入頁
+        
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('SELECT id, nickname, area, note, image_url, created_at FROM land_gods ORDER BY created_at DESC;')
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    return render_template('admin.html', rows=rows)
+
+# 4. 刪除功能 (也有保全)
+@app.route('/delete/<int:id>')
+def delete_post(id):
+    if not session.get('is_admin'):
+        return redirect(url_for('login'))
+        
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute('DELETE FROM land_gods WHERE id = %s', (id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print("刪除失敗:", e)
+    
+    return redirect(url_for('admin_page'))
+
+# --- API 區 ---
+
 @app.route('/api/rank')
 def get_rank():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute('''
-            SELECT nickname, COUNT(*) as count 
-            FROM land_gods 
-            GROUP BY nickname 
-            ORDER BY count DESC 
-            LIMIT 5;
-        ''')
+        cur.execute('SELECT nickname, COUNT(*) as count FROM land_gods GROUP BY nickname ORDER BY count DESC LIMIT 5;')
         rows = cur.fetchall()
         cur.close()
         conn.close()
-        rank_data = []
-        for row in rows:
-            rank_data.append({'name': row[0] if row[0] else "熱心串友", 'count': row[1]})
+        rank_data = [{'name': r[0] if r[0] else "熱心串友", 'count': r[1]} for r in rows]
         return jsonify(rank_data)
-    except:
-        return jsonify([])
+    except: return jsonify([])
 
-# 6. 地圖資料 API
 @app.route('/api/data')
 def get_data():
     conn = get_db_connection()
@@ -102,20 +142,9 @@ def get_data():
     rows = cur.fetchall()
     cur.close()
     conn.close()
-    data = []
-    for row in rows:
-        data.append({
-            'image_url': row[0],
-            'lat': row[1],
-            'lng': row[2],
-            'note': row[3],
-            'nickname': row[4],
-            'area': row[5],
-            'created_at': str(row[6])
-        })
+    data = [{'image_url':r[0], 'lat':r[1], 'lng':r[2], 'note':r[3], 'nickname':r[4], 'area':r[5], 'created_at':str(r[6])} for r in rows]
     return jsonify(data)
 
-# 7. 上傳功能
 @app.route('/upload', methods=['POST'])
 def upload_file():
     file = request.files['photo']
