@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>土地公後台管理</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body { padding: 20px; background-color: #f8f9fa; }
+        .table img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; }
+        .btn-del { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2 class="text-center mb-4">👮‍♂️ 土地公違規取締中心</h2>
+    <div class="text-right mb-3">
+        <a href="/" class="btn btn-secondary">回首頁</a>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped bg-white shadow-sm">
+            <thead class="thead-dark">
+                <tr>
+                    <th>照片</th>
+                    <th>區域/暱稱</th>
+                    <th>故事備註</th>
+                    <th>管理</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    <td>
+                        <a href="{{ row[4] }}" target="_blank">
+                            <img src="{{ row[4] }}">
+                        </a>
+                    </td>
+                    <td>
+                        <span class="badge badge-info">{{ row[5] }}</span><br>
+                        <small>{{ row[1] or '熱心串友' }}</small><br>
+                    </td>
+                    <td>{{ row[3] or '無' }}</td>
+                    <td>
+                        <a href="/delete/{{ row[0] }}" class="btn btn-danger btn-sm btn-del" onclick="return confirm('大哥，確定要刪除這筆資料嗎？刪了就救不回來喔！');">
+                            刪除 🗑️
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
