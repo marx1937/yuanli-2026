@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>苑裡土地公地圖</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body, html { height: 100%; margin: 0; padding: 0; font-family: "Microsoft JhengHei", sans-serif; }
+        #map { height: 100%; width: 100%; z-index: 1; }
+        .back-btn {
+            position: absolute;
+            top: 20px; left: 20px; z-index: 1000;
+            background: white; padding: 10px 15px;
+            border-radius: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            text-decoration: none; color: #333; font-weight: bold;
+            display: flex; align-items: center;
+        }
+        .back-btn i { margin-right: 5px; }
+        .custom-popup .leaflet-popup-content-wrapper { border-radius: 10px; overflow: hidden; padding: 0; }
+        .custom-popup .leaflet-popup-content { margin: 0; width: 280px !important; }
+        .popup-img { width: 100%; height: 180px; object-fit: cover; }
+        .popup-info { padding: 15px; }
+        .popup-title { font-size: 1.1rem; font-weight: bold; color: #d32f2f; margin-bottom: 5px; }
+        .popup-note { font-size: 0.9rem; color: #555; background: #f8f9fa; padding: 8px; border-radius: 5px; margin-top: 5px; }
+        .popup-footer { margin-top: 10px; font-size: 0.8rem; color: #999; text-align: right; }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-btn"><i class="fas fa-chevron-left"></i> 回首頁</a>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        var map = L.map('map').setView([24.4432, 120.6547], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        var templeIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        });
+        $.getJSON('/api/data', function(data) {
+            data.forEach(function(item) {
+                var popupContent = `
+                    <div>
+                        <img src="${item.image_url}" class="popup-img">
+                        <div class="popup-info">
+                            <div class="popup-title">📍 ${item.area} 土地公</div>
+                            <div>提供者：${item.nickname || '熱心串友'}</div>
+                            <div class="popup-note">📖 ${item.note || '無詳細記載'}</div>
+                            <div class="popup-footer">${item.created_at.substring(0, 10)}</div>
+                        </div>
+                    </div>`;
+                L.marker([item.lat, item.lng], {icon: templeIcon})
+                 .bindPopup(popupContent, {className: 'custom-popup'}).addTo(map);
+            });
+        });
+    </script>
+</body>
+</html>
