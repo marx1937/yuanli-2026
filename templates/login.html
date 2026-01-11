@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理員登入</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body { background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        .login-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 100%; max-width: 350px; text-align: center; }
+        .btn-login { background-color: #d32f2f; color: white; border-radius: 50px; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h4 class="mb-4">🔒 管理員專區</h4>
+        {% if error %}
+        <div class="alert alert-danger small">{{ error }}</div>
+        {% endif %}
+        <form method="POST">
+            <div class="form-group">
+                <input type="password" name="password" class="form-control text-center" placeholder="請輸入密碼" required>
+            </div>
+            <button type="submit" class="btn btn-login btn-block">驗證身分</button>
+            <a href="/" class="btn btn-link btn-sm mt-3 text-muted">回首頁</a>
+        </form>
+    </div>
+</body>
+</html>
