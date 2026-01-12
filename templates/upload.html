@@ -199,7 +199,7 @@
             $('#browser-warning').show();
         }
 
-        // 2. GPS 定位 (最穩定版)
+        // 2. GPS 定位
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 function(position) {
@@ -294,13 +294,12 @@
     }
     function deg2rad(deg) { return deg * (Math.PI/180) }
 
-    // --- 上傳功能 (無語音，換圖片) ---
+    // --- 上傳功能 ---
     function uploadData() {
         if(!fileBlob || !currentLat) return;
         var area = $('#area').val();
         var rawName = $('#nickname').val();
         
-        // 1. 檢查地點
         if(!area) {
             Swal.fire({
                 icon: 'warning',
@@ -357,19 +356,18 @@
                         window.location.href = '/map';
                     });
                 } 
-                // 🟢 成功 (圖片換成小幫手)
+                // 🟢 成功 (更換圖片為 tdo.jpg)
                 else {
                     var sayText = '感謝 ' + area + ' 的 ' + displayName + '，土地公收到囉！';
                     
                     Swal.fire({
                         title: '✅ 上傳成功！',
                         text: sayText,
-                        // 👇 這裡就是換圖片的地方
-                        imageUrl: '/static/tdo.jpg', // 換成你的小幫手圖片
-                        imageWidth: 120,           // 設定圖片寬度
-                        imageHeight: 120,          // 設定圖片高度
-                        imageAlt: '土地公小幫手',    // 圖片說明
-                        // 👆 上面這幾行取代了原本的 icon: 'success'
+                        // 👇 修改這裡：換成新的 tdo.jpg
+                        imageUrl: '/static/tdo.jpg', 
+                        imageWidth: 200,     
+                        imageHeight: 'auto', // 自動高度，保持比例
+                        imageAlt: '土地公',
                         confirmButtonText: '太棒了！',
                         confirmButtonColor: '#d32f2f'
                     }).then(() => {
