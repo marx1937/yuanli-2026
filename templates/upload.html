@@ -8,31 +8,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     
     <style>
+        /* --- APP 風格樣式表 --- */
         body {
-            background-color: #fff8e1;
+            background-color: #fff8e1; /* 米黃色背景 */
             padding-bottom: 90px;
             font-family: "Microsoft JhengHei", sans-serif;
         }
 
-        /* 🌟 新增：左上角回首頁按鈕 */
-        .back-btn {
-            position: fixed; /* 固定在螢幕上，滑動也不會跑 */
-            top: 15px;
-            left: 15px;
-            z-index: 1001;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 8px 15px;
-            border-radius: 30px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            text-decoration: none;
-            color: #d32f2f;
-            font-weight: bold;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-        }
-        .back-btn i { margin-right: 5px; }
-
+        /* 頂部標題列 */
         .app-header {
             background: linear-gradient(135deg, #d32f2f, #8e0000);
             color: #ffeb3b;
@@ -45,9 +28,9 @@
             top: 0;
             z-index: 100;
             border-bottom: 3px solid #ffc107;
-            padding-top: 20px; /* 為了避開回首頁按鈕，稍微加高一點 */
         }
 
+        /* FB/LINE 警告條 */
         #browser-warning {
             display: none;
             background-color: #ffc107;
@@ -57,6 +40,7 @@
             text-align: center;
         }
 
+        /* 相機區塊 */
         .camera-zone {
             background-color: #ffffff;
             border-radius: 15px;
@@ -77,6 +61,7 @@
         .camera-icon { font-size: 3rem; color: #d32f2f; }
         #previewImg { width: 100%; height: 100%; object-fit: cover; display: none; }
 
+        /* 狀態文字小藥丸 */
         .status-pill {
             background: white;
             padding: 8px 15px;
@@ -88,6 +73,7 @@
             border: 1px solid #dee2e6;
         }
 
+        /* 底部固定按鈕區 */
         .fixed-footer {
             position: fixed;
             bottom: 0;
@@ -110,17 +96,17 @@
 </head>
 <body>
 
-    <a href="/" class="back-btn">
-        <i class="fas fa-chevron-left"></i> 回首頁
-    </a>
+    <img src="/static/mascot.png" alt="小幫手" 
+         style="position: fixed; bottom: 80px; left: 10px; width: 130px; height: auto; z-index: 9999; pointer-events: none; opacity: 0.9;">
 
     <div class="app-header">
+        <div style="float:left;"><a href="/" style="color:white;"><i class="fas fa-chevron-left"></i> 回首頁</a></div>
         <i class="fas fa-camera"></i> 土地公查報
     </div>
 
     <div id="browser-warning">
         <i class="fas fa-exclamation-triangle"></i> <strong>建議使用 Chrome/Safari</strong><br>
-        臉書瀏覽器可能無法定位，請點右上角選「以瀏覽器開啟」
+        臉書/LINE 可能無法定位，請點右上角選「以瀏覽器開啟」
     </div>
 
     <div class="container mt-3">
@@ -141,39 +127,41 @@
         </div>
 
         <input type="file" id="fileInput" accept="image/*" capture="environment" style="display: none;" onchange="previewFile()">
-            <div class="card-body">
-                            <div class="form-group">
-                <label for="area"><i class="fas fa-map-marker-alt"></i> 土地公在哪個里？</label>
-                <select class="form-control" id="area" name="area" required style="border-radius: 20px; height: 50px;">
-                    <option value="" disabled selected>-- 請選擇里別 --</option>
-                    <option value="苑東里">苑東里</option>
-                    <option value="苑南里">苑南里</option>
-                    <option value="苑北里">苑北里</option>
-                    <option value="西勢里">西勢里</option>
-                    <option value="中正里">中正里</option>
-                    <option value="客庄里">客庄里</option>
-                    <option value="苑港里">苑港里</option>
-                    <option value="西平里">西平里</option>
-                    <option value="海岸里">海岸里</option>
-                    <option value="房裡里">房裡里</option>
-                    <option value="新復里">新復里</option>
-                    <option value="田心里">田心里</option>
-                    <option value="舊社里">舊社里</option>
-                    <option value="山腳里">山腳里</option>
-                    <option value="福田里">福田里</option>
-                    <option value="泰田里">泰田里</option>
-                    <option value="玉田里">玉田里</option>
-                    <option value="上館里">上館里</option>
-                    <option value="南勢里">南勢里</option>
-                    <option value="石鎮里">石鎮里</option>
-                    <option value="蕉埔里">蕉埔里</option>
-                    <option value="山柑里">山柑里</option>
-                    <option value="社苓里">社苓里</option>
-                    <option value="水坡里">水坡里</option>
-                    <option value="其他">其他 / 不確定</option>
-                </select>
-            </div>
 
+        <div class="card border-0 shadow-sm mb-3" style="background-color: rgba(255,255,255,0.9);">
+            <div class="card-body">
+                
+                <div class="form-group">
+                    <label><i class="fas fa-map-marker-alt text-danger"></i> 土地公在哪個里？</label>
+                    <select class="form-control" id="area" style="font-size: 1.1rem; border-radius: 20px; height: 50px;">
+                        <option value="" disabled selected>-- 請選擇里別 --</option>
+                        <option value="苑東里">苑東里</option>
+                        <option value="苑南里">苑南里</option>
+                        <option value="苑北里">苑北里</option>
+                        <option value="西勢里">西勢里</option>
+                        <option value="中正里">中正里</option>
+                        <option value="客庄里">客庄里</option>
+                        <option value="苑港里">苑港里</option>
+                        <option value="西平里">西平里</option>
+                        <option value="海岸里">海岸里</option>
+                        <option value="房裡里">房裡里</option>
+                        <option value="新復里">新復里</option>
+                        <option value="田心里">田心里</option>
+                        <option value="舊社里">舊社里</option>
+                        <option value="山腳里">山腳里</option>
+                        <option value="福田里">福田里</option>
+                        <option value="泰田里">泰田里</option>
+                        <option value="玉田里">玉田里</option>
+                        <option value="上館里">上館里</option>
+                        <option value="南勢里">南勢里</option>
+                        <option value="石鎮里">石鎮里</option>
+                        <option value="蕉埔里">蕉埔里</option>
+                        <option value="山柑里">山柑里</option>
+                        <option value="社苓里">社苓里</option>
+                        <option value="水坡里">水坡里</option>
+                        <option value="其他">其他 / 不確定</option>
+                    </select>
+                </div>
 
                 <div class="form-group">
                     <label><i class="fas fa-user text-info"></i> 您的稱呼 (選填)</label>
@@ -182,40 +170,41 @@
                 </div>
 
                 <div class="form-group mb-0">
-                    <label><i class="fas fa-book-open text-warning"></i> 廟宇故事 / 特殊事蹟 (選填)</label>
-                    <textarea class="form-control" id="note" rows="3" placeholder="例如：這座土地公廟很靈驗...（沒空寫也沒關係，可以直接按上傳！）"></textarea>
+                    <label><i class="fas fa-book-open text-warning"></i> 廟宇故事 / 特殊事蹟</label>
+                    <textarea class="form-control" id="note" rows="3" placeholder="例如：這座土地公廟很靈驗... (選填)"></textarea>
                 </div>
-            </div>
-
             </div>
         </div>
     </div>
 
     <div class="fixed-footer">
-        <button id="submitBtn" class="btn btn-secondary btn-main" type="button" disabled>
-    <i class="fas fa-sync fa-spin"></i> 等待 GPS 定位...
-</button>
-
-
+        <button id="submitBtn" class="btn btn-secondary btn-main" onclick="uploadData()" disabled>
+            <i class="fas fa-sync fa-spin"></i> 等待 GPS 定位...
+        </button>
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script>
+    // --- 恢復原始功能 ---
     var currentLat = null;
     var currentLng = null;
     var fileBlob = null; 
 
     $(document).ready(function() {
+        // A. 臉書/LINE 偵測 (你需要的這個回來了！)
         var ua = navigator.userAgent || navigator.vendor || window.opera;
         if ((ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1) || (ua.indexOf("Line") > -1)) {
             $('#browser-warning').show();
         }
 
+        // B. 真實 GPS 邏輯 (包含 15km 結界)
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 function(position) {
                     currentLat = position.coords.latitude;
                     currentLng = position.coords.longitude;
                     
+                    // 苑裡火車站半徑 15km
                     var dist = getDistanceFromLatLonInKm(currentLat, currentLng, 24.4432, 120.6547);
                     
                     if (dist > 15) {
@@ -238,6 +227,7 @@
         }
     });
 
+    // 照片處理
     function previewFile() {
         var fileInput = document.getElementById('fileInput');
         var file = fileInput.files[0];
@@ -259,6 +249,7 @@
             img.onload = function() {
                 var canvas = document.createElement('canvas');
                 var ctx = canvas.getContext('2d');
+                // 壓縮圖片邏輯
                 var maxWidth = 800;
                 var scale = maxWidth / img.width;
                 var width = (img.width > maxWidth) ? maxWidth : img.width;
@@ -300,89 +291,53 @@
     }
     function deg2rad(deg) { return deg * (Math.PI/180) }
 
-    <script>
-    // 🌟 最強融合版上傳程式 (取代舊的 uploadData)
-    $('#submitBtn').on('click', function(e) {
-        e.preventDefault();
+    // --- 上傳功能 (含語音播報) ---
+    function uploadData() {
+        if(!fileBlob || !currentLat) return;
+        var area = $('#area').val();
+        var rawName = $('#nickname').val();
         
-        // 1. 檢查 GPS 是否定位完成
-        if (!currentLat || !currentLng) {
-            alert("⚠️ GPS 定位中... 請稍等一下，或檢查是否有開啟定位功能！");
+        if(!area) {
+            alert('請選擇「里別」喔！');
             return;
         }
 
-        // 2. 檢查是否有拍照 (檢查 fileBlob 變數)
-        if (!fileBlob) {
-            alert("⚠️ 請先拍攝或選擇照片喔！");
-            return;
-        }
+        $('#submitBtn').html('<i class="fas fa-robot"></i> 傳送中...')
+                      .prop('disabled', true);
 
-        // 3. 準備按鈕動畫
-        var btn = $(this);
-        var originalText = btn.html();
-        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 上傳中...');
-
-        // 4. 打包資料 (手動打包，確保萬無一失)
         var formData = new FormData();
-        formData.append('photo', fileBlob);      // 照片
-        formData.append('lat', currentLat);      // 緯度
-        formData.append('lng', currentLng);      // 經度
-        formData.append('area', $('#area').val()); // 區域
-        formData.append('nickname', $('#nickname').val() || '熱心串友'); // 暱稱
-        formData.append('note', $('#note').val()); // 備註
+        formData.append('photo', fileBlob);
+        formData.append('lat', currentLat);
+        formData.append('lng', currentLng);
+        formData.append('note', $('#note').val());
+        formData.append('nickname', rawName);
+        formData.append('area', area);
 
-        // 5. 發送資料
         $.ajax({
-            url: '/upload',  // 修正：依照你舊代碼的路徑
+            url: '/upload', // 對應原本的後端
             type: 'POST',
             data: formData,
             processData: false,
             contentType: false,
             success: function(response) {
-                // 成功！
-                alert("🎉 感謝您的查報！\n\n土地公會保佑您的！\n我們會盡快審核並更新地圖。");
-                window.location.href = '/map'; // 跳轉回地圖
+                // 🗣️ 語音功能
+                var displayName = rawName ? rawName : '熱心串友';
+                var sayText = '感謝 ' + area + ' 的 ' + displayName + '，土地公收到囉！土地公會庇佑你！';
+                
+                var msg = new SpeechSynthesisUtterance(sayText);
+                msg.lang = 'zh-TW';
+                msg.rate = 0.9; 
+                window.speechSynthesis.speak(msg);
+
+                alert('✅ 上傳成功！\n\n' + sayText);
+                window.location.href = '/map'; // 上傳完跳回地圖
             },
-            error: function(xhr) {
-                // 失敗
-                alert("❌ 上傳失敗！請檢查網路連線。\n" + (xhr.responseText || ""));
-                btn.prop('disabled', false).html(originalText); // 恢復按鈕
+            error: function() {
+                alert('❌ 上傳失敗，請檢查網路連線。');
+                $('#submitBtn').html('確認上傳').prop('disabled', false);
             }
         });
-    });
-</script>
-
     }
     </script>
-        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script>
-        $('form').on('submit', function(e) {
-            e.preventDefault(); 
-            var form = this;
-            var submitBtn = $(form).find('button[type="submit"]');
-            
-            // 顯示上傳中
-            submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 上傳中...');
-
-            var formData = new FormData(form);
-
-            $.ajax({
-                url: '/api/upload', 
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    alert("🎉 感謝查報！土地公會保佑您的！");
-                    window.location.href = '/map'; 
-                },
-                error: function() {
-                    alert("❌ 上傳失敗，請檢查網路！");
-                    submitBtn.prop('disabled', false).html('確認送出'); 
-                }
-            });
-        });
-    </script>
-
 </body>
 </html>
