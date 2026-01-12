@@ -167,7 +167,7 @@
                 <div class="form-group">
                     <label><i class="fas fa-user text-info"></i> 您的稱呼 (選填)</label>
                     <input type="text" class="form-control" id="nickname" placeholder="熱心串友">
-                    <small class="text-muted">如果不填，土地公會稱呼您為「熱心串友」</small>
+                    <small class="text-muted">中英文皆可，請勿使用不雅字眼</small>
                 </div>
 
                 <div class="form-group mb-0">
@@ -298,8 +298,9 @@
     function uploadData() {
         if(!fileBlob || !currentLat) return;
         var area = $('#area').val();
-        var rawName = $('#nickname').val();
+        var rawName = $('#nickname').val() || ''; 
         
+        // 1. 檢查地點
         if(!area) {
             Swal.fire({
                 icon: 'warning',
@@ -309,6 +310,25 @@
                 confirmButtonColor: '#ff9800'
             });
             return;
+        }
+
+        // 👮‍♂️ 髒話過濾器
+        var lowerName = rawName.toLowerCase();
+        var badWords = [
+            '笨蛋', '壞蛋', '王八', '白痴', '幹', '死', '爛', '屌', '雞掰', 
+            'fuck', 'shit', 'bitch', 'asshole', 'cunt', 'dick', 'sex'       
+        ]; 
+        
+        for (var i = 0; i < badWords.length; i++) {
+            if (lowerName.includes(badWords[i])) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '暱稱不太好聽喔...',
+                    text: '請使用優雅一點的名字，土地公才聽得懂！',
+                    confirmButtonColor: '#d33'
+                });
+                return; // 擋下
+            }
         }
 
         $('#submitBtn').html('<i class="fas fa-robot"></i> 傳送中...')
@@ -331,7 +351,7 @@
             success: function(response) {
                 var displayName = rawName ? rawName : '熱心串友';
 
-                // 🔴 違規
+                // 🔴 1. 違規被擋
                 if (response.status === 'block') {
                     Swal.fire({
                         title: '⚠️ 暱稱違規',
@@ -344,7 +364,7 @@
                     return; 
                 }
 
-                // 🟡 重複
+                // 🟡 2. 重複投稿 (黃燈) - 這一段代碼必須要後端配合才有用
                 if (response.status === 'pending') {
                     Swal.fire({
                         title: '📋 資料已送交審核',
@@ -356,17 +376,16 @@
                         window.location.href = '/map';
                     });
                 } 
-                // 🟢 成功 (更換圖片為 tdo.jpg)
+                // 🟢 3. 成功
                 else {
                     var sayText = '感謝 ' + area + ' 的 ' + displayName + '，土地公收到囉！';
                     
                     Swal.fire({
                         title: '✅ 上傳成功！',
                         text: sayText,
-                        // 👇 修改這裡：換成新的 tdo.jpg
                         imageUrl: '/static/tdo.jpg', 
                         imageWidth: 200,     
-                        imageHeight: 'auto', // 自動高度，保持比例
+                        imageHeight: 'auto',
                         imageAlt: '土地公',
                         confirmButtonText: '太棒了！',
                         confirmButtonColor: '#d32f2f'
