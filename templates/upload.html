@@ -96,7 +96,7 @@
 </head>
 <body>
 
-        <img src="/static/up.png" alt="小幫手" 
+    <img src="/static/up.png" alt="小幫手" 
          style="position: fixed; bottom: 75px; right: 0px; width: 130px; height: auto; z-index: 9999; pointer-events: none; opacity: 0.9;">
 
     <div class="app-header">
@@ -183,15 +183,17 @@
         </button>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    
     <script>
-    // --- 恢復原始功能 ---
+    // --- 全域變數 ---
     var currentLat = null;
     var currentLng = null;
     var fileBlob = null; 
 
     $(document).ready(function() {
-        // A. 臉書/LINE 偵測 (你需要的這個回來了！)
+        // A. 臉書/LINE 偵測
         var ua = navigator.userAgent || navigator.vendor || window.opera;
         if ((ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1) || (ua.indexOf("Line") > -1)) {
             $('#browser-warning').show();
@@ -218,12 +220,16 @@
                 },
                 function(error) {
                     $('#statusText').html('<i class="fas fa-exclamation-triangle text-warning"></i> 無法取得定位');
-                    alert('請允許手機開啟位置權限，才能紀錄地點喔！');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '無法定位',
+                        text: '請允許手機開啟位置權限，才能紀錄地點喔！'
+                    });
                 },
                 { enableHighAccuracy: true } 
             );
         } else {
-            alert('您的手機不支援 GPS');
+            Swal.fire('您的手機不支援 GPS');
         }
     });
 
@@ -291,14 +297,21 @@
     }
     function deg2rad(deg) { return deg * (Math.PI/180) }
 
-    // --- 上傳功能 (含語音播報) ---
+    // --- 上傳功能 (含語音播報 + 智慧分流) ---
     function uploadData() {
         if(!fileBlob || !currentLat) return;
         var area = $('#area').val();
         var rawName = $('#nickname').val();
         
+        // 1. 檢查地點是否已選 (改用漂亮的 SweetAlert)
         if(!area) {
-            alert('請選擇「里別」喔！');
+            Swal.fire({
+                icon: 'warning',
+                title: '忘了選地點？',
+                text: '請記得選擇「里別」，土地公才知道他在哪喔！',
+                confirmButtonText: '好，我選一下',
+                confirmButtonColor: '#ff9800'
+            });
             return;
         }
 
@@ -314,16 +327,16 @@
         formData.append('area', area);
 
         $.ajax({
-            url: '/upload', // 對應原本的後端
+            url: '/upload', // 對應後端
             type: 'POST',
             data: formData,
             processData: false,
             contentType: false,
-                        success: function(response) {
-                // 1. 語音準備
+            success: function(response) {
+                // 語音名字準備
                 var displayName = rawName ? rawName : '熱心串友';
-                
-                // 2. 👮‍♂️ 檢查：是否被安檢擋下？ (暱稱違規)
+
+                // 🔴 狀況 1：被安檢擋下 (暱稱違規)
                 if (response.status === 'block') {
                     Swal.fire({
                         title: '⚠️ 暱稱違規',
@@ -332,12 +345,11 @@
                         confirmButtonText: '好，我改一下',
                         confirmButtonColor: '#d33'
                     });
-                    // 恢復按鈕讓使用者重傳
                     $('#submitBtn').html('確認上傳').prop('disabled', false);
-                    return; // ⛔ 這裡結束，不往下跑
+                    return; 
                 }
 
-                // 3. 🟡 檢查：是否重複 (送審)
+                // 🟡 狀況 2：重複地點 (進入審核)
                 if (response.status === 'pending') {
                     Swal.fire({
                         title: '📋 資料已送交審核',
@@ -349,11 +361,10 @@
                         window.location.href = '/map';
                     });
                 } 
-                // 4. 🟢 成功：直接上傳
+                // 🟢 狀況 3：成功上傳
                 else {
                     var sayText = '感謝 ' + area + ' 的 ' + displayName + '，土地公收到囉！';
                     
-                    // 語音播報
                     var msg = new SpeechSynthesisUtterance(sayText);
                     msg.lang = 'zh-TW';
                     window.speechSynthesis.speak(msg);
@@ -367,23 +378,19 @@
                     }).then(() => {
                         window.location.href = '/map';
                     });
-                
-                error: function() {
+                }
+            },
+            error: function() {
                 Swal.fire({
                     title: '❌ 上傳失敗',
                     text: '請檢查網路連線，或稍後再試。',
                     icon: 'error',
                     confirmButtonText: '好'
                 });
-                // 恢復按鈕
                 $('#submitBtn').html('確認上傳').prop('disabled', false);
             }
-        }); // 👈 這裡是結束 $.ajax 的地方
-
-}
-
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+        });
+    }
     </script>
 </body>
 </html>
