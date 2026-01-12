@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>苑裡土地公查報系統 (診斷版)</title>
+    <title>苑裡土地公查報系統</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -11,22 +11,27 @@
     
     <style>
         body { background-color: #fff8e1; padding-bottom: 90px; font-family: "Microsoft JhengHei", sans-serif; }
-        .app-header { background: linear-gradient(135deg, #d32f2f, #8e0000); color: #ffeb3b; padding: 15px; text-align: center; font-size: 1.3rem; font-weight: bold; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; justify-content: space-between; align-items: center; }
+        .app-header { background: linear-gradient(135deg, #d32f2f, #8e0000); color: #ffeb3b; padding: 15px; text-align: center; font-size: 1.3rem; font-weight: bold; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         .camera-zone { background-color: #ffffff; border-radius: 15px; width: 100%; height: 250px; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; border: 2px dashed #d32f2f; overflow: hidden; position: relative; }
         #previewImg { width: 100%; height: 100%; object-fit: cover; display: none; }
         .fixed-footer { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 999; }
         .btn-main { width: 100%; height: 50px; font-size: 1.2rem; font-weight: bold; border-radius: 25px; }
         
-        /* 🛠️ 診斷按鈕樣式 */
-        .debug-btn { font-size: 0.9rem; background: #333; color: white; border: 1px solid white; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+        /* 🔊 橘色大按鈕樣式 */
+        .voice-btn {
+            background-color: #ff9800; color: white; border: none; 
+            padding: 12px 25px; border-radius: 50px; margin-top: 15px;
+            font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            width: 100%; display: block;
+        }
+        .voice-btn:active { transform: scale(0.95); background-color: #f57c00; }
     </style>
 </head>
 <body>
 
     <div class="app-header">
-        <a href="/" style="color:white;"><i class="fas fa-chevron-left"></i></a>
+        <div style="float:left;"><a href="/" style="color:white;"><i class="fas fa-chevron-left"></i> 回首頁</a></div>
         <span>土地公查報</span>
-        <button class="debug-btn" onclick="runDiagnosis()"><i class="fas fa-stethoscope"></i> 診斷</button>
     </div>
 
     <div class="container mt-3 text-center">
@@ -72,38 +77,27 @@
 
     <script>
     var currentLat = null; var currentLng = null; var fileBlob = null; 
+    var voiceMsg = null; // 存語音內容
 
-    // 🕵️‍♂️ 核心：診斷函式
-    function runDiagnosis() {
-        // 1. 檢查瀏覽器核心
-        if (!('speechSynthesis' in window)) {
-            alert("❌ 嚴重錯誤：你的瀏覽器核心「完全不支援」語音功能！\n(可能是無痕模式或瀏覽器版本太舊)");
-            return;
+    // 🔊 獨立播放函式 (強制抓中文語音)
+    function playVoice() {
+        if(!voiceMsg) return;
+
+        window.speechSynthesis.cancel(); // 先閉嘴
+        
+        // 🔍 從 82 個聲音裡，找出最好的中文聲音
+        var voices = window.speechSynthesis.getVoices();
+        var bestVoice = voices.find(v => v.lang.includes('zh-TW') || v.lang.includes('cmn'));
+        
+        if (bestVoice) {
+            voiceMsg.voice = bestVoice; // 指定這個聲音
+            console.log("使用聲音: " + bestVoice.name);
         }
 
-        // 2. 抓取語音包 (Android Chrome 需要一點時間載入，所以這裡強制抓一次)
-        var voices = window.speechSynthesis.getVoices();
-        
-        // 3. 嘗試發聲測試
-        window.speechSynthesis.cancel();
-        var msg = new SpeechSynthesisUtterance("測試一二三，有聽到嗎？");
-        msg.rate = 1; 
-        msg.volume = 1; 
-        window.speechSynthesis.speak(msg);
-
-        // 4. 顯示診斷報告
-        var report = "📊 診斷報告：\n" +
-                     "------------------\n" +
-                     "1. 語音包數量：" + voices.length + " 個\n" +
-                     "2. 瀏覽器：" + navigator.userAgent.slice(0, 50) + "...\n" +
-                     "3. 語音狀態：" + (window.speechSynthesis.paused ? "暫停中" : "正常") + "\n" +
-                     "------------------\n" +
-                     "👉 按下確定後，請仔細聽有沒有「測試一二三」的聲音？";
-        
-        alert(report);
+        window.speechSynthesis.speak(voiceMsg);
     }
 
-    // --- 下面是原本的上傳與GPS邏輯 ---
+    // --- GPS 與 初始化 ---
     $(document).ready(function() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -159,11 +153,6 @@
         var rawName = $('#nickname').val();
         if(!area) { Swal.fire({icon:'warning', title:'請選擇里別'}); return; }
 
-        // 上傳前先講一句
-        window.speechSynthesis.cancel();
-        var startMsg = new SpeechSynthesisUtterance("傳送中");
-        window.speechSynthesis.speak(startMsg);
-
         $('#submitBtn').html('傳送中...').prop('disabled', true);
 
         var formData = new FormData();
@@ -181,20 +170,42 @@
             processData: false,
             contentType: false,
             success: function(response) {
+                var displayName = rawName ? rawName : '熱心串友';
+
                 if (response.status === 'block') {
                     Swal.fire({icon:'warning', title:'暱稱違規', text: response.message});
                     $('#submitBtn').html('確認上傳').prop('disabled', false);
                     return;
                 }
+
                 if (response.status === 'pending') {
                     Swal.fire({title:'已送審', icon:'info'}).then(() => { window.location.href = '/map'; });
                 } else {
-                    // 成功後講第二句
-                    window.speechSynthesis.cancel();
-                    var successMsg = new SpeechSynthesisUtterance('感謝' + area + '的' + (rawName?rawName:'朋友'));
-                    window.speechSynthesis.speak(successMsg);
+                    // 🟢 上傳成功
+                    var sayText = '感謝 ' + area + ' 的 ' + displayName + '，土地公收到囉！';
+                    
+                    // 準備語音內容
+                    voiceMsg = new SpeechSynthesisUtterance(sayText);
+                    voiceMsg.rate = 1; 
+                    voiceMsg.volume = 1;
 
-                    Swal.fire({title:'上傳成功', icon:'success'}).then(() => { window.location.href = '/map'; });
+                    // 1. 嘗試自動播一次 (給運氣好的手機)
+                    playVoice();
+
+                    // 2. 彈出成功視窗，一定要加上這個按鈕！
+                    Swal.fire({
+                        title: '✅ 上傳成功！',
+                        // 👇 這裡加了一個按鈕，如果沒聲音，點它一定有！
+                        html: `<p style="font-size:1.1rem; color:#555;">${sayText}</p>
+                               <button class="voice-btn" onclick="playVoice()">
+                                  <i class="fas fa-volume-up"></i> 聽聽土地公說什麼
+                               </button>`,
+                        icon: 'success',
+                        confirmButtonText: '太棒了',
+                        confirmButtonColor: '#d32f2f'
+                    }).then(() => {
+                        window.location.href = '/map';
+                    });
                 }
             },
             error: function() {
