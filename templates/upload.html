@@ -17,12 +17,12 @@
         .fixed-footer { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 999; }
         .btn-main { width: 100%; height: 50px; font-size: 1.2rem; font-weight: bold; border-radius: 25px; }
         
-        /* 🔊 橘色大按鈕樣式 */
+        /* 🔊 按鈕樣式 (加大加粗) */
         .voice-btn {
             background-color: #ff9800; color: white; border: none; 
-            padding: 12px 25px; border-radius: 50px; margin-top: 15px;
-            font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            width: 100%; display: block;
+            padding: 15px 30px; border-radius: 50px; margin-top: 20px;
+            font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            width: 100%; display: block; font-weight: bold;
         }
         .voice-btn:active { transform: scale(0.95); background-color: #f57c00; }
     </style>
@@ -77,27 +77,33 @@
 
     <script>
     var currentLat = null; var currentLng = null; var fileBlob = null; 
-    var voiceMsg = null; // 存語音內容
+    
+    // 🌍 用一個全域變數把「感謝詞」存起來，讓按鈕可以抓到
+    var finalSayText = ""; 
 
-    // 🔊 獨立播放函式 (強制抓中文語音)
+    // 🔊 終極簡化版播放器
     function playVoice() {
-        if(!voiceMsg) return;
+        // 1. 為了確認按鈕壞沒壞，按下去先震動一下 (如果有支援)
+        if(navigator.vibrate) navigator.vibrate(50);
 
-        window.speechSynthesis.cancel(); // 先閉嘴
-        
-        // 🔍 從 82 個聲音裡，找出最好的中文聲音
-        var voices = window.speechSynthesis.getVoices();
-        var bestVoice = voices.find(v => v.lang.includes('zh-TW') || v.lang.includes('cmn'));
-        
-        if (bestVoice) {
-            voiceMsg.voice = bestVoice; // 指定這個聲音
-            console.log("使用聲音: " + bestVoice.name);
-        }
+        // 2. 強制停止之前的
+        window.speechSynthesis.cancel();
 
-        window.speechSynthesis.speak(voiceMsg);
+        // 3. 建立發音物件 (這一步最關鍵，我們要在按下去的瞬間建立)
+        var msg = new SpeechSynthesisUtterance(finalSayText);
+        
+        // ❌ 不設定 voice (讓手機自己選)
+        // ❌ 不設定 lang (讓手機自己猜)
+        msg.rate = 1.0; 
+        msg.volume = 1.0;
+
+        // 4. 發射！
+        window.speechSynthesis.speak(msg);
+        
+        // 5. 除錯提示 (只會閃一下，確認程式有跑到這)
+        console.log("嘗試播放: " + finalSayText);
     }
 
-    // --- GPS 與 初始化 ---
     $(document).ready(function() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -184,21 +190,17 @@
                     // 🟢 上傳成功
                     var sayText = '感謝 ' + area + ' 的 ' + displayName + '，土地公收到囉！';
                     
-                    // 準備語音內容
-                    voiceMsg = new SpeechSynthesisUtterance(sayText);
-                    voiceMsg.rate = 1; 
-                    voiceMsg.volume = 1;
+                    // 把這句話存到全域變數，給按鈕用
+                    finalSayText = sayText;
 
-                    // 1. 嘗試自動播一次 (給運氣好的手機)
+                    // 自動嘗試播一次 (碰運氣)
                     playVoice();
 
-                    // 2. 彈出成功視窗，一定要加上這個按鈕！
                     Swal.fire({
                         title: '✅ 上傳成功！',
-                        // 👇 這裡加了一個按鈕，如果沒聲音，點它一定有！
                         html: `<p style="font-size:1.1rem; color:#555;">${sayText}</p>
                                <button class="voice-btn" onclick="playVoice()">
-                                  <i class="fas fa-volume-up"></i> 聽聽土地公說什麼
+                                  <i class="fas fa-volume-up"></i> 點我聽土地公說話
                                </button>`,
                         icon: 'success',
                         confirmButtonText: '太棒了',
