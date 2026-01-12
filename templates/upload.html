@@ -6,55 +6,74 @@
     <title>苑裡土地公查報系統</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
+        /* --- APP 風格樣式表 (保留原樣) --- */
         body { background-color: #fff8e1; padding-bottom: 90px; font-family: "Microsoft JhengHei", sans-serif; }
-        .app-header { background: linear-gradient(135deg, #d32f2f, #8e0000); color: #ffeb3b; padding: 15px; text-align: center; font-size: 1.3rem; font-weight: bold; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-        .camera-zone { background-color: #ffffff; border-radius: 15px; width: 100%; height: 250px; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; border: 2px dashed #d32f2f; overflow: hidden; position: relative; }
+        .app-header { background: linear-gradient(135deg, #d32f2f, #8e0000); color: #ffeb3b; padding: 15px; text-align: center; font-size: 1.3rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.3); position: sticky; top: 0; z-index: 100; border-bottom: 3px solid #ffc107; }
+        
+        /* ⚠️ FB/LINE 警告條 (你的這個功能回來了！) */
+        #browser-warning { display: none; background-color: #ffc107; color: #856404; padding: 10px; font-size: 0.9rem; text-align: center; }
+
+        .camera-zone { background-color: #ffffff; border-radius: 15px; width: 100%; height: 250px; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; border: 2px dashed #d32f2f; position: relative; overflow: hidden; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .camera-zone:active { background-color: #fff3cd; }
+        .camera-icon { font-size: 3rem; color: #d32f2f; }
         #previewImg { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .status-pill { background: white; padding: 8px 15px; border-radius: 50px; font-size: 0.9rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 15px; display: inline-block; border: 1px solid #dee2e6; }
         .fixed-footer { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 999; }
         .btn-main { width: 100%; height: 50px; font-size: 1.2rem; font-weight: bold; border-radius: 25px; }
-        /* 隱藏的解鎖按鈕層 */
-        #unlock-overlay { position: fixed; top:0; left:0; width:100%; height:100%; z-index: 99999; display: none; }
     </style>
 </head>
 <body>
 
+    <img src="/static/up.png" alt="小幫手" style="position: fixed; bottom: 75px; right: 0px; width: 130px; height: auto; z-index: 9999; pointer-events: none; opacity: 0.9;">
+
     <div class="app-header">
         <div style="float:left;"><a href="/" style="color:white;"><i class="fas fa-chevron-left"></i> 回首頁</a></div>
-        <span>土地公查報</span>
+        <i class="fas fa-camera"></i> 土地公查報
     </div>
 
-    <div class="container mt-3 text-center">
-        <div id="statusText" class="mb-3" style="background:white; padding:5px 15px; border-radius:20px; display:inline-block; border:1px solid #ccc;">
-            <i class="fas fa-satellite-dish"></i> 衛星定位中...
+    <div id="browser-warning">
+        <i class="fas fa-exclamation-triangle"></i> <strong>建議使用 Chrome/Safari</strong><br>
+        臉書/LINE 可能無法定位，請點右上角選「以瀏覽器開啟」
+    </div>
+
+    <div class="container mt-3">
+        <div class="text-center">
+            <div class="status-pill" id="statusText"><i class="fas fa-satellite-dish"></i> 衛星定位中...</div>
         </div>
-        
+
         <div class="camera-zone" onclick="$('#fileInput').click()">
-            <div id="cameraPlaceholder">
-                <i class="fas fa-camera" style="font-size: 3rem; color: #d32f2f;"></i>
-                <p class="mt-2 text-danger font-weight-bold">拍攝土地公廟</p>
+            <div id="cameraPlaceholder" class="text-center">
+                <i class="fas fa-camera camera-icon"></i>
+                <p class="mt-2" style="color: #d32f2f; font-weight: bold;">拍攝土地公廟</p>
+                <small class="text-muted">點擊開啟相機</small>
             </div>
-            <img id="previewImg">
+            <img id="previewImg" alt="預覽圖">
         </div>
+
         <input type="file" id="fileInput" accept="image/*" capture="environment" style="display: none;" onchange="previewFile()">
 
-        <div class="card border-0 shadow-sm text-left">
+        <div class="card border-0 shadow-sm mb-3" style="background-color: rgba(255,255,255,0.9);">
             <div class="card-body">
                 <div class="form-group">
-                    <label>土地公在哪個里？</label>
-                    <select class="form-control" id="area" style="height:50px; font-size:1.1rem;">
+                    <label><i class="fas fa-map-marker-alt text-danger"></i> 土地公在哪個里？</label>
+                    <select class="form-control" id="area" style="font-size: 1.1rem; border-radius: 20px; height: 50px;">
                         <option value="" disabled selected>-- 請選擇里別 --</option>
-                        <option value="苑東里">苑東里</option><option value="苑南里">苑南里</option><option value="苑北里">苑北里</option><option value="西勢里">西勢里</option><option value="中正里">中正里</option><option value="客庄里">客庄里</option><option value="苑港里">苑港里</option><option value="西平里">西平里</option><option value="海岸里">海岸里</option><option value="房裡里">房裡里</option><option value="新復里">新復里</option><option value="田心里">田心里</option><option value="舊社里">舊社里</option><option value="山腳里">山腳里</option><option value="福田里">福田里</option><option value="泰田里">泰田里</option><option value="玉田里">玉田里</option><option value="上館里">上館里</option><option value="南勢里">南勢里</option><option value="石鎮里">石鎮里</option><option value="蕉埔里">蕉埔里</option><option value="山柑里">山柑里</option><option value="社苓里">社苓里</option><option value="水坡里">水坡里</option><option value="其他">其他</option>
+                        <option value="苑東里">苑東里</option><option value="苑南里">苑南里</option><option value="苑北里">苑北里</option><option value="西勢里">西勢里</option><option value="中正里">中正里</option><option value="客庄里">客庄里</option><option value="苑港里">苑港里</option><option value="西平里">西平里</option><option value="海岸里">海岸里</option><option value="房裡里">房裡里</option><option value="新復里">新復里</option><option value="田心里">田心里</option><option value="舊社里">舊社里</option><option value="山腳里">山腳里</option><option value="福田里">福田里</option><option value="泰田里">泰田里</option><option value="玉田里">玉田里</option><option value="上館里">上館里</option><option value="南勢里">南勢里</option><option value="石鎮里">石鎮里</option><option value="蕉埔里">蕉埔里</option><option value="山柑里">山柑里</option><option value="社苓里">社苓里</option><option value="水坡里">水坡里</option><option value="其他">其他 / 不確定</option>
                     </select>
                 </div>
+
                 <div class="form-group">
-                    <label>您的稱呼</label>
+                    <label><i class="fas fa-user text-info"></i> 您的稱呼 (選填)</label>
                     <input type="text" class="form-control" id="nickname" placeholder="熱心串友">
+                    <small class="text-muted">如果不填，土地公會稱呼您為「熱心串友」</small>
                 </div>
-                <div class="form-group">
-                    <label>備註</label>
-                    <textarea class="form-control" id="note" rows="2"></textarea>
+
+                <div class="form-group mb-0">
+                    <label><i class="fas fa-book-open text-warning"></i> 廟宇故事 / 特殊事蹟</label>
+                    <textarea class="form-control" id="note" rows="3" placeholder="例如：這座土地公廟很靈驗... (選填)"></textarea>
                 </div>
             </div>
         </div>
@@ -62,100 +81,129 @@
 
     <div class="fixed-footer">
         <button id="submitBtn" class="btn btn-secondary btn-main" onclick="uploadData()" disabled>
-            <i class="fas fa-sync fa-spin"></i> 等待定位...
+            <i class="fas fa-sync fa-spin"></i> 等待 GPS 定位...
         </button>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
     <script>
-    // --- 全域變數 ---
     var currentLat = null;
     var currentLng = null;
     var fileBlob = null; 
-    var audioUnlocked = false; // 用來標記語音是否解鎖
 
-    // 🔊 隱形解鎖功能：點擊螢幕任何地方，就偷偷初始化語音
-    document.addEventListener('click', function() {
-        if (!audioUnlocked) {
-            var silentMsg = new SpeechSynthesisUtterance(''); // 講空話
-            window.speechSynthesis.speak(silentMsg);
-            audioUnlocked = true;
-            console.log('🔊 語音引擎已隱形解鎖');
-        }
-    });
-
-    // --- GPS 與 初始化 (這裡是原本穩定的邏輯) ---
     $(document).ready(function() {
+        // ✅ 1. 臉書/LINE 偵測 (功能恢復！)
+        var ua = navigator.userAgent || navigator.vendor || window.opera;
+        if ((ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1) || (ua.indexOf("Line") > -1)) {
+            $('#browser-warning').show();
+        }
+
+        // ✅ 2. 原始穩定的 GPS 邏輯
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
-                function(pos) {
-                    currentLat = pos.coords.latitude;
-                    currentLng = pos.coords.longitude;
-                    $('#statusText').html('<i class="fas fa-map-marker-alt text-success"></i> 定位完成');
-                    checkReady();
-                }, 
-                function(err) { 
-                    $('#statusText').html('無法定位'); 
-                    console.log("GPS Error: ", err);
+                function(position) {
+                    currentLat = position.coords.latitude;
+                    currentLng = position.coords.longitude;
+                    
+                    // 15km 結界
+                    var dist = getDistanceFromLatLonInKm(currentLat, currentLng, 24.4432, 120.6547);
+                    
+                    if (dist > 15) {
+                        $('#statusText').html('<i class="fas fa-times-circle text-danger"></i> 超出服務範圍 (' + dist.toFixed(1) + 'km)');
+                        $('#submitBtn').text('🚫 距離太遠，無法上傳');
+                        currentLat = null; 
+                    } else {
+                        $('#statusText').html('<i class="fas fa-map-marker-alt text-success"></i> 定位完成');
+                        checkReady(); 
+                    }
                 },
-                { enableHighAccuracy: true }
+                function(error) {
+                    $('#statusText').html('<i class="fas fa-exclamation-triangle text-warning"></i> 無法取得定位');
+                    // 升級成漂亮視窗
+                    Swal.fire({ icon: 'warning', title: '無法定位', text: '請允許手機開啟位置權限喔！' });
+                },
+                { enableHighAccuracy: true } 
             );
         } else {
-            $('#statusText').html('不支援 GPS');
+            Swal.fire('您的手機不支援 GPS');
         }
     });
 
-    // 照片預覽處理
     function previewFile() {
-        var file = document.getElementById('fileInput').files[0];
-        if (!file) return;
+        var fileInput = document.getElementById('fileInput');
+        var file = fileInput.files[0];
+        if (!file) return; 
+
+        fileBlob = null;
         $('#cameraPlaceholder').hide();
-        var preview = document.getElementById('previewImg');
-        preview.style.display = 'block';
-        preview.src = URL.createObjectURL(file);
-        
+        var previewImg = document.getElementById('previewImg');
+        previewImg.style.display = 'block';
+        previewImg.src = URL.createObjectURL(file);
+
+        $('#statusText').html('<i class="fas fa-spinner fa-spin"></i> 照片處理中...');
+
         var reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.onload = function(e) {
+        reader.onload = function(event) {
             var img = new Image();
-            img.src = e.target.result;
+            img.src = event.target.result;
             img.onload = function() {
                 var canvas = document.createElement('canvas');
                 var ctx = canvas.getContext('2d');
-                var maxW = 800;
-                var scale = maxW / img.width;
-                var w = (img.width > maxW) ? maxW : img.width;
-                var h = (img.width > maxW) ? (img.height * scale) : img.height;
-                canvas.width = w; canvas.height = h;
-                ctx.drawImage(img, 0, 0, w, h);
+                var maxWidth = 800;
+                var scale = maxWidth / img.width;
+                var width = (img.width > maxWidth) ? maxWidth : img.width;
+                var height = (img.width > maxWidth) ? (img.height * scale) : img.height;
+
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+
                 canvas.toBlob(function(blob) {
                     fileBlob = blob;
+                    $('#statusText').html('<i class="fas fa-image text-success"></i> 照片已準備好');
                     checkReady();
                 }, 'image/jpeg', 0.8);
-            }
-        }
+            };
+        };
     }
 
     function checkReady() {
         if (currentLat && fileBlob) {
             $('#submitBtn').prop('disabled', false).removeClass('btn-secondary').addClass('btn-danger').html('確認上傳');
+        } else if (currentLat) {
+            $('#submitBtn').html('請拍攝土地公廟');
         }
     }
 
-    // --- 上傳功能 (簡單暴力版) ---
+    function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+        var R = 6371; 
+        var dLat = deg2rad(lat2-lat1);  
+        var dLon = deg2rad(lon2-lon1); 
+        var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2); 
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+        return R * c; 
+    }
+    function deg2rad(deg) { return deg * (Math.PI/180) }
+
+    // --- 上傳功能 (功能恢復 + 語音修復) ---
     function uploadData() {
+        if(!fileBlob || !currentLat) return;
         var area = $('#area').val();
         var rawName = $('#nickname').val();
-        if(!area) { Swal.fire({icon:'warning', title:'請選擇里別'}); return; }
+        
+        if(!area) {
+            Swal.fire({ icon: 'warning', title: '忘了選地點？', text: '請選擇「里別」喔！', confirmButtonColor: '#ff9800' });
+            return;
+        }
 
-        // 🔊 上傳前，先講第一句話 (這時候瀏覽器已經解鎖了)
+        // 📢 【語音關鍵修正】
+        // 在按鈕按下的「第一時間」強制講話，這樣瀏覽器就不會擋了！
         window.speechSynthesis.cancel();
-        var startMsg = new SpeechSynthesisUtterance("資料傳送中");
+        var startMsg = new SpeechSynthesisUtterance("資料傳送中，請稍候");
         window.speechSynthesis.speak(startMsg);
 
-        $('#submitBtn').html('傳送中...').prop('disabled', true);
+        $('#submitBtn').html('<i class="fas fa-robot"></i> 傳送中...').prop('disabled', true);
 
         var formData = new FormData();
         formData.append('photo', fileBlob);
@@ -173,22 +221,32 @@
             contentType: false,
             success: function(response) {
                 var displayName = rawName ? rawName : '熱心串友';
-
+                
+                // 1. 違規阻擋
                 if (response.status === 'block') {
-                    Swal.fire({icon:'warning', title:'暱稱違規', text: response.message});
+                    Swal.fire({ icon: 'warning', title: '⚠️ 暱稱違規', text: response.message });
                     $('#submitBtn').html('確認上傳').prop('disabled', false);
                     return;
                 }
 
+                // 2. 重複資料 (送審)
                 if (response.status === 'pending') {
-                    Swal.fire({title:'已送審', icon:'info'}).then(() => { window.location.href = '/map'; });
-                } else {
-                    // 🔊 成功後，講第二句話
+                    Swal.fire({
+                        title: '📋 資料已送交審核',
+                        html: `<b>${area}</b> 附近似乎已有查報紀錄。<br>您的照片已存入「待審核清單」！`,
+                        icon: 'info',
+                        confirmButtonText: '收到'
+                    }).then(() => { window.location.href = '/map'; });
+                } 
+                // 3. 成功上傳
+                else {
                     var sayText = '感謝 ' + area + ' 的 ' + displayName + '，土地公收到囉！';
                     
+                    // 📢 因為第一句已經通了，這第二句肯定能講！
                     window.speechSynthesis.cancel();
-                    var successMsg = new SpeechSynthesisUtterance(sayText);
-                    window.speechSynthesis.speak(successMsg);
+                    var msg = new SpeechSynthesisUtterance(sayText);
+                    msg.lang = 'zh-TW';
+                    window.speechSynthesis.speak(msg);
 
                     Swal.fire({
                         title: '✅ 上傳成功！',
@@ -202,7 +260,7 @@
                 }
             },
             error: function() {
-                Swal.fire({icon:'error', title:'失敗'});
+                Swal.fire({ icon: 'error', title: '❌ 上傳失敗', text: '請檢查網路連線。' });
                 $('#submitBtn').html('確認上傳').prop('disabled', false);
             }
         });
