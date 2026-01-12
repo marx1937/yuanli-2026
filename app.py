@@ -3,6 +3,8 @@ import cloudinary
 import cloudinary.uploader
 import os
 import psycopg2
+from math import radians, cos, sin, asin, sqrt  # 👈 新增這一行
+
 
 app = Flask(__name__)
 
@@ -28,7 +30,9 @@ def init_db():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute('''
+        
+        # 1. 這是原本的正式表格 (保持不動)
+        cur.execute("""
             CREATE TABLE IF NOT EXISTS land_gods (
                 id SERIAL PRIMARY KEY,
                 image_url TEXT NOT NULL,
@@ -39,12 +43,32 @@ def init_db():
                 area TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-        ''')
+        """)
+
+        # 2. 👇 新增這段：建立「待審核」表格 (Review Table)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS land_gods_review (
+                id SERIAL PRIMARY KEY,
+                image_url TEXT NOT NULL,
+                lat DOUBLE PRECISION,
+                lng DOUBLE PRECISION,
+                note TEXT,
+                nickname TEXT,
+                area TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
+
         conn.commit()
         cur.close()
         conn.close()
+        print("資料庫表格檢查完成！") # 加個提示方便看 Log
     except Exception as e:
-        print("資料庫錯誤:", e)
+        print("資料庫連線錯誤:", e)
+
+# 記得這行要留著，讓程式一啟動就執行
+init_db()
+
 
 init_db()
 
