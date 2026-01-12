@@ -321,23 +321,60 @@
             contentType: false,
             success: function(response) {
                 // 🗣️ 語音功能
+                            success: function(response) {
+                // 🗣️ 語音功能 (先準備好)
                 var displayName = rawName ? rawName : '熱心串友';
-                var sayText = '感謝 ' + area + ' 的 ' + displayName + '，土地公收到囉！土地公會庇佑你！';
                 
-                var msg = new SpeechSynthesisUtterance(sayText);
-                msg.lang = 'zh-TW';
-                msg.rate = 0.9; 
-                window.speechSynthesis.speak(msg);
+                // 🔍 判斷後端回傳的狀態
+                if (response.status === 'pending') {
+                    // 🟡 狀況 A：發現重複，進入審核模式
+                    Swal.fire({
+                        title: '📋 資料已送交審核',
+                        html: `感謝您！不過此地點 (<b>${area}</b>) 附近似乎已有查報紀錄。<br><br>您的照片已安全存入<b>「待審核清單」</b>，管理員確認品質後就會更新上去喔！`,
+                        icon: 'info',
+                        confirmButtonText: '收到，我去抓下一隻！',
+                        confirmButtonColor: '#ff9800' // 橘色警告色
+                    }).then(() => {
+                        window.location.href = '/map';
+                    });
 
-                alert('✅ 上傳成功！\n\n' + sayText);
-                window.location.href = '/map'; // 上傳完跳回地圖
+                } else {
+                    // 🟢 狀況 B：全新地點，直接上傳成功
+                    var sayText = '感謝 ' + area + ' 的 ' + displayName + '，土地公收到囉！';
+                    
+                    // 語音播報
+                    var msg = new SpeechSynthesisUtterance(sayText);
+                    msg.lang = 'zh-TW';
+                    window.speechSynthesis.speak(msg);
+
+                    Swal.fire({
+                        title: '✅ 上傳成功！',
+                        text: sayText,
+                        icon: 'success',
+                        confirmButtonText: '太棒了！',
+                        confirmButtonColor: '#d32f2f' // 廟宇紅
+                    }).then(() => {
+                        window.location.href = '/map';
+                    });
+                }
             },
             error: function() {
-                alert('❌ 上傳失敗，請檢查網路連線。');
-                $('#submitBtn').html('確認上傳').prop('disabled', false);
+                Swal.fire({
+                    title: '❌ 上傳失敗',
+                    text: '請檢查網路連線，或稍後再試。',
+                    icon: 'error',
+                    confirmButtonText: '好'
+                });
+                // 恢復按鈕
+                var btn = $('#submitBtn');
+                btn.prop('disabled', false).html('確認上傳'); 
             }
+
         });
     }
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     </script>
 </body>
 </html>
