@@ -1,12 +1,15 @@
 import os
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 import psycopg2
 import cloudinary
 import cloudinary.uploader
-# 數學公式包
 from math import radians, cos, sin, asin, sqrt
 
 app = Flask(__name__)
+
+# --- 設定密鑰 (Session 用) ---
+app.secret_key = os.environ.get('SECRET_KEY', 'yuanli_secret_key')
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '1234')
 
 # --- Cloudinary 設定 ---
 cloudinary.config(
@@ -31,7 +34,7 @@ def get_db_connection():
     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     return conn
 
-# ================= 路由設定 =================
+# ================= 頁面路由 (Routes) =================
 
 @app.route('/')
 def index():
@@ -41,20 +44,48 @@ def index():
 def map_page():
     return render_template('map.html')
 
-# ⚠️ 救命稻草：不管首頁連到哪，這些路徑通通導向「上傳頁」
+# 🏆 排行榜 (你說不見的就是這個！)
+@app.route('/leaderboard')
+def leaderboard_page():
+    return render_template('leaderboard.html')
+
+# 🔧 管理員登入頁
+@app.route('/login')
+def login_page():
+    return render_template('login.html')
+
+# 🔧 管理員後台
+@app.route('/admin')
+def admin_page():
+    if not session.get('is_admin'):
+        return redirect(url_for('login_page'))
+    return render_template('admin.html')
+
+# 🔗 救命導航：不管按首頁哪個按鈕，都導向正確的上傳頁
 @app.route('/report')
 @app.route('/upload_page')
 def show_upload_page():
     return render_template('upload.html')
 
-# --- 核心：上傳功能 (GET=看頁面, POST=傳資料) ---
+# ================= 功能邏輯 (API) =================
+
+# 1. 管理員登入驗證
+@app.route('/api/login', methods=['POST'])
+def api_login():
+    data = request.json
+    if data.get('password') == ADMIN_PASSWORD:
+        session['is_admin'] = True
+        return jsonify({'status': 'success'})
+    return jsonify({'status': 'error', 'message': '密碼錯誤'})
+
+# 2. 核心：上傳功能 (包含重複檢查)
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
-    # 🟢 如果是 GET (瀏覽器要看頁面)
+    # 如果是 GET 請求，就顯示頁面
     if request.method == 'GET':
         return render_template('upload.html')
 
-    # 🔴 如果是 POST (Ajax 要傳資料)
+    # 如果是 POST 請求，處理上傳
     if 'photo' not in request.files:
         return jsonify({'status': 'error', 'message': '沒有檔案'})
     
@@ -70,22 +101,21 @@ def upload_file():
             conn = get_db_connection()
             cur = conn.cursor()
             
-            # --- 🛑 重複地點檢查 (0.5公里測試版) ---
+            # --- 🛑 重複地點檢查 (守門員) ---
             cur.execute("SELECT lat, lng FROM land_gods")
             rows = cur.fetchall()
             
             for row in rows:
                 db_lat = row[0]
                 db_lng = row[1]
-                # 測試設定：0.5 (500公尺)，測試完記得改回 0.05
+                # ⚠️ 測試模式：0.5 (500公尺)，測試完記得改回 0.05
                 dist = haversine(float(lng), float(lat), db_lng, db_lat)
                 
                 if dist < 0.5: 
                     conn.close()
-                    print(f"重複擋下！距離: {dist:.3f} km")
-                    return jsonify({'status': 'pending', 'message': '地點重複'})
+                    return jsonify({'status': 'pending', 'message': '地點重複，已送審'})
             
-            # --- ✅ 開始上傳 ---
+            # --- ✅ 上傳流程 ---
             upload_result = cloudinary.uploader.upload(file)
             image_url = upload_result['secure_url']
 
@@ -103,7 +133,7 @@ def upload_file():
     
     return jsonify({'status': 'error', 'message': '資料不完整'})
 
-# --- API: 給地圖抓資料用的 ---
+# 3. 提供地圖資料 API
 @app.route('/api/locations')
 def get_locations():
     conn = get_db_connection()
@@ -125,6 +155,27 @@ def get_locations():
             'created_at': row[7]
         })
     return jsonify(locations)
+
+# 4. 提供排行榜資料 API (修復排行榜數據)
+@app.route('/api/leaderboard_data')
+def get_leaderboard_data():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    # 統計每個里上傳了幾次
+    cur.execute('SELECT area, COUNT(*) as count FROM land_gods GROUP BY area ORDER BY count DESC')
+    area_rows = cur.fetchall()
+    
+    # 統計每個暱稱上傳了幾次
+    cur.execute('SELECT nickname, COUNT(*) as count FROM land_gods GROUP BY nickname ORDER BY count DESC LIMIT 10')
+    user_rows = cur.fetchall()
+    
+    conn.close()
+    
+    return jsonify({
+        'by_area': [{'name': r[0], 'count': r[1]} for r in area_rows],
+        'by_user': [{'name': r[0], 'count': r[1]} for r in user_rows]
+    })
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
