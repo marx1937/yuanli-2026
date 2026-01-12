@@ -97,6 +97,63 @@
         preview.src = URL.createObjectURL(file);
 
         // 壓縮圖片
+                        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+    // --- 全域變數 (放在最外面，保護語音小精靈不被手機回收) ---
+    var currentLat = null;
+    var currentLng = null;
+    var fileBlob = null; 
+    var voiceHelper = null; // 👈 這是讓它閉嘴的關鍵變數
+
+    $(document).ready(function() {
+        
+        // 📢 第一招：一觸即發 (Global Unlock)
+        // 只要使用者點擊螢幕任何地方，就先偷偷啟動語音引擎 (靜音)
+        document.body.addEventListener('click', function() {
+            if(!voiceHelper) { // 如果還沒啟動過
+                voiceHelper = new SpeechSynthesisUtterance(''); // 講空話
+                voiceHelper.volume = 0; // 靜音
+                window.speechSynthesis.speak(voiceHelper);
+                console.log('語音引擎已暖機');
+            }
+        }, { once: true }); // 只執行一次
+
+        // A. 臉書/LINE 偵測
+        var ua = navigator.userAgent || navigator.vendor || window.opera;
+        if ((ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1) || (ua.indexOf("Line") > -1)) {
+            $('#browser-warning').show();
+        }
+
+        // B. GPS 定位
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(pos) {
+                    currentLat = pos.coords.latitude;
+                    currentLng = pos.coords.longitude;
+                    $('#statusText').html('<i class="fas fa-map-marker-alt text-success"></i> 定位完成');
+                    checkReady();
+                }, 
+                function(err) { 
+                    $('#statusText').html('無法定位，請開啟權限'); 
+                    console.log(err);
+                },
+                { enableHighAccuracy: true }
+            );
+        }
+    });
+
+    // 2. 照片預覽與壓縮
+    function previewFile() {
+        var file = document.getElementById('fileInput').files[0];
+        if (!file) return;
+        
+        $('#cameraPlaceholder').hide();
+        var preview = document.getElementById('previewImg');
+        preview.style.display = 'block';
+        preview.src = URL.createObjectURL(file);
+
         var reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = function(e) {
@@ -125,37 +182,27 @@
         }
     }
 
-    // 3. 上傳功能
-            // --- 上傳功能 (含語音解鎖 + 完整邏輯) ---
+    // 3. 上傳功能 (強效語音版)
     function uploadData() {
-        // 1. 基本檢查
         if(!fileBlob || !currentLat) return;
         var area = $('#area').val();
         var rawName = $('#nickname').val();
         
-        // 2. 檢查有沒有選地點
         if(!area) {
-            Swal.fire({
-                icon: 'warning',
-                title: '忘了選地點？',
-                text: '請記得選擇「里別」，土地公才知道他在哪喔！',
-                confirmButtonText: '好，我選一下',
-                confirmButtonColor: '#ff9800'
-            });
+            Swal.fire({icon:'warning', title:'忘了選地點？', text:'請選擇里別喔！', confirmButtonColor:'#ff9800'});
             return;
         }
 
-        // 🎤 【關鍵一步】按鈕按下的瞬間，強制瀏覽器解鎖語音！
-        // 這一行會讓手機認為「使用者同意播放聲音」
-        var startMsg = new SpeechSynthesisUtterance("資料傳送中，請稍候");
-        startMsg.lang = 'zh-TW';
-        window.speechSynthesis.speak(startMsg);
+        // 📢 第二招：直接講話 (強制中斷前面的)
+        // 這裡一定要再做一次，確保使用者點按鈕的當下獲得發言權
+        window.speechSynthesis.cancel(); 
+        voiceHelper = new SpeechSynthesisUtterance("資料傳送中，請稍候");
+        voiceHelper.lang = 'zh-TW';
+        voiceHelper.rate = 1.0; 
+        window.speechSynthesis.speak(voiceHelper);
 
-        // 3. 鎖定按鈕
-        $('#submitBtn').html('<i class="fas fa-robot"></i> 傳送中...')
-                      .prop('disabled', true);
+        $('#submitBtn').html('<i class="fas fa-robot"></i> 傳送中...').prop('disabled', true);
 
-        // 4. 打包資料
         var formData = new FormData();
         formData.append('photo', fileBlob);
         formData.append('lat', currentLat);
@@ -164,7 +211,6 @@
         formData.append('nickname', rawName);
         formData.append('area', area);
 
-        // 5. 發送資料
         $.ajax({
             url: '/upload',
             type: 'POST',
@@ -174,64 +220,47 @@
             success: function(response) {
                 var displayName = rawName ? rawName : '熱心串友';
 
-                // 🔴 狀況 A：暱稱違規
                 if (response.status === 'block') {
-                    Swal.fire({
-                        title: '⚠️ 暱稱違規',
-                        text: response.message,
-                        icon: 'warning',
-                        confirmButtonText: '好，我改一下',
-                        confirmButtonColor: '#d33'
-                    });
+                    Swal.fire({icon:'warning', title:'暱稱違規', text: response.message, confirmButtonColor:'#d33'});
                     $('#submitBtn').html('確認上傳').prop('disabled', false);
-                    return; 
+                    return;
                 }
 
-                // 🟡 狀況 B：重複地點 (進入審核)
                 if (response.status === 'pending') {
                     Swal.fire({
                         title: '📋 資料已送交審核',
-                        html: `感謝您！不過此地點 (<b>${area}</b>) 附近似乎已有查報紀錄。<br><br>您的照片已安全存入<b>「待審核清單」</b>，管理員確認品質後就會更新上去喔！`,
+                        html: `<b>${area}</b> 附近似乎已有紀錄。<br>您的照片已存入「待審核清單」！`,
                         icon: 'info',
-                        confirmButtonText: '收到，我去抓下一隻！',
+                        confirmButtonText: '收到',
                         confirmButtonColor: '#ff9800'
-                    }).then(() => {
-                        window.location.href = '/map';
-                    });
+                    }).then(() => { window.location.href = '/map'; });
                 } 
-                // 🟢 狀況 C：成功上傳
                 else {
                     var sayText = '感謝 ' + area + ' 的 ' + displayName + '，土地公收到囉！';
                     
-                    // 🎤 成功後講第二句話
-                    // 先取消前面的，再講這一句
+                    // 📢 第三招：成功感言 (再次強制中斷，確保這句會講出來)
                     window.speechSynthesis.cancel(); 
-                    var successMsg = new SpeechSynthesisUtterance(sayText);
-                    successMsg.lang = 'zh-TW';
-                    window.speechSynthesis.speak(successMsg);
+                    voiceHelper = new SpeechSynthesisUtterance(sayText); 
+                    voiceHelper.lang = 'zh-TW';
+                    window.speechSynthesis.speak(voiceHelper);
 
                     Swal.fire({
                         title: '✅ 上傳成功！',
                         text: sayText,
                         icon: 'success',
-                        confirmButtonText: '太棒了！',
+                        confirmButtonText: '太棒了',
                         confirmButtonColor: '#d32f2f'
-                    }).then(() => {
-                        window.location.href = '/map';
-                    });
+                    }).then(() => { window.location.href = '/map'; });
                 }
             },
             error: function() {
-                Swal.fire({
-                    title: '❌ 上傳失敗',
-                    text: '請檢查網路連線，或稍後再試。',
-                    icon: 'error',
-                    confirmButtonText: '好'
-                });
+                Swal.fire({icon:'error', title:'上傳失敗', text:'請檢查網路'});
                 $('#submitBtn').html('確認上傳').prop('disabled', false);
             }
         });
     }
+    </script>
+
 
     </script>
 </body>
