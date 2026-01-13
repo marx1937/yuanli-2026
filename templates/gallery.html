@@ -2,229 +2,134 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>苑裡土地公圖庫</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>土地公圖庫牆</title>
+    
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    
     <style>
-        body { background-color: #fff8e1; padding-bottom: 70px; font-family: "Microsoft JhengHei", sans-serif; }
-        
-        .nav-header {
-            background: linear-gradient(135deg, #d32f2f, #b71c1c);
-            color: #ffeb3b;
-            padding: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+        body { background-color: #fafafa; /* IG 的背景偏白 */ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding-bottom: 60px; }
 
-        .filter-select {
-            width: 100%;
-            padding: 8px;
-            border-radius: 20px;
-            border: none;
-            margin-top: 10px;
-            font-weight: bold;
-            color: #d32f2f;
+        /* 頂部導覽列 (仿 App) */
+        .app-header {
+            background: white; border-bottom: 1px solid #dbdbdb;
+            padding: 15px; text-align: center; position: sticky; top: 0; z-index: 99;
+            display: flex; justify-content: space-between; align-items: center;
         }
+        .header-title { font-weight: bold; font-size: 1.1rem; color: #262626; }
+        .header-btn { color: #262626; font-size: 1.2rem; text-decoration: none; }
 
-        .data-card {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            margin-bottom: 25px;
-            border: none;
-            transition: all 0.3s ease;
+        /* IG 風格照片網格 */
+        .gallery-grid {
+            display: flex; flex-wrap: wrap; margin-right: -1px; margin-left: -1px;
         }
-
-        .card-img-box {
-            height: 280px;
-            overflow: hidden;
+        .gallery-item {
             position: relative;
-            background-color: #eee;
+            flex: 0 0 33.333%; /* 一排三個 */
+            max-width: 33.333%;
+            padding: 1px; /* 照片間隙 */
+            cursor: pointer;
         }
+        /* 強制正方形容器 (Aspect Ratio Hack) */
+        .square-box {
+            position: relative; width: 100%; padding-bottom: 100%; /* 1:1 比例 */
+            background-color: #eee; overflow: hidden;
+        }
+        .square-box img {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; /* 填滿不變形 */
+            transition: transform 0.3s;
+        }
+        .gallery-item:active img { opacity: 0.8; }
+
+        /* 載入中動畫 */
+        .loading-state { padding: 50px; text-align: center; color: #999; width: 100%; }
         
-        .card-img-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        /* 模態框 (點擊放大的黑底視窗) */
+        .modal-content { background-color: transparent; border: none; }
+        .modal-body { padding: 0; text-align: center; position: relative; }
+        .full-img { max-width: 100%; border-radius: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .img-info { 
+            background: white; padding: 15px; border-radius: 0 0 10px 10px; text-align: left; 
+            color: #333; margin-top: -5px; 
         }
 
-        .area-badge {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: rgba(211, 47, 47, 0.85);
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .card-content { padding: 20px; }
-
-        .note-box {
-            background-color: #f8f9fa;
-            border-left: 4px solid #ffc107;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 4px;
-            color: #555;
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: white;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-        .nav-btn {
-            color: #888;
-            text-align: center;
-            text-decoration: none;
-            font-size: 0.8rem;
-        }
-        .nav-btn.active { color: #d32f2f; font-weight: bold; }
-        .nav-btn i { font-size: 1.2rem; display: block; margin-bottom: 2px; }
     </style>
 </head>
 <body>
 
-    <div class="nav-header">
-        <div class="d-flex justify-content-between align-items-center">
-            <h5 class="m-0 font-weight-bold"><i class="fas fa-images"></i> 土地公圖庫牆</h5>
-            <span class="badge badge-light" id="count-badge">全部</span>
-        </div>
-        
-        <select id="areaFilter" class="filter-select" onchange="filterData()">
-            <option value="all">📍 顯示全苑裡</option>
-            <option value="苑東里">苑東里</option>
-            <option value="苑南里">苑南里</option>
-            <option value="苑北里">苑北里</option>
-            <option value="西勢里">西勢里</option>
-            <option value="中正里">中正里</option>
-            <option value="客庄里">客庄里</option>
-            <option value="苑港里">苑港里</option>
-            <option value="西平里">西平里</option>
-            <option value="海岸里">海岸里</option>
-            <option value="房裡里">房裡里</option>
-            <option value="新復里">新復里</option>
-            <option value="田心里">田心里</option>
-            <option value="舊社里">舊社里</option>
-            <option value="山腳里">山腳里</option>
-            <option value="福田里">福田里</option>
-            <option value="蕉埔里">蕉埔里</option>
-            <option value="石鎮里">石鎮里</option>
-            <option value="南勢里">南勢里</option>
-            <option value="玉田里">玉田里</option>
-            <option value="泰田里">泰田里</option>
-            <option value="上館里">上館里</option>
-            <option value="水坡里">水坡里</option>
-            <option value="社苓里">社苓里</option>
-            <option value="山柑里">山柑里</option>
-            <option value="其他">其他</option>
-        </select>
+    <div class="app-header">
+        <a href="/" class="header-btn"><i class="fas fa-chevron-left"></i></a>
+        <div class="header-title">土地公圖庫牆 ▾</div>
+        <a href="/upload" class="header-btn"><i class="far fa-plus-square"></i></a>
     </div>
 
-    <div class="container mt-4">
-        {% if rows|length == 0 %}
-            <div class="text-center text-muted mt-5">
-                <p>還沒有照片喔，快去當第一個上傳的人！</p>
-                <a href="/report" class="btn btn-danger mt-3">我要上傳</a>
+    <div class="container-fluid p-0">
+        <div id="ig-grid" class="gallery-grid">
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin fa-2x"></i><br><br>正在讀取照片...
             </div>
-        {% endif %}
+        </div>
+    </div>
 
-        {% for row in rows %}
-        <div class="data-card" data-area="{{ row[2] }}">
-            <div class="card-img-box">
-                <a href="{{ row[0] }}" target="_blank">
-                    <img src="{{ row[0] }}" loading="lazy">
-                </a>
-                <span class="area-badge">
-                    <i class="fas fa-map-marker-alt"></i> {{ row[2] }}
-                </span>
-            </div>
-            
-            <div class="card-content">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 font-weight-bold text-dark">
-                        <i class="fas fa-user-circle text-secondary"></i> {{ row[1] or '熱心串友' }}
-                    </h5>
-                    <small class="text-muted">{{ row[4].strftime('%Y-%m-%d') }}</small>
-                </div>
-                
-                <div class="note-box">
-                    {% if row[3] %}
-                        {{ row[3] }}
-                    {% else %}
-                        <em class="text-muted">（信徒沒有留下故事...）</em>
-                    {% endif %}
+    <div class="modal fade" id="photoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <img src="" id="modal-img" class="full-img">
+                    <div class="img-info">
+                        <h5 id="modal-area" style="font-weight:bold; margin-bottom:5px;"></h5>
+                        <p id="modal-user" style="color:#666; font-size:0.9rem; margin-bottom:5px;"></p>
+                        <p id="modal-note" style="color:#333; font-size:0.95rem;"></p>
+                    </div>
                 </div>
             </div>
         </div>
-        {% endfor %}
-        
-        <div id="no-result" class="text-center text-muted mt-5" style="display: none;">
-            <i class="fas fa-search mb-3" style="font-size: 2rem;"></i>
-            <p>這個里目前還沒有人上傳照片喔！</p>
-        </div>
     </div>
 
-    <div class="bottom-nav">
-        <a href="/" class="nav-btn">
-            <i class="fas fa-home"></i> 首頁
-        </a>
-        <a href="/map" class="nav-btn">
-            <i class="fas fa-map-marked-alt"></i> 地圖
-        </a>
-        <a href="/gallery" class="nav-btn active">
-            <i class="fas fa-images"></i> 圖庫
-        </a>
-        <a href="/report" class="nav-btn" style="color: #d32f2f;">
-            <i class="fas fa-camera"></i> 查報
-        </a>
-    </div>
-
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    
     <script>
-        function filterData() {
-            var selectedArea = document.getElementById('areaFilter').value;
-            var cards = document.getElementsByClassName('data-card');
-            var visibleCount = 0;
+        $(document).ready(function() {
+            // 抓取 API 資料
+            $.getJSON('/api/locations', function(data) {
+                var container = $('#ig-grid');
+                container.empty(); // 清空載入中圖示
 
-            for (var i = 0; i < cards.length; i++) {
-                var cardArea = cards[i].getAttribute('data-area');
-                if (selectedArea === 'all' || cardArea === selectedArea) {
-                    cards[i].style.display = 'block';
-                    visibleCount++;
-                } else {
-                    cards[i].style.display = 'none';
+                if (data.length === 0) {
+                    container.html('<div class="loading-state">目前還沒有照片，快去按右上角 [+] 上傳！</div>');
+                    return;
                 }
-            }
-            var badge = document.getElementById('count-badge');
-            if(selectedArea === 'all') {
-                badge.innerText = '全部 (' + visibleCount + ')';
-            } else {
-                badge.innerText = selectedArea + ' (' + visibleCount + ')';
-            }
-            if (visibleCount === 0) {
-                document.getElementById('no-result').style.display = 'block';
-            } else {
-                document.getElementById('no-result').style.display = 'none';
-            }
+
+                // 反轉順序 (最新的在上面)
+                data.reverse().forEach(function(item) {
+                    // 如果沒有圖片網址，就用預設圖 (避免破圖)
+                    var imgUrl = item.image_url || 'https://via.placeholder.com/300?text=No+Image';
+
+                    var html = `
+                        <div class="gallery-item" onclick="showPhoto('${imgUrl}', '${item.area}', '${item.nickname}', '${item.note || ""}')">
+                            <div class="square-box">
+                                <img src="${imgUrl}" loading="lazy">
+                            </div>
+                        </div>
+                    `;
+                    container.append(html);
+                });
+            }).fail(function() {
+                $('#ig-grid').html('<div class="loading-state">讀取失敗，請重新整理頁面。</div>');
+            });
+        });
+
+        // 顯示大圖的函式
+        function showPhoto(url, area, user, note) {
+            $('#modal-img').attr('src', url);
+            $('#modal-area').html('<i class="fas fa-map-marker-alt"></i> ' + area);
+            $('#modal-user').text('上傳者：' + (user || '匿名'));
+            $('#modal-note').text(note ? note : '(沒有備註)');
+            $('#photoModal').modal('show');
         }
-        filterData();
     </script>
 </body>
 </html>
