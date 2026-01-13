@@ -322,12 +322,14 @@
         for (var i = 0; i < badWords.length; i++) {
             if (lowerName.includes(badWords[i])) {
                 Swal.fire({
-                    // 🔴 1. 觸發髒話，使用 377.jpg
                     imageUrl: '/static/377.jpg',
-                    imageWidth: 200, imageHeight: 'auto',
+                    // 👇 圖片加大！
+                    imageWidth: 300, 
+                    imageHeight: 'auto',
                     title: '暱稱不太好聽喔...',
                     text: '請使用優雅一點的名字，土地公才聽得懂！',
-                    confirmButtonColor: '#d33'
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
                 });
                 return; // 擋下
             }
@@ -353,11 +355,13 @@
             success: function(response) {
                 var displayName = rawName ? rawName : '熱心串友';
 
-                // 🔴 2. 後端阻擋 (違規)，也使用 377.jpg
+                // 🔴 2. 後端阻擋 (違規)
                 if (response.status === 'block') {
                     Swal.fire({
                         imageUrl: '/static/377.jpg',
-                        imageWidth: 200, imageHeight: 'auto',
+                        // 👇 圖片加大！
+                        imageWidth: 300, 
+                        imageHeight: 'auto',
                         title: '⚠️ 暱稱違規',
                         text: response.message,
                         confirmButtonText: '好，我改一下',
@@ -367,7 +371,7 @@
                     return; 
                 }
 
-                // 🟡 3. 重複投稿 (待審)，使用 tdo.jpg
+                // 🟡 3. 重複投稿 (待審)，使用 tdo.jpg (也建議保持 200 或改 250)
                 if (response.status === 'pending') {
                     Swal.fire({
                         imageUrl: '/static/tdo.jpg',
@@ -380,7 +384,7 @@
                         window.location.href = '/map';
                     });
                 } 
-                // 🟢 4. 成功，也使用 tdo.jpg
+                // 🟢 4. 成功
                 else {
                     var sayText = '感謝 ' + area + ' 的 ' + displayName + '，土地公收到囉！';
                     
