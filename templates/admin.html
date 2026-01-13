@@ -7,51 +7,87 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body { padding: 20px; background-color: #f8f9fa; }
-        .table img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; }
+        .table img { width: 100px; height: 100px; object-fit: cover; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .duplicate-row { background-color: #ffe6e6 !important; border-left: 5px solid #dc3545; }
+        .warning-tag { color: #dc3545; font-weight: bold; font-size: 0.9rem; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h3 class="mb-4">👮‍♂️ 土地公後台管理</h3>
-        <a href="/" class="btn btn-outline-secondary mb-3">回首頁</a>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>👮‍♂️ 土地公審核總部</h3>
+            <a href="/" class="btn btn-outline-secondary">回地圖首頁</a>
+        </div>
         
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> 
+            紅色背景代表 <b>同一個里有重複照片</b>。請保留一張最好的，刪除其他的（這就是「審核」）。
+        </div>
+
         <div class="table-responsive">
-            <table class="table table-striped table-bordered bg-white">
+            <table class="table table-bordered bg-white shadow-sm">
                 <thead class="thead-dark">
                     <tr>
-                        <th>ID</th>
-                        <th>照片</th>
-                        <th>地區</th>
-                        <th>上傳者</th>
-                        <th>備註</th>
-                        <th>操作</th>
+                        <th style="width: 5%">ID</th>
+                        <th style="width: 15%">照片</th>
+                        <th style="width: 15%">地區 (里)</th>
+                        <th style="width: 15%">上傳者</th>
+                        <th style="width: 20%">備註</th>
+                        <th style="width: 10%">審核操作</th>
                     </tr>
                 </thead>
-                <tbody id="data-list"></tbody>
+                <tbody id="data-list">
+                    <tr><td colspan="6" class="text-center p-5">載入資料中...</td></tr>
+                </tbody>
             </table>
         </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+    
     <script>
         $(document).ready(function() {
             loadData();
         });
 
         function loadData() {
-            // 注意：這裡是呼叫 /api/admin/all_data
             $.getJSON('/api/admin/all_data', function(data) {
                 var html = '';
+                
+                // 1. 先計算每個里出現幾次
+                var areaCounts = {};
+                data.forEach(item => {
+                    var area = item.area || "未知";
+                    areaCounts[area] = (areaCounts[area] || 0) + 1;
+                });
+
+                // 2. 產生表格
+                // 我們按照「地區」排序，這樣重複的會排在一起，方便你看
+                data.sort((a, b) => (a.area > b.area) ? 1 : -1);
+
                 data.forEach(function(item) {
+                    var area = item.area || "未知";
+                    var isDuplicate = areaCounts[area] > 1; // 如果出現超過1次，就是重複
+                    var rowClass = isDuplicate ? 'duplicate-row' : '';
+                    var warning = isDuplicate ? '<br><span class="warning-tag"><i class="fas fa-exclamation-triangle"></i> 重複回報</span>' : '';
+
                     html += `
-                        <tr>
-                            <td>${item.id}</td>
-                            <td><a href="${item.image_url}" target="_blank"><img src="${item.image_url}"></a></td>
-                            <td>${item.area}</td>
-                            <td>${item.nickname}</td>
-                            <td>${item.note}</td>
-                            <td>
-                                <button class="btn btn-danger btn-sm" onclick="deleteItem(${item.id})">
+                        <tr class="${rowClass}">
+                            <td class="align-middle">${item.id}</td>
+                            <td class="align-middle">
+                                <a href="${item.image_url}" target="_blank">
+                                    <img src="${item.image_url}">
+                                </a>
+                            </td>
+                            <td class="align-middle" style="font-size:1.1rem; font-weight:bold;">
+                                ${area}
+                                ${warning}
+                            </td>
+                            <td class="align-middle">${item.nickname}</td>
+                            <td class="align-middle text-muted">${item.note || ''}</td>
+                            <td class="align-middle">
+                                <button class="btn btn-danger btn-block" onclick="deleteItem(${item.id})">
                                     🗑️ 刪除
                                 </button>
                             </td>
@@ -63,11 +99,11 @@
         }
 
         function deleteItem(id) {
-            if(confirm('確定要刪除 ID: ' + id + ' 嗎？刪除後無法復原喔！')) {
+            if(confirm('確定要刪除這張照片嗎？(ID: ' + id + ')')) {
                 $.post('/api/delete', { id: id }, function(response) {
                     if(response.success) {
-                        alert('刪除成功！');
-                        loadData(); 
+                        // alert('刪除成功');
+                        loadData(); // 重新整理
                     } else {
                         alert('刪除失敗：' + response.message);
                     }
