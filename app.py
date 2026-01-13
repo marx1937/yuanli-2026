@@ -230,6 +230,36 @@ def leaderboard_data():
         print("排行榜錯誤:", e)
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+# 🗑️ 刪除功能 API
+@app.route('/api/delete', methods=['POST'])
+def delete_location():
+    # 1. 安全檢查：確認是不是管理員 (沒有登入不能刪)
+    if not session.get('is_admin'):
+        return jsonify({'success': False, 'message': '權限不足，請先登入'})
+
+    # 2. 獲取要刪除的 ID
+    location_id = request.form.get('id')
+    
+    if not location_id:
+        return jsonify({'success': False, 'message': '找不到 ID'})
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # 3. 執行資料庫刪除指令
+        cur.execute('DELETE FROM land_gods WHERE id = %s', (location_id,))
+        conn.commit()
+        
+        cur.close()
+        conn.close()
+        return jsonify({"success": True, "message": "已成功刪除"})
+        
+    except Exception as e:
+        print("刪除失敗:", e)
+        return jsonify({"success": False, "message": "資料庫錯誤"})
+
+
 # ================= 程式啟動點 =================
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
