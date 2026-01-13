@@ -5,25 +5,153 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理員登入</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
-        body { background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; height: 100vh; }
-        .login-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 100%; max-width: 350px; text-align: center; }
-        .btn-login { background-color: #d32f2f; color: white; border-radius: 50px; }
+        body {
+            background-color: #fff8e1; /* 配合整體的暖黃色 */
+            font-family: "Microsoft JhengHei", sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            border-top: 6px solid #d32f2f; /* 紅色頂部 */
+        }
+        .lock-icon {
+            font-size: 3.5rem;
+            color: #d32f2f;
+            margin-bottom: 25px;
+            background: #ffebee;
+            width: 100px;
+            height: 100px;
+            line-height: 100px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .btn-login {
+            background: #d32f2f;
+            color: white;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            width: 100%;
+            transition: 0.3s;
+            border: none;
+        }
+        .btn-login:hover {
+            background: #b71c1c;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(211, 47, 47, 0.3);
+        }
+        .form-control {
+            border-radius: 10px;
+            height: 50px;
+            font-size: 1.1rem;
+            background: #f5f5f5;
+            border: 1px solid #eee;
+        }
+        .form-control:focus {
+            background: white;
+            box-shadow: none;
+            border-color: #d32f2f;
+        }
+        .back-link {
+            display: block;
+            margin-top: 25px;
+            color: #757575;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
+
     <div class="login-card">
-        <h4 class="mb-4">🔒 管理員專區</h4>
-        {% if error %}
-        <div class="alert alert-danger small">{{ error }}</div>
-        {% endif %}
-        <form method="POST">
-            <div class="form-group">
-                <input type="password" name="password" class="form-control text-center" placeholder="請輸入密碼" required>
-            </div>
-            <button type="submit" class="btn btn-login btn-block">驗證身分</button>
-            <a href="/" class="btn btn-link btn-sm mt-3 text-muted">回首頁</a>
-        </form>
+        <div class="lock-icon">
+            <i class="fas fa-user-lock"></i>
+        </div>
+        <h4 class="mb-4 font-weight-bold" style="color:#444;">查報系統管理後台</h4>
+        
+        <div class="form-group text-left mb-4">
+            <input type="password" id="password" class="form-control text-center" placeholder="請輸入通行密碼">
+        </div>
+
+        <button onclick="login()" class="btn btn-login">
+            解鎖進入 <i class="fas fa-arrow-right ml-2"></i>
+        </button>
+
+        <a href="/" class="back-link">
+            <i class="fas fa-chevron-left"></i> 返回首頁
+        </a>
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        // 支援按 Enter 鍵登入
+        $('#password').keypress(function(e){
+            if(e.which == 13) login();
+        });
+
+        function login() {
+            var pwd = $('#password').val();
+            
+            // 防呆：沒輸入密碼
+            if(!pwd) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '忘了打密碼？',
+                    confirmButtonColor: '#d32f2f'
+                });
+                return;
+            }
+
+            // 送出密碼給後端檢查
+            $.ajax({
+                url: '/api/login',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ password: pwd }),
+                success: function(response) {
+                    if (response.status === 'success') {
+                        // 登入成功
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 1000,
+                            timerProgressBar: true
+                        })
+
+                        Toast.fire({
+                            icon: 'success',
+                            title: '歡迎回來，管理員！'
+                        }).then(() => {
+                            window.location.href = '/admin'; // 跳轉到管理頁
+                        });
+                    } else {
+                        // 登入失敗
+                        Swal.fire({
+                            icon: 'error',
+                            title: '密碼錯誤',
+                            text: '這把鑰匙打不開喔！',
+                            confirmButtonColor: '#d32f2f'
+                        });
+                        $('#password').val(''); // 清空輸入框
+                    }
+                }
+            });
+        }
+    </script>
 </body>
 </html>
