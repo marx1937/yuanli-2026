@@ -334,14 +334,14 @@
             }
         }
 
-                $('#submitBtn').html('<i class="fas fa-robot"></i> 傳送中...')
+                        $('#submitBtn').html('<i class="fas fa-robot"></i> 傳送中...')
                       .prop('disabled', true);
 
-        // 🔊 暖身語音：先取得手機發聲權限
+        // 🔊 關鍵：在使用者點擊的瞬間，先播放一個「空的聲音」或短句
+        // 這樣瀏覽器才會解鎖之後的音訊權限
         if ('speechSynthesis' in window) {
-            var warmUp = new SpeechSynthesisUtterance("資料傳送中");
-            warmUp.lang = 'zh-TW';
-            window.speechSynthesis.speak(warmUp);
+            var silentWarmup = new SpeechSynthesisUtterance(""); // 靜音暖身
+            window.speechSynthesis.speak(silentWarmup);
         }
 
         var formData = new FormData();
@@ -381,7 +381,7 @@
                         imageWidth: '100%', 
                         imageHeight: 'auto',
                         title: '📋 資料已送交審核',
-                        html: `感謝您！不過此地點 (<b>${area}</b>)<br>附近似乎已有查報紀錄。<br><br>您的照片已安全存入<b>「待審核清單」</b>`,
+                        html: `感謝您！不過此地點 (<b>${area}</b>)<br>附近似乎已有查報紀錄。`,
                         confirmButtonText: '收到，來去找下一座！',
                         confirmButtonColor: '#ff9800'
                     }).then(() => {
@@ -391,11 +391,11 @@
                 else {
                     var sayText = '感謝 ' + area + ' 的 ' + displayName + '，土地公收到囉！';
                     
-                    // 🔊 播放成功語音
+                    // 🔊 正式播放感謝語音
                     if ('speechSynthesis' in window) {
-                        window.speechSynthesis.cancel(); 
                         var utterance = new SpeechSynthesisUtterance(sayText);
                         utterance.lang = 'zh-TW';
+                        utterance.rate = 1.0;
                         window.speechSynthesis.speak(utterance);
                     }
 
@@ -413,23 +413,17 @@
                     });
                 }
             },
-
-
-                    
-                    
-                
-            
             error: function() {
                 Swal.fire({
                     title: '❌ 上傳失敗',
-                    text: '請檢查網路連線，或稍後再試。',
+                    text: '請檢查網路連線。',
                     icon: 'error',
                     confirmButtonText: '好'
                 });
                 $('#submitBtn').html('確認上傳').prop('disabled', false);
             }
         });
-    }
+
     </script>
 </body>
 </html>
