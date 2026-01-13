@@ -9,67 +9,82 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     
     <style>
-        body { background-color: #fafafa; /* IG 的背景偏白 */ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding-bottom: 60px; }
+        body { background-color: #fafafa; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding-bottom: 60px; }
 
-        /* 頂部導覽列 (仿 App) */
+        /* 頂部導覽列 */
         .app-header {
             background: white; border-bottom: 1px solid #dbdbdb;
-            padding: 15px; text-align: center; position: sticky; top: 0; z-index: 99;
-            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 15px; text-align: center; position: sticky; top: 0; z-index: 100;
+            display: flex; justify-content: space-between; align-items: center; height: 50px;
         }
         .header-title { font-weight: bold; font-size: 1.1rem; color: #262626; }
         .header-btn { color: #262626; font-size: 1.2rem; text-decoration: none; }
 
+        /* 🔍 篩選工具列 (新增的部分) */
+        .filter-bar {
+            background: #fff; padding: 10px; 
+            border-bottom: 1px solid #eee;
+            position: sticky; top: 50px; z-index: 99;
+            display: flex; gap: 10px; overflow-x: auto;
+            white-space: nowrap;
+        }
+        .custom-select {
+            border-radius: 20px; font-size: 0.9rem; padding-top: 5px; padding-bottom: 5px; height: auto;
+            border: 1px solid #ddd; background-color: #f8f9fa;
+        }
+        .custom-select:focus { box-shadow: none; border-color: #aaa; }
+
         /* IG 風格照片網格 */
-        .gallery-grid {
-            display: flex; flex-wrap: wrap; margin-right: -1px; margin-left: -1px;
-        }
+        .gallery-grid { display: flex; flex-wrap: wrap; margin-right: -1px; margin-left: -1px; }
         .gallery-item {
-            position: relative;
-            flex: 0 0 33.333%; /* 一排三個 */
-            max-width: 33.333%;
-            padding: 1px; /* 照片間隙 */
-            cursor: pointer;
+            position: relative; flex: 0 0 33.333%; max-width: 33.333%;
+            padding: 1px; cursor: pointer;
         }
-        /* 強制正方形容器 (Aspect Ratio Hack) */
         .square-box {
-            position: relative; width: 100%; padding-bottom: 100%; /* 1:1 比例 */
+            position: relative; width: 100%; padding-bottom: 100%;
             background-color: #eee; overflow: hidden;
         }
         .square-box img {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; /* 填滿不變形 */
-            transition: transform 0.3s;
+            object-fit: cover; transition: transform 0.3s;
         }
         .gallery-item:active img { opacity: 0.8; }
 
-        /* 載入中動畫 */
         .loading-state { padding: 50px; text-align: center; color: #999; width: 100%; }
-        
-        /* 模態框 (點擊放大的黑底視窗) */
+
+        /* 模態框 */
         .modal-content { background-color: transparent; border: none; }
-        .modal-body { padding: 0; text-align: center; position: relative; }
+        .modal-body { padding: 0; text-align: center; }
         .full-img { max-width: 100%; border-radius: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .img-info { 
             background: white; padding: 15px; border-radius: 0 0 10px 10px; text-align: left; 
             color: #333; margin-top: -5px; 
         }
-
     </style>
 </head>
 <body>
 
     <div class="app-header">
         <a href="/" class="header-btn"><i class="fas fa-chevron-left"></i></a>
-        <div class="header-title">土地公圖庫牆 ▾</div>
+        <div class="header-title" id="page-title">土地公圖庫牆</div>
         <a href="/upload" class="header-btn"><i class="far fa-plus-square"></i></a>
+    </div>
+
+    <div class="filter-bar">
+        <select class="custom-select" id="area-filter">
+            <option value="all">📍 全部地區</option>
+            </select>
+        <select class="custom-select" id="user-filter">
+            <option value="all">👤 全部貢獻者</option>
+            </select>
     </div>
 
     <div class="container-fluid p-0">
         <div id="ig-grid" class="gallery-grid">
-            <div class="loading-state">
-                <i class="fas fa-spinner fa-spin fa-2x"></i><br><br>正在讀取照片...
-            </div>
+            <div class="loading-state"><i class="fas fa-spinner fa-spin fa-2x"></i><br>載入中...</div>
+        </div>
+        <div id="no-result" style="display:none; text-align:center; padding:40px; color:#999;">
+            <i class="far fa-sad-tear fa-2x"></i><br><br>找不到符合的照片耶
         </div>
     </div>
 
@@ -92,37 +107,85 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     
     <script>
+        var allData = []; // 儲存所有照片資料
+
         $(document).ready(function() {
-            // 抓取 API 資料
+            // 1. 抓取資料
             $.getJSON('/api/locations', function(data) {
-                var container = $('#ig-grid');
-                container.empty(); // 清空載入中圖示
-
-                if (data.length === 0) {
-                    container.html('<div class="loading-state">目前還沒有照片，快去按右上角 [+] 上傳！</div>');
-                    return;
-                }
-
-                // 反轉順序 (最新的在上面)
-                data.reverse().forEach(function(item) {
-                    // 如果沒有圖片網址，就用預設圖 (避免破圖)
-                    var imgUrl = item.image_url || 'https://via.placeholder.com/300?text=No+Image';
-
-                    var html = `
-                        <div class="gallery-item" onclick="showPhoto('${imgUrl}', '${item.area}', '${item.nickname}', '${item.note || ""}')">
-                            <div class="square-box">
-                                <img src="${imgUrl}" loading="lazy">
-                            </div>
-                        </div>
-                    `;
-                    container.append(html);
-                });
+                allData = data.reverse(); // 最新的在前面
+                initFilters(allData);     // 初始化篩選選單
+                renderGallery(allData);   // 畫出照片
             }).fail(function() {
-                $('#ig-grid').html('<div class="loading-state">讀取失敗，請重新整理頁面。</div>');
+                $('#ig-grid').html('<div class="loading-state">讀取失敗，請重整頁面</div>');
+            });
+
+            // 2. 監聽篩選變更
+            $('#area-filter, #user-filter').on('change', function() {
+                var selectedArea = $('#area-filter').val();
+                var selectedUser = $('#user-filter').val();
+
+                // 進行過濾
+                var filtered = allData.filter(function(item) {
+                    var matchArea = (selectedArea === 'all') || (item.area === selectedArea);
+                    var matchUser = (selectedUser === 'all') || (item.nickname === selectedUser);
+                    return matchArea && matchUser;
+                });
+
+                renderGallery(filtered);
             });
         });
 
-        // 顯示大圖的函式
+        // 初始化篩選選單 (自動找出有的里跟人)
+        function initFilters(data) {
+            var areas = new Set();
+            var users = new Set();
+
+            data.forEach(function(item) {
+                if(item.area) areas.add(item.area);
+                if(item.nickname) users.add(item.nickname);
+            });
+
+            // 填入地區選單
+            areas.forEach(function(area) {
+                $('#area-filter').append(`<option value="${area}">${area}</option>`);
+            });
+
+            // 填入使用者選單
+            users.forEach(function(user) {
+                $('#user-filter').append(`<option value="${user}">${user}</option>`);
+            });
+        }
+
+        // 渲染照片牆
+        function renderGallery(data) {
+            var container = $('#ig-grid');
+            var noResult = $('#no-result');
+            container.empty();
+
+            if (data.length === 0) {
+                noResult.show();
+                return;
+            } else {
+                noResult.hide();
+            }
+
+            // 更新標題數量
+            // $('#page-title').text(`圖庫牆 (${data.length})`);
+
+            data.forEach(function(item) {
+                var imgUrl = item.image_url || 'https://via.placeholder.com/300?text=No+Image';
+                
+                var html = `
+                    <div class="gallery-item" onclick="showPhoto('${imgUrl}', '${item.area}', '${item.nickname}', '${item.note || ""}')">
+                        <div class="square-box">
+                            <img src="${imgUrl}" loading="lazy">
+                        </div>
+                    </div>
+                `;
+                container.append(html);
+            });
+        }
+
         function showPhoto(url, area, user, note) {
             $('#modal-img').attr('src', url);
             $('#modal-area').html('<i class="fas fa-map-marker-alt"></i> ' + area);
