@@ -198,27 +198,47 @@ def get_all_data():
         })
     return jsonify(data)
 
-# 2. 刪除指定資料 (讓你刪掉測試照)
-@app.route('/api/delete/<int:id>', methods=['POST'])
-def delete_data(id):
-    # if not session.get('is_admin'):
-    #     return jsonify({'status': 'error', 'message': '權限不足'})
-
+# ================= 排行榜專用 API (修復版) =================
+@app.route('/api/leaderboard_data')
+def leaderboard_data():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("DELETE FROM land_gods WHERE id = %s", (id,))
-        conn.commit()
-        cur.close()
+        
+        # 1. 抓取【個人】排行榜 (前 10 名)
+        cur.execute("""
+            SELECT nickname, COUNT(*) as count 
+            FROM land_gods 
+            GROUP BY nickname 
+            ORDER BY count DESC 
+            LIMIT 10
+        """)
+        user_rows = cur.fetchall()
+
+        # 2. 抓取【區域】排行榜 (前 10 名)
+        cur.execute("""
+            SELECT area, COUNT(*) as count 
+            FROM land_gods 
+            GROUP BY area 
+            ORDER BY count DESC 
+            LIMIT 10
+        """)
+        area_rows = cur.fetchall()
+        
         conn.close()
-        return jsonify({'status': 'success'})
+        
+        # 整理資料回傳
+        return jsonify({
+            'status': 'success',
+            'by_user': [{'name': r[0] or '熱心串友', 'count': r[1]} for r in user_rows],
+            'by_area': [{'name': r[0], 'count': r[1]} for r in area_rows]
+        })
+
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)})
+        print("排行榜錯誤:", e)
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
-    return jsonify({
-        'by_area': [{'name': r[0], 'count': r[1]} for r in area_rows],
-        'by_user': [{'name': r[0], 'count': r[1]} for r in user_rows]
-    })
-
+# ================= 程式啟動點 =================
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
+
