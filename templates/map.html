@@ -15,39 +15,26 @@
         
         #map { height: 100%; width: 100%; z-index: 1; }
 
-        /* 🌟 改良版：廟簷圖框 (Temple Eaves) */
+        /* 🌟 改良版：純淨屋頂 (移除側邊，只留頂部裝飾) */
         .map-frame-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            /* 👇 關鍵：不設 100% 高度，只讓它自然垂下 */
-            height: 300px; 
+            /* 👇 高度設為 180px，剛好露出屋頂最精華的部分 */
+            height: 180px; 
             pointer-events: none; 
             z-index: 900; 
             
             background-image: url('/static/mpg.png');
-            /* 👇 關鍵：寬度滿版，高度自動 (保持比例，不變形) */
+            /* 👇 寬度 100%，高度自動，保持屋頂漂亮比例 */
             background-size: 100% auto; 
             background-position: top center;
             background-repeat: no-repeat;
             
-            /* 加一點陰影，讓屋頂看起來是浮在地圖上的 */
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
+            /* 加一點柔和陰影，增加層次感 */
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4));
         }
-
-        /* 🌟 增加一點左右紅邊，維持整體感 (選配) */
-        .side-border {
-            position: absolute;
-            top: 0; bottom: 0;
-            width: 15px; /* 邊框厚度 */
-            z-index: 899;
-            pointer-events: none;
-            background: linear-gradient(to right, #b71c1c, #d32f2f); /* 仿柱子顏色 */
-            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
-        }
-        .border-left { left: 0; }
-        .border-right { right: 0; background: linear-gradient(to left, #b71c1c, #d32f2f); }
 
         /* 懸浮控制島 */
         .control-island {
@@ -86,10 +73,12 @@
         }
         .custom-select:focus { border-color: #d32f2f; background-color: white; box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1); }
 
-        /* 回首頁按鈕 (往下移一點，避免被屋頂擋住) */
+        /* 回首頁按鈕 (調整位置) */
         .btn-home {
-            position: absolute; top: 90px; /* 👈 這裡往下移了 */
-            left: 20px; z-index: 1000;
+            position: absolute; 
+            top: 100px; /* 👈 往下移，不要擋到屋頂 */
+            left: 20px; 
+            z-index: 1000;
             background: white; color: #444; padding: 8px 15px; border-radius: 50px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-decoration: none; font-weight: bold;
             font-size: 0.95rem; display: flex; align-items: center; transition: 0.2s;
@@ -104,8 +93,8 @@
         .leaflet-popup-content-wrapper { border-radius: 12px; overflow: hidden; padding: 0; }
         .leaflet-popup-content { margin: 15px; width: 220px !important; }
         
-        /* 調整縮放按鈕位置 (往下移，避開屋頂) */
-        .leaflet-top { top: 90px; } 
+        /* 調整縮放按鈕位置 */
+        .leaflet-top { top: 100px; } 
         .leaflet-right { right: 20px; }
     </style>
 </head>
@@ -115,9 +104,6 @@
 
     <div class="map-frame-overlay"></div>
     
-    <div class="side-border border-left"></div>
-    <div class="side-border border-right"></div>
-
     <a href="/" class="btn-home">
         <i class="fas fa-chevron-left"></i> 回首頁
     </a>
@@ -204,7 +190,6 @@
             $('#marker-count').text(visibleCount + ' 處');
 
             if (bounds.length > 0) {
-                // padding 設大一點，尤其是 top，避免被屋頂擋住
                 map.flyToBounds(bounds, { padding: [50, 200], maxZoom: 16, duration: 1.5 });
             } else {
                 if(filterArea !== 'all') {
