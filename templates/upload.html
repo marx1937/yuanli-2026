@@ -390,7 +390,19 @@
                 // 🟢 4. 成功：happy.jpg
                 else {
                     var sayText = '感謝 ' + area + ' 的 ' + displayName + '，土地公收到囉！';
-                    
+                    // 🔊 語音朗讀功能 (TTS)
+if ('speechSynthesis' in window) {
+    try {
+        var utterance = new SpeechSynthesisUtterance(sayText);
+        utterance.lang = 'zh-TW'; // 設定語言為繁體中文
+        utterance.rate = 1.0;     // 語速
+        window.speechSynthesis.speak(utterance);
+    } catch (e) {
+        console.log("語音播放失敗：", e);
+    }
+}
+
+
                     Swal.fire({
                         title: '✅ 上傳成功！',
                         text: sayText,
