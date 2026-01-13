@@ -3,76 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>土地公總管理後台</title>
+    <title>土地公後台管理</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
     <style>
-        body { background-color: #f0f2f5; font-family: "Microsoft JhengHei", sans-serif; }
-        
-        .admin-header {
-            background: #1a237e; /* 深藍色專業感 */
-            color: white; padding: 15px 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .data-card {
-            background: white; 
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            margin-bottom: 20px; 
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            padding: 10px;
-        }
-
-        .data-img {
-            width: 100px; height: 100px; 
-            object-fit: cover; 
-            border-radius: 8px;
-            cursor: pointer;
-            border: 1px solid #eee;
-        }
-
-        .data-info {
-            padding: 0 15px; 
-            flex: 1;
-        }
-
-        .btn-delete {
-            background: #ffebee; color: #d32f2f; border: none;
-            padding: 8px 15px; border-radius: 20px; font-weight: bold;
-            transition: 0.2s;
-        }
-        .btn-delete:hover { background: #ffcdd2; transform: scale(1.05); }
-
-        .badge-area {
-            background: #e3f2fd; color: #1565c0; 
-            padding: 3px 8px; border-radius: 5px; font-size: 0.9rem; font-weight: bold;
-        }
+        body { padding: 20px; background-color: #f8f9fa; }
+        .table img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; }
     </style>
 </head>
 <body>
-
-    <div class="admin-header">
-        <h5 class="m-0"><i class="fas fa-database"></i> 土地公資料庫</h5>
-        <div>
-            <a href="/" class="btn btn-sm btn-outline-light mr-2">回首頁</a>
-            <a href="/login" class="btn btn-sm btn-warning">登出</a>
-        </div>
-    </div>
-
-    <div class="container mt-4">
-        <div class="d-flex justify-content-between align-items-end mb-3">
-            <h6 class="text-muted m-0">目前共有 <span id="count" class="text-primary font-weight-bold">0</span> 筆資料</h6>
-            <button onclick="loadData()" class="btn btn-sm btn-light"><i class="fas fa-sync-alt"></i> 重新整理</button>
-        </div>
-
-        <div id="data-list">
-            <div class="text-center mt-5"><i class="fas fa-spinner fa-spin"></i> 資料讀取中...</div>
+    <div class="container">
+        <h3 class="mb-4">👮‍♂️ 土地公後台管理</h3>
+        <a href="/" class="btn btn-outline-secondary mb-3">回首頁</a>
+        
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered bg-white">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>照片</th>
+                        <th>地區</th>
+                        <th>上傳者</th>
+                        <th>備註</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="data-list"></tbody>
+            </table>
         </div>
     </div>
 
@@ -83,66 +39,40 @@
         });
 
         function loadData() {
-            // 呼叫我們剛剛寫的後端 API
+            // 注意：這裡是呼叫 /api/admin/all_data
             $.getJSON('/api/admin/all_data', function(data) {
-                $('#count').text(data.length);
-                $('#data-list').empty();
-
-                if (data.length === 0) {
-                    $('#data-list').html('<div class="text-center text-muted p-5">目前乾乾淨淨，沒有任何資料！</div>');
-                    return;
-                }
-
-                $.each(data, function(i, item) {
-                    var html = `
-                        <div class="data-card">
-                            <a href="${item.image_url}" target="_blank">
-                                <img src="${item.image_url}" class="data-img">
-                            </a>
-                            <div class="data-info">
-                                <div class="mb-1">
-                                    <span class="badge-area">${item.area}</span>
-                                    <span class="text-muted small ml-2">${item.created_at.substring(0, 16)}</span>
-                                </div>
-                                <h6 class="font-weight-bold text-dark mb-1">
-                                    ${item.nickname ? item.nickname : '熱心串友'}
-                                </h6>
-                                <p class="text-muted small mb-0" style="line-height:1.4;">
-                                    ${item.note || '(無備註)'}
-                                </p>
-                            </div>
-                            <button onclick="deleteData(${item.id})" class="btn-delete">
-                                <i class="fas fa-trash-alt"></i> 刪除
-                            </button>
-                        </div>
+                var html = '';
+                data.forEach(function(item) {
+                    html += `
+                        <tr>
+                            <td>${item.id}</td>
+                            <td><a href="${item.image_url}" target="_blank"><img src="${item.image_url}"></a></td>
+                            <td>${item.area}</td>
+                            <td>${item.nickname}</td>
+                            <td>${item.note}</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm" onclick="deleteItem(${item.id})">
+                                    🗑️ 刪除
+                                </button>
+                            </td>
+                        </tr>
                     `;
-                    $('#data-list').append(html);
                 });
+                $('#data-list').html(html);
             });
         }
 
-        function deleteData(id) {
-            Swal.fire({
-                title: '確定刪除嗎？',
-                text: "刪掉這張照片後就救不回來囉！",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d32f2f',
-                cancelButtonColor: '#aaa',
-                confirmButtonText: '對，刪掉！',
-                cancelButtonText: '取消'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.post('/api/delete/' + id, function(res) {
-                        if(res.status === 'success') {
-                            Swal.fire('已刪除！', '', 'success');
-                            loadData(); // 刪除成功後，重新抓一次資料
-                        } else {
-                            Swal.fire('刪除失敗', res.message, 'error');
-                        }
-                    });
-                }
-            })
+        function deleteItem(id) {
+            if(confirm('確定要刪除 ID: ' + id + ' 嗎？刪除後無法復原喔！')) {
+                $.post('/api/delete', { id: id }, function(response) {
+                    if(response.success) {
+                        alert('刪除成功！');
+                        loadData(); 
+                    } else {
+                        alert('刪除失敗：' + response.message);
+                    }
+                });
+            }
         }
     </script>
 </body>
