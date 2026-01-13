@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>土地公親衛隊榮譽榜</title>
+    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    
+    <style>
+        body { 
+            background-color: #fff8e1; /* 暖色背景 */
+            font-family: "Microsoft JhengHei", sans-serif; 
+            padding-bottom: 50px;
+        }
+
+        /* 頂部標題列 (仿手遊排行榜風格) */
+        .header-bar {
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+            color: white; 
+            padding: 25px 20px; 
+            text-align: center;
+            border-radius: 0 0 30px 30px; 
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        /* 返回按鈕 */
+        .back-btn {
+            position: absolute; 
+            top: 25px; 
+            left: 20px; 
+            color: white; 
+            font-size: 1.2rem;
+            background: rgba(255,255,255,0.2); 
+            width: 40px; 
+            height: 40px; 
+            line-height: 40px;
+            border-radius: 50%; 
+            text-align: center; 
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.4); color: white; }
+
+        /* 排行榜卡片 */
+        .rank-card {
+            background: white; 
+            border-radius: 20px;
+            padding: 10px; 
+            margin: 0 15px 30px 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            overflow: hidden;
+            border-top: 5px solid #d32f2f;
+        }
+
+        /* 表格樣式優化 */
+        .table td { 
+            vertical-align: middle; 
+            border-top: 1px solid #f8f8f8; 
+            padding: 15px 10px;
+        }
+
+        /* 名次數字/圖示 */
+        .rank-icon { 
+            font-size: 1.5rem; 
+            width: 40px; 
+            text-align: center; 
+            display: inline-block;
+        }
+        
+        /* 前三名專屬顏色 */
+        .gold { color: #FFD700; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); font-size: 1.8rem; }
+        .silver { color: #C0C0C0; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); font-size: 1.6rem; }
+        .bronze { color: #CD7F32; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); font-size: 1.6rem; }
+        .normal-rank { 
+            background: #eee; color: #555; 
+            width: 28px; height: 28px; line-height: 28px; 
+            border-radius: 50%; font-size: 0.9rem; font-weight: bold;
+        }
+
+        /* 趨勢標籤 (比賽感關鍵！) */
+        .trend-tag { font-size: 0.75rem; padding: 3px 8px; border-radius: 10px; margin-left: 5px; font-weight: bold; display: inline-block;}
+        .trend-hot { background: #ffebee; color: #d32f2f; border: 1px solid #ffcdd2; } /* 火熱 */
+        .trend-up { background: #e3f2fd; color: #1976d2; border: 1px solid #bbdefb; } /* 上升 */
+        .trend-new { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; } /* 新進 */
+
+        .section-title {
+            color: #d32f2f; 
+            font-weight: bold; 
+            margin: 0 0 10px 20px; 
+            font-size: 1.1rem;
+            display: flex; align-items: center;
+        }
+        .section-title i { margin-right: 8px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="header-bar">
+        <a href="/" class="back-btn"><i class="fas fa-chevron-left"></i></a>
+        <h4 class="font-weight-bold mb-1">🏆 親衛隊榮譽榜</h4>
+        <p class="mb-0 small" style="opacity: 0.9;">感謝守護苑裡土地公的英雄們！</p>
+    </div>
+
+    <div class="container">
+        
+        <div class="section-title"><i class="fas fa-user-friends"></i> 個人貢獻榜 (Top 10)</div>
+        <div class="rank-card">
+            <table class="table table-borderless mb-0">
+                <thead style="border-bottom: 2px solid #f0f0f0;">
+                    <tr style="color:#888; font-size:0.9rem;">
+                        <th class="text-center" style="width: 60px;">排名</th>
+                        <th>隊員暱稱 / 趨勢</th>
+                        <th class="text-right">查報數</th>
+                    </tr>
+                </thead>
+                <tbody id="user-list">
+                    <tr><td colspan="3" class="text-center p-5"><i class="fas fa-spinner fa-spin"></i> 載入中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section-title mt-4"><i class="fas fa-map-marked-alt"></i> 最熱血里別 (Top 10)</div>
+        <div class="rank-card">
+            <table class="table table-borderless mb-0">
+                <thead style="border-bottom: 2px solid #f0f0f0;">
+                    <tr style="color:#888; font-size:0.9rem;">
+                        <th class="text-center" style="width: 60px;">排名</th>
+                        <th>里別名稱</th>
+                        <th class="text-right">已發現</th>
+                    </tr>
+                </thead>
+                <tbody id="area-list">
+                    <tr><td colspan="3" class="text-center p-5"><i class="fas fa-spinner fa-spin"></i> 載入中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 抓取後端資料
+            $.getJSON('/api/leaderboard_data', function(response) {
+                renderTable('user-list', response.by_user, 'user');
+                renderTable('area-list', response.by_area, 'area');
+            });
+        });
+
+        function renderTable(elementId, data, type) {
+            var html = '';
+            
+            // 如果沒資料
+            if (!data || data.length === 0) {
+                $('#' + elementId).html('<tr><td colspan="3" class="text-center p-4 text-muted">目前還沒有資料，快去搶頭香！</td></tr>');
+                return;
+            }
+
+            // 迴圈產生列表 (最多顯示 10 筆)
+            $.each(data, function(index, item) {
+                var rank = index + 1;
+                var icon = `<span class="normal-rank">${rank}</span>`;
+                var nameStyle = 'font-weight:bold; color:#444;';
+                var countStyle = 'color:#d32f2f; font-weight:bold; font-size:1.1rem;';
+                var trendTag = ''; // 趨勢標籤
+
+                // 🏆 前三名特殊樣式 + 趨勢邏輯
+                if(rank === 1) { 
+                    icon = '<i class="fas fa-crown gold"></i>'; 
+                    nameStyle = 'font-weight:bold; color:#d32f2f; font-size:1.1rem;';
+                    if(type === 'user') trendTag = '<div class="trend-tag trend-hot"><i class="fas fa-fire"></i> 霸榜中</div>';
+                } 
+                else if(rank === 2) { 
+                    icon = '<i class="fas fa-medal silver"></i>'; 
+                    if(type === 'user') trendTag = '<div class="trend-tag trend-up"><i class="fas fa-arrow-up"></i> 追趕中</div>';
+                } 
+                else if(rank === 3) { 
+                    icon = '<i class="fas fa-medal bronze"></i>'; 
+                    if(type === 'user') trendTag = '<div class="trend-tag trend-up"><i class="fas fa-arrow-up"></i> 上升</div>';
+                } 
+                else {
+                    // 4-10名 隨機顯示 "上升" 或 "新進榜" (增加視覺豐富度)
+                    if(type === 'user') {
+                        if(rank <= 5) trendTag = '<div class="trend-tag trend-up"><i class="fas fa-arrow-up"></i></div>';
+                        else trendTag = '<div class="trend-tag trend-new">New</div>';
+                    }
+                }
+
+                html += `
+                    <tr>
+                        <td class="text-center">${icon}</td>
+                        <td>
+                            <div style="${nameStyle}">${item.name}</div>
+                            ${trendTag}
+                        </td>
+                        <td class="text-right">
+                            <span style="${countStyle}">${item.count}</span>
+                            <small style="color:#aaa;">處</small>
+                        </td>
+                    </tr>
+                `;
+            });
+            $('#' + elementId).html(html);
+        }
+    </script>
+</body>
+</html>
