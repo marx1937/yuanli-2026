@@ -7,36 +7,49 @@
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 
     <style>
-        /* 確保地圖滿版，且不出現捲軸 */
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: "Microsoft JhengHei", sans-serif; overflow: hidden; background-color: #f0f0f0; }
         
-        /* 地圖本體 (最底層 z-index: 1) */
         #map { height: 100%; width: 100%; z-index: 1; }
 
-        /* 🌟 新增：地圖圖框層 (中間層 z-index: 900) */
+        /* 🌟 改良版：廟簷圖框 (Temple Eaves) */
         .map-frame-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            /* 關鍵！讓滑鼠點擊可以直接穿透這張圖，操作到底下的地圖 */
+            /* 👇 關鍵：不設 100% 高度，只讓它自然垂下 */
+            height: 300px; 
             pointer-events: none; 
-            /* 確保在圖釘之上，但在按鈕之下 */
             z-index: 900; 
-            /* 讓圖片拉伸填滿整個螢幕 */
+            
             background-image: url('/static/mpg.png');
-            background-size: 100% 100%; /* 強制拉伸填滿 */
-            background-position: center;
+            /* 👇 關鍵：寬度滿版，高度自動 (保持比例，不變形) */
+            background-size: 100% auto; 
+            background-position: top center;
             background-repeat: no-repeat;
+            
+            /* 加一點陰影，讓屋頂看起來是浮在地圖上的 */
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
         }
 
-        /* 🌟 懸浮控制島 (最高層 z-index: 1000) */
+        /* 🌟 增加一點左右紅邊，維持整體感 (選配) */
+        .side-border {
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 15px; /* 邊框厚度 */
+            z-index: 899;
+            pointer-events: none;
+            background: linear-gradient(to right, #b71c1c, #d32f2f); /* 仿柱子顏色 */
+            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+        }
+        .border-left { left: 0; }
+        .border-right { right: 0; background: linear-gradient(to left, #b71c1c, #d32f2f); }
+
+        /* 懸浮控制島 */
         .control-island {
             position: absolute;
             bottom: 40px;
@@ -56,7 +69,6 @@
             border: 1px solid rgba(255,255,255,0.8);
         }
 
-        /* 標題列 */
         .control-header {
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 5px;
@@ -65,7 +77,6 @@
         .control-title i { margin-right: 8px; }
         .badge-count { background: #d32f2f; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
 
-        /* 下拉選單 */
         .custom-select {
             width: 100%; padding: 12px 15px; border: 2px solid #eee; border-radius: 15px;
             font-size: 1rem; background-color: #f8f9fa; color: #333; font-weight: bold;
@@ -75,25 +86,26 @@
         }
         .custom-select:focus { border-color: #d32f2f; background-color: white; box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1); }
 
-        /* 回首頁按鈕 (最高層 z-index: 1000) */
+        /* 回首頁按鈕 (往下移一點，避免被屋頂擋住) */
         .btn-home {
-            position: absolute; top: 20px; left: 20px; z-index: 1000;
-            background: white; color: #444; padding: 10px 18px; border-radius: 50px;
+            position: absolute; top: 90px; /* 👈 這裡往下移了 */
+            left: 20px; z-index: 1000;
+            background: white; color: #444; padding: 8px 15px; border-radius: 50px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-decoration: none; font-weight: bold;
             font-size: 0.95rem; display: flex; align-items: center; transition: 0.2s;
         }
         .btn-home:hover { transform: translateY(-2px); color: #d32f2f; }
         .btn-home i { margin-right: 6px; }
 
-        /* 彈出視窗樣式 */
         .popup-img { width: 100%; height: 140px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; border: 1px solid #eee; }
         .popup-title { font-weight: bold; font-size: 1.1rem; color: #d32f2f; margin-bottom: 4px; }
         .popup-note { font-size: 0.9rem; color: #555; line-height: 1.4; margin-bottom: 5px;}
         .popup-meta { color: #888; font-size: 0.8rem; display: flex; align-items: center; }
         .leaflet-popup-content-wrapper { border-radius: 12px; overflow: hidden; padding: 0; }
         .leaflet-popup-content { margin: 15px; width: 220px !important; }
-        /* 調整 Leaflet 原生控制項的位置，避免被圖框擋住 */
-        .leaflet-top { top: 20px; } 
+        
+        /* 調整縮放按鈕位置 (往下移，避開屋頂) */
+        .leaflet-top { top: 90px; } 
         .leaflet-right { right: 20px; }
     </style>
 </head>
@@ -102,6 +114,9 @@
     <div id="map"></div>
 
     <div class="map-frame-overlay"></div>
+    
+    <div class="side-border border-left"></div>
+    <div class="side-border border-right"></div>
 
     <a href="/" class="btn-home">
         <i class="fas fa-chevron-left"></i> 回首頁
@@ -144,14 +159,9 @@
     </div>
 
     <script>
-        // 1. 初始化地圖 (預設中心：苑裡車站)
-        // 關閉預設縮放控制，我們手動加一個位置比較好的
         var map = L.map('map', { zoomControl: false }).setView([24.4432, 120.6547], 13);
-
-        // 將縮放按鈕放右上角，並往下挪一點，避免被圖框擋住
         L.control.zoom({ position: 'topright' }).addTo(map);
 
-        // 載入地圖圖層
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
@@ -159,16 +169,13 @@
         var allMarkers = []; 
         var layerGroup = L.layerGroup().addTo(map);
 
-        // 2. 抓取資料
         $.getJSON('/api/locations', function(data) {
             allMarkers = data;
             renderMarkers('all');
         }).fail(function() {
             $('#marker-count').text('讀取失敗');
-            // alert('無法讀取地圖資料，請檢查網路連線'); // 先註解掉避免煩人
         });
 
-        // 3. 渲染圖釘 + 自動運鏡 (Smart Lens)
         function renderMarkers(filterArea) {
             layerGroup.clearLayers(); 
             var visibleCount = 0;
@@ -176,7 +183,6 @@
 
             allMarkers.forEach(function(item) {
                 if (filterArea === 'all' || item.area === filterArea) {
-                    
                     var popupContent = `
                         <div>
                             <img src="${item.image_url}" class="popup-img">
@@ -188,10 +194,7 @@
                             </div>
                         </div>
                     `;
-
-                    var marker = L.marker([item.lat, item.lng])
-                        .bindPopup(popupContent);
-                    
+                    var marker = L.marker([item.lat, item.lng]).bindPopup(popupContent);
                     layerGroup.addLayer(marker);
                     bounds.push([item.lat, item.lng]);
                     visibleCount++;
@@ -200,10 +203,9 @@
 
             $('#marker-count').text(visibleCount + ' 處');
 
-            // 🎥 鏡頭自動運鏡
             if (bounds.length > 0) {
-                // padding 設大一點，避免圖釘被圖框擋住
-                map.flyToBounds(bounds, { padding: [80, 80], maxZoom: 16, duration: 1.5 });
+                // padding 設大一點，尤其是 top，避免被屋頂擋住
+                map.flyToBounds(bounds, { padding: [50, 200], maxZoom: 16, duration: 1.5 });
             } else {
                 if(filterArea !== 'all') {
                     map.flyTo([24.4432, 120.6547], 13);
@@ -211,11 +213,9 @@
             }
         }
 
-        // 4. 下拉選單監聽
         $('#areaFilter').change(function() {
             renderMarkers($(this).val());
         });
-
     </script>
 </body>
 </html>
