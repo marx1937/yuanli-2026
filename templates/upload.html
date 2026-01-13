@@ -323,11 +323,12 @@
             if (lowerName.includes(badWords[i])) {
                 Swal.fire({
                     imageUrl: '/static/377.jpg',
-                    // 👇 圖片加大！
-                    imageWidth: 300, 
+                    // 👇 修改1: 圖片滿版 (100%)
+                    imageWidth: '100%', 
                     imageHeight: 'auto',
                     title: '暱稱不太好聽喔...',
-                    text: '請使用優雅一點的名字，土地公才聽得懂！',
+                    // 👇 修改2: 使用 html 並手動換行
+                    html: '請使用優雅一點的名字，<br>土地公才聽得懂！',
                     confirmButtonColor: '#d33',
                     confirmButtonText: 'OK'
                 });
@@ -359,11 +360,12 @@
                 if (response.status === 'block') {
                     Swal.fire({
                         imageUrl: '/static/377.jpg',
-                        // 👇 圖片加大！
-                        imageWidth: 300, 
+                        // 👇 修改: 圖片滿版
+                        imageWidth: '100%', 
                         imageHeight: 'auto',
                         title: '⚠️ 暱稱違規',
-                        text: response.message,
+                        // 👇 修改: 文字自動換行
+                        text: response.message, 
                         confirmButtonText: '好，我改一下',
                         confirmButtonColor: '#d33'
                     });
@@ -371,11 +373,13 @@
                     return; 
                 }
 
-                // 🟡 3. 重複投稿 (待審)，使用 tdo.jpg (也建議保持 200 或改 250)
+                // 🟡 3. 重複投稿 (待審)
                 if (response.status === 'pending') {
                     Swal.fire({
                         imageUrl: '/static/tdo.jpg',
-                        imageWidth: 200, imageHeight: 'auto',
+                        // 👇 也順便讓這張圖變大一點，比較好看
+                        imageWidth: '100%', 
+                        imageHeight: 'auto',
                         title: '📋 資料已送交審核',
                         html: `感謝您！不過此地點 (<b>${area}</b>) 附近似乎已有查報紀錄。<br><br>您的照片已安全存入<b>「待審核清單」</b>，管理員確認品質後就會更新上去喔！`,
                         confirmButtonText: '收到，我去抓下一隻！',
@@ -392,7 +396,9 @@
                         title: '✅ 上傳成功！',
                         text: sayText,
                         imageUrl: '/static/tdo.jpg', 
-                        imageWidth: 200, imageHeight: 'auto',
+                        // 👇 這裡也改 100%，氣勢才夠
+                        imageWidth: '100%', 
+                        imageHeight: 'auto',
                         imageAlt: '土地公',
                         confirmButtonText: '太棒了！',
                         confirmButtonColor: '#d32f2f'
