@@ -11,102 +11,84 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 
     <style>
+        /* 1. 全螢幕設定，無捲軸 */
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: "Microsoft JhengHei", sans-serif; overflow: hidden; background-color: #f0f0f0; }
         
+        /* 2. 地圖滿版 */
         #map { height: 100%; width: 100%; z-index: 1; }
 
-        /* 🌟 改良版：純淨屋頂 (移除側邊，只留頂部裝飾) */
-        .map-frame-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            /* 👇 高度設為 180px，剛好露出屋頂最精華的部分 */
-            height: 180px; 
-            pointer-events: none; 
-            z-index: 900; 
-            
-            background-image: url('/static/mpg.png');
-            /* 👇 寬度 100%，高度自動，保持屋頂漂亮比例 */
-            background-size: 100% auto; 
-            background-position: top center;
-            background-repeat: no-repeat;
-            
-            /* 加一點柔和陰影，增加層次感 */
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4));
-        }
-
-        /* 懸浮控制島 */
+        /* 3. 懸浮控制島 (畫面下方的白色圓角區塊) */
         .control-island {
             position: absolute;
-            bottom: 40px;
+            bottom: 30px; /* 距離底部 */
             left: 50%;
             transform: translateX(-50%);
-            width: 90%;
-            max-width: 400px;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 20px;
-            border-radius: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            width: 92%;
+            max-width: 450px;
+            background: rgba(255, 255, 255, 0.95); /* 半透明白底 */
+            padding: 15px 20px;
+            border-radius: 25px; /* 圓潤感 */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); /* 漂浮陰影 */
             z-index: 1000;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            backdrop-filter: blur(5px);
+            gap: 10px;
+            backdrop-filter: blur(5px); /* 毛玻璃特效 */
             border: 1px solid rgba(255,255,255,0.8);
         }
 
+        /* 控制島標題列 */
         .control-header {
             display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 5px;
+            border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 2px;
         }
         .control-title { font-weight: bold; color: #d32f2f; font-size: 1.1rem; margin: 0; display: flex; align-items: center; }
         .control-title i { margin-right: 8px; }
-        .badge-count { background: #d32f2f; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
+        .badge-count { background: #d32f2f; color: white; padding: 3px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
 
+        /* 下拉選單 */
         .custom-select {
-            width: 100%; padding: 12px 15px; border: 2px solid #eee; border-radius: 15px;
-            font-size: 1rem; background-color: #f8f9fa; color: #333; font-weight: bold;
+            width: 100%; padding: 12px 15px; border: 2px solid #f0f0f0; border-radius: 15px;
+            font-size: 1rem; background-color: #f9f9f9; color: #333; font-weight: bold;
             outline: none; transition: 0.3s; appearance: none;
+            /* 自訂下拉箭頭圖示 */
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='gray' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em;
         }
         .custom-select:focus { border-color: #d32f2f; background-color: white; box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1); }
 
-        /* 回首頁按鈕 (調整位置) */
+        /* 回首頁按鈕 (左上角懸浮) */
         .btn-home {
-            position: absolute; 
-            top: 100px; /* 👈 往下移，不要擋到屋頂 */
-            left: 20px; 
-            z-index: 1000;
-            background: white; color: #444; padding: 8px 15px; border-radius: 50px;
+            position: absolute; top: 20px; left: 20px; z-index: 1000;
+            background: white; color: #444; padding: 10px 18px; border-radius: 50px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-decoration: none; font-weight: bold;
             font-size: 0.95rem; display: flex; align-items: center; transition: 0.2s;
         }
         .btn-home:hover { transform: translateY(-2px); color: #d32f2f; }
         .btn-home i { margin-right: 6px; }
 
+        /* 彈出視窗內容樣式 */
         .popup-img { width: 100%; height: 140px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; border: 1px solid #eee; }
         .popup-title { font-weight: bold; font-size: 1.1rem; color: #d32f2f; margin-bottom: 4px; }
         .popup-note { font-size: 0.9rem; color: #555; line-height: 1.4; margin-bottom: 5px;}
         .popup-meta { color: #888; font-size: 0.8rem; display: flex; align-items: center; }
+        
+        /* Leaflet 預設樣式微調 */
         .leaflet-popup-content-wrapper { border-radius: 12px; overflow: hidden; padding: 0; }
         .leaflet-popup-content { margin: 15px; width: 220px !important; }
         
-        /* 調整縮放按鈕位置 */
-        .leaflet-top { top: 100px; } 
-        .leaflet-right { right: 20px; }
     </style>
 </head>
 <body>
 
-    <div id="map"></div>
+    <img src="/static/maps.png" alt="小幫手" 
+         style="position: fixed; bottom: 130px; right: 10px; width: 140px; height: auto; z-index: 9999; pointer-events: none; opacity: 1;">
 
-    <div class="map-frame-overlay"></div>
-    
     <a href="/" class="btn-home">
         <i class="fas fa-chevron-left"></i> 回首頁
     </a>
+
+    <div id="map"></div>
 
     <div class="control-island">
         <div class="control-header">
@@ -145,7 +127,10 @@
     </div>
 
     <script>
+        // 初始化地圖 (預設中心：苑裡)
         var map = L.map('map', { zoomControl: false }).setView([24.4432, 120.6547], 13);
+        
+        // 縮放按鈕放在右上角
         L.control.zoom({ position: 'topright' }).addTo(map);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -155,6 +140,7 @@
         var allMarkers = []; 
         var layerGroup = L.layerGroup().addTo(map);
 
+        // 讀取資料
         $.getJSON('/api/locations', function(data) {
             allMarkers = data;
             renderMarkers('all');
@@ -162,6 +148,7 @@
             $('#marker-count').text('讀取失敗');
         });
 
+        // 渲染地圖圖釘
         function renderMarkers(filterArea) {
             layerGroup.clearLayers(); 
             var visibleCount = 0;
@@ -189,8 +176,9 @@
 
             $('#marker-count').text(visibleCount + ' 處');
 
+            // 運鏡效果
             if (bounds.length > 0) {
-                map.flyToBounds(bounds, { padding: [50, 200], maxZoom: 16, duration: 1.5 });
+                map.flyToBounds(bounds, { padding: [50, 50], maxZoom: 16, duration: 1.5 });
             } else {
                 if(filterArea !== 'all') {
                     map.flyTo([24.4432, 120.6547], 13);
