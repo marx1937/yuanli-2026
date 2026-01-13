@@ -111,7 +111,7 @@ def upload_file():
                 # ⚠️ 測試模式：0.5 (500公尺)，測試完記得改回 0.05
                 dist = haversine(float(lng), float(lat), db_lng, db_lat)
                 
-                if dist < 0.5: 
+                if dist < 0.05: 
                     conn.close()
                     return jsonify({'status': 'pending', 'message': '地點重複，已送審'})
             
