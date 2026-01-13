@@ -155,21 +155,7 @@ def get_locations():
         })
     return jsonify(locations)
 
-# 4. 提供排行榜資料 API (修復排行榜數據)
-@app.route('/api/leaderboard_data')
-def get_leaderboard_data():
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    # 統計每個里上傳了幾次
-    cur.execute('SELECT area, COUNT(*) as count FROM land_gods GROUP BY area ORDER BY count DESC')
-    area_rows = cur.fetchall()
-    
-    # 統計每個暱稱上傳了幾次
-    cur.execute('SELECT nickname, COUNT(*) as count FROM land_gods GROUP BY nickname ORDER BY count DESC LIMIT 10')
-    user_rows = cur.fetchall()
-    
-    conn.close()
+
     # ================= 管理員專用 API (新增) =================
 
 # 1. 取得所有土地公資料 (顯示所有照片，包含成功的)
