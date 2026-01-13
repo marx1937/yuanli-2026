@@ -9,8 +9,7 @@ app = Flask(__name__)
 
 # --- 設定密鑰 (Session 用) ---
 app.secret_key = os.environ.get('SECRET_KEY', 'yuanli_secret_key')
-ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'ytc@358')
-
+ADMIN_PASSWORD = 'ytc@358'
 # --- Cloudinary 設定 ---
 cloudinary.config(
     cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME'),
