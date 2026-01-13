@@ -322,7 +322,6 @@
         for (var i = 0; i < badWords.length; i++) {
             if (lowerName.includes(badWords[i])) {
                 Swal.fire({
-                    // 🤬 1. 違規 (前端)：377.jpg
                     imageUrl: '/static/377.jpg',
                     imageWidth: '100%', 
                     imageHeight: 'auto',
@@ -373,12 +372,15 @@
                 // 🟡 3. 重複投稿 (待審)：pada.jpg
                 if (response.status === 'pending') {
                     Swal.fire({
-                        imageUrl: '/static/pada.jpg',  // 👈 換新圖
+                        imageUrl: '/static/pada.jpg',  
                         imageWidth: '100%', 
                         imageHeight: 'auto',
                         title: '📋 資料已送交審核',
-                        html: `感謝您！不過此地點 (<b>${area}</b>) 附近似乎已有查報紀錄。<br><br>您的照片已安全存入<b>「待審核清單」</b>，管理員確認品質後就會更新上去喔！`,
-                        // 👇 文案改為「找下一座」
+                        // 👇👇👇 這裡改了排版 👇👇👇
+                        html: `感謝您！不過此地點 (<b>${area}</b>)<br>附近似乎已有查報紀錄。<br><br>
+                               您的照片已安全存入<br><b>「待審核清單」</b><br>
+                               管理員確認品質後就會更新！`,
+                        
                         confirmButtonText: '收到，來去找下一座！',
                         confirmButtonColor: '#ff9800'
                     }).then(() => {
@@ -392,7 +394,7 @@
                     Swal.fire({
                         title: '✅ 上傳成功！',
                         text: sayText,
-                        imageUrl: '/static/happy.jpg', // 👈 換新圖
+                        imageUrl: '/static/happy.jpg',
                         imageWidth: '100%', 
                         imageHeight: 'auto',
                         imageAlt: '土地公',
