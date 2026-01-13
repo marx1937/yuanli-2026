@@ -334,8 +334,15 @@
             }
         }
 
-        $('#submitBtn').html('<i class="fas fa-robot"></i> 傳送中...')
+                $('#submitBtn').html('<i class="fas fa-robot"></i> 傳送中...')
                       .prop('disabled', true);
+
+        // 🔊 暖身語音：先取得手機發聲權限
+        if ('speechSynthesis' in window) {
+            var warmUp = new SpeechSynthesisUtterance("資料傳送中");
+            warmUp.lang = 'zh-TW';
+            window.speechSynthesis.speak(warmUp);
+        }
 
         var formData = new FormData();
         formData.append('photo', fileBlob);
@@ -354,7 +361,6 @@
             success: function(response) {
                 var displayName = rawName ? rawName : '熱心串友';
 
-                // 🔴 2. 違規 (後端)：377.jpg
                 if (response.status === 'block') {
                     Swal.fire({
                         imageUrl: '/static/377.jpg',
@@ -369,39 +375,29 @@
                     return; 
                 }
 
-                // 🟡 3. 重複投稿 (待審)：pada.jpg
                 if (response.status === 'pending') {
                     Swal.fire({
                         imageUrl: '/static/pada.jpg',  
                         imageWidth: '100%', 
                         imageHeight: 'auto',
                         title: '📋 資料已送交審核',
-                        // 👇👇👇 這裡改了排版 👇👇👇
-                        html: `感謝您！不過此地點 (<b>${area}</b>)<br>附近似乎已有查報紀錄。<br><br>
-                               您的照片已安全存入<br><b>「待審核清單」</b><br>
-                               管理員確認品質後就會更新！`,
-                        
+                        html: `感謝您！不過此地點 (<b>${area}</b>)<br>附近似乎已有查報紀錄。<br><br>您的照片已安全存入<b>「待審核清單」</b>`,
                         confirmButtonText: '收到，來去找下一座！',
                         confirmButtonColor: '#ff9800'
                     }).then(() => {
                         window.location.href = '/map';
                     });
                 } 
-                // 🟢 4. 成功：happy.jpg
                 else {
                     var sayText = '感謝 ' + area + ' 的 ' + displayName + '，土地公收到囉！';
-                    // 🔊 語音朗讀功能 (TTS)
-if ('speechSynthesis' in window) {
-    try {
-        var utterance = new SpeechSynthesisUtterance(sayText);
-        utterance.lang = 'zh-TW'; // 設定語言為繁體中文
-        utterance.rate = 1.0;     // 語速
-        window.speechSynthesis.speak(utterance);
-    } catch (e) {
-        console.log("語音播放失敗：", e);
-    }
-}
-
+                    
+                    // 🔊 播放成功語音
+                    if ('speechSynthesis' in window) {
+                        window.speechSynthesis.cancel(); 
+                        var utterance = new SpeechSynthesisUtterance(sayText);
+                        utterance.lang = 'zh-TW';
+                        window.speechSynthesis.speak(utterance);
+                    }
 
                     Swal.fire({
                         title: '✅ 上傳成功！',
@@ -417,6 +413,12 @@ if ('speechSynthesis' in window) {
                     });
                 }
             },
+
+
+                    
+                    
+                
+            
             error: function() {
                 Swal.fire({
                     title: '❌ 上傳失敗',
