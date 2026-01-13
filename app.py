@@ -170,7 +170,51 @@ def get_leaderboard_data():
     user_rows = cur.fetchall()
     
     conn.close()
+    # ================= 管理員專用 API (新增) =================
+
+# 1. 取得所有土地公資料 (顯示所有照片，包含成功的)
+@app.route('/api/admin/all_data')
+def get_all_data():
+    # 權限檢查 (先關掉方便你測試，正式上線可打開)
+    # if not session.get('is_admin'):
+    #     return jsonify({'status': 'error', 'message': '權限不足'})
+        
+    conn = get_db_connection()
+    cur = conn.cursor()
+    # 依 ID 由大到小排序 (最新的在最上面)
+    cur.execute("SELECT id, area, nickname, note, image_url, created_at FROM land_gods ORDER BY id DESC")
+    rows = cur.fetchall()
+    conn.close()
     
+    data = []
+    for row in rows:
+        data.append({
+            'id': row[0],
+            'area': row[1],
+            'nickname': row[2],
+            'note': row[3],
+            'image_url': row[4],
+            'created_at': str(row[5])
+        })
+    return jsonify(data)
+
+# 2. 刪除指定資料 (讓你刪掉測試照)
+@app.route('/api/delete/<int:id>', methods=['POST'])
+def delete_data(id):
+    # if not session.get('is_admin'):
+    #     return jsonify({'status': 'error', 'message': '權限不足'})
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM land_gods WHERE id = %s", (id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)})
+
     return jsonify({
         'by_area': [{'name': r[0], 'count': r[1]} for r in area_rows],
         'by_user': [{'name': r[0], 'count': r[1]} for r in user_rows]
