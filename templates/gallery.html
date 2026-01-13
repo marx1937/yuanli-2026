@@ -9,30 +9,41 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     
     <style>
-        body { background-color: #fafafa; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding-bottom: 60px; }
+        /* 背景改成極淡的米黃色，不再冷冰冰 */
+        body { background-color: #fffaf0; font-family: "Microsoft JhengHei", sans-serif; padding-bottom: 60px; }
 
-        /* 頂部導覽列 */
+        /* 頂部導覽列：暖紅金漸層，喜氣！ */
         .app-header {
-            background: white; border-bottom: 1px solid #dbdbdb;
+            background: linear-gradient(135deg, #d32f2f, #ff6f00); /* 紅到橘金漸層 */
+            border-bottom: none;
             padding: 10px 15px; text-align: center; position: sticky; top: 0; z-index: 100;
-            display: flex; justify-content: space-between; align-items: center; height: 50px;
+            display: flex; justify-content: space-between; align-items: center; height: 55px;
+            box-shadow: 0 2px 10px rgba(211, 47, 47, 0.3); /* 暖色陰影 */
+            color: white;
         }
-        .header-title { font-weight: bold; font-size: 1.1rem; color: #262626; }
-        .header-btn { color: #262626; font-size: 1.2rem; text-decoration: none; }
+        .header-title { font-weight: bold; font-size: 1.2rem; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+        .header-btn { color: white; font-size: 1.3rem; text-decoration: none; transition: 0.2s; }
+        .header-btn:hover { color: #ffca28; transform: scale(1.1); }
 
-        /* 🔍 篩選工具列 (新增的部分) */
+        /* 🔍 篩選工具列：改成暖黃底色 */
         .filter-bar {
-            background: #fff; padding: 10px; 
-            border-bottom: 1px solid #eee;
-            position: sticky; top: 50px; z-index: 99;
+            background: #fff8e1; /* 呼應首頁的暖黃色 */
+            padding: 12px 10px; 
+            border-bottom: 2px solid #ffecb3; /* 更深的暖黃邊框 */
+            position: sticky; top: 55px; z-index: 99;
             display: flex; gap: 10px; overflow-x: auto;
             white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
+        /* 下拉選單美化：暖色系 */
         .custom-select {
-            border-radius: 20px; font-size: 0.9rem; padding-top: 5px; padding-bottom: 5px; height: auto;
-            border: 1px solid #ddd; background-color: #f8f9fa;
+            border-radius: 20px; font-size: 0.95rem; padding-top: 6px; padding-bottom: 6px; height: auto;
+            border: 1px solid #ffd54f; /* 金黃邊框 */
+            background-color: #fff;
+            color: #d84315; /* 深橘紅色文字 */
+            font-weight: bold;
         }
-        .custom-select:focus { box-shadow: none; border-color: #aaa; }
+        .custom-select:focus { box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25); border-color: #ffb300; }
 
         /* IG 風格照片網格 */
         .gallery-grid { display: flex; flex-wrap: wrap; margin-right: -1px; margin-left: -1px; }
@@ -50,41 +61,47 @@
         }
         .gallery-item:active img { opacity: 0.8; }
 
-        .loading-state { padding: 50px; text-align: center; color: #999; width: 100%; }
+        .loading-state { padding: 50px; text-align: center; color: #d32f2f; width: 100%; font-weight: bold; }
+        .loading-state i { color: #ff6f00; }
 
         /* 模態框 */
         .modal-content { background-color: transparent; border: none; }
         .modal-body { padding: 0; text-align: center; }
-        .full-img { max-width: 100%; border-radius: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .full-img { max-width: 100%; border-radius: 10px 10px 0 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.2); }
         .img-info { 
-            background: white; padding: 15px; border-radius: 0 0 10px 10px; text-align: left; 
-            color: #333; margin-top: -5px; 
+            background: #fff8e1; /* 資訊卡也要暖黃色 */
+            padding: 20px; border-radius: 0 0 15px 15px; text-align: left; 
+            color: #333; margin-top: -2px; border-top: 3px solid #d32f2f;
         }
+        .info-area { color: #d32f2f; font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; }
+        .info-area i { margin-right: 8px; }
     </style>
 </head>
 <body>
 
     <div class="app-header">
         <a href="/" class="header-btn"><i class="fas fa-chevron-left"></i></a>
-        <div class="header-title" id="page-title">土地公圖庫牆</div>
+        <div class="header-title" id="page-title"><i class="fas fa-camera-retro"></i> 土地公影像牆</div>
         <a href="/upload" class="header-btn"><i class="far fa-plus-square"></i></a>
     </div>
 
     <div class="filter-bar">
         <select class="custom-select" id="area-filter">
             <option value="all">📍 全部地區</option>
-            </select>
+        </select>
         <select class="custom-select" id="user-filter">
             <option value="all">👤 全部貢獻者</option>
-            </select>
+        </select>
     </div>
 
-    <div class="container-fluid p-0">
+    <div class="container-fluid p-0" style="background: #fffaf0;">
         <div id="ig-grid" class="gallery-grid">
-            <div class="loading-state"><i class="fas fa-spinner fa-spin fa-2x"></i><br>載入中...</div>
+            <div class="loading-state"><i class="fas fa-spinner fa-spin fa-3x mb-3"></i><br>精彩影像載入中...</div>
         </div>
-        <div id="no-result" style="display:none; text-align:center; padding:40px; color:#999;">
-            <i class="far fa-sad-tear fa-2x"></i><br><br>找不到符合的照片耶
+        <div id="no-result" style="display:none; text-align:center; padding:50px 20px; color:#d84315;">
+            <i class="far fa-sad-tear fa-3x mb-3"></i><br>
+            <h5 style="font-weight:bold;">找不到符合的照片耶</h5>
+            <p class="small text-muted">換個條件篩選看看？</p>
         </div>
     </div>
 
@@ -94,9 +111,13 @@
                 <div class="modal-body">
                     <img src="" id="modal-img" class="full-img">
                     <div class="img-info">
-                        <h5 id="modal-area" style="font-weight:bold; margin-bottom:5px;"></h5>
-                        <p id="modal-user" style="color:#666; font-size:0.9rem; margin-bottom:5px;"></p>
-                        <p id="modal-note" style="color:#333; font-size:0.95rem;"></p>
+                        <div id="modal-area" class="info-area"></div>
+                        <hr style="border-color: #ffecb3; margin: 10px 0;">
+                        <p id="modal-user" style="color:#666; font-size:0.95rem; margin-bottom:8px; display:flex; align-items:center;">
+                            <i class="fas fa-user-circle" style="color:#ff6f00; margin-right:5px;"></i> 
+                            <span id="user-text"></span>
+                        </p>
+                        <p id="modal-note" style="color:#444; font-size:1rem; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px;"></p>
                     </div>
                 </div>
             </div>
@@ -107,79 +128,51 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        var allData = []; // 儲存所有照片資料
+        var allData = [];
 
         $(document).ready(function() {
-            // 1. 抓取資料
             $.getJSON('/api/locations', function(data) {
-                allData = data.reverse(); // 最新的在前面
-                initFilters(allData);     // 初始化篩選選單
-                renderGallery(allData);   // 畫出照片
+                allData = data.reverse();
+                initFilters(allData);
+                renderGallery(allData);
             }).fail(function() {
                 $('#ig-grid').html('<div class="loading-state">讀取失敗，請重整頁面</div>');
             });
 
-            // 2. 監聽篩選變更
             $('#area-filter, #user-filter').on('change', function() {
                 var selectedArea = $('#area-filter').val();
                 var selectedUser = $('#user-filter').val();
-
-                // 進行過濾
                 var filtered = allData.filter(function(item) {
                     var matchArea = (selectedArea === 'all') || (item.area === selectedArea);
                     var matchUser = (selectedUser === 'all') || (item.nickname === selectedUser);
                     return matchArea && matchUser;
                 });
-
                 renderGallery(filtered);
             });
         });
 
-        // 初始化篩選選單 (自動找出有的里跟人)
         function initFilters(data) {
             var areas = new Set();
             var users = new Set();
-
             data.forEach(function(item) {
                 if(item.area) areas.add(item.area);
                 if(item.nickname) users.add(item.nickname);
             });
-
-            // 填入地區選單
-            areas.forEach(function(area) {
-                $('#area-filter').append(`<option value="${area}">${area}</option>`);
-            });
-
-            // 填入使用者選單
-            users.forEach(function(user) {
-                $('#user-filter').append(`<option value="${user}">${user}</option>`);
-            });
+            areas.forEach(function(area) { $('#area-filter').append(`<option value="${area}">${area}</option>`); });
+            users.forEach(function(user) { $('#user-filter').append(`<option value="${user}">${user}</option>`); });
         }
 
-        // 渲染照片牆
         function renderGallery(data) {
             var container = $('#ig-grid');
             var noResult = $('#no-result');
             container.empty();
-
-            if (data.length === 0) {
-                noResult.show();
-                return;
-            } else {
-                noResult.hide();
-            }
-
-            // 更新標題數量
-            // $('#page-title').text(`圖庫牆 (${data.length})`);
+            if (data.length === 0) { noResult.show(); return; } else { noResult.hide(); }
 
             data.forEach(function(item) {
                 var imgUrl = item.image_url || 'https://via.placeholder.com/300?text=No+Image';
-                
                 var html = `
                     <div class="gallery-item" onclick="showPhoto('${imgUrl}', '${item.area}', '${item.nickname}', '${item.note || ""}')">
-                        <div class="square-box">
-                            <img src="${imgUrl}" loading="lazy">
-                        </div>
+                        <div class="square-box"><img src="${imgUrl}" loading="lazy"></div>
                     </div>
                 `;
                 container.append(html);
@@ -189,8 +182,8 @@
         function showPhoto(url, area, user, note) {
             $('#modal-img').attr('src', url);
             $('#modal-area').html('<i class="fas fa-map-marker-alt"></i> ' + area);
-            $('#modal-user').text('上傳者：' + (user || '匿名'));
-            $('#modal-note').text(note ? note : '(沒有備註)');
+            $('#user-text').text((user || '熱心串友'));
+            $('#modal-note').text(note ? note : '(這位串友很低調，沒有寫備註)');
             $('#photoModal').modal('show');
         }
     </script>
