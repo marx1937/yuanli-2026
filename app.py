@@ -48,6 +48,12 @@ def map_page():
 def leaderboard_page():
     return render_template('leaderboard.html')
 
+# 📸 圖庫頁面
+@app.route('/gallery')
+def gallery_page():
+    return render_template('gallery.html')
+
+
 # 🔧 管理員登入頁
 @app.route('/login')
 def login_page():
