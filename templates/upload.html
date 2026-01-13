@@ -312,27 +312,26 @@
             return;
         }
 
-        // 👮‍♂️ 髒話過濾器 (中文 + 英文)
+        // 👮‍♂️ 髒話過濾器
         var lowerName = rawName.toLowerCase();
         var badWords = [
-            '笨蛋', '壞蛋', '王八', '白痴', '幹', '死', '爛', '屌', '雞掰', // 中文
-            'fuck', 'shit', 'bitch', 'asshole', 'cunt', 'dick', 'sex'       // 英文
+            '笨蛋', '壞蛋', '王八', '白痴', '幹', '死', '爛', '屌', '雞掰', 
+            'fuck', 'shit', 'bitch', 'asshole', 'cunt', 'dick', 'sex'
         ]; 
         
         for (var i = 0; i < badWords.length; i++) {
             if (lowerName.includes(badWords[i])) {
                 Swal.fire({
+                    // 🤬 1. 違規 (前端)：377.jpg
                     imageUrl: '/static/377.jpg',
-                    // 👇 修改1: 圖片滿版 (100%)
                     imageWidth: '100%', 
                     imageHeight: 'auto',
                     title: '暱稱不太好聽喔...',
-                    // 👇 修改2: 使用 html 並手動換行
                     html: '請使用優雅一點的名字，<br>土地公才聽得懂！',
                     confirmButtonColor: '#d33',
                     confirmButtonText: 'OK'
                 });
-                return; // 擋下
+                return; 
             }
         }
 
@@ -356,15 +355,13 @@
             success: function(response) {
                 var displayName = rawName ? rawName : '熱心串友';
 
-                // 🔴 2. 後端阻擋 (違規)
+                // 🔴 2. 違規 (後端)：377.jpg
                 if (response.status === 'block') {
                     Swal.fire({
                         imageUrl: '/static/377.jpg',
-                        // 👇 修改: 圖片滿版
                         imageWidth: '100%', 
                         imageHeight: 'auto',
                         title: '⚠️ 暱稱違規',
-                        // 👇 修改: 文字自動換行
                         text: response.message, 
                         confirmButtonText: '好，我改一下',
                         confirmButtonColor: '#d33'
@@ -373,30 +370,29 @@
                     return; 
                 }
 
-                // 🟡 3. 重複投稿 (待審)
+                // 🟡 3. 重複投稿 (待審)：pada.jpg
                 if (response.status === 'pending') {
                     Swal.fire({
-                        imageUrl: '/static/tdo.jpg',
-                        // 👇 也順便讓這張圖變大一點，比較好看
+                        imageUrl: '/static/pada.jpg',  // 👈 換新圖
                         imageWidth: '100%', 
                         imageHeight: 'auto',
                         title: '📋 資料已送交審核',
                         html: `感謝您！不過此地點 (<b>${area}</b>) 附近似乎已有查報紀錄。<br><br>您的照片已安全存入<b>「待審核清單」</b>，管理員確認品質後就會更新上去喔！`,
-                        confirmButtonText: '收到，我去抓下一隻！',
+                        // 👇 文案改為「找下一座」
+                        confirmButtonText: '收到，來去找下一座！',
                         confirmButtonColor: '#ff9800'
                     }).then(() => {
                         window.location.href = '/map';
                     });
                 } 
-                // 🟢 4. 成功
+                // 🟢 4. 成功：happy.jpg
                 else {
                     var sayText = '感謝 ' + area + ' 的 ' + displayName + '，土地公收到囉！';
                     
                     Swal.fire({
                         title: '✅ 上傳成功！',
                         text: sayText,
-                        imageUrl: '/static/tdo.jpg', 
-                        // 👇 這裡也改 100%，氣勢才夠
+                        imageUrl: '/static/happy.jpg', // 👈 換新圖
                         imageWidth: '100%', 
                         imageHeight: 'auto',
                         imageAlt: '土地公',
