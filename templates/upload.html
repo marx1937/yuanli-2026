@@ -312,17 +312,19 @@
             return;
         }
 
-        // 👮‍♂️ 髒話過濾器
+        // 👮‍♂️ 髒話過濾器 (中文 + 英文)
         var lowerName = rawName.toLowerCase();
         var badWords = [
-            '笨蛋', '壞蛋', '王八', '白痴', '幹', '死', '爛', '屌', '雞掰', 
-            'fuck', 'shit', 'bitch', 'asshole', 'cunt', 'dick', 'sex'       
+            '笨蛋', '壞蛋', '王八', '白痴', '幹', '死', '爛', '屌', '雞掰', // 中文
+            'fuck', 'shit', 'bitch', 'asshole', 'cunt', 'dick', 'sex'       // 英文
         ]; 
         
         for (var i = 0; i < badWords.length; i++) {
             if (lowerName.includes(badWords[i])) {
                 Swal.fire({
-                    icon: 'warning',
+                    // 🔴 1. 觸發髒話，使用 377.jpg
+                    imageUrl: '/static/377.jpg',
+                    imageWidth: 200, imageHeight: 'auto',
                     title: '暱稱不太好聽喔...',
                     text: '請使用優雅一點的名字，土地公才聽得懂！',
                     confirmButtonColor: '#d33'
@@ -351,12 +353,13 @@
             success: function(response) {
                 var displayName = rawName ? rawName : '熱心串友';
 
-                // 🔴 1. 違規被擋
+                // 🔴 2. 後端阻擋 (違規)，也使用 377.jpg
                 if (response.status === 'block') {
                     Swal.fire({
+                        imageUrl: '/static/377.jpg',
+                        imageWidth: 200, imageHeight: 'auto',
                         title: '⚠️ 暱稱違規',
                         text: response.message,
-                        icon: 'warning',
                         confirmButtonText: '好，我改一下',
                         confirmButtonColor: '#d33'
                     });
@@ -364,19 +367,20 @@
                     return; 
                 }
 
-                // 🟡 2. 重複投稿 (黃燈) - 這一段代碼必須要後端配合才有用
+                // 🟡 3. 重複投稿 (待審)，使用 tdo.jpg
                 if (response.status === 'pending') {
                     Swal.fire({
+                        imageUrl: '/static/tdo.jpg',
+                        imageWidth: 200, imageHeight: 'auto',
                         title: '📋 資料已送交審核',
                         html: `感謝您！不過此地點 (<b>${area}</b>) 附近似乎已有查報紀錄。<br><br>您的照片已安全存入<b>「待審核清單」</b>，管理員確認品質後就會更新上去喔！`,
-                        icon: 'info',
                         confirmButtonText: '收到，我去抓下一隻！',
                         confirmButtonColor: '#ff9800'
                     }).then(() => {
                         window.location.href = '/map';
                     });
                 } 
-                // 🟢 3. 成功
+                // 🟢 4. 成功，也使用 tdo.jpg
                 else {
                     var sayText = '感謝 ' + area + ' 的 ' + displayName + '，土地公收到囉！';
                     
@@ -384,8 +388,7 @@
                         title: '✅ 上傳成功！',
                         text: sayText,
                         imageUrl: '/static/tdo.jpg', 
-                        imageWidth: 200,     
-                        imageHeight: 'auto',
+                        imageWidth: 200, imageHeight: 'auto',
                         imageAlt: '土地公',
                         confirmButtonText: '太棒了！',
                         confirmButtonColor: '#d32f2f'
