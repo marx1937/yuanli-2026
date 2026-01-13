@@ -12,125 +12,210 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; font-family: "Microsoft JhengHei", sans-serif; overflow: hidden; }
+        /* 確保地圖滿版，且不出現捲軸 */
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: "Microsoft JhengHei", sans-serif; overflow: hidden; background-color: #f0f0f0; }
         
-        /* 地圖滿版 */
+        /* 地圖本體 (最底層 z-index: 1) */
         #map { height: 100%; width: 100%; z-index: 1; }
 
-        /* 🌟 懸浮控制島 (設計感的核心) */
+        /* 🌟 新增：地圖圖框層 (中間層 z-index: 900) */
+        .map-frame-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* 關鍵！讓滑鼠點擊可以直接穿透這張圖，操作到底下的地圖 */
+            pointer-events: none; 
+            /* 確保在圖釘之上，但在按鈕之下 */
+            z-index: 900; 
+            /* 讓圖片拉伸填滿整個螢幕 */
+            background-image: url('/static/mpg.png');
+            background-size: 100% 100%; /* 強制拉伸填滿 */
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* 🌟 懸浮控制島 (最高層 z-index: 1000) */
         .control-island {
             position: absolute;
-            bottom: 30px;
+            bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
             width: 90%;
             max-width: 400px;
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 15px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            padding: 20px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             z-index: 1000;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            border: 1px solid rgba(255,255,255,0.5);
+            gap: 12px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.8);
         }
 
-        .island-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-            margin-bottom: 5px;
+        /* 標題列 */
+        .control-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 5px;
         }
+        .control-title { font-weight: bold; color: #d32f2f; font-size: 1.1rem; margin: 0; display: flex; align-items: center; }
+        .control-title i { margin-right: 8px; }
+        .badge-count { background: #d32f2f; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
 
-        .island-title {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #d32f2f;
+        /* 下拉選單 */
+        .custom-select {
+            width: 100%; padding: 12px 15px; border: 2px solid #eee; border-radius: 15px;
+            font-size: 1rem; background-color: #f8f9fa; color: #333; font-weight: bold;
+            outline: none; transition: 0.3s; appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='gray' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em;
         }
+        .custom-select:focus { border-color: #d32f2f; background-color: white; box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1); }
 
-        .filter-group {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding-bottom: 5px;
-            -webkit-overflow-scrolling: touch; /* 讓手機滑動順暢 */
+        /* 回首頁按鈕 (最高層 z-index: 1000) */
+        .btn-home {
+            position: absolute; top: 20px; left: 20px; z-index: 1000;
+            background: white; color: #444; padding: 10px 18px; border-radius: 50px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-decoration: none; font-weight: bold;
+            font-size: 0.95rem; display: flex; align-items: center; transition: 0.2s;
         }
-        
-        /* 隱藏捲軸但保留功能 */
-        .filter-group::-webkit-scrollbar { display: none; }
+        .btn-home:hover { transform: translateY(-2px); color: #d32f2f; }
+        .btn-home i { margin-right: 6px; }
 
-        .filter-btn {
-            white-space: nowrap;
-            padding: 8px 15px;
-            border-radius: 50px;
-            border: 1px solid #ddd;
-            background: white;
-            color: #555;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .filter-btn.active {
-            background: #d32f2f;
-            color: white;
-            border-color: #d32f2f;
-            box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3);
-        }
-
-        /* 左上角返回按鈕 */
-        .btn-back {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-            background: white;
-            color: #333;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            text-decoration: none;
-            font-size: 1.2rem;
-            transition: 0.2s;
-        }
-        .btn-back:hover { transform: scale(1.1); color: #d32f2f; }
-
-        /* 彈出視窗美化 */
-        .popup-img { width: 100%; border-radius: 10px; margin-bottom: 8px; }
-        .popup-title { font-weight: bold; font-size: 1.1rem; color: #d32f2f; }
-        .popup-note { font-size: 0.9rem; color: #555; margin-top: 5px; }
-
+        /* 彈出視窗樣式 */
+        .popup-img { width: 100%; height: 140px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; border: 1px solid #eee; }
+        .popup-title { font-weight: bold; font-size: 1.1rem; color: #d32f2f; margin-bottom: 4px; }
+        .popup-note { font-size: 0.9rem; color: #555; line-height: 1.4; margin-bottom: 5px;}
+        .popup-meta { color: #888; font-size: 0.8rem; display: flex; align-items: center; }
+        .leaflet-popup-content-wrapper { border-radius: 12px; overflow: hidden; padding: 0; }
+        .leaflet-popup-content { margin: 15px; width: 220px !important; }
+        /* 調整 Leaflet 原生控制項的位置，避免被圖框擋住 */
+        .leaflet-top { top: 20px; } 
+        .leaflet-right { right: 20px; }
     </style>
 </head>
 <body>
 
-    <a href="/" class="btn-back"><i class="fas fa-arrow-left"></i></a>
-
     <div id="map"></div>
 
+    <div class="map-frame-overlay"></div>
+
+    <a href="/" class="btn-home">
+        <i class="fas fa-chevron-left"></i> 回首頁
+    </a>
+
     <div class="control-island">
-        <div class="island-header">
-            <div class="island-title"><i class="fas fa-map-marked-alt"></i> 土地公分佈</div>
-            <div style="font-size:0.9rem; color:#888;">已顯示 <span id="marker-count" style="color:#d32f2f; font-weight:bold;">0</span> 處</div>
+        <div class="control-header">
+            <h5 class="control-title"><i class="fas fa-map-marked-alt"></i> 土地公分佈圖</h5>
+            <span class="badge-count" id="marker-count"><i class="fas fa-spinner fa-spin"></i> 載入中...</span>
         </div>
         
-        <div class="filter-group">
-            <button class="filter-btn active" onclick="filterMap('all', this)">全部顯示</button>
-            <button class="filter-btn" onclick="filterMap('苑東里', this)">苑東里</button>
-            <button class="filter-btn" onclick="filterMap('苑南里', this)">苑南里</button>
-            <button class="filter-btn" onclick="filterMap('苑北里', this)">苑北里</button>
-            <button class="filter-btn" onclick="filterMap('西勢里', this)">西勢里</button>
-            <button class="filter-btn" onclick="filterMap('中正里', this)">中正里</button>
-            <button class="filter-btn" onclick="filterMap('客庄里', this)">客庄里</button>
-            <button class="filter-btn" onclick="filterMap('苑港里', this)">苑港里</button>
-            <button class="filter-btn" onclick="filterMap('西平里', this)">西平里</button>
-            <button class="filter-btn" onclick="filterMap('海岸里', this)">海岸里</button>
-            <button class="filter-btn" onclick="
+        <select id="areaFilter" class="custom-select">
+            <option value="all">📍 顯示全苑裡 (預設)</option>
+            <option value="苑東里">苑東里</option>
+            <option value="苑南里">苑南里</option>
+            <option value="苑北里">苑北里</option>
+            <option value="西勢里">西勢里</option>
+            <option value="中正里">中正里</option>
+            <option value="客庄里">客庄里</option>
+            <option value="苑港里">苑港里</option>
+            <option value="西平里">西平里</option>
+            <option value="海岸里">海岸里</option>
+            <option value="房裡里">房裡里</option>
+            <option value="新復里">新復里</option>
+            <option value="田心里">田心里</option>
+            <option value="舊社里">舊社里</option>
+            <option value="山腳里">山腳里</option>
+            <option value="福田里">福田里</option>
+            <option value="蕉埔里">蕉埔里</option>
+            <option value="石鎮里">石鎮里</option>
+            <option value="南勢里">南勢里</option>
+            <option value="玉田里">玉田里</option>
+            <option value="泰田里">泰田里</option>
+            <option value="上館里">上館里</option>
+            <option value="水坡里">水坡里</option>
+            <option value="社苓里">社苓里</option>
+            <option value="山柑里">山柑里</option>
+            <option value="其他">其他</option>
+        </select>
+    </div>
+
+    <script>
+        // 1. 初始化地圖 (預設中心：苑裡車站)
+        // 關閉預設縮放控制，我們手動加一個位置比較好的
+        var map = L.map('map', { zoomControl: false }).setView([24.4432, 120.6547], 13);
+
+        // 將縮放按鈕放右上角，並往下挪一點，避免被圖框擋住
+        L.control.zoom({ position: 'topright' }).addTo(map);
+
+        // 載入地圖圖層
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        var allMarkers = []; 
+        var layerGroup = L.layerGroup().addTo(map);
+
+        // 2. 抓取資料
+        $.getJSON('/api/locations', function(data) {
+            allMarkers = data;
+            renderMarkers('all');
+        }).fail(function() {
+            $('#marker-count').text('讀取失敗');
+            // alert('無法讀取地圖資料，請檢查網路連線'); // 先註解掉避免煩人
+        });
+
+        // 3. 渲染圖釘 + 自動運鏡 (Smart Lens)
+        function renderMarkers(filterArea) {
+            layerGroup.clearLayers(); 
+            var visibleCount = 0;
+            var bounds = []; 
+
+            allMarkers.forEach(function(item) {
+                if (filterArea === 'all' || item.area === filterArea) {
+                    
+                    var popupContent = `
+                        <div>
+                            <img src="${item.image_url}" class="popup-img">
+                            <div class="popup-title">${item.nickname || '熱心串友'}</div>
+                            <div class="popup-note">${item.note || '這位土地公很低調，還沒有故事...'}</div>
+                            <div class="popup-meta">
+                                <i class="fas fa-map-marker-alt mr-1"></i> ${item.area} 
+                                <span class="ml-2">(${item.created_at.substring(0, 10)})</span>
+                            </div>
+                        </div>
+                    `;
+
+                    var marker = L.marker([item.lat, item.lng])
+                        .bindPopup(popupContent);
+                    
+                    layerGroup.addLayer(marker);
+                    bounds.push([item.lat, item.lng]);
+                    visibleCount++;
+                }
+            });
+
+            $('#marker-count').text(visibleCount + ' 處');
+
+            // 🎥 鏡頭自動運鏡
+            if (bounds.length > 0) {
+                // padding 設大一點，避免圖釘被圖框擋住
+                map.flyToBounds(bounds, { padding: [80, 80], maxZoom: 16, duration: 1.5 });
+            } else {
+                if(filterArea !== 'all') {
+                    map.flyTo([24.4432, 120.6547], 13);
+                }
+            }
+        }
+
+        // 4. 下拉選單監聽
+        $('#areaFilter').change(function() {
+            renderMarkers($(this).val());
+        });
+
+    </script>
+</body>
+</html>
