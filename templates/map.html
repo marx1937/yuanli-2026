@@ -26,217 +26,111 @@
             width: 90%;
             max-width: 400px;
             background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             padding: 15px;
-            border-radius: 25px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            z-index: 1000; /* 壓在地圖上面 */
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            z-index: 1000;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.5);
         }
 
-        /* 標題列 */
-        .control-header {
+        .island-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #eee;
-            padding-bottom: 8px;
+            padding-bottom: 10px;
             margin-bottom: 5px;
         }
-        .control-title {
+
+        .island-title {
+            font-size: 1.1rem;
             font-weight: bold;
             color: #d32f2f;
-            font-size: 1.1rem;
-            margin: 0;
         }
-        .badge-count {
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+            -webkit-overflow-scrolling: touch; /* 讓手機滑動順暢 */
+        }
+        
+        /* 隱藏捲軸但保留功能 */
+        .filter-group::-webkit-scrollbar { display: none; }
+
+        .filter-btn {
+            white-space: nowrap;
+            padding: 8px 15px;
+            border-radius: 50px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #555;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .filter-btn.active {
             background: #d32f2f;
             color: white;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-        }
-
-        /* 下拉選單美化 */
-        .custom-select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #f0f0f0;
-            border-radius: 15px;
-            font-size: 1rem;
-            background-color: #f9f9f9;
-            color: #333;
-            font-weight: bold;
-            outline: none;
-            transition: all 0.3s;
-        }
-        .custom-select:focus {
             border-color: #d32f2f;
-            background-color: white;
+            box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3);
         }
 
-        /* 頂部回首頁按鈕 (懸浮左上) */
-        .btn-home {
+        /* 左上角返回按鈕 */
+        .btn-back {
             position: absolute;
             top: 20px;
             left: 20px;
             z-index: 1000;
             background: white;
             color: #333;
-            padding: 10px 15px;
-            border-radius: 50px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 0.9rem;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
             display: flex;
+            justify-content: center;
             align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: 0.2s;
         }
-        .btn-home i { margin-right: 5px; }
+        .btn-back:hover { transform: scale(1.1); color: #d32f2f; }
 
-        /* 彈出視窗樣式 */
-        .popup-img {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 5px;
-        }
-        .popup-title { font-weight: bold; font-size: 1rem; color: #d32f2f; margin-bottom: 2px; }
-        .popup-note { font-size: 0.85rem; color: #666; }
+        /* 彈出視窗美化 */
+        .popup-img { width: 100%; border-radius: 10px; margin-bottom: 8px; }
+        .popup-title { font-weight: bold; font-size: 1.1rem; color: #d32f2f; }
+        .popup-note { font-size: 0.9rem; color: #555; margin-top: 5px; }
+
     </style>
 </head>
 <body>
-    
-        <img src="/static/maps.png" alt="小幫手" 
-         style="position: fixed; bottom: 115px; right: 20px; width: 150px; height: auto; z-index: 9999; pointer-events: none; opacity: 1;">
 
-
-
-    <a href="/" class="btn-home">
-        <i class="fas fa-chevron-left"></i> 回首頁
-    </a>
+    <a href="/" class="btn-back"><i class="fas fa-arrow-left"></i></a>
 
     <div id="map"></div>
 
     <div class="control-island">
-        <div class="control-header">
-            <h5 class="control-title"><i class="fas fa-map-marked-alt"></i> 土地公分佈圖</h5>
-            <span class="badge-count" id="marker-count">載入中...</span>
+        <div class="island-header">
+            <div class="island-title"><i class="fas fa-map-marked-alt"></i> 土地公分佈</div>
+            <div style="font-size:0.9rem; color:#888;">已顯示 <span id="marker-count" style="color:#d32f2f; font-weight:bold;">0</span> 處</div>
         </div>
         
-        <select id="areaFilter" class="custom-select">
-            <option value="all">📍 顯示全苑裡 (預設)</option>
-            <option value="苑東里">苑東里</option>
-            <option value="苑南里">苑南里</option>
-            <option value="苑北里">苑北里</option>
-            <option value="西勢里">西勢里</option>
-            <option value="中正里">中正里</option>
-            <option value="客庄里">客庄里</option>
-            <option value="苑港里">苑港里</option>
-            <option value="西平里">西平里</option>
-            <option value="海岸里">海岸里</option>
-            <option value="房裡里">房裡里</option>
-            <option value="新復里">新復里</option>
-            <option value="田心里">田心里</option>
-            <option value="舊社里">舊社里</option>
-            <option value="山腳里">山腳里</option>
-            <option value="福田里">福田里</option>
-            <option value="蕉埔里">蕉埔里</option>
-            <option value="石鎮里">石鎮里</option>
-            <option value="南勢里">南勢里</option>
-            <option value="玉田里">玉田里</option>
-            <option value="泰田里">泰田里</option>
-            <option value="上館里">上館里</option>
-            <option value="水坡里">水坡里</option>
-            <option value="社苓里">社苓里</option>
-            <option value="山柑里">山柑里</option>
-            <option value="其他">其他</option>
-        </select>
-    </div>
-
-    <script>
-        // 1. 初始化地圖 (預設中心：苑裡車站附近)
-        var map = L.map('map', { zoomControl: false }).setView([24.443, 120.645], 13);
-
-        // 把縮放按鈕移到右上角 (避免擋到手指)
-        L.control.zoom({ position: 'topright' }).addTo(map);
-
-        // 載入地圖圖層 (OpenStreetMap)
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; 串友貢獻'
-        }).addTo(map);
-
-        // 定義全域變數
-        var allMarkers = []; // 存所有圖釘資料
-        var layerGroup = L.layerGroup().addTo(map); // 圖釘圖層
-
-        // 2. 抓取資料
-        $.getJSON('/api/data', function(data) {
-            
-            // 存下來，方便等一下篩選用
-            allMarkers = data;
-            
-            // 一開始先顯示全部
-            renderMarkers('all');
-        });
-
-        // 3. 核心功能：渲染圖釘與切換視角
-        function renderMarkers(filterArea) {
-            layerGroup.clearLayers(); // 清空地圖上的點
-            var visibleCount = 0;
-            var bounds = []; // 用來計算鏡頭要飛去哪
-
-            allMarkers.forEach(function(item) {
-                // 判斷是否符合篩選條件
-                if (filterArea === 'all' || item.area === filterArea) {
-                    
-                    // 建立彈出視窗內容 (有照片、名字、備註)
-                    var popupContent = `
-                        <div style="width: 200px;">
-                            <img src="${item.image_url}" class="popup-img">
-                            <div class="popup-title">${item.nickname || '熱心串友'}</div>
-                            <div class="popup-note">${item.note || '沒有備註'}</div>
-                            <div class="text-muted small mt-1"><i class="fas fa-map-marker-alt"></i> ${item.area}</div>
-                        </div>
-                    `;
-
-                    // 建立圖釘
-                    var marker = L.marker([item.lat, item.lng])
-                        .bindPopup(popupContent);
-                    
-                    layerGroup.addLayer(marker);
-                    
-                    // 收集座標，為了等一下鏡頭自動對焦
-                    bounds.push([item.lat, item.lng]);
-                    visibleCount++;
-                }
-            });
-
-            // 更新計數器
-            $('#marker-count').text(visibleCount + ' 處');
-
-            // 🌟 鏡頭自動運鏡 (Smart Lens)
-            if (bounds.length > 0) {
-                // 如果有點，就飛過去包覆住所有點
-                map.flyToBounds(bounds, { padding: [50, 50], maxZoom: 16 });
-            } else if (filterArea !== 'all') {
-                // 如果選了某里但沒資料
-                alert('親愛的串友！「' + filterArea + '」目前還沒有人查報喔！\n趕快去當第一名！');
-            } else {
-                // 如果是全選但沒資料 (完全空的狀態)
-                map.setView([24.443, 120.645], 13);
-            }
-        }
-
-        // 4. 監聽選單改變
-        $('#areaFilter').change(function() {
-            var selectedArea = $(this).val();
-            renderMarkers(selectedArea);
-        });
-
-    </script>
-</body>
-</html>
+        <div class="filter-group">
+            <button class="filter-btn active" onclick="filterMap('all', this)">全部顯示</button>
+            <button class="filter-btn" onclick="filterMap('苑東里', this)">苑東里</button>
+            <button class="filter-btn" onclick="filterMap('苑南里', this)">苑南里</button>
+            <button class="filter-btn" onclick="filterMap('苑北里', this)">苑北里</button>
+            <button class="filter-btn" onclick="filterMap('西勢里', this)">西勢里</button>
+            <button class="filter-btn" onclick="filterMap('中正里', this)">中正里</button>
+            <button class="filter-btn" onclick="filterMap('客庄里', this)">客庄里</button>
+            <button class="filter-btn" onclick="filterMap('苑港里', this)">苑港里</button>
+            <button class="filter-btn" onclick="filterMap('西平里', this)">西平里</button>
+            <button class="filter-btn" onclick="filterMap('海岸里', this)">海岸里</button>
+            <button class="filter-btn" onclick="
