@@ -31,22 +31,22 @@
             z-index: 1;
         }
         
-        /* 🔦 聚焦燈控制區 (增加上方留白，給公仔站) */
+        /* 🔦 聚焦燈控制區 */
         .spotlight-control {
             position: relative;
             width: 90%; max-width: 450px; 
-            margin: 80px auto 20px auto; /* 🔥 加大到 80px，給公仔足夠空間 */
+            margin: 80px auto 20px auto; 
             background: white; padding: 10px 15px; border-radius: 50px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             display: flex; align-items: center; justify-content: space-between;
             z-index: 20;
         }
         
-        /* 🧞 小幫手公仔 (位置大修正：不擋按鈕) */
+        /* 🧞 小幫手公仔 */
         .helper-mascot {
             position: absolute;
-            top: -65px;  /* ⬆️ 往上提，站在框框上面 */
-            right: 5px;  /* ➡️ 靠最右邊，不擋中間文字 */
+            top: -65px;  
+            right: 5px;  
             height: 85px; width: auto; 
             cursor: pointer;
             filter: drop-shadow(0 3px 5px rgba(0,0,0,0.2));
@@ -61,11 +61,11 @@
             50% { transform: translateY(-5px); }
         }
 
-        /* 💬 小幫手氣泡框 (跟著公仔往上移) */
+        /* 💬 小幫手氣泡框 (移除箭頭版) */
         .helper-bubble {
             position: absolute;
-            top: -75px;   /* ⬆️ 更高 */
-            right: 75px;  /* ⬅️ 保持在公仔左側 */
+            top: -70px;   /* 位置微調 */
+            right: 75px;  
             background: #2d3436;
             color: white;
             padding: 6px 12px;
@@ -79,10 +79,7 @@
             opacity: 0.95;
             animation: bounce-bubble 2s infinite;
         }
-        .helper-bubble::after {
-            content: ''; position: absolute; bottom: 8px; right: -6px; 
-            border-width: 6px 0 6px 6px; border-style: solid; border-color: transparent transparent transparent #2d3436;
-        }
+        /* ❌ 這裡原本是箭頭的 CSS，已經被我刪除了！ */
 
         @keyframes bounce-bubble {
             0%, 100% { transform: translateY(0); }
@@ -136,35 +133,31 @@
             <i class="fas fa-search-location" style="color:#d32f2f; margin-right:8px; font-size:1.2rem;"></i>
             <select id="district-select" class="form-control form-control-sm" style="border-radius:20px; border:1px solid #eee; background:#f9f9f9; height: 35px;">
                 <option value="all">顯示全苑裡 (預設)</option>
-                <optgroup label="市區/海岸">
-                    <option value="苑東里">苑東里</option>
-                    <option value="苑南里">苑南里</option>
-                    <option value="苑北里">苑北里</option>
-                    <option value="西平里">西平里</option>
-                    <option value="海岸里">海岸里</option>
-                    <option value="苑港里">苑港里</option>
-                    <option value="西勢里">西勢里</option>
-                    <option value="房裡里">房裡里</option>
-                    <option value="客庄里">客庄里</option>
-                    <option value="中正里">中正里</option>
-                </optgroup>
-                <optgroup label="平原/山區">
-                    <option value="苑坑里">苑坑里</option>
-                    <option value="水坡里">水坡里</option>
-                    <option value="新復里">新復里</option>
-                    <option value="山腳里">山腳里</option>
-                    <option value="舊社里">舊社里</option>
-                    <option value="福田里">福田里</option>
-                    <option value="石鎮里">石鎮里</option>
-                    <option value="南勢里">南勢里</option>
-                    <option value="泰田里">泰田里</option>
-                    <option value="上館里">上館里</option>
-                    <option value="玉田里">玉田里</option>
-                    <option value="社苓里">社苓里</option>
-                    <option value="山柑里">山柑里</option>
-                    <option value="蕉埔里">蕉埔里</option>
-                    <option value="田心里">田心里</option>
-                </optgroup>
+                <option value="苑東里">苑東里</option>
+                <option value="苑南里">苑南里</option>
+                <option value="苑北里">苑北里</option>
+                <option value="西平里">西平里</option>
+                <option value="海岸里">海岸里</option>
+                <option value="苑港里">苑港里</option>
+                <option value="西勢里">西勢里</option>
+                <option value="房裡里">房裡里</option>
+                <option value="新復里">新復里</option>
+                <option value="客庄里">客庄里</option>
+                <option value="中正里">中正里</option>
+                <option value="苑坑里">苑坑里</option>
+                <option value="水坡里">水坡里</option>
+                <option value="山腳里">山腳里</option>
+                <option value="舊社里">舊社里</option>
+                <option value="福田里">福田里</option>
+                <option value="石鎮里">石鎮里</option>
+                <option value="南勢里">南勢里</option>
+                <option value="泰田里">泰田里</option>
+                <option value="上館里">上館里</option>
+                <option value="玉田里">玉田里</option>
+                <option value="社苓里">社苓里</option>
+                <option value="山柑里">山柑里</option>
+                <option value="蕉埔里">蕉埔里</option>
+                <option value="田心里">田心里</option>
             </select>
         </div>
         
@@ -233,7 +226,7 @@
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
     <script>
-        // 🔥 這裡補齊了 25 里的座標 (概略中心點)
+        // 25里座標 (保留著，導航用)
         const districts = {
             "苑東里": [24.443, 120.655], "苑南里": [24.441, 120.652], "苑北里": [24.445, 120.653],
             "西平里": [24.442, 120.648], "海岸里": [24.450, 120.635], "苑港里": [24.455, 120.640],
