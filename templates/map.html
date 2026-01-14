@@ -61,10 +61,10 @@
             50% { transform: translateY(-5px); }
         }
 
-        /* 💬 小幫手氣泡框 (移除箭頭版) */
+        /* 💬 小幫手氣泡框 */
         .helper-bubble {
             position: absolute;
-            top: -70px;   /* 位置微調 */
+            top: -70px;   
             right: 75px;  
             background: #2d3436;
             color: white;
@@ -79,8 +79,6 @@
             opacity: 0.95;
             animation: bounce-bubble 2s infinite;
         }
-        /* ❌ 這裡原本是箭頭的 CSS，已經被我刪除了！ */
-
         @keyframes bounce-bubble {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-3px); }
@@ -130,7 +128,8 @@
 
     <div class="spotlight-control">
         <div style="flex-grow: 1; display:flex; align-items:center;">
-            <i class="fas fa-search-location" style="color:#d32f2f; margin-right:8px; font-size:1.2rem;"></i>
+            <i class="fas fa-compass" style="color:#d32f2f; margin-right:8px; font-size:1.4rem;"></i>
+            
             <select id="district-select" class="form-control form-control-sm" style="border-radius:20px; border:1px solid #eee; background:#f9f9f9; height: 35px;">
                 <option value="all">顯示全苑裡 (預設)</option>
                 <option value="苑東里">苑東里</option>
@@ -168,7 +167,7 @@
     <div id="map"></div>
     
     <a href="/upload" class="btn-floating-text">
-        <i class="fas fa-camera" style="margin-right:5px;"></i> 發現神隊友？快幫祂拍照！
+        <i class="fas fa-camera-retro" style="margin-right:5px; font-size:1.1rem;"></i> 發現神隊友？快幫祂拍照！
     </a>
 
     <div class="modal fade" id="imageModal" tabindex="-1">
@@ -213,11 +212,19 @@
     </div>
 
     <div class="bottom-nav">
-        <a href="/" class="nav-item"><i class="fas fa-home"></i><span>首頁</span></a>
-        <a href="/map" class="nav-item active"><i class="fas fa-map-marked-alt"></i><span>地圖</span></a>
-        <a href="/upload" class="nav-center-btn"><i class="fas fa-camera"></i></a>
-        <a href="/gallery" class="nav-item"><i class="fas fa-images"></i><span>圖庫</span></a>
-        <a href="/leaderboard" class="nav-item"><i class="fas fa-list-ol"></i><span>榜單</span></a>
+        <a href="/" class="nav-item">
+            <i class="fas fa-archway"></i> <span>首頁</span> </a>
+        <a href="/map" class="nav-item active">
+            <i class="fas fa-map-signs"></i> <span>地圖</span> </a>
+        
+        <a href="/upload" class="nav-center-btn">
+            <i class="fas fa-camera-retro"></i> </a>
+
+        <a href="/gallery" class="nav-item">
+            <i class="fas fa-images"></i> <span>圖庫</span>
+        </a>
+        <a href="/leaderboard" class="nav-item">
+            <i class="fas fa-scroll"></i> <span>榜單</span> </a>
     </div>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -226,7 +233,6 @@
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
     <script>
-        // 25里座標 (保留著，導航用)
         const districts = {
             "苑東里": [24.443, 120.655], "苑南里": [24.441, 120.652], "苑北里": [24.445, 120.653],
             "西平里": [24.442, 120.648], "海岸里": [24.450, 120.635], "苑港里": [24.455, 120.640],
@@ -251,7 +257,8 @@
 
         window.showLargeImage = function(imgUrl, hunterName, lat, lng) {
             $('#modalImage').attr('src', imgUrl);
-            $('#modalHunterName').text('🏆 獵人：' + hunterName);
+            var displayName = hunterName ? ('🏆 熱心串友：' + hunterName) : '🏆 熱心串友';
+            $('#modalHunterName').text(displayName);
             $('#navBtn').attr('href', `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`);
             $('#imageModal').modal('show');
         };
@@ -261,7 +268,14 @@
             if (data.length > 0) {
                 var groupBounds = L.latLngBounds();
                 data.forEach(function(item) {
-                    var hunterName = item.nickname || '熱心串友'; 
+                    var rawName = item.nickname;
+                    var displayHtml = '';
+                    if (rawName && rawName.trim() !== '') {
+                        displayHtml = `<span style="color:#d35400; font-weight:bold; font-size:1rem;">🏆 熱心串友：${rawName}</span><br>`;
+                    } else {
+                        displayHtml = `<span style="color:#d35400; font-weight:bold; font-size:1rem;">🏆 熱心串友</span><br>`;
+                    }
+
                     var locText = item.description;
                     if(!locText || locText === '未知') {
                         locText = `座標: ${item.lat.toFixed(4)}, ${item.lng.toFixed(4)}`;
@@ -270,9 +284,9 @@
                     var popupContent = `
                         <div style="text-align:center;">
                             <b style="color:#d32f2f; font-size:1.1rem;">🎉 發現神隊友！</b><br>
-                            <span style="color:#d35400; font-weight:bold; font-size:1rem;">🏆 獵人：${hunterName}</span><br>
+                            ${displayHtml}
                             <span style="color:#666; font-size:0.9rem;">📍 位置：${locText}</span><br>
-                            <img src="${item.image_url}" onclick="showLargeImage('${item.image_url}', '${hunterName}', ${item.lat}, ${item.lng})"
+                            <img src="${item.image_url}" onclick="showLargeImage('${item.image_url}', '${rawName || ''}', ${item.lat}, ${item.lng})"
                                  style="width:120px; height:120px; object-fit:cover; border-radius:10px; margin-top:8px; border:2px solid #eee; cursor:pointer;" title="點擊放大">
                             <br>
                             <a href="https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}" target="_blank" style="display:inline-block; margin-top:5px; font-size:0.8rem; color:#2980b9;">
