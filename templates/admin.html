@@ -8,20 +8,22 @@
     <style>
         body { padding: 20px; background-color: #f8f9fa; }
         .table img { width: 100px; height: 100px; object-fit: cover; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        /* 重複資料的警告色 (紅色) */
         .duplicate-row { background-color: #ffe6e6 !important; border-left: 5px solid #dc3545; }
-        .warning-tag { color: #dc3545; font-weight: bold; font-size: 0.9rem; }
+        .warning-tag { color: #dc3545; font-weight: bold; font-size: 0.85rem; display: block; margin-top: 5px; }
+        .coord-info { font-size: 0.75rem; color: #666; font-family: monospace; }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3>👮‍♂️ 土地公審核總部</h3>
+            <h3>🛰️ 土地公審核總部 (GPS版)</h3>
             <a href="/" class="btn btn-outline-secondary">回地圖首頁</a>
         </div>
         
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle"></i> 
-            紅色背景代表 <b>同一個里有重複照片</b>。請保留一張最好的，刪除其他的（這就是「審核」）。
+        <div class="alert alert-warning">
+            <i class="fas fa-satellite-dish"></i> 
+            系統會自動計算距離。如果兩張照片距離 <b>小於 20 公尺</b>，會標示為 <span style="background:#ffe6e6; padding:0 5px; color:#dc3545;">紅色</span>，代表可能是重複回報。
         </div>
 
         <div class="table-responsive">
@@ -30,14 +32,15 @@
                     <tr>
                         <th style="width: 5%">ID</th>
                         <th style="width: 15%">照片</th>
-                        <th style="width: 15%">地區 (里)</th>
+                        <th style="width: 15%">地區</th>
+                        <th style="width: 25%">座標 / 距離分析</th>
                         <th style="width: 15%">上傳者</th>
-                        <th style="width: 20%">備註</th>
-                        <th style="width: 10%">審核操作</th>
+                        <th style="width: 15%">備註</th>
+                        <th style="width: 10%">操作</th>
                     </tr>
                 </thead>
                 <tbody id="data-list">
-                    <tr><td colspan="6" class="text-center p-5">載入資料中...</td></tr>
+                    <tr><td colspan="7" class="text-center p-5">正在進行 GPS 比對分析...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -55,39 +58,64 @@
             $.getJSON('/api/admin/all_data', function(data) {
                 var html = '';
                 
-                // 1. 先計算每個里出現幾次
-                var areaCounts = {};
-                data.forEach(item => {
-                    var area = item.area || "未知";
-                    areaCounts[area] = (areaCounts[area] || 0) + 1;
-                });
+                // 1. 進行 GPS 交叉比對，找出重複的項目
+                // 先把資料按 ID 倒序排列 (新的在上面)
+                data.sort((a, b) => b.id - a.id);
+
+                // 為每個項目加上 isDuplicate 標記
+                for(let i = 0; i < data.length; i++) {
+                    data[i].isDuplicate = false;
+                    data[i].nearbyIds = []; // 紀錄跟誰太近
+                    
+                    for(let j = 0; j < data.length; j++) {
+                        if(i === j) continue; // 不跟自己比
+
+                        // 計算距離 (單位：公里)
+                        let dist = getDistanceFromLatLonInKm(
+                            data[i].lat, data[i].lng,
+                            data[j].lat, data[j].lng
+                        );
+
+                        // 如果距離小於 0.02 公里 (也就是 20 公尺)
+                        if(dist < 0.02) {
+                            data[i].isDuplicate = true;
+                            data[i].nearbyIds.push(data[j].id);
+                        }
+                    }
+                }
 
                 // 2. 產生表格
-                // 我們按照「地區」排序，這樣重複的會排在一起，方便你看
-                data.sort((a, b) => (a.area > b.area) ? 1 : -1);
-
                 data.forEach(function(item) {
-                    var area = item.area || "未知";
-                    var isDuplicate = areaCounts[area] > 1; // 如果出現超過1次，就是重複
-                    var rowClass = isDuplicate ? 'duplicate-row' : '';
-                    var warning = isDuplicate ? '<br><span class="warning-tag"><i class="fas fa-exclamation-triangle"></i> 重複回報</span>' : '';
+                    var rowClass = item.isDuplicate ? 'duplicate-row' : '';
+                    
+                    var warningMsg = '';
+                    if (item.isDuplicate) {
+                        warningMsg = `<span class="warning-tag">
+                            <i class="fas fa-exclamation-circle"></i> 位置重複警示!<br>
+                            (與 ID: ${item.nearbyIds.join(', ')} 太近)
+                        </span>`;
+                    }
 
                     html += `
                         <tr class="${rowClass}">
-                            <td class="align-middle">${item.id}</td>
+                            <td class="align-middle font-weight-bold">${item.id}</td>
                             <td class="align-middle">
                                 <a href="${item.image_url}" target="_blank">
                                     <img src="${item.image_url}">
                                 </a>
                             </td>
-                            <td class="align-middle" style="font-size:1.1rem; font-weight:bold;">
-                                ${area}
-                                ${warning}
+                            <td class="align-middle">
+                                <span style="font-size:1.1rem; font-weight:bold;">${item.area}</span>
+                            </td>
+                            <td class="align-middle">
+                                <div class="coord-info">Lat: ${item.lat}</div>
+                                <div class="coord-info">Lng: ${item.lng}</div>
+                                ${warningMsg}
                             </td>
                             <td class="align-middle">${item.nickname}</td>
-                            <td class="align-middle text-muted">${item.note || ''}</td>
+                            <td class="align-middle text-muted small">${item.note || ''}</td>
                             <td class="align-middle">
-                                <button class="btn btn-danger btn-block" onclick="deleteItem(${item.id})">
+                                <button class="btn btn-danger btn-block btn-sm" onclick="deleteItem(${item.id})">
                                     🗑️ 刪除
                                 </button>
                             </td>
@@ -98,11 +126,28 @@
             });
         }
 
+        // --- 數學工具：計算兩點 GPS 距離 (Haversine 公式) ---
+        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+            var R = 6371; // 地球半徑 (km)
+            var dLat = deg2rad(lat2-lat1);
+            var dLon = deg2rad(lon2-lon1); 
+            var a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2); 
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+            var d = R * c; // 距離 (km)
+            return d;
+        }
+
+        function deg2rad(deg) {
+            return deg * (Math.PI/180)
+        }
+
+        // 刪除功能
         function deleteItem(id) {
             if(confirm('確定要刪除這張照片嗎？(ID: ' + id + ')')) {
                 $.post('/api/delete', { id: id }, function(response) {
                     if(response.success) {
-                        // alert('刪除成功');
                         loadData(); // 重新整理
                     } else {
                         alert('刪除失敗：' + response.message);
