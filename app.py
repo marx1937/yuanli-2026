@@ -139,11 +139,13 @@ def upload_file():
     return jsonify({'status': 'error', 'message': '資料不完整'})
 
 # 3. 提供地圖資料 API
+# 📌 取得所有地點資料 (公開 API)
 @app.route('/api/locations')
 def get_locations():
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute('SELECT id, lat, lng, image_url, note, nickname, area, created_at FROM land_gods;')
+    # 確保有抓 lat 和 lng
+    cur.execute('SELECT id, lat, lng, area, note, image_url, nickname, created_at FROM land_gods')
     rows = cur.fetchall()
     conn.close()
     
@@ -153,13 +155,14 @@ def get_locations():
             'id': row[0],
             'lat': row[1],
             'lng': row[2],
-            'image_url': row[3],
+            'area': row[3],
             'note': row[4],
-            'nickname': row[5],
-            'area': row[6],
-            'created_at': row[7]
+            'image_url': row[5],
+            'nickname': row[6],
+            'timestamp': str(row[7])
         })
     return jsonify(locations)
+
 
 
     # ================= 管理員專用 API (新增) =================
