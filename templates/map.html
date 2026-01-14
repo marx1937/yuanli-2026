@@ -99,4 +99,215 @@
         /* 🔴 地圖專屬：懸浮文字按鈕 (文案與樣式優化) */
         .btn-floating-text {
             position: fixed; 
-            bottom:
+            bottom: 95px; /* 距離底部按鈕的高度 */
+            left: 50%; 
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            color: #d63031; 
+            border: 2px solid #ff7675; /* 邊框顏色活潑一點 */
+            border-radius: 30px; 
+            padding: 8px 25px;
+            font-size: 0.9rem; 
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            z-index: 900; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            white-space: nowrap;
+            animation: pulse-text 2s infinite; /* 讓它輕微跳動吸引注意 */
+        }
+        
+        @keyframes pulse-text {
+            0% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.05); }
+            100% { transform: translateX(-50%) scale(1); }
+        }
+
+        /* 底部導覽列 */
+        .bottom-nav { 
+            position: fixed; bottom: 0; width: 100%; 
+            background: white; border-top: 1px solid #eee; 
+            padding: 0 10px; height: 70px;
+            display: flex; justify-content: space-around; align-items: center; 
+            z-index: 999; box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+        }
+        
+        .nav-item { 
+            text-align: center; color: #b2bec3; text-decoration: none; 
+            font-size: 0.7rem; flex: 1; display: flex; flex-direction: column; align-items: center;
+        }
+        .nav-item i { font-size: 1.4rem; margin-bottom: 2px; }
+        .nav-item.active { color: #d32f2f; font-weight: bold; }
+        
+        /* 中間凸起大按鈕 */
+        .nav-center-btn {
+            width: 65px; height: 65px;
+            background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
+            border-radius: 50%;
+            border: 5px solid #f8f9fa;
+            color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 -5px 15px rgba(214, 48, 49, 0.3);
+            transform: translateY(-25px);
+            position: relative; z-index: 1000;
+        }
+        .nav-center-btn:hover { color: white; transform: translateY(-30px); }
+
+    </style>
+</head>
+<body>
+
+    <div class="spotlight-control">
+        <div style="flex-grow: 1; display:flex; align-items:center;">
+            <i class="fas fa-search-location" style="color:#d32f2f; margin-right:8px; font-size:1.2rem;"></i>
+            <select id="district-select" class="form-control form-control-sm" style="border-radius:20px; border:1px solid #eee; background:#f9f9f9; height: 35px;">
+                <option value="all">顯示全苑裡 (預設)</option>
+                <option value="苑東里">苑東里</option>
+                <option value="苑南里">苑南里</option>
+                <option value="苑北里">苑北里</option>
+                <option value="山腳里">山腳里</option>
+                </select>
+        </div>
+        
+        <div class="helper-bubble">我是小幫手 👋</div>
+        <img src="/static/maps.png" class="helper-mascot" alt="小幫手" data-toggle="modal" data-target="#mapHelperModal">
+    </div>
+
+    <div id="map"></div>
+    
+    <a href="/upload" class="btn-floating-text">
+        <i class="fas fa-camera" style="margin-right:5px;"></i> 發現神隊友？快幫祂拍照！
+    </a>
+
+    <div class="modal fade" id="imageModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: transparent; border: none;">
+                <div class="modal-body text-center" style="position: relative;">
+                    <button type="button" class="close" data-dismiss="modal" style="position: absolute; right: 0; top: -30px; color: white; opacity: 1; font-size: 2rem;">×</button>
+                    <h5 id="modalHunterName" style="color: white; font-weight: bold; text-shadow: 0 2px 5px rgba(0,0,0,0.5);"></h5>
+                    <img id="modalImage" src="" style="width: 100%; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); margin-bottom: 20px;">
+                    <a id="navBtn" href="#" target="_blank" class="btn btn-primary btn-block" style="border-radius: 30px; font-weight: bold; padding: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                        <i class="fas fa-location-arrow"></i> Google Maps 帶我去
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="mapHelperModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 20px;">
+                <div class="modal-header" style="border-bottom:none;">
+                    <h5 class="modal-title" style="font-weight:bold; color:#2d3436;">🗺️ 地圖怎麼看？</h5>
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                </div>
+                <div class="modal-body" style="padding:0 20px 20px 20px;">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex align-items-center">
+                            <div style="width:30px; height:30px; background-color:#6ecc39; border-radius:50%; color:white; display:flex; align-items:center; justify-content:center; margin-right:15px; font-weight:bold;">10</div>
+                            <span><b>彩色圓圈 (聚合)</b><br><small class="text-muted">這區有 10 尊，點擊看細節！</small></span>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-map-marker-alt" style="color:#2980b9; font-size:1.5rem; margin-right:18px; margin-left:5px;"></i>
+                            <span><b>藍色圖釘</b><br><small class="text-muted">這裡有一尊土地公！</small></span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="modal-footer" style="border-top:none;">
+                    <button type="button" class="btn btn-primary btn-block" data-dismiss="modal" style="border-radius:30px;">懂了，開始尋寶！</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="/" class="nav-item">
+            <i class="fas fa-home"></i> <span>首頁</span>
+        </a>
+        <a href="/map" class="nav-item active">
+            <i class="fas fa-map-marked-alt"></i> <span>地圖</span>
+        </a>
+        
+        <a href="/upload" class="nav-center-btn">
+            <i class="fas fa-camera"></i>
+        </a>
+
+        <a href="/gallery" class="nav-item">
+            <i class="fas fa-images"></i> <span>圖庫</span>
+        </a>
+        <a href="/leaderboard" class="nav-item">
+            <i class="fas fa-list-ol"></i> <span>榜單</span>
+        </a>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+
+    <script>
+        const districts = { "苑東里": [24.443, 120.655], "苑南里": [24.441, 120.652], "山腳里": [24.415, 120.685] };
+        var map = L.map('map').setView([24.44, 120.65], 13); 
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+        var markers = L.markerClusterGroup({ disableClusteringAtZoom: 16 });
+        var allLocations = [];
+
+        $.getJSON('/api/locations', function(data) {
+            allLocations = data;
+            renderMarkers(allLocations);
+        });
+
+        window.showLargeImage = function(imgUrl, hunterName, lat, lng) {
+            $('#modalImage').attr('src', imgUrl);
+            $('#modalHunterName').text('🏆 獵人：' + hunterName);
+            $('#navBtn').attr('href', `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`);
+            $('#imageModal').modal('show');
+        };
+
+        function renderMarkers(data) {
+            markers.clearLayers();
+            if (data.length > 0) {
+                var groupBounds = L.latLngBounds();
+                data.forEach(function(item) {
+                    var hunterName = item.nickname || '熱心串友'; 
+                    var popupContent = `
+                        <div style="text-align:center;">
+                            <b style="color:#d32f2f; font-size:1.1rem;">🎉 發現神隊友！</b><br>
+                            <span style="color:#d35400; font-weight:bold; font-size:1rem;">🏆 獵人：${hunterName}</span><br>
+                            <span style="color:#666; font-size:0.9rem;">📍 位置：${item.description || '未知'}</span><br>
+                            <img src="${item.image_url}" onclick="showLargeImage('${item.image_url}', '${hunterName}', ${item.lat}, ${item.lng})"
+                                 style="width:120px; height:120px; object-fit:cover; border-radius:10px; margin-top:8px; border:2px solid #eee; cursor:pointer;" title="點擊放大">
+                            <br>
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}" target="_blank" style="display:inline-block; margin-top:5px; font-size:0.8rem; color:#2980b9;">
+                                <i class="fas fa-location-arrow"></i> 導航去
+                            </a>
+                        </div>
+                    `;
+                    var marker = L.marker([item.lat, item.lng]).bindPopup(popupContent);
+                    markers.addLayer(marker);
+                    groupBounds.extend([item.lat, item.lng]);
+                });
+                map.addLayer(markers);
+                if (!currentDistrictFilter || currentDistrictFilter === 'all') { map.fitBounds(groupBounds); }
+            }
+        }
+        
+        var currentDistrictFilter = 'all';
+        $('#district-select').change(function() {
+            var selectedDistrict = $(this).val();
+            currentDistrictFilter = selectedDistrict;
+            if (selectedDistrict === 'all') { renderMarkers(allLocations); if (allLocations.length > 0) map.fitBounds(markers.getBounds()); } 
+            else { if (districts[selectedDistrict]) map.flyTo(districts[selectedDistrict], 16); }
+        });
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var lat = position.coords.latitude; lng = position.coords.longitude;
+                L.circleMarker([lat, lng], { color: '#2980b9', fillColor: '#3498db', fillOpacity: 0.8, radius: 8 }).addTo(map).bindPopup("你目前的位置");
+            });
+        }
+    </script>
+</body>
+</html>
