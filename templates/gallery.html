@@ -14,72 +14,36 @@
             padding-bottom: 90px;
         }
         
-        /* 標題區塊 (移除英文大標題，保留精緻膠囊標題) */
-        .page-header {
-            text-align: center; padding: 20px 0 15px 0;
-        }
+        /* 標題區塊 */
+        .page-header { text-align: center; padding: 20px 0 15px 0; }
         
-        /* 篩選器工具列 (雙欄並排) */
-        .filter-bar {
-            width: 95%; max-width: 600px; margin: 0 auto 15px auto;
-            display: flex; gap: 10px; /* 兩個選單中間的間距 */
-        }
+        /* 篩選器工具列 */
+        .filter-bar { width: 95%; max-width: 600px; margin: 0 auto 15px auto; display: flex; gap: 10px; }
         .custom-select {
-            flex: 1; /* 讓兩個選單平均分配寬度 */
-            border-radius: 50px; /* 圓角更圓潤 */
-            border: none;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
-            height: 45px;
-            font-weight: bold; color: #555;
-            padding-left: 15px;
-            background-color: white;
-            appearance: none; /* 移除預設箭頭，用背景圖或是簡單樣式 */
+            flex: 1; border-radius: 50px; border: none; box-shadow: 0 3px 8px rgba(0,0,0,0.05); height: 45px;
+            font-weight: bold; color: #555; padding-left: 15px; background-color: white; appearance: none;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 15px center;
-            background-size: 15px;
+            background-repeat: no-repeat; background-position: right 15px center; background-size: 15px;
         }
 
         /* 圖片網格 */
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 3px; /* 間距稍微加大一點點 */
-            padding: 3px;
-        }
-        .gallery-item {
-            width: 100%;
-            padding-bottom: 100%; /* 正方形 */
-            position: relative;
-            overflow: hidden;
-            background: #fff;
-            border-radius: 4px; /* 讓每張圖有點小圓角 */
-        }
-        .gallery-item img {
-            position: absolute; width: 100%; height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s;
-        }
+        .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 3px; }
+        .gallery-item { width: 100%; padding-bottom: 100%; position: relative; overflow: hidden; background: #fff; border-radius: 4px; }
+        .gallery-item img { position: absolute; width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
         .gallery-item:active img { transform: scale(1.05); }
 
         /* 底部導覽列 */
         .bottom-nav { 
-            position: fixed; bottom: 0; width: 100%; 
-            background: white; border-top: 1px solid #eee; 
-            padding: 0 10px; height: 70px;
-            display: flex; justify-content: space-around; align-items: center; 
+            position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #eee; 
+            padding: 0 10px; height: 70px; display: flex; justify-content: space-around; align-items: center; 
             z-index: 999; box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
         }
-        .nav-item { 
-            text-align: center; color: #b2bec3; text-decoration: none; 
-            font-size: 0.7rem; flex: 1; display: flex; flex-direction: column; align-items: center;
-        }
+        .nav-item { text-align: center; color: #b2bec3; text-decoration: none; font-size: 0.7rem; flex: 1; display: flex; flex-direction: column; align-items: center; }
         .nav-item i { font-size: 1.4rem; margin-bottom: 2px; }
         .nav-item.active { color: #d32f2f; font-weight: bold; }
         
         .nav-center-btn {
-            width: 65px; height: 65px;
-            background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
+            width: 65px; height: 65px; background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
             border-radius: 50%; border: 5px solid #f8f9fa; color: white;
             display: flex; align-items: center; justify-content: center;
             font-size: 1.8rem; box-shadow: 0 -5px 15px rgba(214, 48, 49, 0.3);
@@ -99,15 +63,14 @@
     <div class="filter-bar">
         <select id="districtFilter" class="custom-select">
             <option value="all">📍 全苑裡</option>
-            </select>
-        
+        </select>
         <select id="userFilter" class="custom-select">
             <option value="all">👤 全部串友</option>
         </select>
     </div>
 
     <div id="gallery" class="gallery-grid">
-        <div class="text-center w-100 mt-5 text-muted">
+        <div class="text-center w-100 mt-5 text-muted" style="grid-column: 1 / -1;">
             <i class="fas fa-spinner fa-spin"></i> 正在載入精彩影像...
         </div>
     </div>
@@ -152,23 +115,17 @@
         $(document).ready(function() {
             var allData = [];
             var currentImageUrl = '';
-
-            // 苑裡 25 里名單
             const districts = [
                 "苑東里", "苑南里", "苑北里", "西平里", "海岸里", "苑港里", "西勢里", "房裡里", "新復里",
                 "客庄里", "中正里", "苑坑里", "水坡里", "山腳里", "舊社里", "福田里", "石鎮里", "南勢里", 
                 "泰田里", "上館里", "玉田里", "社苓里", "山柑里", "蕉埔里", "田心里"
             ];
-
-            // 初始化：填入 25 里選項
-            districts.forEach(d => {
-                $('#districtFilter').append(`<option value="${d}">${d}</option>`);
-            });
+            districts.forEach(d => { $('#districtFilter').append(`<option value="${d}">${d}</option>`); });
 
             $.getJSON('/api/locations', function(data) {
                 allData = data;
                 setupFilters(data);
-                filterAndRender(); // 初始渲染
+                filterAndRender();
             });
 
             function setupFilters(data) {
@@ -177,43 +134,38 @@
                 users.forEach(user => { $('#userFilter').append(`<option value="${user}">${user}</option>`); });
             }
 
-            // 監聽兩個篩選器的變化
-            $('#userFilter, #districtFilter').change(function() {
-                filterAndRender();
-            });
+            $('#userFilter, #districtFilter').change(function() { filterAndRender(); });
 
-            // 🔥 核心篩選邏輯：同時考慮「地區」和「人員」
             function filterAndRender() {
                 var selectedUser = $('#userFilter').val();
                 var selectedDistrict = $('#districtFilter').val();
-
                 var filtered = allData.filter(item => {
-                    // 1. 檢查人員
                     var matchUser = (selectedUser === 'all' || item.nickname === selectedUser);
-                    
-                    // 2. 檢查地區 (檢查備註內是否包含該里名)
                     var desc = item.description || '';
                     var matchDistrict = (selectedDistrict === 'all' || desc.includes(selectedDistrict));
-
                     return matchUser && matchDistrict;
                 });
-
                 renderGallery(filtered);
             }
 
             function renderGallery(data) {
                 var html = '';
                 if(data.length === 0) {
-                    $('#gallery').html('<div class="col-12 text-center mt-5 text-muted" style="padding:40px;">🤷‍♂️ 找不到符合條件的照片<br>試試看別的篩選條件吧！</div>');
+                    // 🔥 這裡修改了！加入「搶頭香」文案，並修正排版問題 (grid-column: 1 / -1)
+                    html = `
+                        <div class="col-12 text-center mt-5 text-muted" style="grid-column: 1 / -1; padding: 40px;">
+                            <i class="fas fa-box-open" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i><br>
+                            <span style="font-size: 1.1rem; font-weight: bold;">目前還沒有資料喔！</span><br>
+                            <span style="font-size: 0.95rem;">各位串友，快去搶頭香！🏃💨</span>
+                        </div>
+                    `;
+                    $('#gallery').html(html);
                     return;
                 }
-                // 時間倒序
                 var sortedData = data.slice().reverse();
-                
                 sortedData.forEach(function(item) {
-                    var safeDesc = (item.description || '沒有備註').replace(/"/g, '&quot;');
-                    var safeName = (item.nickname || '熱心串友').replace(/"/g, '&quot;');
-                    
+                    var safeDesc = (item.description || '沒有備註').replace(/"/g, '"');
+                    var safeName = (item.nickname || '熱心串友').replace(/"/g, '"');
                     html += `
                         <div class="gallery-item" onclick='showImage("${item.image_url}", "${safeName}", "${safeDesc}", ${item.lat}, ${item.lng})'>
                             <img src="${item.image_url}" loading="lazy">
@@ -228,12 +180,10 @@
                 $('#modalImage').attr('src', url);
                 $('#modalHunter').text('上傳者：' + name);
                 $('#modalDesc').text(desc);
-                
                 var locationText = desc;
                 if(!desc || desc === '沒有備註') locationText = `📍 座標：${lat.toFixed(4)}, ${lng.toFixed(4)}`;
                 else if (desc.length > 10) locationText = '📍 ' + desc.substring(0, 15) + '...'; 
                 else locationText = '📍 ' + desc;
-                
                 $('#modalLocation').text(locationText);
                 $('#navBtn').attr('href', `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`);
                 $('#imageModal').modal('show');
