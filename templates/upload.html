@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>苑裡土地公查報系統</title>
+    <title>回報土地公位置</title>
     
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -133,7 +133,7 @@
             <div class="card-body">
                 
                 <div class="form-group">
-                    <label><i class="fas fa-map-marker-alt text-danger"></i> 土地公在哪個里？</label>
+                    <label><i class="fas fa-map-marker-alt text-danger"></i> 這位土地公住哪裡？</label>
                     <select class="form-control" id="area" style="font-size: 1.1rem; border-radius: 20px; height: 50px;">
                         <option value="" disabled selected>-- 請選擇里別 --</option>
                         <option value="苑東里">苑東里</option>
@@ -165,14 +165,14 @@
                 </div>
 
                 <div class="form-group">
-                    <label><i class="fas fa-user text-info"></i> 您的稱呼 (選填)</label>
+                    <label><i class="fas fa-user text-info"></i> 你是哪位神隊友？(選填)</label>
                     <input type="text" class="form-control" id="nickname" placeholder="熱心串友">
                     <small class="text-muted">中英文皆可，請勿使用不雅字眼</small>
                 </div>
 
                 <div class="form-group mb-0">
-                    <label><i class="fas fa-book-open text-warning"></i> 廟宇故事 / 特殊事蹟</label>
-                    <textarea class="form-control" id="note" rows="3" placeholder="例如：這座土地公廟很靈驗... (選填)"></textarea>
+                    <label><i class="fas fa-book-open text-warning"></i> 關於祂的小故事</label>
+                    <textarea class="form-control" id="note" rows="3" placeholder="「例如：聽說這裡求財很靈驗，或是旁邊有棵大榕樹...(選填)"></textarea>
                 </div>
             </div>
         </div>
@@ -279,7 +279,7 @@
                           .addClass('btn-danger') 
                           .html('確認上傳');
         } else if (currentLat) {
-            $('#submitBtn').html('請拍攝土地公廟');
+            $('#submitBtn').html('請先上方拍照');
         }
     }
 
@@ -377,8 +377,8 @@
                         imageHeight: 'auto',
                         title: '📋 資料已送交審核',
                         // 👇👇👇 這裡改了排版 👇👇👇
-                        html: `感謝您！不過此地點 (<b>${area}</b>)<br>附近似乎已有查報紀錄。<br><br>
-                               您的照片已安全存入<br><b>「待審核清單」</b><br>
+                        html: `感謝您！不過此地點 (<b>${area}</b>)<br>附近似乎已有登入紀錄。<br><br>
+                               您的照片已存入<br><b>「待審核清單」</b><br>
                                管理員確認品質後就會更新！`,
                         
                         confirmButtonText: '收到，來去找下一座！',
