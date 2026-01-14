@@ -125,16 +125,22 @@
             if (data.length === 0) { noResult.show(); return; } else { noResult.hide(); }
 
             data.forEach(function(item) {
+                            data.forEach(function(item) {
                 var imgUrl = item.image_url || 'https://via.placeholder.com/300';
-                // 注意：這裡傳入 lat, lng 供導航使用
+                
+                // 🌟 這裡就是改名魔法：把 "匿名" 變成 "熱心串友"
+                var rawName = item.nickname || '熱心串友';
+                var showName = (rawName === '匿名') ? '熱心串友' : rawName;
+
+                // 👇 注意下面 onclick 裡的第三個參數，已經變成 showName 了
                 var html = `
-                    <div class="gallery-item" onclick="showPhoto('${imgUrl}', '${item.area}', '${item.nickname}', '${item.note || ""}', ${item.lat}, ${item.lng})">
+                    <div class="gallery-item" onclick="showPhoto('${imgUrl}', '${item.area}', '${showName}', '${item.note || ""}', ${item.lat}, ${item.lng})">
                         <div class="square-box"><img src="${imgUrl}" loading="lazy"></div>
                     </div>
                 `;
                 container.append(html);
             });
-        }
+
 
         // 顯示詳情 (新增接收 lat, lng)
         function showPhoto(url, area, user, note, lat, lng) {
