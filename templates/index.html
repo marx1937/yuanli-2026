@@ -1,79 +1,39 @@
-    <div class="modal fade" id="installModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" style="font-weight:bold;">📲 把土地公帶回家</h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-success" style="font-size:0.9rem;">
-                        安裝後可全螢幕瀏覽，就像真的 APP 一樣方便！
-                    </div>
-                    
-                    <div id="ios-guide" style="display:none;">
-                        <h6 style="font-weight:bold; color:#007aff;"><i class="fab fa-apple"></i> iPhone 用戶：</h6>
-                        <ol style="padding-left:20px; line-height:1.8;">
-                            <li>點擊下方 <b>「分享」</b> <i class="fas fa-external-link-alt"></i></li>
-                            <li>選擇 <b>「加入主畫面」</b> <i class="far fa-plus-square"></i></li>
-                            <li>按右上角 <b>「新增」</b></li>
-                        </ol>
-                    </div>
-
-                    <div id="android-guide" style="display:none;">
-                        <h6 style="font-weight:bold; color:#3ddc84;"><i class="fab fa-android"></i> Android 用戶：</h6>
-                        <ol style="padding-left:20px; line-height:1.8;">
-                            <li>點擊右上角 <b>「選單」</b> <i class="fas fa-ellipsis-v"></i></li>
-                            <li>選擇 <b>「加到主畫面」</b> 或 <b>「安裝」</b> 📲</li>
-                            <li>按下 <b>「新增」</b> 即可完成</li>
-                        </ol>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">我知道了</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Map My God - 苑裡土地公</title>
     
-    <script>
-        $(document).ready(function() {
-            loadMiniLeaderboard();
-        });
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#d32f2f">
 
-        function loadMiniLeaderboard() {
-            $.getJSON('/api/locations', function(data) {
-                var userCounts = {};
-                data.forEach(item => {
-                    var rawName = item.nickname || '熱心串友'; 
-                    var name = (rawName === '匿名') ? '熱心串友' : rawName;
-                    userCounts[name] = (userCounts[name] || 0) + 1;
-                });
-                var sortedUsers = Object.entries(userCounts).sort((a,b) => b[1] - a[1]);
-
-                var html = '';
-                sortedUsers.slice(0, 3).forEach((item, index) => {
-                    var icon = ['🥇', '🥈', '🥉'][index];
-                    html += `
-                        <li class="list-group-item d-flex justify-content-between align-items-center" style="padding:10px 15px;">
-                            <span>${icon} <b>${item[0]}</b></span>
-                            <span class="badge badge-light" style="color:#d63031; font-weight:bold;">${item[1]} 尊</span>
-                        </li>
-                    `;
-                });
-                $('#mini-leaderboard').html(html);
-            });
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    
+    <style>
+        body { 
+            /* 背景：充滿活力的暖色漸層 */
+            background: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: "Microsoft JhengHei", sans-serif;
+            padding-bottom: 70px; /* 留給底部導覽列空間 */
         }
-
-        function showInstallGuide() {
-            var userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            var isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
-            if (isIOS) { $('#ios-guide').show(); $('#android-guide').hide(); } 
-            else { $('#ios-guide').hide(); $('#android-guide').show(); }
-            $('#installModal').modal('show');
+        .main-logo {
+            width: 140px; height: 140px;
+            background: white; border-radius: 50%;
+            padding: 5px; box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            margin-bottom: 10px; margin-top: 30px;
+            object-fit: contain;
+            animation: float 3s ease-in-out infinite;
         }
-    </script>
-</body>
-</html>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform:
