@@ -155,16 +155,21 @@
 
             allMarkers.forEach(function(item) {
                 if (filterArea === 'all' || item.area === filterArea) {
-                    var popupContent = `
-                        <div>
-                            <img src="${item.image_url}" class="popup-img">
-                            <div class="popup-title">${item.nickname || '熱心串友'}</div>
-                            <div class="popup-note">${item.note || '這位土地公很低調，還沒有故事...'}</div>
-                            <div class="popup-meta">
-                                <i class="fas fa-map-marker-alt mr-1"></i> ${item.area} 
-                                <span class="ml-2">(${item.created_at.substring(0, 10)})</span>
-                            </div>
+                                        var popupContent = `
+                        <div style="text-align:center">
+                            <b style="font-size:1.1rem">${item.area}</b><br>
+                            <span style="color:#666">${item.nickname}</span><br>
+                            <img src="${item.image_url}" style="width:100%; height:120px; object-fit:cover; margin:5px 0; border-radius:5px;"><br>
+                            <div style="text-align:left; font-size:0.9rem; margin-bottom:5px;">${item.note || '沒有備註'}</div>
+                            
+                            <a href="https://www.google.com/maps?q=${item.lat},${item.lng}" 
+                               target="_blank" 
+                               style="display:block; background:#4285F4; color:white; padding:5px; text-decoration:none; border-radius:5px; margin-top:5px;">
+                               <i class="fas fa-location-arrow"></i> 導航去這裡
+                            </a>
                         </div>
+                    `;
+
                     `;
                     var marker = L.marker([item.lat, item.lng]).bindPopup(popupContent);
                     layerGroup.addLayer(marker);
