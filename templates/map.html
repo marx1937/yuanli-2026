@@ -22,11 +22,8 @@
             overflow-x: hidden;
         }
         
-        /* 1. 標題區樣式刪除了，因為我們不需要它了 */
-
-        /* 2. 地圖變高！佔據更多畫面 */
         #map { 
-            height: 78vh; /* 從 60vh 加大到 78vh */
+            height: 78vh; 
             width: 95%; margin: 0 auto; 
             border-radius: 20px; 
             box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
@@ -34,26 +31,28 @@
             z-index: 1;
         }
         
-        /* 3. 搜尋列往下移，給公仔留頭部空間 */
+        /* 🔦 聚焦燈控制區 */
         .spotlight-control {
             position: relative;
             width: 90%; max-width: 450px; 
-            margin: 40px auto 15px auto; /* 上方邊距加大到 40px */
+            margin: 50px auto 15px auto; /* 上方邊距再加大一點，給氣泡框空間 */
             background: white; padding: 10px 15px; border-radius: 50px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             display: flex; align-items: center; justify-content: space-between;
             z-index: 20;
         }
         
+        /* 🧞 小幫手公仔 */
         .helper-mascot {
             position: absolute;
-            top: -45px;
+            top: -40px;
             right: 15px;
-            height: 70px; width: auto;
+            height: 75px; width: auto; /* 稍微再大一點點 */
             cursor: pointer;
             filter: drop-shadow(0 3px 5px rgba(0,0,0,0.2));
             transition: transform 0.2s;
             animation: float-mascot 3s ease-in-out infinite;
+            z-index: 22;
         }
         .helper-mascot:active { transform: scale(0.9) rotate(-5deg); }
 
@@ -62,6 +61,41 @@
             50% { transform: translateY(-5px); }
         }
 
+        /* 💬 小幫手氣泡框 (新增！) */
+        .helper-bubble {
+            position: absolute;
+            top: -70px; /* 在公仔頭上 */
+            right: 0px;
+            background: #2d3436;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            white-space: nowrap;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+            z-index: 21;
+            pointer-events: none; /* 讓點擊穿透到公仔 */
+            opacity: 0.9;
+            animation: bounce-bubble 2s infinite;
+        }
+        /* 氣泡的小三角形 */
+        .helper-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            right: 25px;
+            border-width: 6px 6px 0;
+            border-style: solid;
+            border-color: #2d3436 transparent;
+        }
+
+        @keyframes bounce-bubble {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        /* 🔴 懸浮紅色按鈕 (修正：強制不換行) */
         .btn-floating-add {
             position: fixed;
             bottom: 80px;
@@ -71,12 +105,14 @@
             color: white;
             border: none;
             border-radius: 30px;
-            padding: 12px 30px;
+            padding: 12px 25px;
             font-size: 1rem;
             font-weight: bold;
             box-shadow: 0 5px 15px rgba(214, 48, 49, 0.4);
             z-index: 900;
-            display: flex; align-items: center;
+            display: flex; align-items: center; justify-content: center;
+            white-space: nowrap; /* ✨ 關鍵修正：強制文字不換行！ */
+            min-width: 220px; /* 給它一個最小寬度，確保不會被擠壓 */
         }
         .btn-floating-add:hover { color: white; text-decoration: none; transform: translateX(-50%) scale(1.05); }
 
@@ -121,6 +157,8 @@
             </select>
         </div>
 
+        <div class="helper-bubble">我是小幫手 👋</div>
+        
         <img src="/static/maps.png" class="helper-mascot" alt="小幫手" data-toggle="modal" data-target="#mapHelperModal">
     </div>
 
@@ -149,7 +187,7 @@
                         </li>
                         <li class="list-group-item d-flex align-items-center">
                             <img src="/static/maps.png" style="width:40px; margin-right:10px;">
-                            <span><b>小幫手</b><br><small class="text-muted">我是裝飾品，點我有驚喜 XD</small></span>
+                            <span><b>小幫手</b><br><small class="text-muted">點我有使用說明喔！</small></span>
                         </li>
                     </ul>
                 </div>
@@ -193,10 +231,13 @@
             if (data.length > 0) {
                 var groupBounds = L.latLngBounds();
                 data.forEach(function(item) {
+                    // 👇 修正：這裡改成 '熱心串友'
+                    var hunterName = item.nickname || '熱心串友'; 
+                    
                     var popupContent = `
                         <div style="text-align:center;">
                             <b style="color:#d32f2f; font-size:1.1rem;">🎉 發現神隊友！</b><br>
-                            <span style="color:#d35400; font-weight:bold; font-size:1rem;">🏆 獵人：${item.nickname || '神秘客'}</span><br>
+                            <span style="color:#d35400; font-weight:bold; font-size:1rem;">🏆 獵人：${hunterName}</span><br>
                             <span style="color:#666; font-size:0.9rem;">📍 位置：${item.description || '未知'}</span><br>
                             <img src="${item.image_url}" style="width:100px; height:100px; object-fit:cover; border-radius:10px; margin-top:5px; border:2px solid #eee;">
                         </div>
