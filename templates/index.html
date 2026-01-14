@@ -141,7 +141,7 @@
         <a href="/leaderboard" class="nav-item"><i class="fas fa-list-ol"></i>榜單</a>
     </div>
 
-    <div class="modal fade" id="installModal" tabindex="-1">
+        <div class="modal fade" id="installModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -152,6 +152,7 @@
                     <div class="alert alert-success" style="font-size:0.9rem;">
                         安裝後可全螢幕瀏覽，就像真的 APP 一樣方便！
                     </div>
+                    
                     <div id="ios-guide" style="display:none;">
                         <h6 style="font-weight:bold; color:#007aff;"><i class="fab fa-apple"></i> iPhone 用戶：</h6>
                         <ol style="padding-left:20px; line-height:1.8;">
@@ -160,15 +161,23 @@
                             <li>按右上角 <b>「新增」</b></li>
                         </ol>
                     </div>
+
                     <div id="android-guide" style="display:none;">
                         <h6 style="font-weight:bold; color:#3ddc84;"><i class="fab fa-android"></i> Android 用戶：</h6>
                         <ol style="padding-left:20px; line-height:1.8;">
                             <li>點擊右上角 <b>「選單」</b> <i class="fas fa-ellipsis-v"></i></li>
-                            <li>選擇 <b>「安裝應用程式」</b> 📲</li>
-                            <li>按下 <b>「安裝」</b></li>
+                            <li>選擇 <b>「加到主畫面」</b> 或 <b>「安裝」</b> 📲</li>
+                            <li>按下 <b>「新增」</b> 即可完成</li>
                         </ol>
                     </div>
                 </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">我知道了</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">我知道了</button>
                 </div>
