@@ -65,14 +65,17 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script>
         $(document).ready(function() {
-            $.getJSON('/api/locations', function(data) {
-                // 統計個人
-                var userCounts = {};
-                data.forEach(item => {
-                    var name = item.nickname || "匿名";
-                    userCounts[name] = (userCounts[name] || 0) + 1;
-                });
-                var sortedUsers = Object.entries(userCounts).sort((a,b) => b[1] - a[1]);
+                    $.getJSON('/api/locations', function(data) {
+            // 統計個人
+            var userCounts = {};
+            data.forEach(item => {
+                // 🌟 修改這裡：把 "匿名" 和 沒名字的，全部統一合併算成 "熱心串友"
+                var rawName = item.nickname || '熱心串友';
+                var name = (rawName === '匿名') ? '熱心串友' : rawName;
+                
+                userCounts[name] = (userCounts[name] || 0) + 1;
+            });
+            var sortedUsers = Object.entries(userCounts).sort((a,b) => b[1] - a[1]);
 
                 // 統計地區
                 var areaCounts = {};
