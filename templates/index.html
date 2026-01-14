@@ -15,7 +15,6 @@
     
     <style>
         body { 
-            /* 背景：充滿活力的暖色漸層 */
             background: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%);
             min-height: 100vh;
             display: flex;
@@ -23,7 +22,7 @@
             align-items: center;
             justify-content: center;
             font-family: "Microsoft JhengHei", sans-serif;
-            padding-bottom: 70px; /* 留給底部導覽列空間 */
+            padding-bottom: 90px; /* 🔥 增加底部留白，為了那顆凸起的按鈕 */
         }
         .main-logo {
             width: 140px; height: 140px;
@@ -48,12 +47,6 @@
         }
         .menu-btn:active { transform: scale(0.96); }
         
-        /* 底部導覽列 */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #ddd; padding: 10px 0; display: flex; justify-content: space-around; z-index: 999; }
-        .nav-item { text-align: center; color: #666; text-decoration: none; font-size: 0.8rem; flex: 1; }
-        .nav-item i { display: block; font-size: 1.2rem; margin-bottom: 2px; }
-        .nav-item.active { color: #d32f2f; font-weight: bold; }
-
         /* 📲 下載 APP 懸浮按鈕 */
         .install-btn {
             position: fixed; top: 15px; right: 15px;
@@ -68,6 +61,33 @@
             40% {transform: translateY(-5px);}
             60% {transform: translateY(-3px);}
         }
+
+        /* ✨ 底部導覽列 (全站統一風格) */
+        .bottom-nav { 
+            position: fixed; bottom: 0; width: 100%; 
+            background: white; border-top: 1px solid #eee; 
+            padding: 0 10px; height: 70px;
+            display: flex; justify-content: space-around; align-items: center; 
+            z-index: 999; box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+        }
+        .nav-item { 
+            text-align: center; color: #b2bec3; text-decoration: none; 
+            font-size: 0.7rem; flex: 1; display: flex; flex-direction: column; align-items: center;
+        }
+        .nav-item i { font-size: 1.4rem; margin-bottom: 2px; }
+        .nav-item.active { color: #d32f2f; font-weight: bold; }
+        
+        /* 📸 中間凸起大按鈕 */
+        .nav-center-btn {
+            width: 65px; height: 65px;
+            background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
+            border-radius: 50%; border: 5px solid #f8f9fa; color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; box-shadow: 0 -5px 15px rgba(214, 48, 49, 0.3);
+            transform: translateY(-25px); position: relative; z-index: 1000;
+        }
+        .nav-center-btn:hover { color: white; transform: translateY(-30px); }
+
     </style>
 </head>
 <body>
@@ -95,7 +115,7 @@
 
     <a href="/upload" class="menu-btn" style="background: linear-gradient(135deg, #ff7675 0%, #d63031 100%); color:white; padding:15px; border-radius: 50px; box-shadow: 0 5px 15px rgba(214, 48, 49, 0.4); position:relative; overflow:visible;">
         <div style="font-size:1.3rem; font-weight:900; letter-spacing: 1px;">
-            <i class="fas fa-camera"></i> 尋找到神隊友
+            <i class="fas fa-camera-retro"></i> 尋找到神隊友
         </div>
         <div style="font-size:0.9rem; opacity:0.95; margin-top:3px;">
             趕快幫祂拍張照 📸
@@ -106,7 +126,7 @@
     </a>
 
     <a href="/map" class="menu-btn" style="background:#ffeaa7; color:#d35400; padding:12px; border-radius: 50px; font-weight:bold; margin-top:20px; border: 2px solid #fdcb6e;">
-        <i class="fas fa-search-location"></i> 搜尋隊友方位
+        <i class="fas fa-map-signs"></i> 搜尋隊友方位
         <div style="font-size:0.8rem; font-weight:normal; opacity:0.8; margin-top:2px;">
             看看祂們躲在哪 🗺️
         </div>
@@ -118,7 +138,7 @@
 
     <div style="width:90%; max-width:350px; background:white; border-radius:15px; padding:15px; margin-top:25px; box-shadow:0 4px 10px rgba(0,0,0,0.05);">
         <h5 style="font-weight:bold; color:#d32f2f; margin-bottom:15px; border-bottom:2px solid #eee; padding-bottom:10px;">
-            <i class="fas fa-crown"></i> 尋神捉迷藏．高手榜
+            <i class="fas fa-scroll"></i> 尋神捉迷藏．高手榜
             <a href="/leaderboard" style="float:right; font-size:0.8rem; color:#999; text-decoration:none; margin-top:3px;">看排名 ></a>
         </h5>
         
@@ -135,10 +155,23 @@
     </div>
 
     <div class="bottom-nav">
-        <a href="/" class="nav-item active"><i class="fas fa-home"></i>首頁</a>
-        <a href="/map" class="nav-item"><i class="fas fa-map-marked-alt"></i>地圖</a>
-        <a href="/gallery" class="nav-item"><i class="fas fa-images"></i>圖庫</a>
-        <a href="/leaderboard" class="nav-item"><i class="fas fa-list-ol"></i>榜單</a>
+        <a href="/" class="nav-item active">
+            <i class="fas fa-archway"></i> <span>首頁</span>
+        </a>
+        <a href="/map" class="nav-item">
+            <i class="fas fa-map-signs"></i> <span>地圖</span>
+        </a>
+        
+        <a href="/upload" class="nav-center-btn">
+            <i class="fas fa-camera-retro"></i>
+        </a>
+
+        <a href="/gallery" class="nav-item">
+            <i class="fas fa-images"></i> <span>圖庫</span>
+        </a>
+        <a href="/leaderboard" class="nav-item">
+            <i class="fas fa-scroll"></i> <span>榜單</span>
+        </a>
     </div>
 
     <div class="modal fade" id="installModal" tabindex="-1">
