@@ -31,22 +31,22 @@
             z-index: 1;
         }
         
-        /* 🔦 聚焦燈控制區 */
+        /* 🔦 聚焦燈控制區 (增加上方留白，給公仔站) */
         .spotlight-control {
             position: relative;
             width: 90%; max-width: 450px; 
-            margin: 75px auto 20px auto; /* 🔥 再加高一點到 75px，確保氣泡不被切到 */
+            margin: 80px auto 20px auto; /* 🔥 加大到 80px，給公仔足夠空間 */
             background: white; padding: 10px 15px; border-radius: 50px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             display: flex; align-items: center; justify-content: space-between;
             z-index: 20;
         }
         
-        /* 🧞 小幫手公仔 */
+        /* 🧞 小幫手公仔 (位置大修正：不擋按鈕) */
         .helper-mascot {
             position: absolute;
-            top: -55px; 
-            right: 10px; 
+            top: -65px;  /* ⬆️ 往上提，站在框框上面 */
+            right: 5px;  /* ➡️ 靠最右邊，不擋中間文字 */
             height: 85px; width: auto; 
             cursor: pointer;
             filter: drop-shadow(0 3px 5px rgba(0,0,0,0.2));
@@ -61,11 +61,11 @@
             50% { transform: translateY(-5px); }
         }
 
-        /* 💬 小幫手氣泡框 (位置大修正！) */
+        /* 💬 小幫手氣泡框 (跟著公仔往上移) */
         .helper-bubble {
             position: absolute;
-            top: -65px;  /* ⬆️ 往上提，不要擋到頭 */
-            right: 100px; /* ⬅️ 往左移，拉開距離 */
+            top: -75px;   /* ⬆️ 更高 */
+            right: 75px;  /* ⬅️ 保持在公仔左側 */
             background: #2d3436;
             color: white;
             padding: 6px 12px;
@@ -79,15 +79,9 @@
             opacity: 0.95;
             animation: bounce-bubble 2s infinite;
         }
-        /* 氣泡的小三角形 (指向右下方) */
         .helper-bubble::after {
-            content: '';
-            position: absolute;
-            bottom: 8px; /* 調整箭頭位置 */
-            right: -6px; 
-            border-width: 6px 0 6px 6px;
-            border-style: solid;
-            border-color: transparent transparent transparent #2d3436;
+            content: ''; position: absolute; bottom: 8px; right: -6px; 
+            border-width: 6px 0 6px 6px; border-style: solid; border-color: transparent transparent transparent #2d3436;
         }
 
         @keyframes bounce-bubble {
@@ -104,8 +98,7 @@
             font-size: 0.9rem; font-weight: bold;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
             z-index: 900; display: flex; align-items: center; justify-content: center;
-            white-space: nowrap;
-            animation: pulse-text 2s infinite;
+            white-space: nowrap; animation: pulse-text 2s infinite;
         }
         @keyframes pulse-text {
             0% { transform: translateX(-50%) scale(1); }
@@ -143,11 +136,36 @@
             <i class="fas fa-search-location" style="color:#d32f2f; margin-right:8px; font-size:1.2rem;"></i>
             <select id="district-select" class="form-control form-control-sm" style="border-radius:20px; border:1px solid #eee; background:#f9f9f9; height: 35px;">
                 <option value="all">顯示全苑裡 (預設)</option>
-                <option value="苑東里">苑東里</option>
-                <option value="苑南里">苑南里</option>
-                <option value="苑北里">苑北里</option>
-                <option value="山腳里">山腳里</option>
-                </select>
+                <optgroup label="市區/海岸">
+                    <option value="苑東里">苑東里</option>
+                    <option value="苑南里">苑南里</option>
+                    <option value="苑北里">苑北里</option>
+                    <option value="西平里">西平里</option>
+                    <option value="海岸里">海岸里</option>
+                    <option value="苑港里">苑港里</option>
+                    <option value="西勢里">西勢里</option>
+                    <option value="房裡里">房裡里</option>
+                    <option value="客庄里">客庄里</option>
+                    <option value="中正里">中正里</option>
+                </optgroup>
+                <optgroup label="平原/山區">
+                    <option value="苑坑里">苑坑里</option>
+                    <option value="水坡里">水坡里</option>
+                    <option value="新復里">新復里</option>
+                    <option value="山腳里">山腳里</option>
+                    <option value="舊社里">舊社里</option>
+                    <option value="福田里">福田里</option>
+                    <option value="石鎮里">石鎮里</option>
+                    <option value="南勢里">南勢里</option>
+                    <option value="泰田里">泰田里</option>
+                    <option value="上館里">上館里</option>
+                    <option value="玉田里">玉田里</option>
+                    <option value="社苓里">社苓里</option>
+                    <option value="山柑里">山柑里</option>
+                    <option value="蕉埔里">蕉埔里</option>
+                    <option value="田心里">田心里</option>
+                </optgroup>
+            </select>
         </div>
         
         <div class="helper-bubble">我是小幫手 👋</div>
@@ -215,7 +233,19 @@
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
     <script>
-        const districts = { "苑東里": [24.443, 120.655], "苑南里": [24.441, 120.652], "山腳里": [24.415, 120.685] };
+        // 🔥 這裡補齊了 25 里的座標 (概略中心點)
+        const districts = {
+            "苑東里": [24.443, 120.655], "苑南里": [24.441, 120.652], "苑北里": [24.445, 120.653],
+            "西平里": [24.442, 120.648], "海岸里": [24.450, 120.635], "苑港里": [24.455, 120.640],
+            "西勢里": [24.438, 120.645], "房裡里": [24.430, 120.640], "新復里": [24.425, 120.635],
+            "客庄里": [24.435, 120.655], "中正里": [24.438, 120.660], "苑坑里": [24.450, 120.665],
+            "水坡里": [24.455, 120.670], "山腳里": [24.415, 120.685], "舊社里": [24.410, 120.690],
+            "福田里": [24.405, 120.680], "石鎮里": [24.395, 120.700], "南勢里": [24.390, 120.690],
+            "泰田里": [24.420, 120.670], "上館里": [24.425, 120.675], "玉田里": [24.430, 120.670],
+            "社苓里": [24.435, 120.680], "山柑里": [24.440, 120.685], "蕉埔里": [24.400, 120.720],
+            "田心里": [24.415, 120.665]
+        };
+
         var map = L.map('map').setView([24.44, 120.65], 13); 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
         var markers = L.markerClusterGroup({ disableClusteringAtZoom: 16 });
@@ -239,11 +269,8 @@
                 var groupBounds = L.latLngBounds();
                 data.forEach(function(item) {
                     var hunterName = item.nickname || '熱心串友'; 
-                    
-                    // 👇 修改這裡：如果沒有描述，顯示「座標」或「未留下線索」
                     var locText = item.description;
                     if(!locText || locText === '未知') {
-                        // 把它改成比較好看的格式，保留小數點後4位
                         locText = `座標: ${item.lat.toFixed(4)}, ${item.lng.toFixed(4)}`;
                     }
 
