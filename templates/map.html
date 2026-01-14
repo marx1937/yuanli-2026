@@ -23,7 +23,7 @@
         }
         
         #map { 
-            height: 78vh; 
+            height: 75vh; /* 稍微調整高度，配合上方留白 */
             width: 95%; margin: 0 auto; 
             border-radius: 20px; 
             box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
@@ -31,11 +31,11 @@
             z-index: 1;
         }
         
-        /* 🔦 聚焦燈控制區 */
+        /* 🔦 聚焦燈控制區 (修改：往下降，留空間給頭上的氣泡) */
         .spotlight-control {
             position: relative;
             width: 90%; max-width: 450px; 
-            margin: 50px auto 15px auto; /* 上方邊距再加大一點，給氣泡框空間 */
+            margin: 60px auto 20px auto; /* 🔥 上方留 60px 給公仔和氣泡 */
             background: white; padding: 10px 15px; border-radius: 50px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             display: flex; align-items: center; justify-content: space-between;
@@ -45,9 +45,9 @@
         /* 🧞 小幫手公仔 */
         .helper-mascot {
             position: absolute;
-            top: -40px;
+            top: -45px;
             right: 15px;
-            height: 75px; width: auto; /* 稍微再大一點點 */
+            height: 80px; width: auto; 
             cursor: pointer;
             filter: drop-shadow(0 3px 5px rgba(0,0,0,0.2));
             transition: transform 0.2s;
@@ -61,215 +61,4 @@
             50% { transform: translateY(-5px); }
         }
 
-        /* 💬 小幫手氣泡框 (新增！) */
-        .helper-bubble {
-            position: absolute;
-            top: -70px; /* 在公仔頭上 */
-            right: 0px;
-            background: #2d3436;
-            color: white;
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            white-space: nowrap;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-            z-index: 21;
-            pointer-events: none; /* 讓點擊穿透到公仔 */
-            opacity: 0.9;
-            animation: bounce-bubble 2s infinite;
-        }
-        /* 氣泡的小三角形 */
-        .helper-bubble::after {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            right: 25px;
-            border-width: 6px 6px 0;
-            border-style: solid;
-            border-color: #2d3436 transparent;
-        }
-
-        @keyframes bounce-bubble {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-3px); }
-        }
-
-        /* 🔴 懸浮紅色按鈕 (修正：強制不換行) */
-        .btn-floating-add {
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
-            color: white;
-            border: none;
-            border-radius: 30px;
-            padding: 12px 25px;
-            font-size: 1rem;
-            font-weight: bold;
-            box-shadow: 0 5px 15px rgba(214, 48, 49, 0.4);
-            z-index: 900;
-            display: flex; align-items: center; justify-content: center;
-            white-space: nowrap; /* ✨ 關鍵修正：強制文字不換行！ */
-            min-width: 220px; /* 給它一個最小寬度，確保不會被擠壓 */
-        }
-        .btn-floating-add:hover { color: white; text-decoration: none; transform: translateX(-50%) scale(1.05); }
-
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #ddd; padding: 10px 0; display: flex; justify-content: space-around; z-index: 999; }
-        .nav-item { text-align: center; color: #666; text-decoration: none; font-size: 0.8rem; flex: 1; }
-        .nav-item i { display: block; font-size: 1.2rem; margin-bottom: 2px; }
-        .nav-item.active { color: #d32f2f; font-weight: bold; }
-    </style>
-</head>
-<body>
-
-    <div class="spotlight-control">
-        <div style="flex-grow: 1; display:flex; align-items:center;">
-            <i class="fas fa-search-location" style="color:#d32f2f; margin-right:8px; font-size:1.2rem;"></i>
-            <select id="district-select" class="form-control form-control-sm" style="border-radius:20px; border:1px solid #eee; background:#f9f9f9; height: 35px;">
-                <option value="all">顯示全苑裡 (預設)</option>
-                <option value="苑東里">苑東里</option>
-                <option value="苑南里">苑南里</option>
-                <option value="苑北里">苑北里</option>
-                <option value="西平里">西平里</option>
-                <option value="海岸里">海岸里</option>
-                <option value="苑港里">苑港里</option>
-                <option value="西勢里">西勢里</option>
-                <option value="房裡里">房裡里</option>
-                <option value="新復里">新復里</option>
-                <option value="客庄里">客庄里</option>
-                <option value="中正里">中正里</option>
-                <option value="苑坑里">苑坑里</option>
-                <option value="水坡里">水坡里</option>
-                <option value="山腳里">山腳里</option>
-                <option value="舊社里">舊社里</option>
-                <option value="福田里">福田里</option>
-                <option value="石鎮里">石鎮里</option>
-                <option value="南勢里">南勢里</option>
-                <option value="泰田里">泰田里</option>
-                <option value="上館里">上館里</option>
-                <option value="玉田里">玉田里</option>
-                <option value="社苓里">社苓里</option>
-                <option value="山柑里">山柑里</option>
-                <option value="蕉埔里">蕉埔里</option>
-                <option value="田心里">田心里</option>
-            </select>
-        </div>
-
-        <div class="helper-bubble">我是小幫手 👋</div>
-        
-        <img src="/static/maps.png" class="helper-mascot" alt="小幫手" data-toggle="modal" data-target="#mapHelperModal">
-    </div>
-
-    <div id="map"></div>
-    
-    <a href="/upload" class="btn-floating-add">
-        <i class="fas fa-camera" style="margin-right:8px;"></i> 這裡也有一尊！
-    </a>
-
-    <div class="modal fade" id="mapHelperModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="border-radius: 20px;">
-                <div class="modal-header" style="border-bottom:none;">
-                    <h5 class="modal-title" style="font-weight:bold; color:#2d3436;">🗺️ 地圖怎麼看？</h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body" style="padding:0 20px 20px 20px;">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex align-items-center">
-                            <div style="width:30px; height:30px; background-color:#6ecc39; border-radius:50%; color:white; display:flex; align-items:center; justify-content:center; margin-right:15px; font-weight:bold;">10</div>
-                            <span><b>彩色圓圈 (聚合)</b><br><small class="text-muted">這區有 10 尊，點擊看細節！</small></span>
-                        </li>
-                        <li class="list-group-item d-flex align-items-center">
-                            <i class="fas fa-map-marker-alt" style="color:#2980b9; font-size:1.5rem; margin-right:18px; margin-left:5px;"></i>
-                            <span><b>藍色圖釘</b><br><small class="text-muted">這裡有一尊土地公！</small></span>
-                        </li>
-                        <li class="list-group-item d-flex align-items-center">
-                            <img src="/static/maps.png" style="width:40px; margin-right:10px;">
-                            <span><b>小幫手</b><br><small class="text-muted">點我有使用說明喔！</small></span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="modal-footer" style="border-top:none;">
-                    <button type="button" class="btn btn-primary btn-block" data-dismiss="modal" style="border-radius:30px;">懂了，開始尋寶！</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="bottom-nav">
-        <a href="/" class="nav-item"><i class="fas fa-home"></i>首頁</a>
-        <a href="/map" class="nav-item active"><i class="fas fa-map-marked-alt"></i>地圖</a>
-        <a href="/gallery" class="nav-item"><i class="fas fa-images"></i>圖庫</a>
-        <a href="/leaderboard" class="nav-item"><i class="fas fa-list-ol"></i>榜單</a>
-    </div>
-
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
-
-    <script>
-        const districts = {
-            "苑東里": [24.443, 120.655], "苑南里": [24.441, 120.652], "山腳里": [24.415, 120.685],
-        };
-
-        var map = L.map('map').setView([24.44, 120.65], 13); 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-
-        var markers = L.markerClusterGroup({ disableClusteringAtZoom: 16 });
-        var allLocations = [];
-
-        $.getJSON('/api/locations', function(data) {
-            allLocations = data;
-            renderMarkers(allLocations);
-        });
-
-        function renderMarkers(data) {
-            markers.clearLayers();
-            if (data.length > 0) {
-                var groupBounds = L.latLngBounds();
-                data.forEach(function(item) {
-                    // 👇 修正：這裡改成 '熱心串友'
-                    var hunterName = item.nickname || '熱心串友'; 
-                    
-                    var popupContent = `
-                        <div style="text-align:center;">
-                            <b style="color:#d32f2f; font-size:1.1rem;">🎉 發現神隊友！</b><br>
-                            <span style="color:#d35400; font-weight:bold; font-size:1rem;">🏆 獵人：${hunterName}</span><br>
-                            <span style="color:#666; font-size:0.9rem;">📍 位置：${item.description || '未知'}</span><br>
-                            <img src="${item.image_url}" style="width:100px; height:100px; object-fit:cover; border-radius:10px; margin-top:5px; border:2px solid #eee;">
-                        </div>
-                    `;
-                    var marker = L.marker([item.lat, item.lng]).bindPopup(popupContent);
-                    markers.addLayer(marker);
-                    groupBounds.extend([item.lat, item.lng]);
-                });
-                map.addLayer(markers);
-                if (!currentDistrictFilter || currentDistrictFilter === 'all') { map.fitBounds(groupBounds); }
-            }
-        }
-
-        var currentDistrictFilter = 'all';
-        $('#district-select').change(function() {
-            var selectedDistrict = $(this).val();
-            currentDistrictFilter = selectedDistrict;
-            if (selectedDistrict === 'all') {
-                renderMarkers(allLocations);
-                if (allLocations.length > 0) { map.fitBounds(markers.getBounds()); }
-            } else {
-                if (districts[selectedDistrict]) { map.flyTo(districts[selectedDistrict], 16); }
-            }
-        });
-
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                var lat = position.coords.latitude;
-                var lng = position.coords.longitude;
-                L.circleMarker([lat, lng], { color: '#2980b9', fillColor: '#3498db', fillOpacity: 0.8, radius: 8 }).addTo(map).bindPopup("你目前的位置");
-            });
-        }
-    </script>
-</body>
-</html>
+        /* 💬 小幫手氣泡框 (修改：改到左邊，
