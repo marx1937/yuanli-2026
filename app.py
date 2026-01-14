@@ -164,20 +164,23 @@ def get_locations():
 
     # ================= 管理員專用 API (新增) =================
 
-# 1. 取得所有土地公資料 (顯示所有照片，包含成功的)
+# 🔍 1. 吸取所有土地公資料 (給後台用的 API)
 @app.route('/api/admin/all_data')
 def get_all_data():
-    # 權限檢查 (先關掉方便你測試，正式上線可打開)
-    # if not session.get('is_admin'):
-    #     return jsonify({'status': 'error', 'message': '權限不足'})
-        
+    if not session.get('is_admin'):
+        return jsonify({'status': 'error', 'message': '權限不足'})
+
     conn = get_db_connection()
     cur = conn.cursor()
-    # 依 ID 由大到小排序 (最新的在最上面)
-    cur.execute("SELECT id, area, nickname, note, image_url, created_at FROM land_gods ORDER BY id DESC")
+    # 👇 修改這裡：多抓了 lat (緯度) 和 lng (經度)
+    cur.execute('''
+        SELECT id, area, nickname, note, image_url, created_at, lat, lng 
+        FROM land_gods 
+        ORDER BY id DESC
+    ''')
     rows = cur.fetchall()
     conn.close()
-    
+
     data = []
     for row in rows:
         data.append({
@@ -186,9 +189,13 @@ def get_all_data():
             'nickname': row[2],
             'note': row[3],
             'image_url': row[4],
-            'created_at': str(row[5])
+            'created_at': str(row[5]),
+            'lat': row[6], # 補上這行
+            'lng': row[7]  # 補上這行
         })
+
     return jsonify(data)
+
 
 # ================= 排行榜專用 API (修復版) =================
 @app.route('/api/leaderboard_data')
