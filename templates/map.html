@@ -27,7 +27,6 @@
         }
         #map { flex-grow: 1; width: 100%; z-index: 1; }
 
-        /* 圖標樣式 */
         .custom-div-icon { background: transparent; border: none; }
         .marker-pin {
             width: 40px; height: 40px; border-radius: 50% 50% 50% 0;
@@ -45,7 +44,6 @@
             transform: rotate(45deg); z-index: 10; margin-top: -5px; margin-left: -1px;
         }
 
-        /* 彈窗優化 */
         .leaflet-popup-content-wrapper { border-radius: 15px; overflow: hidden; padding: 0; }
         .leaflet-popup-content { margin: 0; width: 220px !important; }
         .popup-img-box {
@@ -113,21 +111,19 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 
     <script>
-        var map = L.map('map', {
-            zoomControl: false // 隱藏預設縮放鈕，介面更乾淨
-        }).setView([24.4418, 120.6543], 13);
+        var map = L.map('map', { zoomControl: false }).setView([24.4418, 120.6543], 13);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        // 🔥 重點修正：設定聚合群組參數
+        // 🔥 重點修正：啟動「蜘蛛網模式」
         var markers = L.markerClusterGroup({
             showCoverageOnHover: false,
             zoomToBoundsOnClick: true,
-            spiderfyOnMaxZoom: true, // 允許展開，但...
-            maxClusterRadius: 50,    // 加大聚合半徑，讓它們更愛黏在一起
-            disableClusteringAtZoom: 19 // 只有拉到非常非常近 (Zoom 19) 才會散開
+            spiderfyOnMaxZoom: true, // ✅ 關鍵：允許在最大縮放時展開
+            spiderfyDistanceMultiplier: 2, // ✅ 關鍵：展開的距離拉大一點，才不會擠在一起
+            maxClusterRadius: 60 // 聚合半徑
         });
 
         var templeIcon = L.divIcon({
@@ -137,14 +133,10 @@
         });
 
         $.getJSON('/api/locations', function(data) {
-            // 🔥 加入一點隨機偏移 (Jitter)，避免重疊
             data.forEach(function(item) {
-                // 產生 -0.0001 ~ +0.0001 的微小偏移 (約 10公尺)
-                var jitterLat = (Math.random() - 0.5) * 0.0002;
-                var jitterLng = (Math.random() - 0.5) * 0.0002;
-                
-                var lat = item.lat + jitterLat; 
-                var lng = item.lng + jitterLng;
+                // 🔥 移除隨機偏移 (Jitter)，讓它們完全重疊，觸發蜘蛛網效果
+                var lat = item.lat; 
+                var lng = item.lng;
                 
                 var img = item.image_url;
                 var nickname = item.nickname || '熱心串友';
