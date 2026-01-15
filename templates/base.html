@@ -13,15 +13,17 @@
             background: linear-gradient(180deg, #fdfbf7 0%, #fff3e0 40%, #e3f2fd 100%);
             min-height: 100vh;
             font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
-            padding-bottom: 90px;
+            padding-bottom: 100px; /* 配合變高的導覽列，這裡也要加高 */
             overflow-x: hidden;
             margin: 0;
         }
 
-        /* --- 底部導覽列 CSS (全站共用) --- */
+        /* --- 底部導覽列 --- */
         .bottom-nav { 
             position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #f1f1f1; 
-            padding: 0 5px; height: 80px; 
+            padding: 0 5px; 
+            /* 🔥 修改：高度增加，讓大圖示住得舒服 */
+            height: 90px; 
             display: flex; justify-content: space-around; align-items: center; 
             z-index: 999; box-shadow: 0 -5px 25px rgba(0,0,0,0.05);
         }
@@ -29,30 +31,43 @@
             text-align: center; color: #b2bec3; text-decoration: none; 
             font-size: 0.75rem; flex: 1; display: flex; flex-direction: column; align-items: center; 
         }
+        
+        /* 🔥 修改：左右小圖示變大 (38px -> 45px) */
         .nav-icon {
-            height: 38px; width: auto; margin-bottom: 2px;
+            height: 45px; 
+            width: auto; margin-bottom: 2px;
             filter: grayscale(100%) opacity(0.7); transition: all 0.3s;
         }
+        
         .nav-item.active .nav-icon {
             filter: grayscale(0%) opacity(1); transform: scale(1.1);
         }
         .nav-item.active span { color: #d32f2f; font-weight: bold; }
 
+        /* 🔥 修改：中間大紅圈 巨大化 (75px -> 85px) */
         .nav-center-btn {
-            width: 75px; height: 75px;
+            width: 85px; 
+            height: 85px;
+            
             background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
             border-radius: 50%; border: 5px solid #fff; 
             display: flex; align-items: center; justify-content: center;
-            transform: translateY(-30px);
+            
+            /* 🔥 修改：往上浮更多 (-30px -> -40px) */
+            transform: translateY(-40px); 
+            
             box-shadow: 0 5px 15px rgba(214, 48, 49, 0.4);
             overflow: hidden;
         }
+
+        /* 🔥 修改：中間圖示也跟著變大 (52px -> 60px) */
         .nav-center-icon {
-            height: 52px; width: auto; display: block;
+            height: 60px; 
+            width: auto; display: block;
             filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+            margin: 0;
         }
 
-        /* 預留給子頁面的 CSS 區塊 */
         {% block styles %}{% endblock %}
     </style>
 </head>
