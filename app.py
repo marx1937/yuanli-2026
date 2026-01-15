@@ -4,12 +4,15 @@ import psycopg2
 import cloudinary
 import cloudinary.uploader
 from math import radians, cos, sin, asin, sqrt
+# 👇 新增這個：地名翻譯官
+from geopy.geocoders import Nominatim 
 
 app = Flask(__name__)
 
 # --- 設定密鑰 (Session 用) ---
 app.secret_key = os.environ.get('SECRET_KEY', 'yuanli_secret_key')
 ADMIN_PASSWORD = 'ytc@358'
+
 # --- Cloudinary 設定 ---
 cloudinary.config(
     cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME'),
@@ -33,6 +36,28 @@ def get_db_connection():
     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     return conn
 
+# --- 🔥 新增功能：座標轉地名 (反向地理編碼) ---
+def get_location_name(lat, lng):
+    try:
+        # user_agent 必須是唯一的，隨便取個名字
+        geolocator = Nominatim(user_agent="yuanli_god_hunter_2026_render")
+        location = geolocator.reverse(f"{lat}, {lng}", language='zh-tw')
+        
+        address = location.raw.get('address', {})
+        # 抓取順序：村里 > 鄰居 > 鄉鎮
+        area = address.get('village') or address.get('neighbourhood') or address.get('town')
+        
+        if area:
+            # 確保前面有掛上 "苑裡" 兩個字，看起來比較整齊
+            if "苑裡" not in area:
+                return f"苑裡 {area}"
+            return area
+        else:
+            return "苑裡某處"
+    except Exception as e:
+        print(f"翻譯失敗: {e}")
+        return "苑裡某處"
+
 # ================= 頁面路由 (Routes) =================
 
 @app.route('/')
@@ -43,30 +68,24 @@ def index():
 def map_page():
     return render_template('map.html')
 
-# 🏆 排行榜 (你說不見的就是這個！)
 @app.route('/leaderboard')
 def leaderboard_page():
     return render_template('leaderboard.html')
 
-# 📸 圖庫頁面
 @app.route('/gallery')
 def gallery_page():
     return render_template('gallery.html')
 
-
-# 🔧 管理員登入頁
 @app.route('/login')
 def login_page():
     return render_template('login.html')
 
-# 🔧 管理員後台
 @app.route('/admin')
 def admin_page():
     if not session.get('is_admin'):
         return redirect(url_for('login_page'))
     return render_template('admin.html')
 
-# 🔗 救命導航：不管按首頁哪個按鈕，都導向正確的上傳頁
 @app.route('/report')
 @app.route('/upload_page')
 def show_upload_page():
@@ -74,7 +93,6 @@ def show_upload_page():
 
 # ================= 功能邏輯 (API) =================
 
-# 1. 管理員登入驗證
 @app.route('/api/login', methods=['POST'])
 def api_login():
     data = request.json
@@ -83,14 +101,12 @@ def api_login():
         return jsonify({'status': 'success'})
     return jsonify({'status': 'error', 'message': '密碼錯誤'})
 
-# 2. 核心：上傳功能 (包含重複檢查)
+# 2. 核心：上傳功能 (包含重複檢查 + 🔥 自動翻譯地名)
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
-    # 如果是 GET 請求，就顯示頁面
     if request.method == 'GET':
         return render_template('upload.html')
 
-    # 如果是 POST 請求，處理上傳
     if 'photo' not in request.files:
         return jsonify({'status': 'error', 'message': '沒有檔案'})
     
@@ -99,38 +115,45 @@ def upload_file():
     lng = request.form.get('lng')
     note = request.form.get('note')
     nickname = request.form.get('nickname')
-    area = request.form.get('area')
-
+    
+    # 這裡原本是 request.form.get('area')，我們現在要用後端算出來的
+    
     if file and lat and lng:
         try:
             conn = get_db_connection()
             cur = conn.cursor()
             
-            # --- 🛑 重複地點檢查 (守門員) ---
+            # --- 🛑 重複地點檢查 ---
             cur.execute("SELECT lat, lng FROM land_gods")
             rows = cur.fetchall()
             
             for row in rows:
                 db_lat = row[0]
                 db_lng = row[1]
-                # ⚠️ 測試模式：0.5 (500公尺)，測試完記得改回 0.05
                 dist = haversine(float(lng), float(lat), db_lng, db_lat)
                 
-                if dist < -1: 
+                if dist < -1: # 注意：你原本設 -1 是關閉檢查，如果開啟要改成 < 0.05
                     conn.close()
                     return jsonify({'status': 'pending', 'message': '地點重複，已送審'})
             
-            # --- ✅ 上傳流程 ---
+            # --- 🔥 關鍵：計算地名 ---
+            # 這裡呼叫我們的翻譯機
+            detected_area = get_location_name(lat, lng)
+            print(f"新座標: {lat}, {lng} -> 翻譯結果: {detected_area}")
+
+            # --- ✅ 上傳 Cloudinary ---
             upload_result = cloudinary.uploader.upload(file)
             image_url = upload_result['secure_url']
 
+            # --- 💾 寫入資料庫 ---
+            # 注意：最後一個欄位 area 改用 detected_area
             cur.execute("INSERT INTO land_gods (image_url, lat, lng, note, nickname, area) VALUES (%s, %s, %s, %s, %s, %s)",
-                        (image_url, float(lat), float(lng), note, nickname, area))
+                        (image_url, float(lat), float(lng), note, nickname, detected_area))
             conn.commit()
             cur.close()
             conn.close()
 
-            return jsonify({'status': 'success', 'url': image_url})
+            return jsonify({'status': 'success', 'url': image_url, 'area': detected_area})
 
         except Exception as e:
             print("Error:", e)
@@ -139,12 +162,10 @@ def upload_file():
     return jsonify({'status': 'error', 'message': '資料不完整'})
 
 # 3. 提供地圖資料 API
-# 📌 取得所有地點資料 (公開 API)
 @app.route('/api/locations')
 def get_locations():
     conn = get_db_connection()
     cur = conn.cursor()
-    # 確保有抓 lat 和 lng
     cur.execute('SELECT id, lat, lng, area, note, image_url, nickname, created_at FROM land_gods')
     rows = cur.fetchall()
     conn.close()
@@ -155,7 +176,7 @@ def get_locations():
             'id': row[0],
             'lat': row[1],
             'lng': row[2],
-            'area': row[3],
+            'area': row[3], # 這裡就會讀到 "苑裡 客庄里" 了
             'note': row[4],
             'image_url': row[5],
             'nickname': row[6],
@@ -163,11 +184,8 @@ def get_locations():
         })
     return jsonify(locations)
 
+# ================= 管理員專用 API =================
 
-
-    # ================= 管理員專用 API (新增) =================
-
-# 🔍 1. 吸取所有土地公資料 (給後台用的 API)
 @app.route('/api/admin/all_data')
 def get_all_data():
     if not session.get('is_admin'):
@@ -175,7 +193,6 @@ def get_all_data():
 
     conn = get_db_connection()
     cur = conn.cursor()
-    # 👇 修改這裡：多抓了 lat (緯度) 和 lng (經度)
     cur.execute('''
         SELECT id, area, nickname, note, image_url, created_at, lat, lng 
         FROM land_gods 
@@ -193,21 +210,19 @@ def get_all_data():
             'note': row[3],
             'image_url': row[4],
             'created_at': str(row[5]),
-            'lat': row[6], # 補上這行
-            'lng': row[7]  # 補上這行
+            'lat': row[6],
+            'lng': row[7]
         })
 
     return jsonify(data)
 
-
-# ================= 排行榜專用 API (修復版) =================
+# ================= 排行榜專用 API =================
 @app.route('/api/leaderboard_data')
 def leaderboard_data():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # 1. 抓取【個人】排行榜 (前 10 名)
         cur.execute("""
             SELECT nickname, COUNT(*) as count 
             FROM land_gods 
@@ -217,7 +232,6 @@ def leaderboard_data():
         """)
         user_rows = cur.fetchall()
 
-        # 2. 抓取【區域】排行榜 (前 10 名)
         cur.execute("""
             SELECT area, COUNT(*) as count 
             FROM land_gods 
@@ -229,25 +243,21 @@ def leaderboard_data():
         
         conn.close()
         
-        # 整理資料回傳
         return jsonify({
             'status': 'success',
             'by_user': [{'name': r[0] or '熱心串友', 'count': r[1]} for r in user_rows],
-            'by_area': [{'name': r[0], 'count': r[1]} for r in area_rows]
+            'by_area': [{'name': r[0] or '未知區域', 'count': r[1]} for r in area_rows]
         })
 
     except Exception as e:
         print("排行榜錯誤:", e)
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-# 🗑️ 刪除功能 API
 @app.route('/api/delete', methods=['POST'])
 def delete_location():
-    # 1. 安全檢查：確認是不是管理員 (沒有登入不能刪)
     if not session.get('is_admin'):
         return jsonify({'success': False, 'message': '權限不足，請先登入'})
 
-    # 2. 獲取要刪除的 ID
     location_id = request.form.get('id')
     
     if not location_id:
@@ -256,11 +266,8 @@ def delete_location():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        
-        # 3. 執行資料庫刪除指令
         cur.execute('DELETE FROM land_gods WHERE id = %s', (location_id,))
         conn.commit()
-        
         cur.close()
         conn.close()
         return jsonify({"success": True, "message": "已成功刪除"})
@@ -269,8 +276,5 @@ def delete_location():
         print("刪除失敗:", e)
         return jsonify({"success": False, "message": "資料庫錯誤"})
 
-
-# ================= 程式啟動點 =================
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
-
