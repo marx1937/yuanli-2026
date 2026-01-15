@@ -78,37 +78,52 @@
             position: relative; z-index: 1000;
         }
 
-        /* 🔥 小幫手導覽遮罩 (Guide Overlay) */
+        /* 小幫手導覽遮罩 */
         #guideOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); z-index: 2000;
             display: flex; justify-content: center; align-items: center;
-            backdrop-filter: blur(3px); /* 背景模糊 */
+            backdrop-filter: blur(3px);
         }
         .guide-card {
             background: white; width: 85%; max-width: 350px;
-            border-radius: 25px; padding: 30px 25px 25px 25px;
+            /* 調整 padding，讓上面空間多一點 */
+            border-radius: 25px; padding: 25px 25px 20px 25px;
             text-align: center; position: relative;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             animation: popUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; flex-direction: column; align-items: center; /* 讓內部元素置中 */
         }
         @keyframes popUp {
             from { transform: scale(0.5); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
         }
+        
+        /* 🔥 小幫手位置大調整 */
         .guide-mascot {
-            position: absolute; top: -70px; left: 50%; transform: translateX(-50%);
-            width: 100px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2));
+            /* 不再是絕對定位 */
+            position: relative; 
+            width: 90px; /* 稍微縮小一點以適應卡片內部 */
+            filter: drop-shadow(0 3px 3px rgba(0,0,0,0.1));
+            /* 🔥 關鍵：負的下邊距，讓她看起來趴在按鈕上 */
+            margin-bottom: -15px; 
+            z-index: 10; /* 確保在按鈕上層 */
         }
-        .guide-title { font-weight: bold; color: #d32f2f; font-size: 1.3rem; margin-top: 20px; margin-bottom: 15px; }
-        .guide-list { text-align: left; margin-bottom: 20px; font-size: 0.95rem; color: #555; }
-        .guide-list li { margin-bottom: 10px; list-style: none; }
-        .guide-list i { color: #0984e3; width: 25px; text-align: center; margin-right: 5px; }
+
+        .guide-title { font-weight: bold; color: #d32f2f; font-size: 1.3rem; margin-bottom: 15px; }
+        .guide-list { text-align: left; margin-bottom: 15px; font-size: 0.95rem; color: #555; width: 100%; }
+        .guide-list li { margin-bottom: 10px; list-style: none; display: flex; align-items: center; }
+        .guide-list i { color: #0984e3; width: 30px; text-align: center; margin-right: 8px; font-size: 1.1rem; }
+        
+        /* 🔥 按鈕改成暖黃色系，呼應小幫手 */
         .btn-guide-ok {
-            background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
-            color: white; border: none; padding: 10px 30px; border-radius: 50px;
-            font-weight: bold; font-size: 1rem; width: 100%;
-            box-shadow: 0 5px 15px rgba(214, 48, 49, 0.3);
+            /* background: linear-gradient(135deg, #ff7675 0%, #d63031 100%); 原本的紅色 */
+            background: linear-gradient(135deg, #f0932b 0%, #e67e22 100%); /* 新的暖橘黃 */
+            color: white; border: none; padding: 12px 30px; border-radius: 50px;
+            font-weight: bold; font-size: 1.1rem; width: 100%;
+            box-shadow: 0 5px 15px rgba(230, 126, 34, 0.3); /* 陰影顏色也要改 */
+            position: relative; z-index: 1; /* 確保在小幫手下層 */
+            margin-top: 5px; /* 與上方元素的間距 */
         }
         .btn-guide-ok:active { transform: scale(0.95); }
 
@@ -118,14 +133,14 @@
 
     <div id="guideOverlay">
         <div class="guide-card">
-            <img src="/static/up.png" class="guide-mascot">
             <h3 class="guide-title">歡迎來到尋神地圖！</h3>
             <ul class="guide-list" style="padding-left: 0;">
-                <li><i class="fas fa-map-pin text-danger"></i> <b>點擊圖釘</b>：查看照片與導航</li>
-                <li><i class="fas fa-undo-alt text-secondary"></i> <b>點擊標題</b>：地圖一鍵歸位</li>
-                <li><i class="fas fa-crosshairs text-primary"></i> <b>瞄準按鈕</b>：尋找你的位置</li>
-                <li><i class="fas fa-camera text-warning"></i> <b>中間相機</b>：去上傳新情報</li>
+                <li><i class="fas fa-map-pin text-danger"></i> <div><b>點擊圖釘</b>：查看照片與導航</div></li>
+                <li><i class="fas fa-undo-alt text-secondary"></i> <div><b>點擊標題</b>：地圖一鍵歸位</div></li>
+                <li><i class="fas fa-crosshairs text-primary"></i> <div><b>瞄準按鈕</b>：尋找你的位置</div></li>
+                <li><i class="fas fa-camera text-warning"></i> <div><b>中間相機</b>：去上傳新情報</div></li>
             </ul>
+            <img src="/static/up.png" class="guide-mascot" alt="小幫手">
             <button class="btn btn-guide-ok" onclick="closeGuide()">收到，出發尋神！</button>
         </div>
     </div>
@@ -159,6 +174,8 @@
         // 關閉小幫手導覽
         function closeGuide() {
             $('#guideOverlay').fadeOut();
+            // 可以在這裡存一個 localStorage，下次來就不會再跳出
+            // localStorage.setItem('guideShown', 'true');
         }
 
         const DEFAULT_LAT = 24.4418;
@@ -225,6 +242,13 @@
                 }, function() { alert("無法取得定位"); });
             }
         }
+
+        // 頁面載入時檢查是否要顯示導覽 (目前先強制顯示，方便測試)
+        $(document).ready(function() {
+            // if (!localStorage.getItem('guideShown')) {
+                $('#guideOverlay').css('display', 'flex');
+            // }
+        });
     </script>
 </body>
 </html>
