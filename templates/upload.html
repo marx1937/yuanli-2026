@@ -49,12 +49,22 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
         }
 
-        /* 定位狀態 */
+        /* 定位狀態 Pill */
         .gps-pill {
-            background: white; padding: 6px 18px; border-radius: 50px;
-            font-size: 0.85rem; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            display: inline-flex; align-items: center; margin-bottom: 20px; border: 1px solid #eee;
+            background: white; padding: 8px 18px; border-radius: 50px;
+            font-size: 0.9rem; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: inline-flex; align-items: center; border: 1px solid #eee;
+            color: #555;
         }
+
+        /* 🔥 新增：重新定位按鈕 */
+        .btn-refresh-gps {
+            width: 40px; height: 40px; border-radius: 50%; border: none;
+            background: white; color: #0984e3; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex; align-items: center; justify-content: center;
+            margin-left: 10px; cursor: pointer; transition: 0.2s;
+        }
+        .btn-refresh-gps:active { transform: scale(0.9); background: #f1f2f6; }
 
         /* 輸入框 */
         .form-label { font-weight: bold; color: #2d3436; margin-bottom: 8px; font-size: 0.95rem; }
@@ -91,7 +101,6 @@
         .nav-item { text-align: center; color: #b2bec3; text-decoration: none; font-size: 0.7rem; flex: 1; display: flex; flex-direction: column; align-items: center; }
         .nav-item i { font-size: 1.4rem; margin-bottom: 3px; }
         .nav-item.active { color: #d32f2f; font-weight: bold; }
-        
         .nav-center-btn {
             width: 68px; height: 68px; background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
             border-radius: 50%; border: 6px solid #fff; color: white; display: flex; align-items: center; justify-content: center;
@@ -114,10 +123,13 @@
             <input type="hidden" id="lat" name="lat">
             <input type="hidden" id="lng" name="lng">
 
-            <div class="text-center">
+            <div class="d-flex justify-content-center align-items-center mb-3">
                 <div id="gpsStatus" class="gps-pill">
                     <i class="fas fa-satellite-dish fa-spin mr-2" style="color: #0984e3;"></i> 衛星定位中...
                 </div>
+                <button type="button" class="btn-refresh-gps" onclick="startGPS()" title="重新定位">
+                    <i class="fas fa-crosshairs"></i>
+                </button>
             </div>
 
             <div class="form-group text-center">
@@ -166,11 +178,9 @@
     <div class="bottom-nav">
         <a href="/" class="nav-item"><i class="fas fa-archway"></i><span>首頁</span></a>
         <a href="/map" class="nav-item"><i class="fas fa-map-signs"></i><span>地圖</span></a>
-        
         <a href="javascript:void(0);" class="nav-center-btn active" style="cursor: default;">
             <i class="fas fa-camera-retro" style="color:white;"></i>
         </a>
-
         <a href="/gallery" class="nav-item"><i class="fas fa-images"></i><span>圖庫</span></a>
         <a href="/leaderboard" class="nav-item"><i class="fas fa-scroll"></i><span>榜單</span></a>
     </div>
@@ -187,17 +197,46 @@
         }
     }
 
-    $(document).ready(function() {
+    // 🔥 獨立的定位函式
+    function startGPS() {
+        // 重置狀態 UI
+        $('#gpsStatus').html('<i class="fas fa-satellite-dish fa-spin mr-2" style="color: #0984e3;"></i> 衛星定位中...');
+        $('.btn-refresh-gps i').addClass('fa-spin'); // 讓按鈕旋轉
+        $('#submitBtn').prop('disabled', true).html('<i class="fas fa-sync fa-spin"></i> 等待 GPS 定位...');
+
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                currentLat = position.coords.latitude; currentLng = position.coords.longitude;
-                $('#lat').val(currentLat); $('#lng').val(currentLng);
-                $('#gpsStatus').html('<i class="fas fa-check-circle text-success mr-1"></i> 定位完成');
-                checkReady();
-            }, function() { 
-                $('#gpsStatus').html('<i class="fas fa-exclamation-triangle text-warning mr-1"></i> 定位失敗'); 
-            }, { enableHighAccuracy: true });
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    currentLat = position.coords.latitude; 
+                    currentLng = position.coords.longitude;
+                    $('#lat').val(currentLat); $('#lng').val(currentLng);
+                    
+                    // 成功 UI
+                    $('#gpsStatus').html('<i class="fas fa-check-circle text-success mr-1"></i> 定位完成');
+                    $('.btn-refresh-gps i').removeClass('fa-spin'); // 停止旋轉
+                    checkReady();
+                }, 
+                function(error) { 
+                    var errorMsg = '定位失敗';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED: errorMsg = '請允許定位權限'; break;
+                        case error.POSITION_UNAVAILABLE: errorMsg = '訊號不佳'; break;
+                        case error.TIMEOUT: errorMsg = '定位逾時'; break;
+                    }
+                    // 失敗 UI
+                    $('#gpsStatus').html('<i class="fas fa-exclamation-triangle text-warning mr-1"></i> ' + errorMsg); 
+                    $('.btn-refresh-gps i').removeClass('fa-spin');
+                },
+                { timeout: 10000 }
+            );
+        } else {
+            $('#gpsStatus').text('裝置不支援 GPS');
+            $('.btn-refresh-gps i').removeClass('fa-spin');
         }
+    }
+
+    $(document).ready(function() {
+        startGPS(); // 一進來先抓一次
     });
 
     function previewImage(input) {
@@ -217,6 +256,8 @@
             $('#submitBtn').prop('disabled', false).html('<i class="fas fa-paper-plane"></i> 發送情報！歸檔！');
         } else if (currentLat) {
             $('#submitBtn').html('📸 請先捕捉金身');
+        } else {
+            $('#submitBtn').html('<i class="fas fa-sync fa-spin"></i> 等待 GPS 定位...');
         }
     }
 
@@ -225,12 +266,7 @@
         
         var nickname = $('#nickname').val() || '熱心串友';
         var area = $('#area').val();
-
-        var badWords = [
-            '笨蛋', '壞蛋', '王八', '白痴', '白癡', '智障', 
-            '幹', '靠', '死', '爛', '屌', '雞掰', '機車', 
-            'fuck', 'shit', 'bitch','三小'，'肏'
-        ]; 
+        var badWords = ['笨蛋', '壞蛋', '王八', '白痴', '白癡', '智障', '幹', '靠', '死', '爛', '屌', '雞掰', '機車', 'fuck', 'shit', 'bitch']; 
         
         for (var word of badWords) {
             if (nickname.toLowerCase().includes(word)) {
@@ -251,11 +287,7 @@
         formData.set('description', '[' + area + '] ' + desc);
 
         $.ajax({
-            url: '/upload',
-            type: 'POST',
-            data: formData,
-            contentType: false,
-            processData: false,
+            url: '/upload', type: 'POST', data: formData, contentType: false, processData: false,
             success: function(response) {
                 if (response.status === 'duplicate') {
                     Swal.fire({
@@ -264,17 +296,12 @@
                         html: `感謝您！不過此地點附近似乎已有查報紀錄。<br>管理員確認後就會更新！`,
                         confirmButtonText: '收到！', confirmButtonColor: '#ff9800'
                     }).then(() => { window.location.href = '/map'; });
-                
                 } else {
                     var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公會保庇你喔！';
                     var sayHtml = '感謝 ' + area + ' 的 ' + nickname + '，<br><br><b style="font-size:1.2rem; color:#d32f2f;">土地公會保庇你喔！</b>';
-
                     speakHappy(sayText); 
-                    
                     Swal.fire({
-                        title: '✅ 上傳成功！', 
-                        html: sayHtml,
-                        width: '90%', 
+                        title: '✅ 上傳成功！', html: sayHtml, width: '90%', 
                         imageUrl: '/static/happy.jpg', imageWidth: '100%',
                         confirmButtonText: '太棒了！', confirmButtonColor: '#d32f2f'
                     }).then(() => { window.location.href = '/map'; });
