@@ -25,12 +25,16 @@
             mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
             -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
         }
+        
+        /* 🔥 修改 1：標題文字往下移 (從 -20px 改成 0px，讓它自然處於下方) */
         .app-logo-img {
             width: 75%; max-width: 320px; height: auto;
-            margin-top: -20px; margin-bottom: 5px;
+            margin-top: 0px; /* 這裡改成 0，讓它不那麼貼上 */
+            margin-bottom: 5px;
             filter: drop-shadow(0 3px 5px rgba(0,0,0,0.2));
             position: relative; z-index: 10;
         }
+        
         .sub-title-badge {
             background: rgba(255, 255, 255, 0.9); padding: 8px 25px; border-radius: 50px;
             color: #8d6e63; font-weight: bold; font-size: 1.1rem;
@@ -42,9 +46,9 @@
             line-height: 1.6; padding: 0 20px;
         }
 
-        /* --- 首頁大按鈕樣式 (統一設定) --- */
+        /* --- 首頁大按鈕樣式 --- */
         .menu-btn {
-            display: block; width: 92%; max-width: 400px; /*稍微加寬*/
+            display: block; width: 92%; max-width: 400px;
             margin: 0 auto 15px auto; border-radius: 25px;
             text-decoration: none !important; position: relative;
             transition: transform 0.1s; overflow: hidden;
@@ -52,31 +56,24 @@
         }
         .menu-btn:active { transform: scale(0.98); }
 
-        /* 🔥 修改：統一讓內容靠左對齊 (justify-content: flex-start) */
         .btn-content {
-            padding: 5px 15px; /* 上下邊距縮小，左右留白 */
-            height: 100%;
-            display: flex; 
-            align-items: center; 
-            justify-content: flex-start; /* 關鍵：全部靠左 */
-            color: white; 
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            padding: 5px 15px; height: 100%; display: flex; 
+            align-items: center; justify-content: flex-start;
+            color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         
-        /* 🔥 修改：加大圖片，並增加右邊距 */
         .btn-icon-large {
-            height: 85px; /* 圖變大一點 */
-            width: auto;
-            margin-right: 15px; /* 文字跟圖不要擠在一起 */
-            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2));
-            margin-left: -10px; /* 稍微往左拉一點，利用空間 */
+            height: 85px; width: auto; margin-right: 15px;
+            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2)); margin-left: -10px;
         }
 
         .btn-text-group { text-align: left; flex: 1; }
         .btn-main-text { font-size: 1.5rem; font-weight: bold; margin-bottom: 0px; line-height: 1.2; }
-        .btn-sub-text { font-size: 0.9rem; opacity: 0.95; font-weight: normal; margin-top: 3px; }
+        
+        /* 🔥 修改 3：副標題樣式微調 (移除 Emoji 後更乾淨) */
+        .btn-sub-text { font-size: 0.9rem; opacity: 0.95; font-weight: normal; margin-top: 3px; letter-spacing: 0.5px; }
 
-        /* 🔴 紅色按鈕 */
+        /* 按鈕個別設定 */
         .btn-red {
             background: linear-gradient(180deg, #ff8a80 0%, #e53935 100%);
             box-shadow: 0 10px 25px rgba(229, 57, 53, 0.4); height: 110px;
@@ -93,59 +90,53 @@
             60% {transform: rotate(15deg) translateY(-3px);}
         }
 
-        /* 🟡 黃色按鈕 */
         .btn-yellow {
             background: linear-gradient(180deg, #ffd54f 0%, #ffb300 100%);
             box-shadow: 0 8px 20px rgba(255, 179, 0, 0.4); height: 95px;
         }
-        
-        /* 🔵 藍色按鈕 */
         .btn-blue {
             background: linear-gradient(180deg, #64b5f6 0%, #1e88e5 100%);
             box-shadow: 0 8px 20px rgba(30, 136, 229, 0.4); height: 90px;
         }
 
-        /* --- 底部導覽列 (放大優化版) --- */
+        /* --- 底部導覽列 --- */
         .bottom-nav { 
             position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #f1f1f1; 
-            padding: 0 5px; height: 80px; /* 高度稍微增加 */
+            padding: 0 5px; height: 80px; 
             display: flex; justify-content: space-around; align-items: center; 
             z-index: 999; box-shadow: 0 -5px 25px rgba(0,0,0,0.05);
         }
         .nav-item { 
             text-align: center; color: #b2bec3; text-decoration: none; 
-            font-size: 0.75rem; /* 字體稍微大一點點 */
-            flex: 1; display: flex; flex-direction: column; align-items: center; 
+            font-size: 0.75rem; flex: 1; display: flex; flex-direction: column; align-items: center; 
         }
-        
-        /* 🔥 修改：底部小圖示放大！ */
         .nav-icon {
-            height: 38px; /* 原本28，改成38 */
-            width: auto; margin-bottom: 2px;
-            filter: grayscale(100%) opacity(0.7); 
-            transition: all 0.3s;
+            height: 38px; width: auto; margin-bottom: 2px;
+            filter: grayscale(100%) opacity(0.7); transition: all 0.3s;
         }
-        
-        /* 選中狀態 */
         .nav-item.active .nav-icon {
-            filter: grayscale(0%) opacity(1);
-            transform: scale(1.1);
+            filter: grayscale(0%) opacity(1); transform: scale(1.1);
         }
         .nav-item.active span { color: #d32f2f; font-weight: bold; }
 
-        /* 🔥 修改：中間大按鈕 極限放大！ */
+        /* 🔥 修改 2：中間大按鈕 強制置中 */
         .nav-center-btn {
-            width: 75px; height: 75px; /* 加大圈圈 */
+            width: 75px; height: 75px;
             background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
             border-radius: 50%; border: 5px solid #fff; 
-            display: flex; align-items: center; justify-content: center;
-            transform: translateY(-30px); /* 往上浮一點 */
+            display: flex; 
+            align-items: center;    /* 垂直置中 */
+            justify-content: center; /* 水平置中 */
+            transform: translateY(-30px);
             box-shadow: 0 5px 15px rgba(214, 48, 49, 0.4);
+            overflow: hidden; /* 確保圖片不出界 */
         }
         /* 中間的圖示 */
         .nav-center-icon {
-            height: 50px; /* 原本35，改成50，讓它塞滿！ */
+            height: 52px; /* 稍微再大一點點 */
             width: auto;
+            margin: 0; /* 強制去除邊距 */
+            display: block; /* 避免 inline 元素造成的空隙 */
             filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
         }
 
@@ -171,7 +162,7 @@
             <img src="/static/icon_camera.png" class="btn-icon-large" alt="Camera">
             <div class="btn-text-group">
                 <div class="btn-main-text">尋找神隊友</div>
-                <div class="btn-sub-text">趕快幫祂拍張照 📸</div>
+                <div class="btn-sub-text">趕快幫祂拍張照</div>
             </div>
         </div>
     </a>
@@ -181,7 +172,7 @@
             <img src="/static/icon_compass.png" class="btn-icon-large" alt="Compass">
             <div class="btn-text-group">
                 <div class="btn-main-text" style="color: #5d4037;">搜尋方位</div>
-                <div class="btn-sub-text" style="color: #5d4037;">看看他們躲在哪 🗺️</div>
+                <div class="btn-sub-text" style="color: #5d4037;">看看他們躲在哪</div>
             </div>
         </div>
     </a>
@@ -191,7 +182,7 @@
             <img src="/static/icon_album.png" class="btn-icon-large" alt="Gallery">
             <div class="btn-text-group">
                 <div class="btn-main-text">影像庫</div>
-                <div class="btn-sub-text">尋神足跡紀錄 📖</div>
+                <div class="btn-sub-text">尋神足跡紀錄</div>
             </div>
         </div>
     </a>
