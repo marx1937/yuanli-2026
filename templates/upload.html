@@ -14,7 +14,7 @@
             font-family: "Microsoft JhengHei", sans-serif; padding-bottom: 100px;
         }
 
-        /* 頂部標題與背景優化 */
+        /* 頂部標題 */
         .page-header { text-align: center; padding: 30px 0 20px 0; width: 100%; }
         .header-capsule {
             background: white; padding: 10px 25px; border-radius: 50px;
@@ -30,16 +30,27 @@
             position: relative; margin-top: 20px;
         }
 
-        /* 相機區塊 */
+        /* 📸 相機區塊 (大幅優化！) */
         .upload-zone {
             border: 2px dashed #fab1a0; border-radius: 20px;
-            padding: 35px 15px; text-align: center; background: #fffaf9;
-            cursor: pointer; transition: all 0.3s; position: relative;
+            /* 🔥 設定最小高度，讓框框變大 */
+            min-height: 250px; 
+            /* 🔥 讓內容垂直置中 */
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: #fffaf9;
+            cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;
         }
         .upload-zone:active { background: #fff; border-color: #d32f2f; transform: scale(0.98); }
-        .upload-icon { font-size: 3.2rem; color: #ff7675; margin-bottom: 12px; opacity: 0.8; }
+        .upload-icon { font-size: 3.5rem; color: #ff7675; margin-bottom: 15px; opacity: 0.8; }
         .upload-text { font-weight: bold; color: #d35400; font-size: 1.1rem; }
-        #preview { width: 100%; border-radius: 15px; display: none; margin-top: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        
+        /* 🔥 圖片預覽修正：保持比例，不變形 */
+        #preview { 
+            width: 100%; height: auto; 
+            object-fit: contain; /* 確保整張照片都看得到，不裁切 */
+            border-radius: 15px; display: none; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+        }
 
         /* 定位狀態 */
         .gps-pill {
@@ -166,7 +177,6 @@
     <script>
     var currentLat = null, currentLng = null;
 
-    // 🔊 語音播報
     function speakHappy(text) {
         if ('speechSynthesis' in window) {
             var msg = new SpeechSynthesisUtterance();
@@ -214,8 +224,13 @@
         var nickname = $('#nickname').val() || '熱心串友';
         var area = $('#area').val();
 
-        // 👮‍♂️ 髒話過濾器
-        var badWords = ['笨蛋', '壞蛋', '王八', '白痴', '幹', '死', '爛', '屌', '雞掰', 'fuck', 'shit', 'bitch']; 
+        // 🔥 升級版髒話過濾器 (包含繁體異體字)
+        var badWords = [
+            '笨蛋', '壞蛋', '王八', '白痴', '白癡', '智障', 
+            '幹', '靠', '死', '爛', '屌', '雞掰', '機車', 
+            'fuck', 'shit', 'bitch'
+        ]; 
+        
         for (var word of badWords) {
             if (nickname.toLowerCase().includes(word)) {
                 Swal.fire({
@@ -227,28 +242,21 @@
             }
         }
 
-        // 鎖定按鈕
         var btn = $('#submitBtn');
         btn.html('<i class="fas fa-robot"></i> 正在傳送資料...').prop('disabled', true);
 
-        // 準備資料
         var formData = new FormData(this);
-        // 合併「里別」與「備註」，確保後端 description 欄位有完整資訊
         var desc = $('#description').val();
         formData.set('description', '[' + area + '] ' + desc);
 
-        // 🚀 真實上傳 AJAX
         $.ajax({
-            url: '/upload', // 確保後端有這個路由
+            url: '/upload',
             type: 'POST',
             data: formData,
             contentType: false,
             processData: false,
             success: function(response) {
-                // 這裡接收後端回傳的 JSON，假設格式為 { status: 'success' } 或 { status: 'duplicate' }
-                
                 if (response.status === 'duplicate') {
-                    // 📋 重複資料：進入待審
                     Swal.fire({
                         imageUrl: '/static/pada.jpg', imageWidth: '100%', 
                         title: '📋 資料已送交審核',
@@ -257,23 +265,21 @@
                     }).then(() => { window.location.href = '/map'; });
                 
                 } else {
-                    // ✅ 成功上傳
                     var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公收到囉！';
                     speakHappy(sayText); 
                     
                     Swal.fire({
-                        title: '✅ 上傳成功！', text: sayText,
+                        title: '✅ 上傳成功！', 
+                        // 🔥 修正：文字斷行問題解決
+                        text: sayText,
+                        width: '90%', // 加寬彈窗，避免文字換行太擠
                         imageUrl: '/static/happy.jpg', imageWidth: '100%',
                         confirmButtonText: '太棒了！', confirmButtonColor: '#d32f2f'
                     }).then(() => { window.location.href = '/map'; });
                 }
             },
             error: function() {
-                Swal.fire({
-                    title: '❌ 上傳失敗',
-                    text: '請檢查網路連線，或稍後再試。',
-                    icon: 'error', confirmButtonText: '好'
-                });
+                Swal.fire({ title: '❌ 上傳失敗', text: '請檢查網路連線', icon: 'error', confirmButtonText: '好' });
                 btn.html('<i class="fas fa-paper-plane"></i> 重新發送').prop('disabled', false);
             }
         });
