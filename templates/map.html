@@ -27,23 +27,19 @@
         }
         #map { flex-grow: 1; width: 100%; z-index: 1; }
 
+        /* 🔥 新版簡潔圖標樣式 */
         .custom-div-icon { background: transparent; border: none; }
-        .marker-pin {
-            width: 40px; height: 40px; border-radius: 50% 50% 50% 0;
-            background: #d32f2f; position: absolute; transform: rotate(-45deg);
-            left: 50%; top: 50%; margin: -20px 0 0 -20px;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.3);
-            display: flex; justify-content: center; align-items: center;
+        .simple-pin {
+            font-size: 32px; /* 圖釘大小 */
+            line-height: 32px;
+            text-align: center;
+            filter: drop-shadow(0 3px 3px rgba(0,0,0,0.4)); /* 讓圖釘有立體陰影，才不會跟地圖混在一起 */
+            cursor: pointer;
+            transition: transform 0.2s;
         }
-        .marker-pin::after {
-            content: ''; width: 24px; height: 24px; margin: 8px 0 0 8px;
-            background: #fff; position: absolute; border-radius: 50%;
-        }
-        .marker-icon-svg {
-            position: absolute; font-size: 18px; color: #d32f2f;
-            transform: rotate(45deg); z-index: 10; margin-top: -5px; margin-left: -1px;
-        }
+        .simple-pin:active { transform: scale(1.2); } /* 點擊時放大一下 */
 
+        /* 彈窗優化 */
         .leaflet-popup-content-wrapper { border-radius: 15px; overflow: hidden; padding: 0; }
         .leaflet-popup-content { margin: 0; width: 220px !important; }
         .popup-img-box {
@@ -117,27 +113,28 @@
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        // 🔥 重點修正：啟動「蜘蛛網模式」
         var markers = L.markerClusterGroup({
             showCoverageOnHover: false,
             zoomToBoundsOnClick: true,
-            spiderfyOnMaxZoom: true, // ✅ 關鍵：允許在最大縮放時展開
-            spiderfyDistanceMultiplier: 2, // ✅ 關鍵：展開的距離拉大一點，才不會擠在一起
-            maxClusterRadius: 60 // 聚合半徑
+            spiderfyOnMaxZoom: true, // 保持蜘蛛網功能
+            spiderfyDistanceMultiplier: 1.5, // 稍微拉開一點距離
+            maxClusterRadius: 60
         });
 
-        var templeIcon = L.divIcon({
+        // 🔥 修改：改用簡單的「📍」圖釘
+        var simpleIcon = L.divIcon({
             className: 'custom-div-icon',
-            html: "<div class='marker-pin'></div><i class='fas fa-gopuram marker-icon-svg'></i>",
-            iconSize: [30, 42], iconAnchor: [15, 42], popupAnchor: [0, -40]
+            // 使用 Emoji 當作圖釘，簡單又清楚，還有陰影
+            html: "<div class='simple-pin'>📍</div>",
+            iconSize: [30, 30], 
+            iconAnchor: [15, 30], // 定位點在圖釘底部中央
+            popupAnchor: [0, -30] // 彈窗從圖釘上方跳出
         });
 
         $.getJSON('/api/locations', function(data) {
             data.forEach(function(item) {
-                // 🔥 移除隨機偏移 (Jitter)，讓它們完全重疊，觸發蜘蛛網效果
                 var lat = item.lat; 
                 var lng = item.lng;
-                
                 var img = item.image_url;
                 var nickname = item.nickname || '熱心串友';
                 var desc = item.description || '發現神隊友！';
@@ -155,7 +152,8 @@
                     </div>
                 `;
 
-                var marker = L.marker([lat, lng], { icon: templeIcon }).bindPopup(popupContent);
+                // 使用 simpleIcon
+                var marker = L.marker([lat, lng], { icon: simpleIcon }).bindPopup(popupContent);
                 markers.addLayer(marker);
             });
             map.addLayer(markers);
