@@ -7,22 +7,40 @@
     .hero-section { 
         text-align: center; 
         position: relative; 
-        margin-bottom: 0px; 
+        margin-bottom: 10px; 
         padding-bottom: 0px;
-        max-height: 35vh; 
-        overflow: hidden;
+        /* 這裡不限制高度了，讓內容自然撐開 */
     }
     .hero-banner {
         width: 100%; height: auto; display: block;
-        mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-        -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-        margin-top: -5%; 
+        mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+        /* 圖片正常放，不需要負 margin 了 */
+    }
+
+    /* 🔥 找回 Logo：但稍微縮小一點 (65% width) */
+    .app-logo-img {
+        width: 65%; max-width: 280px; height: auto;
+        margin-top: -10px; /* 稍微往上拉一點，貼近 Banner */    
+        margin-bottom: 10px; 
+        filter: drop-shadow(0 3px 5px rgba(0,0,0,0.2));
+        position: relative; z-index: 10;
+        transform: translateX(5px); /* 微調視覺中心 */
+    }
+    
+    /* 🔥 找回 膠囊標語 */
+    .sub-title-badge {
+        background: rgba(255, 255, 255, 0.9); padding: 5px 20px; border-radius: 50px;
+        color: #8d6e63; font-weight: bold; font-size: 1rem; /* 字體稍微小一點點 */
+        display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        margin-bottom: 5px; border: 2px solid #fff;
+        transform: translateX(5px);
     }
 
     /* --- 報馬仔情報站 --- */
     .news-ticker-container {
         width: 92%; max-width: 400px; 
-        margin: -30px auto 10px auto; 
+        margin: 10px auto 15px auto; /* 調整間距 */
         background: #fff;
         border-radius: 50px;
         box-shadow: 0 5px 15px rgba(0,0,0,0.15); 
@@ -56,7 +74,7 @@
     }
     .ticker-text.active { opacity: 1; transform: translateY(0px); }
 
-    /* --- 按鈕樣式 (緊湊版) --- */
+    /* --- 按鈕樣式 (維持緊湊) --- */
     .menu-btn {
         display: block; width: 94%; max-width: 400px;
         margin: 0 auto 10px auto; 
@@ -109,6 +127,10 @@
     
     <div class="hero-section">
         <img src="/static/top.png" class="hero-banner" alt="Banner">
+        
+        <img src="/static/toptext.png" class="app-logo-img" alt="MAP MY GOD">
+        <br>
+        <div class="sub-title-badge">老神在在 🙈 躲貓貓</div>
     </div>
 
     <a href="/leaderboard" class="news-ticker-container">
@@ -176,8 +198,6 @@
                     let name = item.nickname || "熱心鄉親";
                     let desc = item.description || "這裡";
                     if (desc.length > 8) desc = desc.substring(0, 8) + "...";
-                    
-                    // 🔥 修改：使用「神的足跡」，更有意境 🙏
                     realMsgs.push(`🙏 感恩！感謝 [${name}] 在 [${desc}] 尋獲神的足跡！`);
                 });
                 realMsgs.push(`🚩 目前戰報：全苑裡已尋獲 ${data.length} 尊！`);
