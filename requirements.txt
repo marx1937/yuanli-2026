@@ -1,7 +1,5 @@
-
-
 Flask
 gunicorn
-cloudinary
 psycopg2-binary
-python-dotenv
+cloudinary
+geopy
