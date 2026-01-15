@@ -38,48 +38,54 @@
             margin-bottom: 10px; border: 2px solid #fff;
         }
         .description-text {
-            color: #5d4037; font-size: 0.95rem; margin-bottom: 30px;
+            color: #5d4037; font-size: 0.95rem; margin-bottom: 20px;
             line-height: 1.6; padding: 0 20px;
         }
 
-        /* --- 首頁大按鈕樣式 --- */
+        /* --- 首頁大按鈕樣式 (統一設定) --- */
         .menu-btn {
-            display: block; width: 90%; max-width: 380px;
-            margin: 0 auto 20px auto; border-radius: 25px;
+            display: block; width: 92%; max-width: 400px; /*稍微加寬*/
+            margin: 0 auto 15px auto; border-radius: 25px;
             text-decoration: none !important; position: relative;
             transition: transform 0.1s; overflow: hidden;
             border: 2px solid rgba(255,255,255,0.4);
         }
         .menu-btn:active { transform: scale(0.98); }
 
+        /* 🔥 修改：統一讓內容靠左對齊 (justify-content: flex-start) */
         .btn-content {
-            padding: 10px 20px; display: flex; align-items: center; 
-            color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            padding: 5px 15px; /* 上下邊距縮小，左右留白 */
+            height: 100%;
+            display: flex; 
+            align-items: center; 
+            justify-content: flex-start; /* 關鍵：全部靠左 */
+            color: white; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         
-        /* 🔥 大按鈕裡的圖片樣式 */
+        /* 🔥 修改：加大圖片，並增加右邊距 */
         .btn-icon-large {
-            height: 70px; /*圖片高度*/
+            height: 85px; /* 圖變大一點 */
             width: auto;
-            margin-right: 15px;
-            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2)); /* 幫公仔加點陰影 */
+            margin-right: 15px; /* 文字跟圖不要擠在一起 */
+            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2));
+            margin-left: -10px; /* 稍微往左拉一點，利用空間 */
         }
 
-        .btn-text-group { text-align: left; }
-        .btn-main-text { font-size: 1.4rem; font-weight: bold; margin-bottom: 2px; }
-        .btn-sub-text { font-size: 0.9rem; opacity: 0.95; font-weight: normal; }
+        .btn-text-group { text-align: left; flex: 1; }
+        .btn-main-text { font-size: 1.5rem; font-weight: bold; margin-bottom: 0px; line-height: 1.2; }
+        .btn-sub-text { font-size: 0.9rem; opacity: 0.95; font-weight: normal; margin-top: 3px; }
 
         /* 🔴 紅色按鈕 */
         .btn-red {
             background: linear-gradient(180deg, #ff8a80 0%, #e53935 100%);
             box-shadow: 0 10px 25px rgba(229, 57, 53, 0.4); height: 110px;
-            display: flex; align-items: center; justify-content: center;
         }
         .lucky-badge {
-            position: absolute; top: 10px; right: 15px;
-            background: #ffe082; color: #d35400; font-size: 0.75rem; font-weight: bold;
-            padding: 3px 10px; border-radius: 10px; transform: rotate(15deg);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2); animation: bounce 2s infinite;
+            position: absolute; top: 12px; right: 15px;
+            background: #ffe082; color: #d35400; font-size: 0.8rem; font-weight: bold;
+            padding: 4px 12px; border-radius: 12px; transform: rotate(15deg);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); animation: bounce 2s infinite; z-index: 5;
         }
         @keyframes bounce {
             0%, 20%, 50%, 80%, 100% {transform: rotate(15deg) translateY(0);}
@@ -90,54 +96,56 @@
         /* 🟡 黃色按鈕 */
         .btn-yellow {
             background: linear-gradient(180deg, #ffd54f 0%, #ffb300 100%);
-            box-shadow: 0 8px 20px rgba(255, 179, 0, 0.4); height: 90px;
+            box-shadow: 0 8px 20px rgba(255, 179, 0, 0.4); height: 95px;
         }
-        .btn-yellow .btn-content { justify-content: flex-start; padding-left: 25px; }
         
         /* 🔵 藍色按鈕 */
         .btn-blue {
             background: linear-gradient(180deg, #64b5f6 0%, #1e88e5 100%);
-            box-shadow: 0 8px 20px rgba(30, 136, 229, 0.4); height: 80px; margin-top: 10px;
+            box-shadow: 0 8px 20px rgba(30, 136, 229, 0.4); height: 90px;
         }
-        .btn-blue .btn-content { justify-content: flex-start; padding-left: 25px; }
 
-        /* --- 底部導覽列 (使用圖片) --- */
+        /* --- 底部導覽列 (放大優化版) --- */
         .bottom-nav { 
             position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #f1f1f1; 
-            padding: 0 10px; height: 75px; display: flex; justify-content: space-around; align-items: center; 
+            padding: 0 5px; height: 80px; /* 高度稍微增加 */
+            display: flex; justify-content: space-around; align-items: center; 
             z-index: 999; box-shadow: 0 -5px 25px rgba(0,0,0,0.05);
         }
         .nav-item { 
             text-align: center; color: #b2bec3; text-decoration: none; 
-            font-size: 0.7rem; flex: 1; display: flex; flex-direction: column; align-items: center; 
+            font-size: 0.75rem; /* 字體稍微大一點點 */
+            flex: 1; display: flex; flex-direction: column; align-items: center; 
         }
         
-        /* 🔥 底部小圖示樣式 */
+        /* 🔥 修改：底部小圖示放大！ */
         .nav-icon {
-            height: 28px; width: auto; margin-bottom: 4px;
-            filter: grayscale(100%) opacity(0.6); /* 預設：黑白+半透明 */
+            height: 38px; /* 原本28，改成38 */
+            width: auto; margin-bottom: 2px;
+            filter: grayscale(100%) opacity(0.7); 
             transition: all 0.3s;
         }
         
-        /* 選中狀態 (Active) */
+        /* 選中狀態 */
         .nav-item.active .nav-icon {
-            filter: grayscale(0%) opacity(1); /* 還原彩色 */
-            transform: scale(1.1); /* 稍微放大 */
+            filter: grayscale(0%) opacity(1);
+            transform: scale(1.1);
         }
         .nav-item.active span { color: #d32f2f; font-weight: bold; }
 
-        /* 中間那顆大相機/寶玉 */
+        /* 🔥 修改：中間大按鈕 極限放大！ */
         .nav-center-btn {
-            width: 68px; height: 68px; 
-            /* 這裡背景留白，因為圖片本身應該就很漂亮了，或者保留紅色底 */
+            width: 75px; height: 75px; /* 加大圈圈 */
             background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
-            border-radius: 50%; border: 6px solid #fff; 
+            border-radius: 50%; border: 5px solid #fff; 
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.8rem; transform: translateY(-28px); 
+            transform: translateY(-30px); /* 往上浮一點 */
             box-shadow: 0 5px 15px rgba(214, 48, 49, 0.4);
         }
+        /* 中間的圖示 */
         .nav-center-icon {
-            height: 35px; width: auto;
+            height: 50px; /* 原本35，改成50，讓它塞滿！ */
+            width: auto;
             filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
         }
 
@@ -162,7 +170,7 @@
         <div class="btn-content">
             <img src="/static/icon_camera.png" class="btn-icon-large" alt="Camera">
             <div class="btn-text-group">
-                <div class="btn-main-text">尋找到神隊友</div>
+                <div class="btn-main-text">尋找神隊友</div>
                 <div class="btn-sub-text">趕快幫祂拍張照 📸</div>
             </div>
         </div>
@@ -172,7 +180,7 @@
         <div class="btn-content">
             <img src="/static/icon_compass.png" class="btn-icon-large" alt="Compass">
             <div class="btn-text-group">
-                <div class="btn-main-text" style="color: #5d4037;">搜尋隊友方位</div>
+                <div class="btn-main-text" style="color: #5d4037;">搜尋方位</div>
                 <div class="btn-sub-text" style="color: #5d4037;">看看他們躲在哪 🗺️</div>
             </div>
         </div>
@@ -182,9 +190,8 @@
         <div class="btn-content">
             <img src="/static/icon_album.png" class="btn-icon-large" alt="Gallery">
             <div class="btn-text-group">
-                <div class="btn-main-text" style="font-size: 1.1rem;">
-                    尋神足跡 · 影像庫
-                </div>
+                <div class="btn-main-text">影像庫</div>
+                <div class="btn-sub-text">尋神足跡紀錄 📖</div>
             </div>
         </div>
     </a>
