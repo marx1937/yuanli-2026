@@ -22,7 +22,7 @@
             display: inline-flex; align-items: center; border: 1px solid rgba(255,255,255,0.8);
         }
 
-        /* 表單卡片：增加深度感 */
+        /* 表單卡片 */
         .form-card {
             background: rgba(255, 255, 255, 0.95); width: 92%; max-width: 450px;
             padding: 30px 25px; border-radius: 30px;
@@ -30,7 +30,7 @@
             position: relative; margin-top: 20px;
         }
 
-        /* 📸 相機區塊優化 */
+        /* 相機區塊 */
         .upload-zone {
             border: 2px dashed #fab1a0; border-radius: 20px;
             padding: 35px 15px; text-align: center; background: #fffaf9;
@@ -41,14 +41,14 @@
         .upload-text { font-weight: bold; color: #d35400; font-size: 1.1rem; }
         #preview { width: 100%; border-radius: 15px; display: none; margin-top: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 
-        /* 定位狀態小藥丸 */
+        /* 定位狀態 */
         .gps-pill {
             background: white; padding: 6px 18px; border-radius: 50px;
             font-size: 0.85rem; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             display: inline-flex; align-items: center; margin-bottom: 20px; border: 1px solid #eee;
         }
 
-        /* 輸入框美化 */
+        /* 輸入框 */
         .form-label { font-weight: bold; color: #2d3436; margin-bottom: 8px; font-size: 0.95rem; }
         .custom-input {
             border-radius: 15px; border: 1px solid #eee; background: #fdfdfd;
@@ -56,7 +56,7 @@
         }
         .custom-input:focus { border-color: #ff7675; box-shadow: 0 0 0 3px rgba(255, 118, 117, 0.1); background: white; }
 
-        /* 行動按鈕：拉開與底部的距離 */
+        /* 行動按鈕 */
         .btn-submit {
             background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
             border: none; border-radius: 50px; padding: 16px; margin-top: 25px;
@@ -65,7 +65,7 @@
         }
         .btn-submit:disabled { background: #dfe6e9; box-shadow: none; color: #b2bec3; }
 
-        /* 🧞 小幫手位置修正：讓她站在卡片邊緣，不再破圖 */
+        /* 小幫手 */
         .helper-mascot {
             position: absolute; top: -75px; right: 10px;
             width: 100px; height: auto; z-index: 20;
@@ -74,7 +74,7 @@
         }
         @keyframes float-helper { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 
-        /* 底部導覽列：確保與按鈕有足夠留白 */
+        /* 底部導覽列 */
         .bottom-nav { 
             position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #f1f1f1; 
             padding: 0 10px; height: 75px; display: flex; justify-content: space-around; align-items: center; 
@@ -145,7 +145,7 @@
 
             <div class="form-group mb-0">
                 <label class="form-label"><i class="fas fa-pen-fancy text-warning mr-1"></i> 線索描述 (選填)</label>
-                <textarea class="form-control custom-input" id="note" name="note" rows="2" placeholder="例如：在榕樹下很靈驗..."></textarea>
+                <textarea class="form-control custom-input" id="description" name="description" rows="2" placeholder="例如：在榕樹下很靈驗..."></textarea>
             </div>
 
             <button type="submit" class="btn btn-submit" id="submitBtn" disabled>
@@ -157,7 +157,7 @@
     <div class="bottom-nav">
         <a href="/" class="nav-item"><i class="fas fa-archway"></i><span>首頁</span></a>
         <a href="/map" class="nav-item"><i class="fas fa-map-signs"></i><span>地圖</span></a>
-        <a href="/upload" class="nav-center-btn"><i class="fas fa-camera-retro" style="color:white;"></i></a>
+        <a href="/upload" class="nav-center-btn active"><i class="fas fa-camera-retro" style="color:white;"></i></a>
         <a href="/gallery" class="nav-item"><i class="fas fa-images"></i><span>圖庫</span></a>
         <a href="/leaderboard" class="nav-item"><i class="fas fa-scroll"></i><span>榜單</span></a>
     </div>
@@ -166,7 +166,7 @@
     <script>
     var currentLat = null, currentLng = null;
 
-    // 🔊 核心功能：語音播報
+    // 🔊 語音播報
     function speakHappy(text) {
         if ('speechSynthesis' in window) {
             var msg = new SpeechSynthesisUtterance();
@@ -210,6 +210,7 @@
 
     $('#uploadForm').submit(function(e) {
         e.preventDefault();
+        
         var nickname = $('#nickname').val() || '熱心串友';
         var area = $('#area').val();
 
@@ -226,30 +227,56 @@
             }
         }
 
-        $('#submitBtn').html('<i class="fas fa-robot"></i> 傳送中...').prop('disabled', true);
+        // 鎖定按鈕
+        var btn = $('#submitBtn');
+        btn.html('<i class="fas fa-robot"></i> 正在傳送資料...').prop('disabled', true);
 
-        // 模擬上傳邏輯 (包含重複檢查 pada.jpg 與 成功 happy.jpg)
-        setTimeout(function() {
-            // 這裡可以根據後端回傳 status 判斷
-            var isDuplicate = false; // 模擬變數
+        // 準備資料
+        var formData = new FormData(this);
+        // 合併「里別」與「備註」，確保後端 description 欄位有完整資訊
+        var desc = $('#description').val();
+        formData.set('description', '[' + area + '] ' + desc);
 
-            if (isDuplicate) {
+        // 🚀 真實上傳 AJAX
+        $.ajax({
+            url: '/upload', // 確保後端有這個路由
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                // 這裡接收後端回傳的 JSON，假設格式為 { status: 'success' } 或 { status: 'duplicate' }
+                
+                if (response.status === 'duplicate') {
+                    // 📋 重複資料：進入待審
+                    Swal.fire({
+                        imageUrl: '/static/pada.jpg', imageWidth: '100%', 
+                        title: '📋 資料已送交審核',
+                        html: `感謝您！不過此地點附近似乎已有查報紀錄。<br>管理員確認後就會更新！`,
+                        confirmButtonText: '收到！', confirmButtonColor: '#ff9800'
+                    }).then(() => { window.location.href = '/map'; });
+                
+                } else {
+                    // ✅ 成功上傳
+                    var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公收到囉！';
+                    speakHappy(sayText); 
+                    
+                    Swal.fire({
+                        title: '✅ 上傳成功！', text: sayText,
+                        imageUrl: '/static/happy.jpg', imageWidth: '100%',
+                        confirmButtonText: '太棒了！', confirmButtonColor: '#d32f2f'
+                    }).then(() => { window.location.href = '/map'; });
+                }
+            },
+            error: function() {
                 Swal.fire({
-                    imageUrl: '/static/pada.jpg', imageWidth: '100%', 
-                    title: '📋 資料已送交審核',
-                    html: `感謝您！不過此地點附近似乎已有查報紀錄。<br>管理員確認後就會更新！`,
-                    confirmButtonText: '收到！', confirmButtonColor: '#ff9800'
-                }).then(() => { window.location.href = '/map'; });
-            } else {
-                var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公收到囉！';
-                speakHappy(sayText); // 🔊 語音播報
-                Swal.fire({
-                    title: '✅ 上傳成功！', text: sayText,
-                    imageUrl: '/static/happy.jpg', imageWidth: '100%',
-                    confirmButtonText: '太棒了！', confirmButtonColor: '#d32f2f'
-                }).then(() => { window.location.href = '/map'; });
+                    title: '❌ 上傳失敗',
+                    text: '請檢查網路連線，或稍後再試。',
+                    icon: 'error', confirmButtonText: '好'
+                });
+                btn.html('<i class="fas fa-paper-plane"></i> 重新發送').prop('disabled', false);
             }
-        }, 1500);
+        });
     });
     </script>
 </body>
