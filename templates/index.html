@@ -22,12 +22,16 @@
         margin-top: 15px; margin-bottom: 5px;
     }
     
+    /* 🔥 修改：標語樣式優化 (去除虛線誤會) */
     .sub-title-badge {
-        background: transparent; 
+        background: rgba(255, 255, 255, 0.6); /* 稍微帶點透的白 */
         color: #8d6e63; font-weight: bold; font-size: 1rem;
-        padding: 5px 15px;
-        border: 1px dashed #bcaaa4; 
-        border-radius: 20px;
+        padding: 5px 18px;
+        /* 改成實線，顏色更淡更精緻 */
+        border: 1px solid #d7ccc8; 
+        border-radius: 50px;
+        /* 加一點模糊濾鏡讓它融合背景 */
+        backdrop-filter: blur(2px);
     }
 
     /* --- 報馬仔 --- */
@@ -44,7 +48,8 @@
         text-decoration: none !important;
         overflow: hidden; 
     }
-    .news-ticker-container:active { transform: scale(0.98); background: #ffecb3; }
+    /* 點擊報馬仔也要有 Q 彈感 */
+    .news-ticker-container:active { transform: scale(0.96); transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1); }
 
     .bao-ma-zai-badge {
         color: #d32f2f; font-weight: bold; font-size: 0.9rem;
@@ -73,16 +78,25 @@
         100% { transform: translateX(-150%); } 
     }
 
-    /* --- 按鈕共用樣式 --- */
+    /* --- 按鈕共用樣式 (🔥 注入靈魂：Q彈微交互) --- */
     .menu-btn {
         display: block; width: 92%; max-width: 400px;
         margin: 0 auto 28px auto; 
         border-radius: 25px;
         text-decoration: none !important; position: relative;
-        transition: transform 0.1s; overflow: hidden;
+        overflow: hidden;
         box-shadow: 0 10px 20px rgba(93, 64, 55, 0.1); 
+        
+        /* 🔥 加入這行：更自然的物理過渡效果 */
+        transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
     }
-    .menu-btn:active { transform: scale(0.98); }
+    
+    /* 🔥 修改：按下去的時候縮得更明顯，並減少陰影，製造「壓下去」的感覺 */
+    .menu-btn:active { 
+        transform: scale(0.95); 
+        box-shadow: 0 2px 5px rgba(93, 64, 55, 0.2);
+    }
+
     .btn-content {
         padding: 5px 20px; height: 100%; display: flex; 
         align-items: center; justify-content: flex-start;
@@ -130,23 +144,12 @@
         60% {transform: rotate(15deg) translateY(-3px);}
     }
 
-    /* 🔥 修改：極致低調的底部版權 */
+    /* 底部版權 (極致低調) */
     .secret-footer {
-        text-align: center; 
-        margin-top: 40px; /* 拉開距離 (原本30) */
-        margin-bottom: 20px;
-        /* 使用 rgba 透明度，讓它非常淡，不搶視覺 */
-        color: rgba(141, 110, 99, 0.3); 
-        font-size: 0.65rem; /* 縮小字體 (原本0.75) */
-        letter-spacing: 1px;
+        text-align: center; margin-top: 40px; margin-bottom: 20px;
+        color: rgba(141, 110, 99, 0.3); font-size: 0.65rem; letter-spacing: 1px;
     }
-    .secret-link { 
-        color: rgba(141, 110, 99, 0.2); /* 連結更淡，幾乎隱形 */
-        margin-left: 5px; 
-        text-decoration: none !important; 
-        transition: color 0.3s; 
-    }
-    /* 滑鼠移過去才會亮起來，給管理員看的 */
+    .secret-link { color: rgba(141, 110, 99, 0.2); margin-left: 5px; text-decoration: none !important; transition: color 0.3s; }
     .secret-link:hover { color: #d32f2f; opacity: 1; }
 </style>
 {% endblock %}
@@ -210,10 +213,17 @@
 {% block scripts %}
 <script>
     let realMsgs = ["🔔 報——！歡迎來到尋神情報站！", "💡 報馬仔提醒：發現神隊友請上傳！"];
+    
     fetch('/api/locations').then(r=>r.json()).then(d=>{if(d&&d.length>0){realMsgs=[];d.slice().reverse().slice(0,5).forEach(i=>{
-        let n=i.nickname||"熱心鄉親",desc=i.description||"這裡";if(desc.length>8)desc=desc.substring(0,8)+"...";
-        realMsgs.push(`🙏 感謝！[${n}] 在 [${desc}] 尋獲神的足跡！`);});
-        realMsgs.push(`🚩 目前戰報：全苑裡已尋獲 ${d.length} 尊！`);}}).catch(e=>{});
+        let n = i.nickname || "熱心鄉親";
+        // 智慧判斷地點
+        let place = i.title || i.description || i.address || "苑裡某處";
+        if(place.length > 10) place = place.substring(0, 10) + "...";
+        
+        realMsgs.push(`🙏 感謝！[${n}] 在 [${place}] 尋獲神的足跡！`);
+    });
+    realMsgs.push(`🚩 目前戰報：全苑裡已尋獲 ${d.length} 尊！`);}}).catch(e=>{});
+
     let idx=0,el=document.getElementById('ticker-msg');
     setInterval(()=>{
         el.style.animation = 'none'; 
