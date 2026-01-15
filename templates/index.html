@@ -4,119 +4,119 @@
 {% block styles %}
 <style>
     /* --- 頂部英雄區 --- */
-    .hero-section { 
-        position: relative; 
-        margin-bottom: 10px; 
-        padding-bottom: 0px;
-    }
+    .hero-section { position: relative; margin-bottom: 15px; }
     .hero-banner {
         width: 100%; height: auto; display: block;
-        mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
-        -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+        /* 遮罩改柔和一點 */
+        mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
     }
 
-    /* Flexbox 容器 */
     .hero-text-container {
-        display: flex;
-        flex-direction: column; 
-        align-items: center;    
-        width: 100%;
-        margin-top: -15px;      
-        position: relative; 
-        z-index: 10;
+        display: flex; flex-direction: column; align-items: center; width: 100%;
+        margin-top: -20px; position: relative; z-index: 10;
     }
 
-    /* 🔥 修改：Logo 上下留白平衡校正 */
     .app-logo-img {
-        width: 65%; max-width: 280px; height: auto;
-        display: block;
-        filter: drop-shadow(0 3px 5px rgba(0,0,0,0.2));
-        
-        /* 🔥 加大上方距離，讓它遠離 Banner (10px -> 25px) */
-        margin-top: 25px; 
-        
-        /* 🔥 加大下方距離，與標語保持等距呼吸感 (5px -> 15px) */
-        margin-bottom: 15px; 
+        width: 65%; max-width: 280px; height: auto; display: block;
+        filter: drop-shadow(0 5px 5px rgba(93, 64, 55, 0.2));
+        margin-top: 15px; margin-bottom: 5px;
     }
     
-    /* 標語樣式 */
+    /* 🔥 修改：標語弱化，變成純文字膠囊，不搶按鈕風采 */
     .sub-title-badge {
-        background: rgba(255, 255, 255, 0.9); 
-        padding: 6px 22px; 
-        border-radius: 50px;
+        background: transparent; /* 去除背景 */
         color: #8d6e63; font-weight: bold; font-size: 1rem;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-        border: 2px solid #fff;
+        padding: 5px 15px;
+        border: 1px dashed #bcaaa4; /* 變成虛線框，像是一個註記 */
+        border-radius: 20px;
     }
 
-    /* --- 報馬仔情報站 --- */
+    /* --- 報馬仔 (更融入背景) --- */
     .news-ticker-container {
         width: 92%; max-width: 400px; 
-        margin: 10px auto 15px auto; 
-        background: #fff;
-        border-radius: 50px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.15); 
-        padding: 8px 10px;
+        margin: 15px auto 25px auto; /* 增加下方間距 */
+        background: #fff8e1; /* 淡黃色背景，融入主色調 */
+        border-radius: 15px; /* 變成長方形圓角，不那麼像膠囊 */
+        box-shadow: 0 2px 8px rgba(93, 64, 55, 0.05); 
+        padding: 10px 15px;
         display: flex; align-items: center;
-        border: 2px solid #d32f2f;
+        border: 1px solid #ffe082; /* 邊框變淡 */
         position: relative; z-index: 20;
         text-decoration: none !important;
-        transform: translateY(0); transition: transform 0.2s;
     }
-    .news-ticker-container:active { transform: scale(0.96); }
+    .news-ticker-container:active { transform: scale(0.98); background: #ffecb3; }
 
     .bao-ma-zai-badge {
-        background: #d32f2f; color: white;
-        font-size: 0.75rem; font-weight: bold;
-        padding: 2px 8px; border-radius: 10px;
-        margin-right: 8px; white-space: nowrap;
-        box-shadow: 0 2px 5px rgba(211, 47, 47, 0.3);
+        color: #d32f2f; font-weight: bold; font-size: 0.9rem;
+        margin-right: 10px; white-space: nowrap;
         display: flex; align-items: center;
     }
-    .bao-ma-zai-badge i { margin-right: 3px; font-size: 0.8rem; }
+    .bao-ma-zai-badge i { margin-right: 5px; }
 
     .ticker-content { flex: 1; overflow: hidden; height: 24px; position: relative; }
     .ticker-text {
-        font-size: 0.9rem; color: #333; font-weight: bold;
+        font-size: 0.9rem; color: #5d4037; font-weight: bold; /* 深棕色文字 */
         position: absolute; width: 100%; top: 2px; left: 0;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        opacity: 0; transform: translateY(20px);
-        transition: all 0.5s ease-in-out;
+        opacity: 0; transform: translateY(20px); transition: all 0.5s ease-in-out;
     }
     .ticker-text.active { opacity: 1; transform: translateY(0px); }
 
-    /* --- 按鈕樣式 --- */
+    /* --- 按鈕共用樣式 (增加留白) --- */
     .menu-btn {
-        display: block; width: 94%; max-width: 400px;
-        margin: 0 auto 10px auto; 
-        border-radius: 20px;
+        display: block; width: 92%; max-width: 400px;
+        margin: 0 auto 20px auto; /* 🔥 增加垂直間距 (原本10 -> 20) */
+        border-radius: 25px;
         text-decoration: none !important; position: relative;
         transition: transform 0.1s; overflow: hidden;
-        border: 2px solid rgba(255,255,255,0.6);
+        box-shadow: 0 10px 20px rgba(93, 64, 55, 0.1); /* 統柔和陰影 */
     }
     .menu-btn:active { transform: scale(0.98); }
     .btn-content {
-        padding: 5px 15px; height: 100%; display: flex; 
+        padding: 5px 20px; height: 100%; display: flex; 
         align-items: center; justify-content: flex-start;
-        color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    }
-    .btn-icon-large {
-        height: 75px; width: auto; margin-right: 15px;
-        filter: drop-shadow(0 3px 3px rgba(0,0,0,0.2)); margin-left: -5px;
     }
     .btn-text-group { text-align: left; flex: 1; }
-    .btn-main-text { font-size: 1.4rem; font-weight: bold; margin-bottom: 0px; line-height: 1.2; }
-    .btn-sub-text { font-size: 0.85rem; opacity: 0.95; font-weight: normal; margin-top: 2px; }
+    
+    /* --- 🔥 主按鈕 (Primary) - 尋找神隊友 --- */
+    .btn-primary-action {
+        background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); /* 宮廟紅 */
+        height: 110px; /* 最大顆 */
+        color: white;
+        border: 2px solid rgba(255,255,255,0.2);
+    }
+    .btn-primary-action .btn-main-text { font-size: 1.6rem; font-weight: bold; margin-bottom: 2px; }
+    .btn-primary-action .btn-sub-text { font-size: 0.95rem; opacity: 0.9; font-weight: normal; }
+    .btn-primary-action .btn-icon-large {
+        height: 80px; width: auto; margin-right: 15px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2));
+    }
 
-    .btn-red { background: linear-gradient(180deg, #ff8a80 0%, #e53935 100%); box-shadow: 0 8px 20px rgba(229, 57, 53, 0.3); height: 100px; }
-    .btn-yellow { background: linear-gradient(180deg, #ffd54f 0%, #ffb300 100%); box-shadow: 0 6px 15px rgba(255, 179, 0, 0.3); height: 85px; }
-    .btn-blue { background: linear-gradient(180deg, #64b5f6 0%, #1e88e5 100%); box-shadow: 0 6px 15px rgba(30, 136, 229, 0.3); height: 80px; }
+    /* --- 🔥 次按鈕 (Secondary) - 地圖 & 圖庫 --- */
+    /* 統一改成「暖黃色」，不搶紅色風采 */
+    .btn-secondary-action {
+        background: #fff; /* 白底 */
+        border: 2px solid #ffe082; /* 黃框 */
+        height: 90px; /* 稍微小一點 */
+    }
+    /* 次按鈕文字顏色改深色 */
+    .btn-secondary-action .btn-main-text { color: #5d4037; font-size: 1.4rem; font-weight: bold; }
+    .btn-secondary-action .btn-sub-text { color: #8d6e63; font-size: 0.85rem; }
+    /* 次按鈕圖示 */
+    .btn-secondary-action .btn-icon-large {
+        height: 65px; width: auto; margin-right: 15px; margin-left: 5px;
+    }
+    /* 為了區分，給地圖和圖庫一點點不同的淡背景 */
+    .bg-map { background: linear-gradient(to right, #fff 30%, #fff8e1 100%); }
+    .bg-gallery { background: linear-gradient(to right, #fff 30%, #fff3e0 100%); }
 
+    /* Lucky Badge */
     .lucky-badge {
-        position: absolute; top: 10px; right: 10px;
-        background: #ffe082; color: #d35400; font-size: 0.75rem; font-weight: bold;
-        padding: 3px 10px; border-radius: 10px; transform: rotate(15deg);
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2); animation: bounce 2s infinite; z-index: 5;
+        position: absolute; top: 12px; right: 15px;
+        background: #ffca28; color: #b71c1c; 
+        font-size: 0.8rem; font-weight: bold;
+        padding: 4px 12px; border-radius: 12px; transform: rotate(15deg);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1); animation: bounce 2s infinite; z-index: 5;
     }
     @keyframes bounce {
         0%, 20%, 50%, 80%, 100% {transform: rotate(15deg) translateY(0);}
@@ -125,11 +125,11 @@
     }
 
     .secret-footer {
-        text-align: center; margin-top: 20px; margin-bottom: 20px;
-        color: #ccc; font-size: 0.75rem; letter-spacing: 1px;
+        text-align: center; margin-top: 30px; margin-bottom: 20px;
+        color: #bcaaa4; font-size: 0.75rem; letter-spacing: 1px;
     }
-    .secret-link { color: #e0e0e0; margin-left: 5px; text-decoration: none !important; transition: color 0.3s; }
-    .secret-link:hover { color: #ff9800; }
+    .secret-link { color: #d7ccc8; margin-left: 5px; text-decoration: none !important; transition: color 0.3s; }
+    .secret-link:hover { color: #d32f2f; }
 </style>
 {% endblock %}
 
@@ -148,10 +148,10 @@
         <div class="ticker-content">
             <div class="ticker-text active" id="ticker-msg">🔔 正在接收天庭訊號...</div>
         </div>
-        <div style="color: #bbb; font-size: 0.8rem; margin-left: 5px;"><i class="fas fa-chevron-right"></i></div>
+        <div style="color: #d7ccc8; font-size: 0.8rem; margin-left: 5px;"><i class="fas fa-chevron-right"></i></div>
     </a>
 
-    <a href="/upload" class="menu-btn btn-red">
+    <a href="/upload" class="menu-btn btn-primary-action">
         <div class="lucky-badge">LUCKY!</div>
         <div class="btn-content">
             <img src="/static/icon_camera.png" class="btn-icon-large" alt="Camera">
@@ -161,22 +161,26 @@
             </div>
         </div>
     </a>
-    <a href="/map" class="menu-btn btn-yellow">
+
+    <a href="/map" class="menu-btn btn-secondary-action bg-map">
         <div class="btn-content">
             <img src="/static/icon_compass.png" class="btn-icon-large" alt="Compass">
             <div class="btn-text-group">
                 <div class="btn-main-text">搜尋方位</div>
                 <div class="btn-sub-text">看看他們躲在哪</div>
             </div>
+            <i class="fas fa-map-marked-alt" style="color:#ffe082; font-size:1.2rem; opacity:0.5;"></i>
         </div>
     </a>
-    <a href="/gallery" class="menu-btn btn-blue">
+
+    <a href="/gallery" class="menu-btn btn-secondary-action bg-gallery">
         <div class="btn-content">
             <img src="/static/icon_album.png" class="btn-icon-large" alt="Gallery">
             <div class="btn-text-group">
                 <div class="btn-main-text">影像庫</div>
                 <div class="btn-sub-text">尋神足跡紀錄</div>
             </div>
+            <i class="fas fa-images" style="color:#ffcc80; font-size:1.2rem; opacity:0.5;"></i>
         </div>
     </a>
 
