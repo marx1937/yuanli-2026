@@ -91,6 +91,7 @@
         .nav-item { text-align: center; color: #b2bec3; text-decoration: none; font-size: 0.7rem; flex: 1; display: flex; flex-direction: column; align-items: center; }
         .nav-item i { font-size: 1.4rem; margin-bottom: 3px; }
         .nav-item.active { color: #d32f2f; font-weight: bold; }
+        
         .nav-center-btn {
             width: 68px; height: 68px; background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
             border-radius: 50%; border: 6px solid #fff; color: white; display: flex; align-items: center; justify-content: center;
@@ -165,7 +166,11 @@
     <div class="bottom-nav">
         <a href="/" class="nav-item"><i class="fas fa-archway"></i><span>首頁</span></a>
         <a href="/map" class="nav-item"><i class="fas fa-map-signs"></i><span>地圖</span></a>
-        <a href="/upload" class="nav-center-btn active"><i class="fas fa-camera-retro" style="color:white;"></i></a>
+        
+        <a href="javascript:void(0);" class="nav-center-btn active" style="cursor: default;">
+            <i class="fas fa-camera-retro" style="color:white;"></i>
+        </a>
+
         <a href="/gallery" class="nav-item"><i class="fas fa-images"></i><span>圖庫</span></a>
         <a href="/leaderboard" class="nav-item"><i class="fas fa-scroll"></i><span>榜單</span></a>
     </div>
@@ -224,7 +229,7 @@
         var badWords = [
             '笨蛋', '壞蛋', '王八', '白痴', '白癡', '智障', 
             '幹', '靠', '死', '爛', '屌', '雞掰', '機車', 
-            'fuck', 'shit', 'bitch'
+            'fuck', 'shit', 'bitch','三小'，'肏'
         ]; 
         
         for (var word of badWords) {
@@ -261,18 +266,14 @@
                     }).then(() => { window.location.href = '/map'; });
                 
                 } else {
-                    // 🔊 語音念這句 (連在一起念比較順)
                     var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公會保庇你喔！';
-                    
-                    // 📺 畫面顯示這句 (有換行 <br>)
-                    // 土地公那句有加粗 <b> 和加大字體，更有神力！
                     var sayHtml = '感謝 ' + area + ' 的 ' + nickname + '，<br><br><b style="font-size:1.2rem; color:#d32f2f;">土地公會保庇你喔！</b>';
 
                     speakHappy(sayText); 
                     
                     Swal.fire({
                         title: '✅ 上傳成功！', 
-                        html: sayHtml, // 改用 html 屬性
+                        html: sayHtml,
                         width: '90%', 
                         imageUrl: '/static/happy.jpg', imageWidth: '100%',
                         confirmButtonText: '太棒了！', confirmButtonColor: '#d32f2f'
