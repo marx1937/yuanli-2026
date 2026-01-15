@@ -30,12 +30,10 @@
             position: relative; margin-top: 20px;
         }
 
-        /* 📸 相機區塊 (大幅優化！) */
+        /* 📸 相機區塊 (大方框設定) */
         .upload-zone {
             border: 2px dashed #fab1a0; border-radius: 20px;
-            /* 🔥 設定最小高度，讓框框變大 */
-            min-height: 250px; 
-            /* 🔥 讓內容垂直置中 */
+            min-height: 250px; /* 這裡讓框框變大 */
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             background: #fffaf9;
             cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;
@@ -47,7 +45,7 @@
         /* 🔥 圖片預覽修正：保持比例，不變形 */
         #preview { 
             width: 100%; height: auto; 
-            object-fit: contain; /* 確保整張照片都看得到，不裁切 */
+            object-fit: contain; 
             border-radius: 15px; display: none; 
             box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
         }
@@ -177,6 +175,7 @@
     <script>
     var currentLat = null, currentLng = null;
 
+    // 🔊 語音播報
     function speakHappy(text) {
         if ('speechSynthesis' in window) {
             var msg = new SpeechSynthesisUtterance();
@@ -224,7 +223,7 @@
         var nickname = $('#nickname').val() || '熱心串友';
         var area = $('#area').val();
 
-        // 🔥 升級版髒話過濾器 (包含繁體異體字)
+        // 👮‍♂️ 髒話過濾器 (包含繁體異體字)
         var badWords = [
             '笨蛋', '壞蛋', '王八', '白痴', '白癡', '智障', 
             '幹', '靠', '死', '爛', '屌', '雞掰', '機車', 
@@ -265,14 +264,14 @@
                     }).then(() => { window.location.href = '/map'; });
                 
                 } else {
-                    var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公收到囉！';
+                    // 🔥 這裡換成了「保庇版」文案 🔥
+                    var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公會保庇你喔！';
                     speakHappy(sayText); 
                     
                     Swal.fire({
                         title: '✅ 上傳成功！', 
-                        // 🔥 修正：文字斷行問題解決
                         text: sayText,
-                        width: '90%', // 加寬彈窗，避免文字換行太擠
+                        width: '90%', // 寬度優化
                         imageUrl: '/static/happy.jpg', imageWidth: '100%',
                         confirmButtonText: '太棒了！', confirmButtonColor: '#d32f2f'
                     }).then(() => { window.location.href = '/map'; });
