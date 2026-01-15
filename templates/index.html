@@ -8,7 +8,6 @@
         position: relative; 
         margin-bottom: 10px; 
         padding-bottom: 0px;
-        /* 移除 text-align，改用內部的 flex container 控制 */
     }
     .hero-banner {
         width: 100%; height: auto; display: block;
@@ -16,26 +15,30 @@
         -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
     }
 
-    /* 🔥 新增：專門用來「強制置中」的容器 */
+    /* Flexbox 容器：負責讓 Logo 和標語絕對置中 */
     .hero-text-container {
         display: flex;
         flex-direction: column; /* 垂直排列 */
-        align-items: center;    /* 水平置中 (關鍵!) */
+        align-items: center;    /* 水平置中 */
         width: 100%;
-        margin-top: -15px;      /* 整體往上拉，靠近 Banner */
+        margin-top: -15px;      
         position: relative; 
         z-index: 10;
     }
 
-    /* Logo：移除所有 margin 設定，乖乖聽 flex container 的話 */
+    /* 🔥 修改：Logo 位置微調 */
     .app-logo-img {
         width: 65%; max-width: 280px; height: auto;
         display: block;
         filter: drop-shadow(0 3px 5px rgba(0,0,0,0.2));
-        margin-bottom: 8px; /* Logo 跟下方標語的距離 */
+        
+        /* 這裡增加 margin-top 把它往下推 */
+        margin-top: 10px; 
+        /* 稍微減少跟下方標語的距離，讓它們更緊湊 */
+        margin-bottom: 5px; 
     }
     
-    /* 標語：移除 inline-block，乖乖聽 flex container 的話 */
+    /* 標語樣式 */
     .sub-title-badge {
         background: rgba(255, 255, 255, 0.9); 
         padding: 6px 22px; 
@@ -43,10 +46,9 @@
         color: #8d6e63; font-weight: bold; font-size: 1rem;
         box-shadow: 0 4px 10px rgba(0,0,0,0.08);
         border: 2px solid #fff;
-        /* 不需要 transform 了 */
     }
 
-    /* --- 報馬仔情報站 --- */
+    /* --- 報馬仔情報站 (以下保持不變) --- */
     .news-ticker-container {
         width: 92%; max-width: 400px; 
         margin: 10px auto 15px auto; 
