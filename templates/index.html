@@ -10,7 +10,6 @@
 
     <style>
         body { 
-            /* 背景漸層：配合 top.png 的色調，從米黃過渡到淺藍 */
             background: linear-gradient(180deg, #fdfbf7 0%, #fff3e0 40%, #e3f2fd 100%);
             min-height: 100vh;
             font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
@@ -19,58 +18,31 @@
             margin: 0;
         }
 
-        /* 頂部英雄區塊 */
-        .hero-section {
-            text-align: center;
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        /* 1. 頂部大圖 Banner (top.png) */
+        /* --- 頂部英雄區 --- */
+        .hero-section { text-align: center; position: relative; margin-bottom: 20px; }
         .hero-banner {
-            width: 100%;
-            height: auto;
-            display: block;
-            /* 讓圖片無縫貼齊頂部 */
+            width: 100%; height: auto; display: block;
             mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
             -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
         }
-
-        /* 2. Logo 文字圖 (toptext.png) */
         .app-logo-img {
-            width: 75%;       /* 稍微調大一點點，讓標題更清楚 */
-            max-width: 320px;
-            height: auto;
-            margin-top: 0px; /* 往上拉一點，疊在 Banner 下緣 */
-            margin-bottom: 5px;
-            filter: drop-shadow(0 3px 5px rgba(0,0,0,0.2)); /* 立體陰影 */
-            position: relative;
-            z-index: 10; /* 確保文字浮在最上面 */
+            width: 75%; max-width: 320px; height: auto;
+            margin-top: -20px; margin-bottom: 5px;
+            filter: drop-shadow(0 3px 5px rgba(0,0,0,0.2));
+            position: relative; z-index: 10;
         }
-        
-        /* 躲貓貓副標題 */
         .sub-title-badge {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 8px 25px;
-            border-radius: 50px;
-            color: #8d6e63;
-            font-weight: bold;
-            font-size: 1.1rem;
-            display: inline-block;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-            margin-bottom: 10px;
-            border: 2px solid #fff;
+            background: rgba(255, 255, 255, 0.9); padding: 8px 25px; border-radius: 50px;
+            color: #8d6e63; font-weight: bold; font-size: 1.1rem;
+            display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            margin-bottom: 10px; border: 2px solid #fff;
         }
-
         .description-text {
-            color: #5d4037;
-            font-size: 0.95rem;
-            margin-bottom: 30px;
-            line-height: 1.6;
-            padding: 0 20px;
+            color: #5d4037; font-size: 0.95rem; margin-bottom: 30px;
+            line-height: 1.6; padding: 0 20px;
         }
 
-        /* --- 按鈕樣式 --- */
+        /* --- 首頁大按鈕樣式 --- */
         .menu-btn {
             display: block; width: 90%; max-width: 380px;
             margin: 0 auto 20px auto; border-radius: 25px;
@@ -81,17 +53,26 @@
         .menu-btn:active { transform: scale(0.98); }
 
         .btn-content {
-            padding: 15px 20px; display: flex; align-items: center; justify-content: center;
-            flex-direction: column; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            padding: 10px 20px; display: flex; align-items: center; 
+            color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        /* 🔥 大按鈕裡的圖片樣式 */
+        .btn-icon-large {
+            height: 70px; /*圖片高度*/
+            width: auto;
+            margin-right: 15px;
+            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2)); /* 幫公仔加點陰影 */
         }
 
+        .btn-text-group { text-align: left; }
         .btn-main-text { font-size: 1.4rem; font-weight: bold; margin-bottom: 2px; }
         .btn-sub-text { font-size: 0.9rem; opacity: 0.95; font-weight: normal; }
 
         /* 🔴 紅色按鈕 */
         .btn-red {
             background: linear-gradient(180deg, #ff8a80 0%, #e53935 100%);
-            box-shadow: 0 10px 25px rgba(229, 57, 53, 0.4); height: 100px;
+            box-shadow: 0 10px 25px rgba(229, 57, 53, 0.4); height: 110px;
             display: flex; align-items: center; justify-content: center;
         }
         .lucky-badge {
@@ -109,39 +90,63 @@
         /* 🟡 黃色按鈕 */
         .btn-yellow {
             background: linear-gradient(180deg, #ffd54f 0%, #ffb300 100%);
-            box-shadow: 0 8px 20px rgba(255, 179, 0, 0.4); height: 80px;
+            box-shadow: 0 8px 20px rgba(255, 179, 0, 0.4); height: 90px;
         }
-        .btn-yellow .btn-content { flex-direction: row; justify-content: flex-start; padding-left: 30px; }
-        .yellow-icon { font-size: 2.5rem; margin-right: 15px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
+        .btn-yellow .btn-content { justify-content: flex-start; padding-left: 25px; }
         
         /* 🔵 藍色按鈕 */
         .btn-blue {
             background: linear-gradient(180deg, #64b5f6 0%, #1e88e5 100%);
-            box-shadow: 0 8px 20px rgba(30, 136, 229, 0.4); height: 60px; margin-top: 10px;
+            box-shadow: 0 8px 20px rgba(30, 136, 229, 0.4); height: 80px; margin-top: 10px;
         }
-        .btn-blue .btn-content { flex-direction: row; }
+        .btn-blue .btn-content { justify-content: flex-start; padding-left: 25px; }
 
+        /* --- 底部導覽列 (使用圖片) --- */
         .bottom-nav { 
             position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #f1f1f1; 
             padding: 0 10px; height: 75px; display: flex; justify-content: space-around; align-items: center; 
             z-index: 999; box-shadow: 0 -5px 25px rgba(0,0,0,0.05);
         }
-        .nav-item { text-align: center; color: #b2bec3; text-decoration: none; font-size: 0.7rem; flex: 1; display: flex; flex-direction: column; align-items: center; }
-        .nav-item i { font-size: 1.4rem; margin-bottom: 3px; }
-        .nav-item.active { color: #d32f2f; font-weight: bold; }
-        .nav-center-btn {
-            width: 68px; height: 68px; background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
-            border-radius: 50%; border: 6px solid #fff; color: white; display: flex; align-items: center; justify-content: center;
-            font-size: 1.8rem; transform: translateY(-28px); box-shadow: 0 5px 15px rgba(214, 48, 49, 0.4);
+        .nav-item { 
+            text-align: center; color: #b2bec3; text-decoration: none; 
+            font-size: 0.7rem; flex: 1; display: flex; flex-direction: column; align-items: center; 
         }
+        
+        /* 🔥 底部小圖示樣式 */
+        .nav-icon {
+            height: 28px; width: auto; margin-bottom: 4px;
+            filter: grayscale(100%) opacity(0.6); /* 預設：黑白+半透明 */
+            transition: all 0.3s;
+        }
+        
+        /* 選中狀態 (Active) */
+        .nav-item.active .nav-icon {
+            filter: grayscale(0%) opacity(1); /* 還原彩色 */
+            transform: scale(1.1); /* 稍微放大 */
+        }
+        .nav-item.active span { color: #d32f2f; font-weight: bold; }
+
+        /* 中間那顆大相機/寶玉 */
+        .nav-center-btn {
+            width: 68px; height: 68px; 
+            /* 這裡背景留白，因為圖片本身應該就很漂亮了，或者保留紅色底 */
+            background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
+            border-radius: 50%; border: 6px solid #fff; 
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; transform: translateY(-28px); 
+            box-shadow: 0 5px 15px rgba(214, 48, 49, 0.4);
+        }
+        .nav-center-icon {
+            height: 35px; width: auto;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+        }
+
     </style>
 </head>
 <body>
 
     <div class="hero-section">
-        
         <img src="/static/top.png" class="hero-banner" alt="Banner">
-        
         <img src="/static/toptext.png" class="app-logo-img" alt="MAP MY GOD">
         
         <div class="sub-title-badge">老神在在 🙈 躲貓貓</div>
@@ -155,15 +160,18 @@
     <a href="/upload" class="menu-btn btn-red">
         <div class="lucky-badge">LUCKY!</div>
         <div class="btn-content">
-            <div class="btn-main-text"><i class="fas fa-camera"></i> 尋找到神隊友</div>
-            <div class="btn-sub-text">趕快幫祂拍張照 📸</div>
+            <img src="/static/icon_camera.png" class="btn-icon-large" alt="Camera">
+            <div class="btn-text-group">
+                <div class="btn-main-text">尋找到神隊友</div>
+                <div class="btn-sub-text">趕快幫祂拍張照 📸</div>
+            </div>
         </div>
     </a>
 
     <a href="/map" class="menu-btn btn-yellow">
         <div class="btn-content">
-            <div class="yellow-icon">🧭</div> 
-            <div style="text-align: left;">
+            <img src="/static/icon_compass.png" class="btn-icon-large" alt="Compass">
+            <div class="btn-text-group">
                 <div class="btn-main-text" style="color: #5d4037;">搜尋隊友方位</div>
                 <div class="btn-sub-text" style="color: #5d4037;">看看他們躲在哪 🗺️</div>
             </div>
@@ -172,18 +180,35 @@
 
     <a href="/gallery" class="menu-btn btn-blue">
         <div class="btn-content">
-            <div class="btn-main-text" style="font-size: 1.1rem;">
-                <i class="fas fa-images"></i> 尋神足跡 · 影像庫
+            <img src="/static/icon_album.png" class="btn-icon-large" alt="Gallery">
+            <div class="btn-text-group">
+                <div class="btn-main-text" style="font-size: 1.1rem;">
+                    尋神足跡 · 影像庫
+                </div>
             </div>
         </div>
     </a>
 
     <div class="bottom-nav">
-        <a href="/" class="nav-item active"><i class="fas fa-archway"></i><span>首頁</span></a>
-        <a href="/map" class="nav-item"><i class="fas fa-map-signs"></i><span>地圖</span></a>
-        <a href="/upload" class="nav-center-btn"><i class="fas fa-camera-retro" style="color:white;"></i></a>
-        <a href="/gallery" class="nav-item"><i class="fas fa-images"></i><span>圖庫</span></a>
-        <a href="/leaderboard" class="nav-item"><i class="fas fa-scroll"></i><span>榜單</span></a>
+        <a href="/" class="nav-item active">
+            <img src="/static/nav_home.png" class="nav-icon" alt="首頁">
+            <span>首頁</span>
+        </a>
+        <a href="/map" class="nav-item">
+            <img src="/static/nav_map.png" class="nav-icon" alt="地圖">
+            <span>地圖</span>
+        </a>
+        <a href="/upload" class="nav-center-btn">
+            <img src="/static/nav_upload.png" class="nav-center-icon" alt="上傳">
+        </a>
+        <a href="/gallery" class="nav-item">
+            <img src="/static/nav_gallery.png" class="nav-icon" alt="圖庫">
+            <span>圖庫</span>
+        </a>
+        <a href="/leaderboard" class="nav-item">
+            <img src="/static/nav_leaderboard.png" class="nav-icon" alt="榜單">
+            <span>榜單</span>
+        </a>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
