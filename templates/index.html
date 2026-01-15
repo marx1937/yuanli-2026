@@ -5,10 +5,10 @@
 <style>
     /* --- 頂部英雄區 --- */
     .hero-section { 
-        text-align: center; 
         position: relative; 
         margin-bottom: 10px; 
         padding-bottom: 0px;
+        /* 移除 text-align，改用內部的 flex container 控制 */
     }
     .hero-banner {
         width: 100%; height: auto; display: block;
@@ -16,24 +16,34 @@
         -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
     }
 
-    /* 🔥 修改：Logo 絕對置中校正 */
+    /* 🔥 新增：專門用來「強制置中」的容器 */
+    .hero-text-container {
+        display: flex;
+        flex-direction: column; /* 垂直排列 */
+        align-items: center;    /* 水平置中 (關鍵!) */
+        width: 100%;
+        margin-top: -15px;      /* 整體往上拉，靠近 Banner */
+        position: relative; 
+        z-index: 10;
+    }
+
+    /* Logo：移除所有 margin 設定，乖乖聽 flex container 的話 */
     .app-logo-img {
         width: 65%; max-width: 280px; height: auto;
-        /* margin-left/right: auto 確保區塊置中 */
-        margin: -10px auto 10px auto; 
+        display: block;
         filter: drop-shadow(0 3px 5px rgba(0,0,0,0.2));
-        position: relative; z-index: 10;
-        display: block; /* 變成區塊元素，讓 margin: auto 生效 */
-        /* 移除原本的 transform: translateX(5px); */
+        margin-bottom: 8px; /* Logo 跟下方標語的距離 */
     }
     
-    /* 🔥 修改：標語 絕對置中校正 */
+    /* 標語：移除 inline-block，乖乖聽 flex container 的話 */
     .sub-title-badge {
-        background: rgba(255, 255, 255, 0.9); padding: 5px 20px; border-radius: 50px;
+        background: rgba(255, 255, 255, 0.9); 
+        padding: 6px 22px; 
+        border-radius: 50px;
         color: #8d6e63; font-weight: bold; font-size: 1rem;
-        display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-        margin-bottom: 5px; border: 2px solid #fff;
-        /* 移除原本的 transform: translateX(5px); */
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        border: 2px solid #fff;
+        /* 不需要 transform 了 */
     }
 
     /* --- 報馬仔情報站 --- */
@@ -123,8 +133,11 @@
 {% block content %}
     <div class="hero-section">
         <img src="/static/top.png" class="hero-banner" alt="Banner">
-        <img src="/static/toptext.png" class="app-logo-img" alt="MAP MY GOD">
-        <div class="sub-title-badge">老神在在 🙈 躲貓貓</div>
+        
+        <div class="hero-text-container">
+            <img src="/static/toptext.png" class="app-logo-img" alt="MAP MY GOD">
+            <div class="sub-title-badge">老神在在 🙈 躲貓貓</div>
+        </div>
     </div>
     
     <a href="/leaderboard" class="news-ticker-container">
