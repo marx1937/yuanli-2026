@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Map My God - {% block title %}尋神情報站{% endblock %}</title>
+    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <style>
+        body { 
+            background: linear-gradient(180deg, #fdfbf7 0%, #fff3e0 40%, #e3f2fd 100%);
+            min-height: 100vh;
+            font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
+            padding-bottom: 90px;
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        /* --- 底部導覽列 CSS (全站共用) --- */
+        .bottom-nav { 
+            position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #f1f1f1; 
+            padding: 0 5px; height: 80px; 
+            display: flex; justify-content: space-around; align-items: center; 
+            z-index: 999; box-shadow: 0 -5px 25px rgba(0,0,0,0.05);
+        }
+        .nav-item { 
+            text-align: center; color: #b2bec3; text-decoration: none; 
+            font-size: 0.75rem; flex: 1; display: flex; flex-direction: column; align-items: center; 
+        }
+        .nav-icon {
+            height: 38px; width: auto; margin-bottom: 2px;
+            filter: grayscale(100%) opacity(0.7); transition: all 0.3s;
+        }
+        .nav-item.active .nav-icon {
+            filter: grayscale(0%) opacity(1); transform: scale(1.1);
+        }
+        .nav-item.active span { color: #d32f2f; font-weight: bold; }
+
+        .nav-center-btn {
+            width: 75px; height: 75px;
+            background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
+            border-radius: 50%; border: 5px solid #fff; 
+            display: flex; align-items: center; justify-content: center;
+            transform: translateY(-30px);
+            box-shadow: 0 5px 15px rgba(214, 48, 49, 0.4);
+            overflow: hidden;
+        }
+        .nav-center-icon {
+            height: 52px; width: auto; display: block;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+        }
+
+        /* 預留給子頁面的 CSS 區塊 */
+        {% block styles %}{% endblock %}
+    </style>
+</head>
+<body>
+
+    {% block content %}{% endblock %}
+
+    <div class="bottom-nav">
+        <a href="/" class="nav-item {% if active_page == 'home' %}active{% endif %}">
+            <img src="/static/nav_home.png" class="nav-icon" alt="首頁">
+            <span>首頁</span>
+        </a>
+        <a href="/map" class="nav-item {% if active_page == 'map' %}active{% endif %}">
+            <img src="/static/nav_map.png" class="nav-icon" alt="地圖">
+            <span>地圖</span>
+        </a>
+        <a href="/upload" class="nav-center-btn">
+            <img src="/static/nav_upload.png" class="nav-center-icon" alt="上傳">
+        </a>
+        <a href="/gallery" class="nav-item {% if active_page == 'gallery' %}active{% endif %}">
+            <img src="/static/nav_gallery.png" class="nav-icon" alt="圖庫">
+            <span>圖庫</span>
+        </a>
+        <a href="/leaderboard" class="nav-item {% if active_page == 'leaderboard' %}active{% endif %}">
+            <img src="/static/nav_leaderboard.png" class="nav-icon" alt="榜單">
+            <span>榜單</span>
+        </a>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    {% block scripts %}{% endblock %}
+
+</body>
+</html>
