@@ -15,27 +15,28 @@
         -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
     }
 
-    /* Flexbox 容器：負責讓 Logo 和標語絕對置中 */
+    /* Flexbox 容器 */
     .hero-text-container {
         display: flex;
-        flex-direction: column; /* 垂直排列 */
-        align-items: center;    /* 水平置中 */
+        flex-direction: column; 
+        align-items: center;    
         width: 100%;
         margin-top: -15px;      
         position: relative; 
         z-index: 10;
     }
 
-    /* 🔥 修改：Logo 位置微調 */
+    /* 🔥 修改：Logo 上下留白平衡校正 */
     .app-logo-img {
         width: 65%; max-width: 280px; height: auto;
         display: block;
         filter: drop-shadow(0 3px 5px rgba(0,0,0,0.2));
         
-        /* 這裡增加 margin-top 把它往下推 */
-        margin-top: 10px; 
-        /* 稍微減少跟下方標語的距離，讓它們更緊湊 */
-        margin-bottom: 5px; 
+        /* 🔥 加大上方距離，讓它遠離 Banner (10px -> 25px) */
+        margin-top: 25px; 
+        
+        /* 🔥 加大下方距離，與標語保持等距呼吸感 (5px -> 15px) */
+        margin-bottom: 15px; 
     }
     
     /* 標語樣式 */
@@ -48,7 +49,7 @@
         border: 2px solid #fff;
     }
 
-    /* --- 報馬仔情報站 (以下保持不變) --- */
+    /* --- 報馬仔情報站 --- */
     .news-ticker-container {
         width: 92%; max-width: 400px; 
         margin: 10px auto 15px auto; 
