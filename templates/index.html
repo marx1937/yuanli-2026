@@ -10,24 +10,28 @@
         mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
         -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
     }
+    
     .app-logo-img {
         width: 75%; max-width: 320px; height: auto;
-        margin-top: 0px; margin-bottom: 5px;
+        margin-top: 10px;    
+        margin-bottom: 15px; 
         filter: drop-shadow(0 3px 5px rgba(0,0,0,0.2));
         position: relative; z-index: 10;
     }
+    
     .sub-title-badge {
         background: rgba(255, 255, 255, 0.9); padding: 8px 25px; border-radius: 50px;
         color: #8d6e63; font-weight: bold; font-size: 1.1rem;
         display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-        margin-bottom: 5px; border: 2px solid #fff;
+        margin-bottom: 15px; border: 2px solid #fff;
     }
+    
     .description-text {
         color: #5d4037; font-size: 0.95rem; margin-bottom: 15px;
         line-height: 1.6; padding: 0 20px;
     }
 
-    /* 🔥 新增：動態情報跑馬燈 (Marquee) */
+    /* --- 動態情報跑馬燈 --- */
     .news-ticker-container {
         width: 92%; max-width: 400px; margin: 0 auto 20px auto;
         background: rgba(255, 255, 255, 0.95);
@@ -35,13 +39,10 @@
         box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         padding: 8px 15px;
         display: flex; align-items: center;
-        border: 2px solid #ffe0b2; /* 淡橘色邊框 */
-        cursor: pointer; /* 讓使用者知道可以點 */
-        transition: transform 0.2s;
-        text-decoration: none !important; /* 去除超連結底線 */
+        border: 2px solid #ffe0b2; cursor: pointer;
+        transition: transform 0.2s; text-decoration: none !important;
     }
     .news-ticker-container:active { transform: scale(0.95); background: #fff3e0; }
-
     .ticker-icon {
         width: 32px; height: 32px; background: #ff9800; color: white;
         border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -53,10 +54,7 @@
         70% { box-shadow: 0 0 0 10px rgba(255, 152, 0, 0); }
         100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
     }
-
-    .ticker-content {
-        flex: 1; overflow: hidden; height: 24px; position: relative;
-    }
+    .ticker-content { flex: 1; overflow: hidden; height: 24px; position: relative; }
     .ticker-text {
         font-size: 0.9rem; color: #5d4037; font-weight: bold;
         position: absolute; width: 100%; top: 0; left: 0;
@@ -66,7 +64,7 @@
     }
     .ticker-text.active { opacity: 1; transform: translateY(2px); }
 
-    /* --- 按鈕樣式 (維持原樣) --- */
+    /* --- 按鈕樣式 --- */
     .menu-btn {
         display: block; width: 92%; max-width: 400px;
         margin: 0 auto 15px auto; border-radius: 25px;
@@ -75,7 +73,6 @@
         border: 2px solid rgba(255,255,255,0.4);
     }
     .menu-btn:active { transform: scale(0.98); }
-
     .btn-content {
         padding: 5px 15px; height: 100%; display: flex; 
         align-items: center; justify-content: flex-start;
@@ -88,7 +85,6 @@
     .btn-text-group { text-align: left; flex: 1; }
     .btn-main-text { font-size: 1.5rem; font-weight: bold; margin-bottom: 0px; line-height: 1.2; }
     .btn-sub-text { font-size: 0.9rem; opacity: 0.95; font-weight: normal; margin-top: 3px; letter-spacing: 0.5px; }
-
     .btn-red { background: linear-gradient(180deg, #ff8a80 0%, #e53935 100%); box-shadow: 0 10px 25px rgba(229, 57, 53, 0.4); height: 110px; }
     .lucky-badge {
         position: absolute; top: 12px; right: 15px;
@@ -103,6 +99,25 @@
     }
     .btn-yellow { background: linear-gradient(180deg, #ffd54f 0%, #ffb300 100%); box-shadow: 0 8px 20px rgba(255, 179, 0, 0.4); height: 95px; }
     .btn-blue { background: linear-gradient(180deg, #64b5f6 0%, #1e88e5 100%); box-shadow: 0 8px 20px rgba(30, 136, 229, 0.4); height: 90px; }
+
+    /* 🔥 新增：底部版權與秘密通道 */
+    .secret-footer {
+        text-align: center;
+        margin-top: 30px;
+        margin-bottom: 20px; /* 留一點空間給底部導覽列 */
+        color: #ccc; /* 很淡的灰色，不顯眼 */
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+    }
+    .secret-link {
+        color: #e0e0e0; /* 比文字更淡一點，接近隱形 */
+        margin-left: 5px;
+        text-decoration: none !important;
+        transition: color 0.3s;
+    }
+    .secret-link:hover {
+        color: #ff9800; /* 滑鼠移過去才會變色 */
+    }
 </style>
 {% endblock %}
 
@@ -112,22 +127,18 @@
         <img src="/static/top.png" class="hero-banner" alt="Banner">
         <img src="/static/toptext.png" class="app-logo-img" alt="MAP MY GOD">
         <div class="sub-title-badge">老神在在 🙈 躲貓貓</div>
+        
         <p class="description-text">
-            祂藏在田頭田尾...<br>
-            快把那位 <b>「神隊友」</b> 找出來！
+            祂藏在田頭田尾... 快把那位 <b>「神隊友」</b> 找出來！
         </p>
     </div>
 
     <a href="/leaderboard" class="news-ticker-container">
-        <div class="ticker-icon">
-            <i class="fas fa-bullhorn"></i>
-        </div>
+        <div class="ticker-icon"><i class="fas fa-bullhorn"></i></div>
         <div class="ticker-content">
             <div class="ticker-text active" id="ticker-msg">🔥 系統載入中...</div>
         </div>
-        <div style="color: #bbb; font-size: 0.8rem;">
-            <i class="fas fa-chevron-right"></i>
-        </div>
+        <div style="color: #bbb; font-size: 0.8rem;"><i class="fas fa-chevron-right"></i></div>
     </a>
 
     <a href="/upload" class="menu-btn btn-red">
@@ -140,7 +151,6 @@
             </div>
         </div>
     </a>
-
     <a href="/map" class="menu-btn btn-yellow">
         <div class="btn-content">
             <img src="/static/icon_compass.png" class="btn-icon-large" alt="Compass">
@@ -150,7 +160,6 @@
             </div>
         </div>
     </a>
-
     <a href="/gallery" class="menu-btn btn-blue">
         <div class="btn-content">
             <img src="/static/icon_album.png" class="btn-icon-large" alt="Gallery">
@@ -161,11 +170,15 @@
         </div>
     </a>
 
+    <div class="secret-footer">
+        2026 苑裡串起來 
+        <a href="/admin" class="secret-link"><i class="fas fa-lock"></i></a>
+    </div>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
-    // 🔥 模擬戰報資料庫 (之後可以改從後端 API 抓)
     const msgs = [
         "🏆 恭喜 [香蕉兄弟] 剛剛在 舊社里 尋獲神隊友！",
         "🔥 全苑裡目前已累積發現 88 尊土地公！",
@@ -174,34 +187,22 @@
         "📸 快去上傳！這週的排行榜冠軍還沒出爐！",
         "📢 系統公告：請勿上傳非土地公的照片喔～"
     ];
-
     let msgIndex = 0;
     const tickerEl = document.getElementById('ticker-msg');
-
-    // 每 3.5 秒切換一次訊息
     setInterval(() => {
-        // 1. 先淡出
         tickerEl.style.opacity = '0';
         tickerEl.style.transform = 'translateY(-20px)';
-
         setTimeout(() => {
-            // 2. 更新文字
             msgIndex = (msgIndex + 1) % msgs.length;
             tickerEl.innerText = msgs[msgIndex];
-            
-            // 3. 瞬間移到下方準備進場 (取消動畫)
             tickerEl.style.transition = 'none';
             tickerEl.style.transform = 'translateY(20px)';
-            
-            // 4. 淡入進場 (恢復動畫)
             setTimeout(() => {
                 tickerEl.style.transition = 'all 0.5s ease-in-out';
                 tickerEl.style.opacity = '1';
                 tickerEl.style.transform = 'translateY(2px)';
             }, 50);
-
-        }, 500); // 等淡出動畫跑完
+        }, 500);
     }, 3500);
 </script>
 {% endblock %}
- 
