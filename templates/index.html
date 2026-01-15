@@ -9,38 +9,37 @@
         position: relative; 
         margin-bottom: 10px; 
         padding-bottom: 0px;
-        /* 這裡不限制高度了，讓內容自然撐開 */
     }
     .hero-banner {
         width: 100%; height: auto; display: block;
         mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
         -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
-        /* 圖片正常放，不需要負 margin 了 */
     }
 
-    /* 🔥 找回 Logo：但稍微縮小一點 (65% width) */
+    /* 🔥 修改：Logo 絕對置中校正 */
     .app-logo-img {
         width: 65%; max-width: 280px; height: auto;
-        margin-top: -10px; /* 稍微往上拉一點，貼近 Banner */    
-        margin-bottom: 10px; 
+        /* margin-left/right: auto 確保區塊置中 */
+        margin: -10px auto 10px auto; 
         filter: drop-shadow(0 3px 5px rgba(0,0,0,0.2));
         position: relative; z-index: 10;
-        transform: translateX(5px); /* 微調視覺中心 */
+        display: block; /* 變成區塊元素，讓 margin: auto 生效 */
+        /* 移除原本的 transform: translateX(5px); */
     }
     
-    /* 🔥 找回 膠囊標語 */
+    /* 🔥 修改：標語 絕對置中校正 */
     .sub-title-badge {
         background: rgba(255, 255, 255, 0.9); padding: 5px 20px; border-radius: 50px;
-        color: #8d6e63; font-weight: bold; font-size: 1rem; /* 字體稍微小一點點 */
+        color: #8d6e63; font-weight: bold; font-size: 1rem;
         display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.08);
         margin-bottom: 5px; border: 2px solid #fff;
-        transform: translateX(5px);
+        /* 移除原本的 transform: translateX(5px); */
     }
 
     /* --- 報馬仔情報站 --- */
     .news-ticker-container {
         width: 92%; max-width: 400px; 
-        margin: 10px auto 15px auto; /* 調整間距 */
+        margin: 10px auto 15px auto; 
         background: #fff;
         border-radius: 50px;
         box-shadow: 0 5px 15px rgba(0,0,0,0.15); 
@@ -53,7 +52,6 @@
     }
     .news-ticker-container:active { transform: scale(0.96); }
 
-    /* 報馬仔的紅色印章 */
     .bao-ma-zai-badge {
         background: #d32f2f; color: white;
         font-size: 0.75rem; font-weight: bold;
@@ -74,7 +72,7 @@
     }
     .ticker-text.active { opacity: 1; transform: translateY(0px); }
 
-    /* --- 按鈕樣式 (維持緊湊) --- */
+    /* --- 按鈕樣式 --- */
     .menu-btn {
         display: block; width: 94%; max-width: 400px;
         margin: 0 auto 10px auto; 
@@ -113,7 +111,6 @@
         60% {transform: rotate(15deg) translateY(-3px);}
     }
 
-    /* 秘密通道 */
     .secret-footer {
         text-align: center; margin-top: 20px; margin-bottom: 20px;
         color: #ccc; font-size: 0.75rem; letter-spacing: 1px;
@@ -124,25 +121,18 @@
 {% endblock %}
 
 {% block content %}
-    
     <div class="hero-section">
         <img src="/static/top.png" class="hero-banner" alt="Banner">
-        
         <img src="/static/toptext.png" class="app-logo-img" alt="MAP MY GOD">
-        <br>
         <div class="sub-title-badge">老神在在 🙈 躲貓貓</div>
     </div>
-
+    
     <a href="/leaderboard" class="news-ticker-container">
-        <div class="bao-ma-zai-badge">
-            <i class="fas fa-scroll"></i> 報馬仔
-        </div>
+        <div class="bao-ma-zai-badge"><i class="fas fa-scroll"></i> 報馬仔</div>
         <div class="ticker-content">
             <div class="ticker-text active" id="ticker-msg">🔔 正在接收天庭訊號...</div>
         </div>
-        <div style="color: #bbb; font-size: 0.8rem; margin-left: 5px;">
-            <i class="fas fa-chevron-right"></i>
-        </div>
+        <div style="color: #bbb; font-size: 0.8rem; margin-left: 5px;"><i class="fas fa-chevron-right"></i></div>
     </a>
 
     <a href="/upload" class="menu-btn btn-red">
@@ -159,8 +149,8 @@
         <div class="btn-content">
             <img src="/static/icon_compass.png" class="btn-icon-large" alt="Compass">
             <div class="btn-text-group">
-                <div class="btn-main-text" style="color: #5d4037;">搜尋方位</div>
-                <div class="btn-sub-text" style="color: #5d4037;">看看他們躲在哪</div>
+                <div class="btn-main-text">搜尋方位</div>
+                <div class="btn-sub-text">看看他們躲在哪</div>
             </div>
         </div>
     </a>
@@ -175,53 +165,21 @@
     </a>
 
     <div class="secret-footer">
-        2026 苑裡串起來 
-        <a href="/admin" class="secret-link"><i class="fas fa-lock"></i></a>
+        2026 苑裡串起來 <a href="/admin" class="secret-link"><i class="fas fa-lock"></i></a>
     </div>
-
 {% endblock %}
 
 {% block scripts %}
 <script>
-    let realMsgs = [
-        "🔔 報——！歡迎來到尋神情報站！",
-        "💡 報馬仔提醒：發現神隊友請上傳！"
-    ];
-    
-    fetch('/api/locations')
-        .then(response => response.json())
-        .then(data => {
-            if (data && data.length > 0) {
-                realMsgs = [];
-                const latest = data.slice().reverse().slice(0, 5);
-                latest.forEach(item => {
-                    let name = item.nickname || "熱心鄉親";
-                    let desc = item.description || "這裡";
-                    if (desc.length > 8) desc = desc.substring(0, 8) + "...";
-                    realMsgs.push(`🙏 感恩！感謝 [${name}] 在 [${desc}] 尋獲神的足跡！`);
-                });
-                realMsgs.push(`🚩 目前戰報：全苑裡已尋獲 ${data.length} 尊！`);
-            }
-        })
-        .catch(err => { console.error("報馬仔休息中:", err); });
-
-    let msgIndex = 0;
-    const tickerEl = document.getElementById('ticker-msg');
-
-    setInterval(() => {
-        tickerEl.style.opacity = '0';
-        tickerEl.style.transform = 'translateY(-20px)';
-        setTimeout(() => {
-            msgIndex = (msgIndex + 1) % realMsgs.length;
-            tickerEl.innerText = realMsgs[msgIndex];
-            tickerEl.style.transition = 'none';
-            tickerEl.style.transform = 'translateY(20px)';
-            setTimeout(() => {
-                tickerEl.style.transition = 'all 0.5s ease-in-out';
-                tickerEl.style.opacity = '1';
-                tickerEl.style.transform = 'translateY(0px)';
-            }, 50);
-        }, 500);
-    }, 4000);
+    let realMsgs = ["🔔 報——！歡迎來到尋神情報站！", "💡 報馬仔提醒：發現神隊友請上傳！"];
+    fetch('/api/locations').then(r=>r.json()).then(d=>{if(d&&d.length>0){realMsgs=[];d.slice().reverse().slice(0,5).forEach(i=>{
+        let n=i.nickname||"熱心鄉親",desc=i.description||"這裡";if(desc.length>8)desc=desc.substring(0,8)+"...";
+        realMsgs.push(`🙏 感恩！感謝 [${n}] 在 [${desc}] 尋獲神的足跡！`);});
+        realMsgs.push(`🚩 目前戰報：全苑裡已尋獲 ${d.length} 尊！`);}}).catch(e=>{});
+    let idx=0,el=document.getElementById('ticker-msg');
+    setInterval(()=>{el.style.opacity='0';el.style.transform='translateY(-20px)';
+    setTimeout(()=>{idx=(idx+1)%realMsgs.length;el.innerText=realMsgs[idx];
+    el.style.transition='none';el.style.transform='translateY(20px)';
+    setTimeout(()=>{el.style.transition='all 0.5s ease-in-out';el.style.opacity='1';el.style.transform='translateY(0px)';},50);},500);},4000);
 </script>
 {% endblock %}
