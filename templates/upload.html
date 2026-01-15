@@ -30,10 +30,10 @@
             position: relative; margin-top: 20px;
         }
 
-        /* 📸 相機區塊 (大方框設定) */
+        /* 📸 相機區塊 */
         .upload-zone {
             border: 2px dashed #fab1a0; border-radius: 20px;
-            min-height: 250px; /* 這裡讓框框變大 */
+            min-height: 250px;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             background: #fffaf9;
             cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;
@@ -42,7 +42,6 @@
         .upload-icon { font-size: 3.5rem; color: #ff7675; margin-bottom: 15px; opacity: 0.8; }
         .upload-text { font-weight: bold; color: #d35400; font-size: 1.1rem; }
         
-        /* 🔥 圖片預覽修正：保持比例，不變形 */
         #preview { 
             width: 100%; height: auto; 
             object-fit: contain; 
@@ -175,7 +174,6 @@
     <script>
     var currentLat = null, currentLng = null;
 
-    // 🔊 語音播報
     function speakHappy(text) {
         if ('speechSynthesis' in window) {
             var msg = new SpeechSynthesisUtterance();
@@ -223,7 +221,6 @@
         var nickname = $('#nickname').val() || '熱心串友';
         var area = $('#area').val();
 
-        // 👮‍♂️ 髒話過濾器 (包含繁體異體字)
         var badWords = [
             '笨蛋', '壞蛋', '王八', '白痴', '白癡', '智障', 
             '幹', '靠', '死', '爛', '屌', '雞掰', '機車', 
@@ -264,14 +261,19 @@
                     }).then(() => { window.location.href = '/map'; });
                 
                 } else {
-                    // 🔥 這裡換成了「保庇版」文案 🔥
+                    // 🔊 語音念這句 (連在一起念比較順)
                     var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公會保庇你喔！';
+                    
+                    // 📺 畫面顯示這句 (有換行 <br>)
+                    // 土地公那句有加粗 <b> 和加大字體，更有神力！
+                    var sayHtml = '感謝 ' + area + ' 的 ' + nickname + '，<br><br><b style="font-size:1.2rem; color:#d32f2f;">土地公會保庇你喔！</b>';
+
                     speakHappy(sayText); 
                     
                     Swal.fire({
                         title: '✅ 上傳成功！', 
-                        text: sayText,
-                        width: '90%', // 寬度優化
+                        html: sayHtml, // 改用 html 屬性
+                        width: '90%', 
                         imageUrl: '/static/happy.jpg', imageWidth: '100%',
                         confirmButtonText: '太棒了！', confirmButtonColor: '#d32f2f'
                     }).then(() => { window.location.href = '/map'; });
