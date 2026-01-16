@@ -10,12 +10,11 @@
 
     <style>
         /* --- 頁面佈局 --- */
-        /* 因為 base.html 已經有 padding-bottom，這裡只要確保地圖滿版即可 */
+        /* 🔥 加碼：設定地圖底色為米白，避免載入時看到破圖網格 */
         #map { 
-            position: absolute; top: 0; left: 0; width: 100%; 
-            /* 扣掉底部導航的高度，避免被擋住，但為了美觀通常會讓地圖延伸到底 */
-            height: 100vh; 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100vh; 
             z-index: 1; 
+            background-color: #fdfcf0; /* 暖米色底 */
         }
         
         /* --- 1. 頂部標題列 (懸浮膠囊) --- */
@@ -49,7 +48,7 @@
 
         /* --- 3. 彈窗美學 (圓角 + 紅色按鈕) --- */
         .leaflet-popup-content-wrapper { 
-            border-radius: 20px; /* 🔥 香蕉大師建議：更圓潤的圓角 */
+            border-radius: 20px; /* 圓潤圓角 */
             overflow: hidden; padding: 0; 
             box-shadow: 0 10px 25px rgba(93, 64, 55, 0.2);
         }
@@ -66,8 +65,7 @@
         .popup-desc { font-size: 0.9rem; color: #8d6e63; margin-bottom: 15px; line-height: 1.4; }
         
         .popup-btn {
-            /* 🔥 改成宮廟紅漸層，跟首頁統一 */
-            background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+            background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); /* 宮廟紅 */
             color: white !important; 
             border-radius: 50px; padding: 10px 0; font-size: 0.95rem; font-weight: bold;
             text-decoration: none !important; display: block; text-align: center;
@@ -88,10 +86,10 @@
         }
         .btn-locate:active { transform: scale(0.9); background: #fff8e1; }
 
-        /* --- 5. 小幫手導覽遮罩 (香蕉美學版) --- */
+        /* --- 5. 小幫手導覽遮罩 --- */
         #guideOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(93, 64, 55, 0.6); /* 改用深棕色半透明，比較暖 */
+            background: rgba(93, 64, 55, 0.6); 
             z-index: 2000;
             display: flex; justify-content: center; align-items: center;
             backdrop-filter: blur(4px);
@@ -99,13 +97,13 @@
         .guide-card {
             background: #fff; 
             width: 85%; max-width: 320px;
-            border-radius: 25px; /* 圓角加大 */
+            border-radius: 25px; 
             padding: 30px 25px 20px 25px;
             text-align: center; position: relative;
             box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-            animation: popUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex; flex-direction: column; align-items: center;
-            border: 4px solid #fff8e1; /* 加一個暖黃色邊框 */
+            border: 4px solid #fff8e1;
+            animation: popUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         @keyframes popUp {
             from { transform: scale(0.5); opacity: 0; }
@@ -113,32 +111,24 @@
         }
         
         .guide-mascot {
-            position: relative; 
-            width: 100px; /* 土地公大一點 */
+            position: relative; width: 100px; 
             filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1));
             margin-bottom: -15px; z-index: 10;
         }
 
-        .guide-title { 
-            font-weight: bold; color: #d32f2f; font-size: 1.4rem; margin-bottom: 20px; letter-spacing: 1px;
-        }
-        
-        .guide-list { 
-            text-align: left; margin-bottom: 20px; font-size: 0.95rem; color: #5d4037; width: 100%; 
-            padding-left: 10px;
-        }
+        .guide-title { font-weight: bold; color: #d32f2f; font-size: 1.4rem; margin-bottom: 20px; letter-spacing: 1px; }
+        .guide-list { text-align: left; margin-bottom: 20px; font-size: 0.95rem; color: #5d4037; width: 100%; padding-left: 10px; }
         .guide-list li { margin-bottom: 12px; list-style: none; display: flex; align-items: center; }
         
-        /* 🔥 關鍵修改：統一圖示顏色為宮廟紅，看起來更整潔 */
         .guide-list i { 
-            color: #d32f2f; /* 統一款式 */
+            color: #d32f2f; 
             width: 30px; text-align: center; margin-right: 10px; font-size: 1.2rem; 
             background: #fff8e1; border-radius: 50%; padding: 5px; height: 30px; width: 30px;
             display: flex; align-items: center; justify-content: center;
         }
         
         .btn-guide-ok {
-            background: linear-gradient(135deg, #f0932b 0%, #e67e22 100%); /* 暖橘黃，呼應土地公 */
+            background: linear-gradient(135deg, #f0932b 0%, #e67e22 100%); 
             color: white; border: none; padding: 12px 30px; border-radius: 50px;
             font-weight: bold; font-size: 1.1rem; width: 100%;
             box-shadow: 0 8px 20px rgba(230, 126, 34, 0.3);
@@ -185,8 +175,6 @@
     <script>
         function closeGuide() {
             $('#guideOverlay').fadeOut();
-            // 如果希望下次不顯示，可以打開下面這行
-            // localStorage.setItem('guideShown', 'true');
         }
 
         const DEFAULT_LAT = 24.4418;
@@ -195,8 +183,11 @@
 
         var map = L.map('map', { zoomControl: false }).setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
+        // 🔥 升級：改用 CartoDB Voyager 風格 (更快、更美、更暖)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
         }).addTo(map);
 
         var markers = L.markerClusterGroup({
@@ -207,7 +198,6 @@
             maxClusterRadius: 60
         });
 
-        // 簡單的圖釘樣式
         var simpleIcon = L.divIcon({
             className: 'custom-div-icon',
             html: "<div class='simple-pin'>📍</div>",
@@ -223,7 +213,6 @@
                     var nickname = item.nickname || '熱心鄉親';
                     var desc = item.description || '發現神隊友！';
                     
-                    // 如果沒有描述，給個預設值
                     if(!desc || desc === "") desc = "在苑裡發現的神蹟！";
 
                     var popupContent = `
@@ -264,10 +253,7 @@
         }
 
         $(document).ready(function() {
-            // 每次進來都顯示小幫手，親切感滿分
-            // if (!localStorage.getItem('guideShown')) {
-                $('#guideOverlay').css('display', 'flex');
-            // }
+            $('#guideOverlay').css('display', 'flex');
         });
     </script>
 {% endblock %}
