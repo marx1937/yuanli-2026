@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% set active_page = "map" %}
 
-{% block title %}尋神雷達 - 苑裡土地公{% endblock %}
+{% block title %}尋神地圖 (里別數據統計版){% endblock %}
 
 {% block styles %}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
@@ -9,71 +9,96 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
 
     <style>
-        /* 基礎地圖設定 */
-        #map { position: absolute; top: 0; left: 0; width: 100%; height: 100vh; z-index: 1; background-color: #fdfcf0; }
+        #map { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100vh; 
+            z-index: 1; background-color: #fdfcf0; 
+        }
         
-        /* 🍌 紅色匾額標題 */
-        .map-header { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 900; width: 90%; max-width: 400px; text-align: center; }
-        .header-badge {
-            background: #d32f2f; color: #fff; padding: 10px 25px; border-radius: 50px; font-weight: bold; 
-            box-shadow: 0 5px 15px rgba(211, 47, 47, 0.3); display: inline-flex; align-items: center; border: 2px solid #fff8e1;
+        /* 頂部導航 */
+        .map-header {
+            position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; width: 95%; max-width: 500px; display: flex; gap: 8px;
+        }
+        .header-capsule {
+            background: rgba(255, 255, 255, 0.95); padding: 10px 15px; 
+            border-radius: 50px; font-weight: bold; color: #5d4037; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15); 
+            display: inline-flex; align-items: center; border: 1px solid rgba(0,0,0,0.1);
+            cursor: pointer; backdrop-filter: blur(5px); flex: 1; justify-content: center;
+            font-size: 0.85rem;
+        }
+        .data-badge {
+            background: #5d4037; color: white; padding: 2px 8px; 
+            border-radius: 10px; font-size: 0.75rem; margin-left: 5px;
         }
 
-        /* 🚀 教學指南 (確保回歸) */
-        #guideOverlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(93, 64, 55, 0.85); z-index: 2000;
-            display: flex; justify-content: center; align-items: center;
-            backdrop-filter: blur(8px);
+        /* 里別選擇面板 */
+        #villagePanel {
+            position: fixed; bottom: -65%; left: 0; width: 100%; height: 60%;
+            background: white; z-index: 2000; border-radius: 25px 25px 0 0;
+            box-shadow: 0 -5px 25px rgba(0,0,0,0.2);
+            transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 20px; box-sizing: border-box; overflow-y: auto;
         }
-        .guide-card {
-            background: #fff; width: 85%; max-width: 320px; border-radius: 30px; padding: 30px 25px; 
-            text-align: center; border: 4px solid #fff8e1; box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        #villagePanel.active { bottom: 0; }
+        .panel-handle { width: 40px; height: 5px; background: #ddd; border-radius: 10px; margin: 0 auto 15px auto; }
+        
+        .village-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .village-item {
+            background: #fff; border: 1px solid #eee; padding: 8px 4px;
+            border-radius: 12px; text-align: center; font-size: 0.8rem;
+            color: #444; cursor: pointer; display: flex; flex-direction: column;
+            align-items: center; gap: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: relative;
         }
-        .guide-mascot { display: block; margin: 0 auto 15px auto; width: 140px; }
-        .guide-btn {
-            background: linear-gradient(135deg, #f0932b 0%, #e67e22 100%); 
-            color: white; border: none; padding: 12px 0; border-radius: 50px;
-            font-weight: bold; font-size: 1.1rem; width: 100%; box-shadow: 0 8px 20px rgba(230, 126, 34, 0.3);
+        .village-count-tag {
+            font-size: 10px; color: #888; font-weight: normal;
         }
+        .color-indicator { width: 100%; height: 3px; border-radius: 2px; }
 
-        /* 彈出視窗樣式 */
-        .leaflet-popup-content-wrapper { border-radius: 20px; overflow: hidden; padding: 0; }
-        .leaflet-popup-content { margin: 0; width: 260px !important; }
-        .popup-img { width: 100%; height: 170px; object-fit: cover; background: #eee; }
-        .popup-info { padding: 15px; color: #5d4037; }
+        /* 彩色地圖標籤 */
+        .village-label-icon { 
+            color: white; border-radius: 20px; 
+            padding: 4px 12px; font-weight: bold; border: 2px solid white;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3); white-space: nowrap; font-size: 12px;
+            text-align: center; display: flex; flex-direction: column; line-height: 1.2;
+        }
+        .village-label-count { font-size: 10px; opacity: 0.9; font-weight: normal; }
+
+        .custom-div-icon { background: transparent; border: none; }
+        .simple-pin { font-size: 32px; text-align: center; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3)); }
+
+        /* 彈窗 */
+        .leaflet-popup-content-wrapper { border-radius: 15px; overflow: hidden; padding: 0; }
+        .popup-img-box { width: 100%; height: 160px; overflow: hidden; background: #eee; }
+        .popup-img-box img { width: 100%; height: 100%; object-fit: cover; }
+        .popup-info { padding: 12px; }
         .popup-btn {
             background: #d32f2f; color: white !important; border-radius: 50px; 
-            padding: 10px 0; display: block; text-align: center; text-decoration: none !important;
-            font-weight: bold; margin-top: 10px;
-        }
-
-        /* 右下角定位鈕 */
-        .btn-locate {
-            position: absolute; bottom: 110px; right: 20px; z-index: 900;
-            width: 55px; height: 55px; border-radius: 50%; background: white; 
-            color: #d32f2f; font-size: 1.5rem; display: flex; align-items: center; 
-            justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.15); border: 1px solid #efebe9;
+            padding: 8px 0; display: block; text-align: center; text-decoration: none; margin-top: 8px;
         }
     </style>
 {% endblock %}
 
 {% block content %}
-    <div id="guideOverlay">
-        <div class="guide-card">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/guide_couple.png" class="guide-mascot">
-            <h3 style="color:#d32f2f; font-weight:bold;">尋神地圖指南</h3>
-            <p style="color:#8d6e63; margin-bottom:20px;">點擊地圖上的圖釘<br>看看神隊友躲在哪裡！</p>
-            <button class="guide-btn" onclick="closeGuide()">收到，出發！</button>
+    <div class="map-header">
+        <div class="header-capsule" onclick="resetMapView()">
+            全苑裡 <span class="data-badge" id="totalCount">0</span>
+        </div>
+        <div class="header-capsule" onclick="toggleVillagePanel()">
+            <i class="fas fa-search-location" style="margin-right:5px; color:#d32f2f;"></i> 透過里方式查找
         </div>
     </div>
 
-    <div class="map-header" onclick="resetMapView()">
-        <div class="header-badge"><i class="fas fa-map-marked-alt mr-2"></i> 尋神雷達地圖</div>
-    </div>
-
     <div id="map"></div>
-    <div class="btn-locate" onclick="locateUser()"><i class="fas fa-crosshairs"></i></div>
+
+    <!-- 里別管理面板 -->
+    <div id="villagePanel">
+        <div class="panel-handle" onclick="toggleVillagePanel()"></div>
+        <h4 style="text-align:center; color:#5d4037; margin-bottom:15px; font-weight:bold;">苑裡各里資料分佈</h4>
+        <div class="village-grid" id="villageGrid"></div>
+        <div style="height:40px;"></div>
+    </div>
 {% endblock %}
 
 {% block scripts %}
@@ -82,77 +107,152 @@
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
     <script>
-        function closeGuide() { $('#guideOverlay').fadeOut(); }
+        // 苑裡 25 里數據
+        const VILLAGES = [
+            { name: "苑東里", lat: 24.4442, lng: 120.6558, color: "#e74c3c", count: 0 },
+            { name: "苑南里", lat: 24.4388, lng: 120.6535, color: "#3498db", count: 0 },
+            { name: "苑北里", lat: 24.4465, lng: 120.6515, color: "#2ecc71", count: 0 },
+            { name: "客庄里", lat: 24.4395, lng: 120.6612, color: "#f1c40f", count: 0 },
+            { name: "中正里", lat: 24.4412, lng: 120.6508, color: "#9b59b6", count: 0 },
+            { name: "房裡里", lat: 24.4342, lng: 120.6455, color: "#1abc9c", count: 0 },
+            { name: "新復里", lat: 24.4255, lng: 120.6412, color: "#e67e22", count: 0 },
+            { name: "西勢里", lat: 24.4485, lng: 120.6385, color: "#34495e", count: 0 },
+            { name: "海岸里", lat: 24.4602, lng: 120.6355, color: "#2980b9", count: 0 },
+            { name: "出水里", lat: 24.4552, lng: 120.6458, color: "#27ae60", count: 0 },
+            { name: "山東里", lat: 24.4488, lng: 120.6655, color: "#8e44ad", count: 0 },
+            { name: "山腳里", lat: 24.4352, lng: 120.6885, color: "#d35400", count: 0 },
+            { name: "舊社里", lat: 24.4285, lng: 120.6812, color: "#7f8c8d", count: 0 },
+            { name: "石鎮里", lat: 24.4252, lng: 120.7155, color: "#c0392b", count: 0 },
+            { name: "蕉埔里", lat: 24.4055, lng: 120.7255, color: "#16a085", count: 0 },
+            { name: "南勢里", lat: 24.4152, lng: 120.6955, color: "#f39c12", count: 0 },
+            { name: "泰田里", lat: 24.4158, lng: 120.6585, color: "#d32f2f", count: 0 },
+            { name: "玉田里", lat: 24.4258, lng: 120.6655, color: "#1976d2", count: 0 },
+            { name: "上館里", lat: 24.4385, lng: 120.7185, color: "#388e3c", count: 0 },
+            { name: "南港里", lat: 24.3985, lng: 120.6355, color: "#ffa000", count: 0 },
+            { name: "苑坑里", lat: 24.4625, lng: 120.6755, color: "#7b1fa2", count: 0 },
+            { name: "水坡里", lat: 24.4552, lng: 120.6885, color: "#00796b", count: 0 },
+            { name: "山柑里", lat: 24.4685, lng: 120.6555, color: "#afb42b", count: 0 },
+            { name: "社苓里", lat: 24.4225, lng: 120.6755, color: "#689f38", count: 0 },
+            { name: "田心里", lat: 24.4325, lng: 120.6612, color: "#5d4037", count: 0 }
+        ];
 
-        const DEFAULT_LAT = 24.4418;
-        const DEFAULT_LNG = 120.6543;
-        const DEFAULT_ZOOM = 14;
-
-        /* 🚀 效能優化：開啟 Canvas 渲染 */
-        var map = L.map('map', {
-            zoomControl: false,
-            preferCanvas: true,
-            tap: false
-        }).setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
-
-        /* 🔥 使用 CartoDB Voyager 圖資：比標準 OSM 更快且不會有格子破圖 */
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            attribution: '© CartoDB',
-            subdomains: 'abcd',
-            maxZoom: 20
-        }).addTo(map);
-
-        var markers = L.markerClusterGroup({ chunkedLoading: true });
+        const DEFAULT_LAT = 24.4418, DEFAULT_LNG = 120.6543, DEFAULT_ZOOM = 13;
+        var map = L.map('map', { zoomControl: false, preferCanvas: true }).setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
         
-        var simpleIcon = L.divIcon({
-            className: 'custom-div-icon',
-            html: "<div style='font-size:32px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.3));'>📍</div>",
-            iconSize: [30, 30], iconAnchor: [15, 30]
-        });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        /* 載入資料邏輯 */
-        function loadLocations() {
-            // 注意：我們統一使用 /api/locations 接口
-            $.getJSON('/api/locations', function(data) {
-                if(!data) return;
-                markers.clearLayers();
-                data.forEach(function(item) {
-                    var marker = L.marker([item.lat, item.lng], { icon: simpleIcon });
-                    
-                    marker.on('click', function() {
-                        var html = `
-                            <img src="${item.image_url}" class="popup-img" loading="lazy">
-                            <div class="popup-info">
-                                <b style="font-size:1.1rem;">👤 ${item.nickname || '熱心串友'}</b>
-                                <p style="margin:5px 0; font-size:0.9rem;">${item.description || '發現神蹟！'}</p>
-                                <a href="https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}" target="_blank" class="popup-btn">
-                                    <i class="fas fa-location-arrow"></i> 導航去拜拜
-                                </a>
-                            </div>`;
-                        marker.bindPopup(html).openPopup();
-                    });
-                    markers.addLayer(marker);
+        var villageLayer = L.layerGroup().addTo(map);
+        var detailCluster = L.markerClusterGroup({ chunkedLoading: true });
+
+        // 計算兩點之間的距離 (用於歸類資料點屬於哪個里)
+        function getDistance(lat1, lon1, lat2, lon2) {
+            return Math.sqrt(Math.pow(lat1 - lat2, 2) + Math.pow(lon1 - lon2, 2));
+        }
+
+        // 初始化/更新里別標記 (包含數據量)
+        function updateVillageUI() {
+            villageLayer.clearLayers();
+            $('#villageGrid').empty();
+
+            VILLAGES.forEach(v => {
+                // 地圖標籤
+                var vMarker = L.marker([v.lat, v.lng], {
+                    icon: L.divIcon({
+                        className: 'custom-div-icon',
+                        html: `
+                            <div class="village-label-icon" style="background-color: ${v.color}">
+                                <span>${v.name}</span>
+                                <span class="village-label-count">(${v.count})</span>
+                            </div>`,
+                        iconSize: [80, 40], iconAnchor: [40, 20]
+                    })
                 });
-                map.addLayer(markers);
+                vMarker.on('click', () => goToVillage(v.lat, v.lng));
+                villageLayer.addLayer(vMarker);
+                
+                // 選單項目
+                $('#villageGrid').append(`
+                    <div class="village-item" onclick="goToVillage(${v.lat}, ${v.lng})">
+                        <div class="color-indicator" style="background-color: ${v.color}"></div>
+                        <b>${v.name}</b>
+                        <span class="village-count-tag">${v.count} 筆資料</span>
+                    </div>
+                `);
             });
         }
 
-        function resetMapView() { map.flyTo([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM); }
-
-        function locateUser() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(pos) {
-                    map.flyTo([pos.coords.latitude, pos.coords.longitude], 16);
-                });
+        map.on('zoomend', function() {
+            var currentZoom = map.getZoom();
+            if (currentZoom >= 15) {
+                if (map.hasLayer(villageLayer)) map.removeLayer(villageLayer);
+                if (!map.hasLayer(detailCluster)) map.addLayer(detailCluster);
+            } else {
+                if (!map.hasLayer(villageLayer)) map.addLayer(villageLayer);
+                if (map.hasLayer(detailCluster)) map.removeLayer(detailCluster);
             }
+        });
+
+        function loadData() {
+            $.getJSON('/api/locations', function(data) {
+                $('#totalCount').text(data.length);
+                detailCluster.clearLayers();
+                
+                // 重置各里計數
+                VILLAGES.forEach(v => v.count = 0);
+
+                var markers = [];
+                var pinIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: "<div class='simple-pin'>📍</div>",
+                    iconSize: [30, 30], iconAnchor: [15, 30]
+                });
+
+                data.forEach(item => {
+                    // 1. 邏輯歸類：找出距離此點最近的里
+                    let nearestVillage = null;
+                    let minDist = Infinity;
+                    VILLAGES.forEach(v => {
+                        let d = getDistance(item.lat, item.lng, v.lat, v.lng);
+                        if(d < minDist) {
+                            minDist = d;
+                            nearestVillage = v;
+                        }
+                    });
+                    if(nearestVillage) nearestVillage.count++;
+
+                    // 2. 建立標記
+                    var m = L.marker([item.lat, item.lng], { icon: pinIcon });
+                    m.on('click', function() {
+                        if(!this.getPopup()) {
+                            this.bindPopup(`
+                                <div class="popup-img-box"><img src="${item.image_url}" loading="lazy"></div>
+                                <div class="popup-info">
+                                    <b>${item.nickname || '鄉親'}</b>
+                                    <p>${item.description || '發現規劃點！'}</p>
+                                    <a href="https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}" target="_blank" class="popup-btn">導航</a>
+                                </div>
+                            `).openPopup();
+                        }
+                    });
+                    markers.push(m);
+                });
+
+                detailCluster.addLayers(markers);
+                updateVillageUI(); // 數據跑完後更新 UI
+            });
         }
 
+        function goToVillage(lat, lng) {
+            $('#villagePanel').removeClass('active');
+            map.flyTo([lat, lng], 16, { duration: 1.5 });
+        }
+
+        function resetMapView() { map.flyTo([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM); }
+        function toggleVillagePanel() { $('#villagePanel').toggleClass('active'); }
+
         $(document).ready(function() {
-            // 確保一開始就顯示指南
-            $('#guideOverlay').show();
-            loadLocations();
-            // 解決地圖尺寸跑掉的問題
-            setTimeout(() => { map.invalidateSize(); }, 500);
+            loadData();
         });
     </script>
 {% endblock %}
+
