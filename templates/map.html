@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% set active_page = "map" %}
 
-{% block title %}尋神雷達 - 極速版{% endblock %}
+{% block title %}尋神雷達 - 終極加速版{% endblock %}
 
 {% block styles %}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
@@ -9,23 +9,37 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
 
     <style>
-        /* 🍌 香蕉建議：延續暖米色底色，避免白屏閃爍 */
+        /* 預設米黃色背景，防止格子破圖時太難看 */
         #map { position: absolute; top: 0; left: 0; width: 100%; height: 100vh; z-index: 1; background-color: #fdfcf0; }
         
         /* 匾額標題 */
         .map-header { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 900; width: 90%; max-width: 400px; text-align: center; }
         .header-badge { background: #d32f2f; color: #fff; padding: 10px 25px; border-radius: 50px; font-weight: bold; box-shadow: 0 5px 15px rgba(211, 47, 47, 0.3); border: 2px solid #fff8e1; }
 
-        /* 🚀 新增：載入中遮罩，解決「客人跑光」的問題 */
-        #mapLoading {
+        /* 🚀 教學指南遮罩 (修復回歸！) */
+        #guideOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #fdfcf0; z-index: 1500; display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
+            background: rgba(93, 64, 55, 0.85); z-index: 2000;
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(8px);
         }
-        .loading-spinner { width: 50px; height: 50px; border: 5px solid #fff; border-top: 5px solid #d32f2f; border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .guide-card {
+            background: #fff; width: 85%; max-width: 320px;
+            border-radius: 30px; padding: 30px 25px; 
+            text-align: center; border: 4px solid #fff8e1;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .guide-mascot { display: block; margin: 0 auto 20px auto; width: 140px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); }
+        .guide-btn {
+            background: linear-gradient(135deg, #f0932b 0%, #e67e22 100%); 
+            color: white; border: none; padding: 12px 0; border-radius: 50px;
+            font-weight: bold; font-size: 1.1rem; width: 100%;
+            box-shadow: 0 8px 20px rgba(230, 126, 34, 0.3);
+        }
 
-        /* 彈出視窗圓潤化 */
+        /* 彈出視窗 */
         .leaflet-popup-content-wrapper { border-radius: 20px; overflow: hidden; padding: 0; }
         .leaflet-popup-content { margin: 0; width: 250px !important; }
         .popup-img { width: 100%; height: 160px; object-fit: cover; background: #eee; }
@@ -38,9 +52,13 @@
 {% endblock %}
 
 {% block content %}
-    <div id="mapLoading">
-        <div class="loading-spinner"></div>
-        <p style="margin-top:15px; color:#5d4037; font-weight:bold;">🙏 正在開啟靈感雷達...</p>
+    <div id="guideOverlay">
+        <div class="guide-card">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/guide_couple.png" class="guide-mascot" alt="小幫手">
+            <h3 style="color:#d32f2f; font-weight:bold; margin-bottom:10px;">尋神地圖指南</h3>
+            <p style="color:#8d6e63; margin-bottom:20px; font-size:0.95rem;">點擊地圖上的圖釘<br>看看神隊友躲在哪裡！</p>
+            <button class="guide-btn" onclick="closeGuide()">收到，出發！</button>
+        </div>
     </div>
 
     <div class="map-header" onclick="resetMapView()">
@@ -61,26 +79,27 @@
         const DEFAULT_LNG = 120.6543;
         const DEFAULT_ZOOM = 14;
 
-        /* 🚀 效能優化核心：開啟 Canvas 渲染模式 */
+        function closeGuide() { $('#guideOverlay').fadeOut(); }
+
+        /* 🚀 效能核心：Canvas 渲染 + 延遲啟動 */
         var map = L.map('map', {
             zoomControl: false,
-            preferCanvas: true, // 這行是解決 500 個點卡頓的關鍵
-            tap: false
+            preferCanvas: true, // 效能關鍵
+            tap: false,
+            updateWhenIdle: true, // 只在停止移動時更新
+            updateWhenZooming: false
         }).setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
 
-        /* 🔥 使用 CartoDB 穩定圖層，避免台灣政府伺服器塞車問題 */
+        /* 🔥 使用 CartoDB 全球加速節點，速度最快 */
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            attribution: '© CartoDB'
+            attribution: '© CartoDB',
+            subdomains: 'abcd', // 使用多線程加速下載
+            maxZoom: 20
         }).addTo(map);
 
-        // 地圖載入完成後關閉動畫
-        map.on('tileload', function() { $('#mapLoading').fadeOut(1000); });
-
-        var markers = L.markerClusterGroup({ chunkedLoading: true });
-        var simpleIcon = L.divIcon({
-            className: 'custom-div-icon',
-            html: "<div style='font-size:32px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.3));'>📍</div>",
-            iconSize: [30, 30], iconAnchor: [15, 30]
+        var markers = L.markerClusterGroup({ 
+            chunkedLoading: true, // 分批載入避免當機
+            maxClusterRadius: 60 
         });
 
         function loadLocations() {
@@ -88,9 +107,14 @@
                 if(!data) return;
                 markers.clearLayers();
                 data.forEach(function(item) {
-                    var marker = L.marker([item.lat, item.lng], { icon: simpleIcon });
+                    var marker = L.marker([item.lat, item.lng], {
+                        icon: L.divIcon({
+                            className: 'custom-div-icon',
+                            html: "<div style='font-size:32px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.3));'>📍</div>",
+                            iconSize: [30, 30], iconAnchor: [15, 30]
+                        })
+                    });
                     
-                    // 🚀 點擊才生成詳情，幫 Cloudinary 節省頻寬
                     marker.on('click', function() {
                         var html = `
                             <img src="${item.image_url}" class="popup-img" loading="lazy">
@@ -120,8 +144,14 @@
         }
 
         $(document).ready(function() {
-            loadLocations();
-            setTimeout(() => { map.invalidateSize(); $('#mapLoading').fadeOut(1500); }, 1000);
+            // 1. 強制顯示指南
+            $('#guideOverlay').css('display', 'flex').hide().fadeIn();
+            
+            // 2. 異步載入資料
+            setTimeout(loadLocations, 300);
+            
+            // 3. 解決手機畫面跑掉的問題
+            setTimeout(() => { map.invalidateSize(); }, 600);
         });
     </script>
 {% endblock %}
