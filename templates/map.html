@@ -4,15 +4,16 @@
 {% block title %}尋神地圖{% endblock %}
 
 {% block styles %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
 
     <style>
-        /* 避免載入瞬間黑底 */
+        /* 地圖底色設定為暖米色，與 CartoDB 圖層一致，避免載入瞬間閃爍 */
         #map { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100vh; 
-            z-index: 1; background-color: #fcfcfc; 
+            z-index: 1; 
+            background-color: #fdfcf0; 
         }
         
         .map-header {
@@ -34,14 +35,16 @@
         .simple-pin {
             font-size: 36px; line-height: 36px; text-align: center;
             filter: drop-shadow(0 3px 5px rgba(0,0,0,0.3));
+            cursor: pointer; transition: transform 0.2s;
         }
+        .simple-pin:active { transform: scale(1.2); }
 
         .leaflet-popup-content-wrapper { 
             border-radius: 20px; overflow: hidden; padding: 0; 
             box-shadow: 0 10px 25px rgba(93, 64, 55, 0.2);
         }
         .leaflet-popup-content { margin: 0; width: 240px !important; }
-        .popup-img-box { width: 100%; height: 160px; overflow: hidden; background: #f9f7f2; }
+        .popup-img-box { width: 100%; height: 160px; overflow: hidden; background: #f9f7f2; position: relative; }
         .popup-img-box img { width: 100%; height: 100%; object-fit: cover; }
         .popup-info { padding: 15px 20px; text-align: left; background: #fff; }
         .popup-title { font-weight: bold; font-size: 1.15rem; color: #5d4037; margin-bottom: 5px; }
@@ -133,8 +136,8 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/leaflet.markercluster.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
     <script>
         function closeGuide() { $('#guideOverlay').fadeOut(); }
@@ -145,10 +148,10 @@
 
         var map = L.map('map', { zoomControl: false }).setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
 
-        // 🔥 台灣專用加速：使用內政部國土測繪中心 (NLSC) 通用電子地圖
-        // 這是在台灣本地的伺服器，速度最快，而且不會擋 IP
-        L.tileLayer('https://wmts.nlsc.gov.tw/wmts/EMAP/default/GoogleMapsCompatible/{z}/{y}/{x}', {
-            attribution: '© <a href="https://maps.nlsc.gov.tw/">國土測繪中心</a>',
+        // 🔥 終極穩定方案：CartoDB Voyager + 4核心加速 (abcd)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap & CartoDB',
+            subdomains: 'abcd', // 開啟多執行緒下載，速度快 4 倍
             maxZoom: 20
         }).addTo(map);
 
@@ -163,25 +166,32 @@
             iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -30]
         });
 
-        $.getJSON('/api/locations', function(data) {
-            if(data && data.length > 0) {
-                data.forEach(function(item) {
-                    var desc = item.description || "在苑裡發現的神蹟！";
-                    var nickname = item.nickname || '熱心鄉親';
-                    var popupContent = `
-                        <div class="popup-img-box"><img src="${item.image_url}" loading="lazy"></div>
-                        <div class="popup-info">
-                            <div class="popup-title">👤 ${nickname}</div>
-                            <div class="popup-desc">${desc}</div>
-                            <a href="https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}" target="_blank" class="popup-btn">
-                                <i class="fas fa-location-arrow"></i> 導航去拜拜
-                            </a>
-                        </div>`;
-                    markers.addLayer(L.marker([item.lat, item.lng], { icon: simpleIcon }).bindPopup(popupContent));
-                });
-                map.addLayer(markers);
-            }
-        });
+        // 加上錯誤處理，如果 API 讀不到會自動重試
+        function loadLocations() {
+            $.getJSON('/api/locations', function(data) {
+                if(data && data.length > 0) {
+                    markers.clearLayers(); // 清除舊的避免重複
+                    data.forEach(function(item) {
+                        var desc = item.description || "在苑裡發現的神蹟！";
+                        var nickname = item.nickname || '熱心鄉親';
+                        var popupContent = `
+                            <div class="popup-img-box"><img src="${item.image_url}" loading="lazy"></div>
+                            <div class="popup-info">
+                                <div class="popup-title">👤 ${nickname}</div>
+                                <div class="popup-desc">${desc}</div>
+                                <a href="https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}" target="_blank" class="popup-btn">
+                                    <i class="fas fa-location-arrow"></i> 導航去拜拜
+                                </a>
+                            </div>`;
+                        markers.addLayer(L.marker([item.lat, item.lng], { icon: simpleIcon }).bindPopup(popupContent));
+                    });
+                    map.addLayer(markers);
+                }
+            }).fail(function() {
+                console.log("連線不穩，3秒後重試...");
+                setTimeout(loadLocations, 3000); // 如果失敗，3秒後自動重試
+            });
+        }
 
         function resetMapView() { map.flyTo([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM); map.closePopup(); }
 
@@ -197,7 +207,8 @@
 
         $(document).ready(function() {
             $('#guideOverlay').css('display', 'flex');
-            setTimeout(function(){ map.invalidateSize(); }, 500);
+            loadLocations(); // 啟動資料載入
+            setTimeout(function(){ map.invalidateSize(); }, 500); // 確保地圖滿版
         });
     </script>
 {% endblock %}
