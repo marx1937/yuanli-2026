@@ -7,6 +7,7 @@
     .hero-section { position: relative; margin-bottom: 15px; }
     .hero-banner {
         width: 100%; height: auto; display: block;
+        /* 讓底部有點漸層消失，融入背景 */
         mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
         -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
     }
@@ -22,19 +23,16 @@
         margin-top: 15px; margin-bottom: 5px;
     }
     
-    /* 🔥 修改：標語樣式優化 (去除虛線誤會) */
     .sub-title-badge {
-        background: rgba(255, 255, 255, 0.6); /* 稍微帶點透的白 */
+        background: rgba(255, 255, 255, 0.6); 
         color: #8d6e63; font-weight: bold; font-size: 1rem;
         padding: 5px 18px;
-        /* 改成實線，顏色更淡更精緻 */
         border: 1px solid #d7ccc8; 
         border-radius: 50px;
-        /* 加一點模糊濾鏡讓它融合背景 */
         backdrop-filter: blur(2px);
     }
 
-    /* --- 報馬仔 --- */
+    /* --- 報馬仔 (跑馬燈) --- */
     .news-ticker-container {
         width: 92%; max-width: 400px; 
         margin: 15px auto 25px auto; 
@@ -48,7 +46,6 @@
         text-decoration: none !important;
         overflow: hidden; 
     }
-    /* 點擊報馬仔也要有 Q 彈感 */
     .news-ticker-container:active { transform: scale(0.96); transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1); }
 
     .bao-ma-zai-badge {
@@ -78,7 +75,7 @@
         100% { transform: translateX(-150%); } 
     }
 
-    /* --- 按鈕共用樣式 (🔥 注入靈魂：Q彈微交互) --- */
+    /* --- 按鈕樣式 --- */
     .menu-btn {
         display: block; width: 92%; max-width: 400px;
         margin: 0 auto 28px auto; 
@@ -86,12 +83,9 @@
         text-decoration: none !important; position: relative;
         overflow: hidden;
         box-shadow: 0 10px 20px rgba(93, 64, 55, 0.1); 
-        
-        /* 🔥 加入這行：更自然的物理過渡效果 */
         transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
     }
     
-    /* 🔥 修改：按下去的時候縮得更明顯，並減少陰影，製造「壓下去」的感覺 */
     .menu-btn:active { 
         transform: scale(0.95); 
         box-shadow: 0 2px 5px rgba(93, 64, 55, 0.2);
@@ -103,7 +97,6 @@
     }
     .btn-text-group { text-align: left; flex: 1; }
     
-    /* 主按鈕 */
     .btn-primary-action {
         background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); 
         height: 110px; 
@@ -116,7 +109,6 @@
         height: 80px; width: auto; margin-right: 15px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2));
     }
 
-    /* 次按鈕 */
     .btn-secondary-action {
         background: #fff; 
         border: 2px solid #ffe082; 
@@ -130,7 +122,7 @@
     .bg-map { background: linear-gradient(to right, #fff 30%, #fff8e1 100%); }
     .bg-gallery { background: linear-gradient(to right, #fff 30%, #fff3e0 100%); }
 
-    /* Lucky Badge */
+    /* LUCKY 標籤跳動效果 */
     .lucky-badge {
         position: absolute; top: 12px; right: 15px;
         background: #ffca28; color: #b71c1c; 
@@ -144,7 +136,7 @@
         60% {transform: rotate(15deg) translateY(-3px);}
     }
 
-    /* 底部版權 (極致低調) */
+    /* 底部版權 */
     .secret-footer {
         text-align: center; margin-top: 40px; margin-bottom: 20px;
         color: rgba(141, 110, 99, 0.3); font-size: 0.65rem; letter-spacing: 1px;
@@ -156,10 +148,10 @@
 
 {% block content %}
     <div class="hero-section">
-        <img src="/static/top.png" class="hero-banner" alt="Banner">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/top.png" class="hero-banner" alt="Banner">
         
         <div class="hero-text-container">
-            <img src="/static/toptext.png" class="app-logo-img" alt="MAP MY GOD">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/toptext.png" class="app-logo-img" alt="MAP MY GOD">
             <div class="sub-title-badge">老神在在 🙈 躲貓貓</div>
         </div>
     </div>
@@ -175,7 +167,7 @@
     <a href="/upload" class="menu-btn btn-primary-action">
         <div class="lucky-badge">LUCKY!</div>
         <div class="btn-content">
-            <img src="/static/icon_camera.png" class="btn-icon-large" alt="Camera">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/icon_camera.png" class="btn-icon-large" alt="Camera">
             <div class="btn-text-group">
                 <div class="btn-main-text">尋找神隊友</div>
                 <div class="btn-sub-text">趕快幫祂拍張照</div>
@@ -185,7 +177,7 @@
 
     <a href="/map" class="menu-btn btn-secondary-action bg-map">
         <div class="btn-content">
-            <img src="/static/icon_compass.png" class="btn-icon-large" alt="Compass">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/icon_compass.png" class="btn-icon-large" alt="Compass">
             <div class="btn-text-group">
                 <div class="btn-main-text">搜尋方位</div>
                 <div class="btn-sub-text">看看他們躲在哪</div>
@@ -196,7 +188,7 @@
 
     <a href="/gallery" class="menu-btn btn-secondary-action bg-gallery">
         <div class="btn-content">
-            <img src="/static/icon_album.png" class="btn-icon-large" alt="Gallery">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/icon_album.png" class="btn-icon-large" alt="Gallery">
             <div class="btn-text-group">
                 <div class="btn-main-text">影像庫</div>
                 <div class="btn-sub-text">尋神足跡紀錄</div>
@@ -214,10 +206,11 @@
 <script>
     let realMsgs = ["🔔 報——！歡迎來到尋神情報站！", "💡 報馬仔提醒：發現神隊友請上傳！"];
     
+    // 這裡會抓後端資料，如果有 'area' (客庄里) 就顯示，沒有就顯示備註
     fetch('/api/locations').then(r=>r.json()).then(d=>{if(d&&d.length>0){realMsgs=[];d.slice().reverse().slice(0,5).forEach(i=>{
         let n = i.nickname || "熱心鄉親";
-        // 智慧判斷地點
-        let place = i.title || i.description || i.address || "苑裡某處";
+        // 優先順序：翻譯好的區域 > 描述 > 備註 > 預設
+        let place = i.area || i.description || i.note || "苑裡某處";
         if(place.length > 10) place = place.substring(0, 10) + "...";
         
         realMsgs.push(`🙏 感謝！[${n}] 在 [${place}] 尋獲神的足跡！`);
