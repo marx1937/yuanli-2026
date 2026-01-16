@@ -5,16 +5,18 @@
 <style>
     /* --- 1. APP 啟動遮罩 --- */
     #app-splash-screen {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        position: fixed !important; 
+        top: 0; left: 0; width: 100%; height: 100%;
         background-color: #fff8e1;
-        z-index: 9999;
+        z-index: 99999;
         display: flex; flex-direction: column;
         justify-content: center; align-items: center;
         transition: opacity 0.8s ease-out;
     }
     
     .splash-logo {
-        width: 120px; height: 120px; 
+        width: 100px; 
+        height: 100px; 
         object-fit: contain; 
         margin-bottom: 20px;
         filter: drop-shadow(0 5px 10px rgba(93, 64, 55, 0.2));
@@ -58,9 +60,7 @@
     }
     
     .sub-title-icon {
-        height: 28px; 
-        width: auto;
-        margin: 0 5px; 
+        height: 28px; width: auto; margin: 0 5px; 
         filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
     }
 
@@ -81,16 +81,12 @@
     .news-ticker-container:active { transform: scale(0.96); transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1); }
 
     .bao-ma-zai-badge {
-        margin-right: 5px; 
-        display: flex; align-items: center;
-        z-index: 25; background: #fff8e1; 
-        padding-right: 5px;
+        margin-right: 5px; display: flex; align-items: center;
+        z-index: 25; background: #fff8e1; padding-right: 5px;
     }
     
     .bao-ma-zai-icon {
-        height: 42px; 
-        width: auto; 
-        margin-left: -8px; 
+        height: 42px; width: auto; margin-left: -8px; 
         vertical-align: middle;
         filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
     }
@@ -102,11 +98,7 @@
         position: absolute; white-space: nowrap; 
         top: 2px; transform: translateX(100%); opacity: 0; 
     }
-
-    .ticker-text.active {
-        opacity: 1;
-        animation: marquee-scroll 8s linear infinite; 
-    }
+    .ticker-text.active { opacity: 1; animation: marquee-scroll 8s linear infinite; }
 
     @keyframes marquee-scroll {
         0%   { transform: translateX(100%); }
@@ -123,11 +115,7 @@
         box-shadow: 0 10px 20px rgba(93, 64, 55, 0.1); 
         transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
     }
-    
-    .menu-btn:active { 
-        transform: scale(0.95); 
-        box-shadow: 0 2px 5px rgba(93, 64, 55, 0.2);
-    }
+    .menu-btn:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(93, 64, 55, 0.2); }
 
     .btn-content {
         padding: 5px 20px; height: 100%; display: flex; 
@@ -137,26 +125,18 @@
     
     .btn-primary-action {
         background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); 
-        height: 110px; 
-        color: white;
+        height: 110px; color: white;
         border: 2px solid rgba(255,255,255,0.2);
     }
     .btn-primary-action .btn-main-text { font-size: 1.6rem; font-weight: bold; margin-bottom: 2px; }
     .btn-primary-action .btn-sub-text { font-size: 0.95rem; opacity: 0.9; font-weight: normal; }
-    .btn-primary-action .btn-icon-large {
-        height: 80px; width: auto; margin-right: 15px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2));
-    }
+    .btn-primary-action .btn-icon-large { height: 80px; width: auto; margin-right: 15px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2)); }
 
-    .btn-secondary-action {
-        background: #fff; 
-        border: 2px solid #ffe082; 
-        height: 90px; 
-    }
+    .btn-secondary-action { background: #fff; border: 2px solid #ffe082; height: 90px; }
     .btn-secondary-action .btn-main-text { color: #5d4037; font-size: 1.4rem; font-weight: bold; }
     .btn-secondary-action .btn-sub-text { color: #8d6e63; font-size: 0.85rem; }
-    .btn-secondary-action .btn-icon-large {
-        height: 65px; width: auto; margin-right: 15px; margin-left: 5px;
-    }
+    .btn-secondary-action .btn-icon-large { height: 65px; width: auto; margin-right: 15px; margin-left: 5px; }
+    
     .bg-map { background: linear-gradient(to right, #fff 30%, #fff8e1 100%); }
     .bg-gallery { background: linear-gradient(to right, #fff 30%, #fff3e0 100%); }
 
@@ -179,35 +159,34 @@
         display: flex; flex-direction: column; align-items: center; gap: 10px;
     }
     
+    /* 🔥 香蕉大師方案 B：幽靈按鈕 (Ghost Button) */
     .contact-admin-btn {
-        background-color: #4267B2; 
-        color: white;
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 0.9rem;
+        background-color: transparent; /* 透明背景 */
+        border: 1px solid #8d6e63;     /* 暖棕色邊框 */
+        color: #8d6e63;                /* 暖棕色文字 */
+        
+        padding: 6px 16px;             /* 稍微精緻一點的尺寸 */
+        border-radius: 50px;           /* 圓潤膠囊狀 */
+        font-size: 0.85rem;            /* 字體大小適中 */
         text-decoration: none !important;
-        box-shadow: 0 4px 6px rgba(66, 103, 178, 0.2);
-        transition: transform 0.2s;
-        display: inline-flex; align-items: center; gap: 5px;
+        
+        /* 讓它看起來低調但有互動感 */
+        transition: all 0.2s;
+        display: inline-flex; align-items: center; gap: 6px;
+    }
+    .contact-admin-btn:hover {
+        background-color: rgba(141, 110, 99, 0.1); /* 摸到時有一點點很淡的棕色底 */
+        transform: translateY(-2px);
     }
     .contact-admin-btn:active { transform: scale(0.95); }
     
     .copyright-text {
         color: rgba(141, 110, 99, 0.4); font-size: 0.7rem; letter-spacing: 1px;
     }
-    
-    /* 🔥 新增：底部社團連結樣式 */
     .footer-fb-link {
-        color: inherit; /* 繼承原本的顏色 */
-        text-decoration: none;
-        font-weight: bold;
-        transition: opacity 0.3s;
+        color: inherit; text-decoration: none; font-weight: bold; transition: opacity 0.3s;
     }
-    .footer-fb-link:hover {
-        opacity: 0.7;
-        text-decoration: underline;
-    }
-
+    .footer-fb-link:hover { opacity: 0.7; text-decoration: underline; }
     .secret-link { color: rgba(141, 110, 99, 0.2); text-decoration: none !important; }
 </style>
 {% endblock %}
@@ -228,7 +207,6 @@
         
         <div class="hero-text-container">
             <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/toptext.png" class="app-logo-img" alt="MAP MY GOD">
-            
             <div class="sub-title-badge">
                 老神在在 
                 <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/god_cute.png" class="sub-title-icon" alt="Q版土地公"> 
