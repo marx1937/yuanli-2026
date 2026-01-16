@@ -4,17 +4,17 @@
 {% block title %}尋神地圖{% endblock %}
 
 {% block styles %}
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.Default.css" />
 
     <style>
         /* --- 頁面佈局 --- */
-        /* 設定地圖底色，避免載入瞬間看到黑底 */
+        /* 設定地圖底色為米白，避免載入瞬間看到黑底 */
         #map { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100vh; 
             z-index: 1; 
-            background-color: #fffbf0; /* Google Map 的預設暖底色 */
+            background-color: #f5f5f5; /* Esri 地圖的預設底色 */
         }
         
         /* --- 1. 頂部標題列 (懸浮膠囊) --- */
@@ -86,7 +86,7 @@
         }
         .btn-locate:active { transform: scale(0.9); background: #fff8e1; }
 
-        /* --- 5. 小幫手導覽遮罩 (位置修正版) --- */
+        /* --- 5. 小幫手導覽遮罩 --- */
         #guideOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(93, 64, 55, 0.6); 
@@ -98,7 +98,7 @@
             background: #fff; 
             width: 85%; max-width: 320px;
             border-radius: 25px; 
-            padding: 30px 25px 25px 25px; /* 下方留多一點點空間 */
+            padding: 30px 25px 25px 25px; 
             text-align: center; position: relative;
             box-shadow: 0 15px 40px rgba(0,0,0,0.3);
             display: flex; flex-direction: column; align-items: center;
@@ -111,9 +111,8 @@
         }
         
         .guide-mascot {
-            /* 🔥 關鍵修正：讓雙人組置中，且上下都有空間 */
             display: block;
-            margin: 10px auto 15px auto; /* 上 10px, 下 15px, 左右自動置中 */
+            margin: 10px auto 15px auto; 
             width: 140px; 
             filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1));
             z-index: 10;
@@ -172,8 +171,8 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/leaflet.markercluster.js"></script>
 
     <script>
         function closeGuide() {
@@ -186,11 +185,10 @@
 
         var map = L.map('map', { zoomControl: false }).setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
 
-        // 🔥 終極大絕招：改用 Google Maps 圖層 (台灣最穩)
-        // 使用 Google 官方 Tile Server (mt1)
-        L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-            attribution: '© Google',
-            maxZoom: 20
+        // 🔥 加速 3：改用 Esri (ArcGIS) WorldStreetMap
+        // 這是有錢的大企業用的圖資，非常快、非常穩，而且不會隨便破圖
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri'
         }).addTo(map);
 
         var markers = L.markerClusterGroup({
@@ -257,6 +255,12 @@
 
         $(document).ready(function() {
             $('#guideOverlay').css('display', 'flex');
+            
+            // 🔥 加速 4：強制刷新地圖
+            // 頁面載入 0.5 秒後，強制地圖重新計算大小，解決「只載入一半」的 Bug
+            setTimeout(function(){ 
+                map.invalidateSize(); 
+            }, 500);
         });
     </script>
 {% endblock %}
