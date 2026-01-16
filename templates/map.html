@@ -86,7 +86,7 @@
         }
         .btn-locate:active { transform: scale(0.9); background: #fff8e1; }
 
-        /* --- 5. 小幫手導覽遮罩 --- */
+        /* --- 5. 小幫手導覽遮罩 (位置修正版) --- */
         #guideOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(93, 64, 55, 0.6); 
@@ -98,7 +98,7 @@
             background: #fff; 
             width: 85%; max-width: 320px;
             border-radius: 25px; 
-            padding: 30px 25px 20px 25px;
+            padding: 30px 25px 25px 25px; /* 下方留多一點點空間 */
             text-align: center; position: relative;
             box-shadow: 0 15px 40px rgba(0,0,0,0.3);
             display: flex; flex-direction: column; align-items: center;
@@ -111,15 +111,16 @@
         }
         
         .guide-mascot {
-            position: relative; 
-            width: 140px; /* 🔥 因為是兩個人，稍微放大一點點 */
+            /* 🔥 關鍵修正：讓雙人組置中，且上下都有空間 */
+            display: block;
+            margin: 10px auto 15px auto; /* 上 10px, 下 15px, 左右自動置中 */
+            width: 140px; 
             filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1));
-            margin-bottom: -20px; /* 讓他們看起來坐在按鈕上 */
             z-index: 10;
         }
 
         .guide-title { font-weight: bold; color: #d32f2f; font-size: 1.4rem; margin-bottom: 20px; letter-spacing: 1px; }
-        .guide-list { text-align: left; margin-bottom: 20px; font-size: 0.95rem; color: #5d4037; width: 100%; padding-left: 10px; }
+        .guide-list { text-align: left; margin-bottom: 10px; font-size: 0.95rem; color: #5d4037; width: 100%; padding-left: 10px; }
         .guide-list li { margin-bottom: 12px; list-style: none; display: flex; align-items: center; }
         
         .guide-list i { 
@@ -134,7 +135,8 @@
             color: white; border: none; padding: 12px 30px; border-radius: 50px;
             font-weight: bold; font-size: 1.1rem; width: 100%;
             box-shadow: 0 8px 20px rgba(230, 126, 34, 0.3);
-            position: relative; z-index: 1; margin-top: 5px;
+            position: relative; z-index: 1; 
+            /* 不再需要 margin-top，因為圖片已經有 margin-bottom */
         }
         .btn-guide-ok:active { transform: scale(0.95); }
 
@@ -185,7 +187,7 @@
 
         var map = L.map('map', { zoomControl: false }).setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
 
-        // 🔥 改用 CartoDB Voyager 風格 (更快、更美、更暖)
+        // 🔥 改用 CartoDB Voyager 風格 (暖色系)
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
             subdomains: 'abcd',
