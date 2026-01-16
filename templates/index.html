@@ -3,7 +3,7 @@
 
 {% block styles %}
 <style>
-    /* --- 🔥 1. APP 啟動遮罩 (解決 Logo 背景與 Render 黑畫面問題) --- */
+    /* --- 🔥 1. APP 啟動遮罩 (解決 Render 喚醒時的黑畫面) --- */
     #app-splash-screen {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background-color: #fff8e1; /* 暖黃色底，讓去背 Logo 漂亮顯示 */
@@ -55,7 +55,7 @@
         backdrop-filter: blur(2px);
     }
 
-    /* --- 報馬仔 --- */
+    /* --- 報馬仔 (跑馬燈) --- */
     .news-ticker-container {
         width: 92%; max-width: 400px; 
         margin: 15px auto 25px auto; 
@@ -246,7 +246,7 @@
 
 {% block scripts %}
 <script>
-    // 遮罩控制邏輯：網頁載入完成後自動消失
+    // 遮罩控制邏輯：網頁載入完成後 1.2 秒自動消失
     window.addEventListener('load', function() {
         setTimeout(function() {
             var splash = document.getElementById('app-splash-screen');
