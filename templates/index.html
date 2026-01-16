@@ -70,8 +70,7 @@
         background: #fff8e1; 
         border-radius: 15px; 
         box-shadow: 0 2px 8px rgba(93, 64, 55, 0.05); 
-        /* 🔥 修改 1：縮小左右內距 (15px -> 8px)，讓空間更緊湊 */
-        padding: 8px 8px; 
+        padding: 8px 10px; /* 稍微縮小內距 */
         display: flex; align-items: center;
         border: 1px solid #ffe082; 
         position: relative; z-index: 20;
@@ -81,21 +80,28 @@
     .news-ticker-container:active { transform: scale(0.96); transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1); }
 
     .bao-ma-zai-badge {
-        /* 🔥 修改 2：使用負邊距 (-8px) 強制拉近距離！ */
-        margin-right: -8px; 
-        display: flex; align-items: center;
-        z-index: 25; background: #fff8e1; 
-        padding-right: 0; /* 確保沒有多餘填充 */
+        /* 🔥 關鍵修改：用 -25px 強制吃掉圖片右邊的透明空白！ */
+        margin-right: -25px; 
+        
+        display: flex; 
+        /* 改為底部對齊，讓公仔看起來像站在框框底線上 */
+        align-items: flex-end; 
+        z-index: 25; background: transparent; /* 背景透明，讓圖疊在文字區塊上也沒關係 */
+        padding-right: 0;
     }
     
     .bao-ma-zai-icon {
-        height: 42px; width: auto; 
-        margin-left: -5px; /* 左邊也稍微修一下 */
-        vertical-align: middle;
+        height: 45px; /* 稍微加大一點點 */
+        width: auto; 
+        margin-left: -5px; 
         filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
     }
 
-    .ticker-content { flex: 1; height: 24px; position: relative; overflow: hidden; }
+    .ticker-content { 
+        flex: 1; height: 24px; position: relative; overflow: hidden; 
+        /* 稍微往左推一點，配合那個負邊距 */
+        margin-left: 5px; 
+    }
     
     .ticker-text {
         font-size: 0.9rem; color: #5d4037; font-weight: bold; 
@@ -163,6 +169,7 @@
         display: flex; flex-direction: column; align-items: center; gap: 10px;
     }
     
+    /* 幽靈按鈕樣式 */
     .contact-admin-btn {
         background-color: transparent;
         border: 1px solid #8d6e63;
