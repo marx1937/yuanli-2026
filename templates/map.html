@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% set active_page = "map" %}
 
-{% block title %}尋神地圖 (台灣版){% endblock %}
+{% block title %}尋神地圖 (穩定版){% endblock %}
 
 {% block styles %}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
@@ -9,11 +9,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
 
     <style>
-        /* 地圖底色改為淺灰，避免載入時太刺眼 */
+        /* 地圖底色 */
         #map { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100vh; 
             z-index: 1; 
-            background-color: #eeeeee; 
+            background-color: #fdfcf0; 
         }
         
         /* 頂部標題 */
@@ -30,18 +30,48 @@
             cursor: pointer; backdrop-filter: blur(5px);
         }
 
-        /* 彈出視窗 */
+        /* 🔥 小幫手遮罩樣式 (加回來了！) */
+        #guideOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); z-index: 2000;
+            display: flex; justify-content: center; align-items: center;
+            backdrop-filter: blur(4px);
+        }
+        .guide-card {
+            background: #fff; width: 85%; max-width: 320px;
+            border-radius: 25px; padding: 25px; 
+            text-align: center; border: 4px solid #fff8e1;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation: popUp 0.5s ease-out;
+        }
+        @keyframes popUp { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .guide-mascot {
+            display: block; margin: 10px auto 15px auto; 
+            width: 140px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1));
+        }
+        .guide-list { text-align: left; margin-bottom: 20px; padding-left: 10px; font-size: 0.95rem; }
+        .guide-list li { margin-bottom: 10px; list-style: none; display: flex; align-items: center; }
+        .guide-list i { 
+            color: #d32f2f; width: 30px; margin-right: 10px; font-size: 1.2rem; text-align: center;
+        }
+        .btn-guide-ok {
+            background: linear-gradient(135deg, #f0932b 0%, #e67e22 100%); 
+            color: white; border: none; padding: 12px 30px; border-radius: 50px;
+            font-weight: bold; font-size: 1.1rem; width: 100%;
+            box-shadow: 0 8px 20px rgba(230, 126, 34, 0.3);
+        }
+
+        /* 彈出視窗與按鈕 */
         .leaflet-popup-content-wrapper { border-radius: 15px; overflow: hidden; padding: 0; }
         .leaflet-popup-content { margin: 0; width: 240px !important; }
-        .popup-img-box { width: 100%; height: 160px; overflow: hidden; position: relative; }
+        .popup-img-box { width: 100%; height: 160px; overflow: hidden; }
         .popup-img-box img { width: 100%; height: 100%; object-fit: cover; }
-        .popup-info { padding: 15px; background: #fff; }
+        .popup-info { padding: 15px; }
         .popup-btn {
             background: #d32f2f; color: white !important; border-radius: 50px; 
             padding: 8px 0; display: block; text-align: center; text-decoration: none; margin-top: 10px;
         }
-
-        /* 定位按鈕 */
         .btn-locate {
             position: absolute; bottom: 110px; right: 20px; z-index: 900;
             width: 50px; height: 50px; border-radius: 50%;
@@ -49,17 +79,28 @@
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer;
         }
-        
-        /* 自定義圖釘 */
         .custom-div-icon { background: transparent; border: none; }
         .simple-pin { font-size: 36px; text-align: center; filter: drop-shadow(0 3px 2px rgba(0,0,0,0.3)); }
     </style>
 {% endblock %}
 
 {% block content %}
+    <div id="guideOverlay">
+        <div class="guide-card">
+            <h3 style="color:#d32f2f; font-weight:bold; margin-bottom:15px;">尋神地圖指南</h3>
+            <ul class="guide-list">
+                <li><i class="fas fa-map-pin"></i> 點擊圖釘看照片</li>
+                <li><i class="fas fa-crosshairs"></i> 按瞄準鈕找自己</li>
+                <li><i class="fas fa-camera"></i> 按相機去上傳</li>
+            </ul>
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/guide_couple.png" class="guide-mascot" alt="小幫手">
+            <button class="btn btn-guide-ok" onclick="closeGuide()">好，出發！</button>
+        </div>
+    </div>
+
     <div class="map-header" onclick="resetMapView()">
         <div class="header-capsule">
-            <i class="fas fa-map-marked-alt" style="color:#d32f2f; margin-right:8px;"></i> 台灣通用電子地圖
+            <i class="fas fa-map-marked-alt" style="color:#d32f2f; margin-right:8px;"></i> 尋神雷達地圖
         </div>
     </div>
 
@@ -76,21 +117,22 @@
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
     <script>
-        // 預設鎖定苑裡
+        // 關閉小幫手的功能
+        function closeGuide() { $('#guideOverlay').fadeOut(); }
+
         const DEFAULT_LAT = 24.4418;
         const DEFAULT_LNG = 120.6543;
         const DEFAULT_ZOOM = 14;
 
         var map = L.map('map', { zoomControl: false }).setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
 
-        // 🔥 這裡改成了：台灣通用電子地圖 (NLSC)
-        L.tileLayer('https://wmts.nlsc.gov.tw/wmts/EMAP/default/GoogleMapsCompatible/{z}/{y}/{x}', {
-            attribution: '© 內政部國土測繪中心',
-            maxZoom: 20
+        // 🔥 改回最穩定的 OSM 標準地圖 (避免破圖)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
         }).addTo(map);
 
         var markers = L.markerClusterGroup();
-
         var simpleIcon = L.divIcon({
             className: 'custom-div-icon',
             html: "<div class='simple-pin'>📍</div>",
@@ -129,6 +171,8 @@
         }
 
         $(document).ready(function() {
+            // 確保一進來就顯示小幫手
+            $('#guideOverlay').show();
             loadLocations();
         });
     </script>
