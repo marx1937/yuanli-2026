@@ -3,11 +3,34 @@
 
 {% block styles %}
 <style>
+    /* --- 🔥 1. APP 啟動遮罩 (解決 Logo 背景與 Render 黑畫面問題) --- */
+    #app-splash-screen {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background-color: #fff8e1; /* 暖黃色底，讓去背 Logo 漂亮顯示 */
+        z-index: 9999;
+        display: flex; flex-direction: column;
+        justify-content: center; align-items: center;
+        transition: opacity 0.8s ease-out; /* 淡出動畫 */
+    }
+    
+    .splash-logo {
+        width: 120px; height: 120px; 
+        object-fit: contain; 
+        margin-bottom: 20px;
+        filter: drop-shadow(0 5px 10px rgba(93, 64, 55, 0.2));
+        animation: pulse-logo 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse-logo {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
     /* --- 頂部英雄區 --- */
     .hero-section { position: relative; margin-bottom: 15px; }
     .hero-banner {
         width: 100%; height: auto; display: block;
-        /* 讓底部有點漸層消失，融入背景 */
         mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
         -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
     }
@@ -32,7 +55,7 @@
         backdrop-filter: blur(2px);
     }
 
-    /* --- 報馬仔 (跑馬燈) --- */
+    /* --- 報馬仔 --- */
     .news-ticker-container {
         width: 92%; max-width: 400px; 
         margin: 15px auto 25px auto; 
@@ -55,7 +78,15 @@
         z-index: 25; background: #fff8e1; 
         padding-right: 5px;
     }
-    .bao-ma-zai-badge i { margin-right: 5px; }
+    
+    /* 報馬仔小圖示設定 */
+    .bao-ma-zai-icon {
+        height: 24px; 
+        width: auto; 
+        margin-right: 8px; 
+        vertical-align: middle;
+        filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+    }
 
     .ticker-content { flex: 1; height: 24px; position: relative; overflow: hidden; }
     
@@ -122,7 +153,6 @@
     .bg-map { background: linear-gradient(to right, #fff 30%, #fff8e1 100%); }
     .bg-gallery { background: linear-gradient(to right, #fff 30%, #fff3e0 100%); }
 
-    /* LUCKY 標籤跳動效果 */
     .lucky-badge {
         position: absolute; top: 12px; right: 15px;
         background: #ffca28; color: #b71c1c; 
@@ -136,7 +166,6 @@
         60% {transform: rotate(15deg) translateY(-3px);}
     }
 
-    /* 底部版權 */
     .secret-footer {
         text-align: center; margin-top: 40px; margin-bottom: 20px;
         color: rgba(141, 110, 99, 0.3); font-size: 0.65rem; letter-spacing: 1px;
@@ -147,6 +176,16 @@
 {% endblock %}
 
 {% block content %}
+    <div id="app-splash-screen">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/logo.png" class="splash-logo" alt="Loading...">
+        <div style="color: #8d6e63; font-weight: bold; font-size: 1.2rem; letter-spacing: 1px;">
+            尋神連線中...
+        </div>
+        <div style="margin-top: 10px; color: #d7ccc8; font-size: 0.8rem;">
+            (系統暖機請稍候)
+        </div>
+    </div>
+
     <div class="hero-section">
         <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/top.png" class="hero-banner" alt="Banner">
         
@@ -157,7 +196,10 @@
     </div>
     
     <a href="/leaderboard" class="news-ticker-container">
-        <div class="bao-ma-zai-badge"><i class="fas fa-scroll"></i> 報馬仔</div>
+        <div class="bao-ma-zai-badge">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/bm.png" class="bao-ma-zai-icon" alt="報馬仔">
+            報馬仔
+        </div>
         <div class="ticker-content">
             <div class="ticker-text active" id="ticker-msg">🔔 系統連線中... 準備接收情報...</div>
         </div>
@@ -204,15 +246,26 @@
 
 {% block scripts %}
 <script>
+    // 遮罩控制邏輯：網頁載入完成後自動消失
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            var splash = document.getElementById('app-splash-screen');
+            if(splash) {
+                splash.style.opacity = '0'; 
+                setTimeout(function() {
+                    splash.style.display = 'none'; 
+                }, 800);
+            }
+        }, 1200); 
+    });
+
     let realMsgs = ["🔔 報——！歡迎來到尋神情報站！", "💡 報馬仔提醒：發現神隊友請上傳！"];
     
-    // 這裡會抓後端資料，如果有 'area' (客庄里) 就顯示，沒有就顯示備註
+    // 智慧抓取地名邏輯 (使用 app.py 翻譯好的 'area')
     fetch('/api/locations').then(r=>r.json()).then(d=>{if(d&&d.length>0){realMsgs=[];d.slice().reverse().slice(0,5).forEach(i=>{
         let n = i.nickname || "熱心鄉親";
-        // 優先順序：翻譯好的區域 > 描述 > 備註 > 預設
         let place = i.area || i.description || i.note || "苑裡某處";
         if(place.length > 10) place = place.substring(0, 10) + "...";
-        
         realMsgs.push(`🙏 感謝！[${n}] 在 [${place}] 尋獲神的足跡！`);
     });
     realMsgs.push(`🚩 目前戰報：全苑裡已尋獲 ${d.length} 尊！`);}}).catch(e=>{});
