@@ -1,127 +1,148 @@
 <script>
-/* =========================
+/* =====================
    基本設定
-========================= */
+===================== */
 const DEFAULT_LAT = 24.4418;
 const DEFAULT_LNG = 120.6543;
 const DEFAULT_ZOOM = 14;
+const DETAIL_CACHE = {};
 
 function closeGuide() {
     $('#guideOverlay').fadeOut();
 }
 
-/* =========================
-   初始化地圖（手機優化）
-========================= */
+/* =====================
+   初始化地圖（手機極限）
+===================== */
 var map = L.map('map', {
     zoomControl: false,
     preferCanvas: true,
-    inertia: true
+    inertia: true,
+    tap: false
 }).setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
 
-/* =========================
-   底圖（OSM 穩定快）
-========================= */
+/* =====================
+   底圖
+===================== */
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap'
+    maxZoom: 19
 }).addTo(map);
 
-/* =========================
-   Marker Cluster（效能設定）
-========================= */
+/* =====================
+   Canvas Marker Cluster
+===================== */
 var markers = L.markerClusterGroup({
     chunkedLoading: true,
-    chunkInterval: 200,
-    chunkDelay: 50,
-    removeOutsideVisibleBounds: true
+    chunkInterval: 80,
+    chunkDelay: 20,
+    removeOutsideVisibleBounds: true,
+    maxClusterRadius: 60
 });
-
 map.addLayer(markers);
 
-/* =========================
-   Icon
-========================= */
+/* =====================
+   Icon（極簡）
+===================== */
 var simpleIcon = L.divIcon({
     className: 'custom-div-icon',
     html: "<div class='simple-pin'>📍</div>",
-    iconSize: [30, 30],
-    iconAnchor: [15, 30],
-    popupAnchor: [0, -30]
+    iconSize: [28, 28],
+    iconAnchor: [14, 28]
 });
 
-/* =========================
-   加入 Marker（圖片 lazy load）
-========================= */
-function addMarker(item) {
-    var popupContent = `
-        <div class="popup-img-box" data-img="${item.image_url}"></div>
-        <div class="popup-info">
-            <b>${item.nickname || '熱心鄉親'}</b>
-            <p>${item.description || '發現神蹟！'}</p>
-            <a href="https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}"
-               target="_blank" class="popup-btn">導航去拜拜</a>
-        </div>
-    `;
+/* =====================
+   加入 Marker（不建 popup）
+===================== */
+function addLiteMarker(item) {
+    var marker = L.marker([item.lat, item.lng], { icon: simpleIcon });
 
-    var marker = L.marker([item.lat, item.lng], { icon: simpleIcon })
-        .bindPopup(popupContent);
-
-    marker.on('popupopen', function(e) {
-        const box = e.popup._contentNode.querySelector('.popup-img-box');
-        if (box && !box.innerHTML) {
-            box.innerHTML = `<img src="${box.dataset.img}">`;
-        }
+    marker.on('click', function() {
+        openDetailPopup(item.id, marker);
     });
 
     markers.addLayer(marker);
 }
 
-/* =========================
-   載入資料（只載畫面內）
-========================= */
-function loadLocations() {
-    const bounds = map.getBounds();
+/* =====================
+   點擊才載詳細資料
+===================== */
+function openDetailPopup(id, marker) {
+    if (DETAIL_CACHE[id]) {
+        marker.bindPopup(DETAIL_CACHE[id]).openPopup();
+        return;
+    }
 
-    $.getJSON('/api/locations', {
-        north: bounds.getNorth(),
-        south: bounds.getSouth(),
-        east: bounds.getEast(),
-        west: bounds.getWest()
-    }, function(data) {
-        markers.clearLayers();
-        if (!data || !data.length) return;
-        data.forEach(addMarker);
+    marker.bindPopup('載入中...').openPopup();
+
+    $.getJSON(`/api/location/${id}`, function(item) {
+        var html = `
+            <div class="popup-img-box" data-img="${item.image_url}"></div>
+            <div class="popup-info">
+                <b>${item.nickname || '熱心鄉親'}</b>
+                <p>${item.description || ''}</p>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}"
+                   target="_blank" class="popup-btn">導航去拜拜</a>
+            </div>
+        `;
+
+        DETAIL_CACHE[id] = html;
+        marker.setPopupContent(html);
+
+        setTimeout(() => {
+            const box = document.querySelector('.popup-img-box');
+            if (box && !box.innerHTML) {
+                box.innerHTML = `<img src="${box.dataset.img}">`;
+            }
+        }, 50);
     });
 }
 
-/* =========================
-   互動功能
-========================= */
+/* =====================
+   載入「輕量」資料（視窗內）
+===================== */
+function loadLiteLocations() {
+    if (map.getZoom() < 13) {
+        markers.clearLayers();
+        return;
+    }
+
+    const b = map.getBounds();
+
+    $.getJSON('/api/locations-lite', {
+        north: b.getNorth(),
+        south: b.getSouth(),
+        east: b.getEast(),
+        west: b.getWest()
+    }, function(data) {
+        markers.clearLayers();
+        if (!data) return;
+        data.forEach(addLiteMarker);
+    });
+}
+
+/* =====================
+   基本互動
+===================== */
 function resetMapView() {
     map.flyTo([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
 }
 
 function locateUser() {
-    if (!navigator.geolocation) {
-        alert('無法定位');
-        return;
-    }
-    navigator.geolocation.getCurrentPosition(function(pos) {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(pos => {
         map.flyTo([pos.coords.latitude, pos.coords.longitude], 16);
     });
 }
 
-/* =========================
-   初始化流程（重點）
-========================= */
+/* =====================
+   初始化流程
+===================== */
 $(document).ready(function() {
     $('#guideOverlay').show();
 
-    // ⭐ 地圖先顯示，再延遲載點
-    setTimeout(loadLocations, 300);
+    setTimeout(loadLiteLocations, 300);
+    map.on('moveend zoomend', loadLiteLocations);
 
-    // 地圖移動後才重新抓資料
-    map.on('moveend', loadLocations);
+    setTimeout(() => map.invalidateSize(), 600);
 });
 </script>
