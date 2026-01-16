@@ -10,7 +10,7 @@
 
     <style>
         /* --- 頁面佈局 --- */
-        /* 🔥 加碼：設定地圖底色為米白，避免載入時看到破圖網格 */
+        /* 設定地圖底色為米白，避免載入時看到破圖網格 */
         #map { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100vh; 
             z-index: 1; 
@@ -27,8 +27,8 @@
             background: rgba(255, 255, 255, 0.95); 
             padding: 10px 25px; 
             border-radius: 50px;
-            font-weight: bold; color: #5d4037; /* 暖棕色 */
-            box-shadow: 0 4px 15px rgba(93, 64, 55, 0.15); /* 暖色陰影 */
+            font-weight: bold; color: #5d4037; 
+            box-shadow: 0 4px 15px rgba(93, 64, 55, 0.15); 
             display: inline-flex; align-items: center; 
             border: 1px solid rgba(141, 110, 99, 0.2);
             cursor: pointer; transition: transform 0.2s, background 0.2s;
@@ -39,7 +39,7 @@
         /* --- 2. 地圖標記樣式 --- */
         .custom-div-icon { background: transparent; border: none; }
         .simple-pin {
-            font-size: 36px; /*稍微加大*/
+            font-size: 36px;
             line-height: 36px; text-align: center;
             filter: drop-shadow(0 3px 5px rgba(0,0,0,0.3));
             cursor: pointer; transition: transform 0.2s;
@@ -48,7 +48,7 @@
 
         /* --- 3. 彈窗美學 (圓角 + 紅色按鈕) --- */
         .leaflet-popup-content-wrapper { 
-            border-radius: 20px; /* 圓潤圓角 */
+            border-radius: 20px; 
             overflow: hidden; padding: 0; 
             box-shadow: 0 10px 25px rgba(93, 64, 55, 0.2);
         }
@@ -65,7 +65,7 @@
         .popup-desc { font-size: 0.9rem; color: #8d6e63; margin-bottom: 15px; line-height: 1.4; }
         
         .popup-btn {
-            background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); /* 宮廟紅 */
+            background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); 
             color: white !important; 
             border-radius: 50px; padding: 10px 0; font-size: 0.95rem; font-weight: bold;
             text-decoration: none !important; display: block; text-align: center;
@@ -111,9 +111,11 @@
         }
         
         .guide-mascot {
-            position: relative; width: 100px; 
+            position: relative; 
+            width: 140px; /* 🔥 因為是兩個人，稍微放大一點點 */
             filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1));
-            margin-bottom: -15px; z-index: 10;
+            margin-bottom: -20px; /* 讓他們看起來坐在按鈕上 */
+            z-index: 10;
         }
 
         .guide-title { font-weight: bold; color: #d32f2f; font-size: 1.4rem; margin-bottom: 20px; letter-spacing: 1px; }
@@ -149,7 +151,7 @@
                 <li><i class="fas fa-crosshairs"></i> <div><b>瞄準按鈕</b>：尋找你的位置</div></li>
                 <li><i class="fas fa-camera"></i> <div><b>中間相機</b>：去上傳新情報</div></li>
             </ul>
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/god_cute.png" class="guide-mascot" alt="土地公">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/guide_couple.png" class="guide-mascot" alt="尋神小幫手">
             <button class="btn btn-guide-ok" onclick="closeGuide()">收到，出發尋神！</button>
         </div>
     </div>
@@ -183,9 +185,9 @@
 
         var map = L.map('map', { zoomControl: false }).setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
 
-        // 🔥 升級：改用 CartoDB Voyager 風格 (更快、更美、更暖)
+        // 🔥 改用 CartoDB Voyager 風格 (更快、更美、更暖)
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
             subdomains: 'abcd',
             maxZoom: 20
         }).addTo(map);
