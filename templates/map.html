@@ -9,18 +9,18 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
 
     <style>
-        /* 地圖底色設定為暖米色，與 CartoDB 圖層一致，避免載入瞬間閃爍 */
+        /* 地圖底色設定為暖米色 */
         #map { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100vh; 
             z-index: 1; 
             background-color: #fdfcf0; 
         }
         
+        /* 頂部懸浮標題 (膠囊造型) */
         .map-header {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
             z-index: 900; width: 90%; max-width: 400px; text-align: center;
         }
-        
         .header-capsule {
             background: rgba(255, 255, 255, 0.95); padding: 10px 25px; 
             border-radius: 50px; font-weight: bold; color: #5d4037; 
@@ -31,6 +31,7 @@
         }
         .header-capsule:active { transform: scale(0.95); background: #fff8e1; }
 
+        /* 自定義圖釘樣式 */
         .custom-div-icon { background: transparent; border: none; }
         .simple-pin {
             font-size: 36px; line-height: 36px; text-align: center;
@@ -39,6 +40,7 @@
         }
         .simple-pin:active { transform: scale(1.2); }
 
+        /* 彈出視窗美化 */
         .leaflet-popup-content-wrapper { 
             border-radius: 20px; overflow: hidden; padding: 0; 
             box-shadow: 0 10px 25px rgba(93, 64, 55, 0.2);
@@ -50,6 +52,7 @@
         .popup-title { font-weight: bold; font-size: 1.15rem; color: #5d4037; margin-bottom: 5px; }
         .popup-desc { font-size: 0.9rem; color: #8d6e63; margin-bottom: 15px; }
         
+        /* 導航按鈕 */
         .popup-btn {
             background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); 
             color: white !important; border-radius: 50px; padding: 10px 0; 
@@ -57,6 +60,7 @@
             text-decoration: none !important; box-shadow: 0 4px 10px rgba(183, 28, 28, 0.3);
         }
 
+        /* 定位按鈕 (右下角) */
         .btn-locate {
             position: absolute; bottom: 110px; right: 20px; z-index: 900;
             width: 55px; height: 55px; border-radius: 50%;
@@ -66,6 +70,7 @@
             box-shadow: 0 5px 15px rgba(93, 64, 55, 0.2); cursor: pointer;
         }
 
+        /* 第一次進入的教學遮罩 */
         #guideOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(93, 64, 55, 0.6); z-index: 2000;
@@ -87,7 +92,6 @@
             width: 140px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1));
             z-index: 10;
         }
-
         .guide-title { font-weight: bold; color: #d32f2f; font-size: 1.4rem; margin-bottom: 20px; }
         .guide-list { text-align: left; margin-bottom: 10px; font-size: 0.95rem; color: #5d4037; padding-left: 10px; width: 100%; }
         .guide-list li { margin-bottom: 12px; list-style: none; display: flex; align-items: center; }
@@ -136,6 +140,7 @@
 {% endblock %}
 
 {% block scripts %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
@@ -148,13 +153,14 @@
 
         var map = L.map('map', { zoomControl: false }).setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
 
-        // 🔥 終極穩定方案：CartoDB Voyager + 4核心加速 (abcd)
+        // 🔥 文青地圖圖層 (CartoDB Voyager)
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '© OpenStreetMap & CartoDB',
-            subdomains: 'abcd', // 開啟多執行緒下載，速度快 4 倍
+            subdomains: 'abcd',
             maxZoom: 20
         }).addTo(map);
 
+        // 聚合點群組
         var markers = L.markerClusterGroup({
             showCoverageOnHover: false, zoomToBoundsOnClick: true,
             spiderfyOnMaxZoom: true, spiderfyDistanceMultiplier: 1.5, maxClusterRadius: 60
@@ -166,11 +172,11 @@
             iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -30]
         });
 
-        // 加上錯誤處理，如果 API 讀不到會自動重試
+        // 讀取地標資料
         function loadLocations() {
             $.getJSON('/api/locations', function(data) {
                 if(data && data.length > 0) {
-                    markers.clearLayers(); // 清除舊的避免重複
+                    markers.clearLayers();
                     data.forEach(function(item) {
                         var desc = item.description || "在苑裡發現的神蹟！";
                         var nickname = item.nickname || '熱心鄉親';
@@ -179,7 +185,7 @@
                             <div class="popup-info">
                                 <div class="popup-title">👤 ${nickname}</div>
                                 <div class="popup-desc">${desc}</div>
-                                <a href="https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}" target="_blank" class="popup-btn">
+                                <a href="https://www.google.com/maps/dir/?api=1&destination=$?q=${item.lat},${item.lng}" target="_blank" class="popup-btn">
                                     <i class="fas fa-location-arrow"></i> 導航去拜拜
                                 </a>
                             </div>`;
@@ -189,7 +195,7 @@
                 }
             }).fail(function() {
                 console.log("連線不穩，3秒後重試...");
-                setTimeout(loadLocations, 3000); // 如果失敗，3秒後自動重試
+                setTimeout(loadLocations, 3000);
             });
         }
 
@@ -207,8 +213,8 @@
 
         $(document).ready(function() {
             $('#guideOverlay').css('display', 'flex');
-            loadLocations(); // 啟動資料載入
-            setTimeout(function(){ map.invalidateSize(); }, 500); // 確保地圖滿版
+            loadLocations();
+            setTimeout(function(){ map.invalidateSize(); }, 500);
         });
     </script>
 {% endblock %}
