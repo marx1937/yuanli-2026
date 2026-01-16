@@ -177,7 +177,7 @@
 
 {% block content %}
     <div id="app-splash-screen">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/logo.png" class="splash-logo" alt="Loading...">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/logo.png" class="splash-logo" alt="Loading...">
         <div style="color: #8d6e63; font-weight: bold; font-size: 1.2rem; letter-spacing: 1px;">
             尋神連線中...
         </div>
@@ -187,17 +187,17 @@
     </div>
 
     <div class="hero-section">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/top.png" class="hero-banner" alt="Banner">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/top.png" class="hero-banner" alt="Banner">
         
         <div class="hero-text-container">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/toptext.png" class="app-logo-img" alt="MAP MY GOD">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/toptext.png" class="app-logo-img" alt="MAP MY GOD">
             <div class="sub-title-badge">老神在在 🙈 躲貓貓</div>
         </div>
     </div>
     
     <a href="/leaderboard" class="news-ticker-container">
         <div class="bao-ma-zai-badge">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/bm.png" class="bao-ma-zai-icon" alt="報馬仔">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/bm.png" class="bao-ma-zai-icon" alt="報馬仔">
             報馬仔
         </div>
         <div class="ticker-content">
@@ -209,7 +209,7 @@
     <a href="/upload" class="menu-btn btn-primary-action">
         <div class="lucky-badge">LUCKY!</div>
         <div class="btn-content">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/icon_camera.png" class="btn-icon-large" alt="Camera">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/icon_camera.png" class="btn-icon-large" alt="Camera">
             <div class="btn-text-group">
                 <div class="btn-main-text">尋找神隊友</div>
                 <div class="btn-sub-text">趕快幫祂拍張照</div>
@@ -219,7 +219,7 @@
 
     <a href="/map" class="menu-btn btn-secondary-action bg-map">
         <div class="btn-content">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/icon_compass.png" class="btn-icon-large" alt="Compass">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/icon_compass.png" class="btn-icon-large" alt="Compass">
             <div class="btn-text-group">
                 <div class="btn-main-text">搜尋方位</div>
                 <div class="btn-sub-text">看看他們躲在哪</div>
@@ -230,7 +230,7 @@
 
     <a href="/gallery" class="menu-btn btn-secondary-action bg-gallery">
         <div class="btn-content">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/icon_album.png" class="btn-icon-large" alt="Gallery">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/icon_album.png" class="btn-icon-large" alt="Gallery">
             <div class="btn-text-group">
                 <div class="btn-main-text">影像庫</div>
                 <div class="btn-sub-text">尋神足跡紀錄</div>
@@ -246,7 +246,7 @@
 
 {% block scripts %}
 <script>
-    // 遮罩控制邏輯：網頁載入完成後 1.2 秒自動消失
+    // 遮罩控制邏輯：網頁載入完成後自動消失
     window.addEventListener('load', function() {
         setTimeout(function() {
             var splash = document.getElementById('app-splash-screen');
@@ -261,7 +261,7 @@
 
     let realMsgs = ["🔔 報——！歡迎來到尋神情報站！", "💡 報馬仔提醒：發現神隊友請上傳！"];
     
-    // 智慧抓取地名邏輯 (使用 app.py 翻譯好的 'area')
+    // 智慧抓取地名邏輯
     fetch('/api/locations').then(r=>r.json()).then(d=>{if(d&&d.length>0){realMsgs=[];d.slice().reverse().slice(0,5).forEach(i=>{
         let n = i.nickname || "熱心鄉親";
         let place = i.area || i.description || i.note || "苑裡某處";
