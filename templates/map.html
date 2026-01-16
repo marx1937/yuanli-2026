@@ -9,122 +9,87 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.Default.css" />
 
     <style>
-        /* --- 頁面佈局 --- */
-        /* 設定地圖底色為米白，避免載入瞬間看到黑底 */
+        /* 避免載入瞬間黑底 */
         #map { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100vh; 
-            z-index: 1; 
-            background-color: #f5f5f5; /* Esri 地圖的預設底色 */
+            z-index: 1; background-color: #fcfcfc; 
         }
         
-        /* --- 1. 頂部標題列 (懸浮膠囊) --- */
         .map-header {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
             z-index: 900; width: 90%; max-width: 400px; text-align: center;
         }
         
         .header-capsule {
-            background: rgba(255, 255, 255, 0.95); 
-            padding: 10px 25px; 
-            border-radius: 50px;
-            font-weight: bold; color: #5d4037; 
+            background: rgba(255, 255, 255, 0.95); padding: 10px 25px; 
+            border-radius: 50px; font-weight: bold; color: #5d4037; 
             box-shadow: 0 4px 15px rgba(93, 64, 55, 0.15); 
             display: inline-flex; align-items: center; 
             border: 1px solid rgba(141, 110, 99, 0.2);
-            cursor: pointer; transition: transform 0.2s, background 0.2s;
-            backdrop-filter: blur(5px);
+            cursor: pointer; transition: transform 0.2s; backdrop-filter: blur(5px);
         }
         .header-capsule:active { transform: scale(0.95); background: #fff8e1; }
 
-        /* --- 2. 地圖標記樣式 --- */
         .custom-div-icon { background: transparent; border: none; }
         .simple-pin {
-            font-size: 36px;
-            line-height: 36px; text-align: center;
+            font-size: 36px; line-height: 36px; text-align: center;
             filter: drop-shadow(0 3px 5px rgba(0,0,0,0.3));
-            cursor: pointer; transition: transform 0.2s;
         }
-        .simple-pin:active { transform: scale(1.2); }
 
-        /* --- 3. 彈窗美學 (圓角 + 紅色按鈕) --- */
         .leaflet-popup-content-wrapper { 
-            border-radius: 20px; 
-            overflow: hidden; padding: 0; 
+            border-radius: 20px; overflow: hidden; padding: 0; 
             box-shadow: 0 10px 25px rgba(93, 64, 55, 0.2);
         }
         .leaflet-popup-content { margin: 0; width: 240px !important; }
-        
-        .popup-img-box { 
-            width: 100%; height: 160px; overflow: hidden; position: relative; 
-            background: #f9f7f2; 
-        }
+        .popup-img-box { width: 100%; height: 160px; overflow: hidden; background: #f9f7f2; }
         .popup-img-box img { width: 100%; height: 100%; object-fit: cover; }
-        
         .popup-info { padding: 15px 20px; text-align: left; background: #fff; }
         .popup-title { font-weight: bold; font-size: 1.15rem; color: #5d4037; margin-bottom: 5px; }
-        .popup-desc { font-size: 0.9rem; color: #8d6e63; margin-bottom: 15px; line-height: 1.4; }
+        .popup-desc { font-size: 0.9rem; color: #8d6e63; margin-bottom: 15px; }
         
         .popup-btn {
             background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); 
-            color: white !important; 
-            border-radius: 50px; padding: 10px 0; font-size: 0.95rem; font-weight: bold;
-            text-decoration: none !important; display: block; text-align: center;
-            box-shadow: 0 4px 10px rgba(183, 28, 28, 0.3);
-            transition: opacity 0.2s;
+            color: white !important; border-radius: 50px; padding: 10px 0; 
+            font-size: 0.95rem; font-weight: bold; display: block; text-align: center;
+            text-decoration: none !important; box-shadow: 0 4px 10px rgba(183, 28, 28, 0.3);
         }
-        .popup-btn:active { opacity: 0.9; transform: scale(0.98); }
 
-        /* --- 4. 定位按鈕 --- */
         .btn-locate {
             position: absolute; bottom: 110px; right: 20px; z-index: 900;
             width: 55px; height: 55px; border-radius: 50%;
             background: white; color: #5d4037; font-size: 1.4rem;
             display: flex; align-items: center; justify-content: center;
             border: 1px solid rgba(141, 110, 99, 0.1);
-            box-shadow: 0 5px 15px rgba(93, 64, 55, 0.2); 
-            cursor: pointer; transition: transform 0.2s;
+            box-shadow: 0 5px 15px rgba(93, 64, 55, 0.2); cursor: pointer;
         }
-        .btn-locate:active { transform: scale(0.9); background: #fff8e1; }
 
-        /* --- 5. 小幫手導覽遮罩 --- */
         #guideOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(93, 64, 55, 0.6); 
-            z-index: 2000;
+            background: rgba(93, 64, 55, 0.6); z-index: 2000;
             display: flex; justify-content: center; align-items: center;
             backdrop-filter: blur(4px);
         }
         .guide-card {
-            background: #fff; 
-            width: 85%; max-width: 320px;
-            border-radius: 25px; 
-            padding: 30px 25px 25px 25px; 
-            text-align: center; position: relative;
+            background: #fff; width: 85%; max-width: 320px;
+            border-radius: 25px; padding: 30px 25px 25px 25px; 
+            text-align: center; border: 4px solid #fff8e1;
             box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-            display: flex; flex-direction: column; align-items: center;
-            border: 4px solid #fff8e1;
             animation: popUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; flex-direction: column; align-items: center;
         }
-        @keyframes popUp {
-            from { transform: scale(0.5); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
+        @keyframes popUp { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         
         .guide-mascot {
-            display: block;
-            margin: 10px auto 15px auto; 
-            width: 140px; 
-            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1));
+            display: block; margin: 10px auto 15px auto; 
+            width: 140px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1));
             z-index: 10;
         }
 
-        .guide-title { font-weight: bold; color: #d32f2f; font-size: 1.4rem; margin-bottom: 20px; letter-spacing: 1px; }
-        .guide-list { text-align: left; margin-bottom: 10px; font-size: 0.95rem; color: #5d4037; width: 100%; padding-left: 10px; }
+        .guide-title { font-weight: bold; color: #d32f2f; font-size: 1.4rem; margin-bottom: 20px; }
+        .guide-list { text-align: left; margin-bottom: 10px; font-size: 0.95rem; color: #5d4037; padding-left: 10px; width: 100%; }
         .guide-list li { margin-bottom: 12px; list-style: none; display: flex; align-items: center; }
-        
         .guide-list i { 
-            color: #d32f2f; 
-            width: 30px; text-align: center; margin-right: 10px; font-size: 1.2rem; 
+            color: #d32f2f; width: 30px; text-align: center; margin-right: 10px; font-size: 1.2rem; 
             background: #fff8e1; border-radius: 50%; padding: 5px; height: 30px; width: 30px;
             display: flex; align-items: center; justify-content: center;
         }
@@ -134,10 +99,7 @@
             color: white; border: none; padding: 12px 30px; border-radius: 50px;
             font-weight: bold; font-size: 1.1rem; width: 100%;
             box-shadow: 0 8px 20px rgba(230, 126, 34, 0.3);
-            position: relative; z-index: 1; 
         }
-        .btn-guide-ok:active { transform: scale(0.95); }
-
     </style>
 {% endblock %}
 
@@ -175,9 +137,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/leaflet.markercluster.js"></script>
 
     <script>
-        function closeGuide() {
-            $('#guideOverlay').fadeOut();
-        }
+        function closeGuide() { $('#guideOverlay').fadeOut(); }
 
         const DEFAULT_LAT = 24.4418;
         const DEFAULT_LNG = 120.6543;
@@ -185,18 +145,16 @@
 
         var map = L.map('map', { zoomControl: false }).setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
 
-        // 🔥 加速 3：改用 Esri (ArcGIS) WorldStreetMap
-        // 這是有錢的大企業用的圖資，非常快、非常穩，而且不會隨便破圖
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-            attribution: 'Tiles &copy; Esri'
+        // 🔥 台灣專用加速：使用內政部國土測繪中心 (NLSC) 通用電子地圖
+        // 這是在台灣本地的伺服器，速度最快，而且不會擋 IP
+        L.tileLayer('https://wmts.nlsc.gov.tw/wmts/EMAP/default/GoogleMapsCompatible/{z}/{y}/{x}', {
+            attribution: '© <a href="https://maps.nlsc.gov.tw/">國土測繪中心</a>',
+            maxZoom: 20
         }).addTo(map);
 
         var markers = L.markerClusterGroup({
-            showCoverageOnHover: false,
-            zoomToBoundsOnClick: true,
-            spiderfyOnMaxZoom: true,
-            spiderfyDistanceMultiplier: 1.5,
-            maxClusterRadius: 60
+            showCoverageOnHover: false, zoomToBoundsOnClick: true,
+            spiderfyOnMaxZoom: true, spiderfyDistanceMultiplier: 1.5, maxClusterRadius: 60
         });
 
         var simpleIcon = L.divIcon({
@@ -205,62 +163,41 @@
             iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -30]
         });
 
-        // 抓取資料
         $.getJSON('/api/locations', function(data) {
             if(data && data.length > 0) {
                 data.forEach(function(item) {
-                    var lat = item.lat; var lng = item.lng;
-                    var img = item.image_url;
+                    var desc = item.description || "在苑裡發現的神蹟！";
                     var nickname = item.nickname || '熱心鄉親';
-                    var desc = item.description || '發現神隊友！';
-                    
-                    if(!desc || desc === "") desc = "在苑裡發現的神蹟！";
-
                     var popupContent = `
-                        <div class="popup-img-box"><img src="${img}" loading="lazy"></div>
+                        <div class="popup-img-box"><img src="${item.image_url}" loading="lazy"></div>
                         <div class="popup-info">
                             <div class="popup-title">👤 ${nickname}</div>
                             <div class="popup-desc">${desc}</div>
-                            <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" class="popup-btn">
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}" target="_blank" class="popup-btn">
                                 <i class="fas fa-location-arrow"></i> 導航去拜拜
                             </a>
-                        </div>
-                    `;
-                    var marker = L.marker([lat, lng], { icon: simpleIcon }).bindPopup(popupContent);
-                    markers.addLayer(marker);
+                        </div>`;
+                    markers.addLayer(L.marker([item.lat, item.lng], { icon: simpleIcon }).bindPopup(popupContent));
                 });
                 map.addLayer(markers);
             }
         });
 
-        function resetMapView() {
-            map.flyTo([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
-            map.closePopup();
-        }
+        function resetMapView() { map.flyTo([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM); map.closePopup(); }
 
         function locateUser() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function(position) {
-                    var lat = position.coords.latitude;
-                    var lng = position.coords.longitude;
+                    var lat = position.coords.latitude; var lng = position.coords.longitude;
                     map.flyTo([lat, lng], 16);
-                    L.circleMarker([lat, lng], {
-                        radius: 8, fillColor: "#0984e3", color: "#fff", weight: 2, opacity: 1, fillOpacity: 0.8
-                    }).addTo(map).bindPopup("📍 你在這裡").openPopup();
+                    L.circleMarker([lat, lng], { radius: 8, fillColor: "#0984e3", color: "#fff", weight: 2, opacity: 1, fillOpacity: 0.8 }).addTo(map).bindPopup("📍 你在這裡").openPopup();
                 }, function() { alert("無法取得定位，請確認已授權。"); });
-            } else {
-                alert("你的瀏覽器不支援定位功能喔！");
-            }
+            } else { alert("瀏覽器不支援定位"); }
         }
 
         $(document).ready(function() {
             $('#guideOverlay').css('display', 'flex');
-            
-            // 🔥 加速 4：強制刷新地圖
-            // 頁面載入 0.5 秒後，強制地圖重新計算大小，解決「只載入一半」的 Bug
-            setTimeout(function(){ 
-                map.invalidateSize(); 
-            }, 500);
+            setTimeout(function(){ map.invalidateSize(); }, 500);
         });
     </script>
 {% endblock %}
