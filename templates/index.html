@@ -3,14 +3,14 @@
 
 {% block styles %}
 <style>
-    /* --- 🔥 1. APP 啟動遮罩 (解決 Render 喚醒時的黑畫面) --- */
+    /* --- 🔥 1. APP 啟動遮罩 --- */
     #app-splash-screen {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background-color: #fff8e1; /* 暖黃色底，讓去背 Logo 漂亮顯示 */
+        background-color: #fff8e1;
         z-index: 9999;
         display: flex; flex-direction: column;
         justify-content: center; align-items: center;
-        transition: opacity 0.8s ease-out; /* 淡出動畫 */
+        transition: opacity 0.8s ease-out;
     }
     
     .splash-logo {
@@ -50,9 +50,22 @@
         background: rgba(255, 255, 255, 0.6); 
         color: #8d6e63; font-weight: bold; font-size: 1rem;
         padding: 5px 18px;
+        /* 🔥 修改：為了放圖片，稍微增加一點高度跟圓角 */
+        padding-top: 6px; padding-bottom: 6px;
         border: 1px solid #d7ccc8; 
         border-radius: 50px;
         backdrop-filter: blur(2px);
+        display: inline-flex; align-items: center; /* 讓圖片跟文字垂直置中 */
+    }
+    
+    /* 🔥 新增：標題小神像圖示樣式 */
+    .sub-title-icon {
+        height: 28px; /* 設定高度，比文字大一點點 */
+        width: auto;
+        margin: 0 5px; /* 左右留點空隙 */
+        filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+        /* 如果你的圖沒有去背，可以試著加這行讓它變圓形 (選用) */
+        /* border-radius: 50%; border: 2px solid #fff; */
     }
 
     /* --- 報馬仔 (跑馬燈) --- */
@@ -62,7 +75,7 @@
         background: #fff8e1; 
         border-radius: 15px; 
         box-shadow: 0 2px 8px rgba(93, 64, 55, 0.05); 
-        padding: 10px 15px;
+        padding: 8px 15px; 
         display: flex; align-items: center;
         border: 1px solid #ffe082; 
         position: relative; z-index: 20;
@@ -79,11 +92,11 @@
         padding-right: 5px;
     }
     
-    /* 報馬仔小圖示設定 */
     .bao-ma-zai-icon {
-        height: 24px; 
+        height: 38px; 
         width: auto; 
-        margin-right: 8px; 
+        margin-right: 5px; 
+        margin-left: -5px;
         vertical-align: middle;
         filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
     }
@@ -167,11 +180,27 @@
     }
 
     .secret-footer {
-        text-align: center; margin-top: 40px; margin-bottom: 20px;
-        color: rgba(141, 110, 99, 0.3); font-size: 0.65rem; letter-spacing: 1px;
+        text-align: center; margin-top: 30px; margin-bottom: 40px;
+        display: flex; flex-direction: column; align-items: center; gap: 10px;
     }
-    .secret-link { color: rgba(141, 110, 99, 0.2); margin-left: 5px; text-decoration: none !important; transition: color 0.3s; }
-    .secret-link:hover { color: #d32f2f; opacity: 1; }
+    
+    .contact-admin-btn {
+        background-color: #4267B2; 
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        text-decoration: none !important;
+        box-shadow: 0 4px 6px rgba(66, 103, 178, 0.2);
+        transition: transform 0.2s;
+        display: inline-flex; align-items: center; gap: 5px;
+    }
+    .contact-admin-btn:active { transform: scale(0.95); }
+    
+    .copyright-text {
+        color: rgba(141, 110, 99, 0.4); font-size: 0.7rem; letter-spacing: 1px;
+    }
+    .secret-link { color: rgba(141, 110, 99, 0.2); text-decoration: none !important; }
 </style>
 {% endblock %}
 
@@ -191,7 +220,12 @@
         
         <div class="hero-text-container">
             <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/toptext.png" class="app-logo-img" alt="MAP MY GOD">
-            <div class="sub-title-badge">老神在在 🙈 躲貓貓</div>
+            
+            <div class="sub-title-badge">
+                老神在在 
+                <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/god_cute.png" class="sub-title-icon" alt="Q版土地公"> 
+                躲貓貓
+            </div>
         </div>
     </div>
     
@@ -240,13 +274,18 @@
     </a>
 
     <div class="secret-footer">
-        2026 苑裡串起來 <a href="/admin" class="secret-link"><i class="fas fa-lock"></i></a>
+        <a href="https://www.facebook.com/YourPageLink" target="_blank" class="contact-admin-btn">
+            <i class="fab fa-facebook-messenger"></i> 聯絡小編 (私訊)
+        </a>
+
+        <div class="copyright-text">
+            2026 苑裡串起來 <a href="/admin" class="secret-link"><i class="fas fa-lock"></i></a>
+        </div>
     </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    // 遮罩控制邏輯：網頁載入完成後自動消失
     window.addEventListener('load', function() {
         setTimeout(function() {
             var splash = document.getElementById('app-splash-screen');
@@ -261,7 +300,6 @@
 
     let realMsgs = ["🔔 報——！歡迎來到尋神情報站！", "💡 報馬仔提醒：發現神隊友請上傳！"];
     
-    // 智慧抓取地名邏輯
     fetch('/api/locations').then(r=>r.json()).then(d=>{if(d&&d.length>0){realMsgs=[];d.slice().reverse().slice(0,5).forEach(i=>{
         let n = i.nickname || "熱心鄉親";
         let place = i.area || i.description || i.note || "苑裡某處";
