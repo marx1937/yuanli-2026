@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% set active_page = "map" %}
 
-{% block title %}尋神雷達 - 終極加速版{% endblock %}
+{% block title %}尋神雷達 - 苑裡土地公{% endblock %}
 
 {% block styles %}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
@@ -9,54 +9,61 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
 
     <style>
-        /* 預設米黃色背景，防止格子破圖時太難看 */
+        /* 基礎地圖設定 */
         #map { position: absolute; top: 0; left: 0; width: 100%; height: 100vh; z-index: 1; background-color: #fdfcf0; }
         
-        /* 匾額標題 */
+        /* 🍌 紅色匾額標題 */
         .map-header { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 900; width: 90%; max-width: 400px; text-align: center; }
-        .header-badge { background: #d32f2f; color: #fff; padding: 10px 25px; border-radius: 50px; font-weight: bold; box-shadow: 0 5px 15px rgba(211, 47, 47, 0.3); border: 2px solid #fff8e1; }
+        .header-badge {
+            background: #d32f2f; color: #fff; padding: 10px 25px; border-radius: 50px; font-weight: bold; 
+            box-shadow: 0 5px 15px rgba(211, 47, 47, 0.3); display: inline-flex; align-items: center; border: 2px solid #fff8e1;
+        }
 
-        /* 🚀 教學指南遮罩 (修復回歸！) */
+        /* 🚀 教學指南 (確保回歸) */
         #guideOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(93, 64, 55, 0.85); z-index: 2000;
-            display: none; justify-content: center; align-items: center;
+            display: flex; justify-content: center; align-items: center;
             backdrop-filter: blur(8px);
         }
         .guide-card {
-            background: #fff; width: 85%; max-width: 320px;
-            border-radius: 30px; padding: 30px 25px; 
-            text-align: center; border: 4px solid #fff8e1;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-            animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: #fff; width: 85%; max-width: 320px; border-radius: 30px; padding: 30px 25px; 
+            text-align: center; border: 4px solid #fff8e1; box-shadow: 0 15px 40px rgba(0,0,0,0.3);
         }
-        @keyframes popUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .guide-mascot { display: block; margin: 0 auto 20px auto; width: 140px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); }
+        .guide-mascot { display: block; margin: 0 auto 15px auto; width: 140px; }
         .guide-btn {
             background: linear-gradient(135deg, #f0932b 0%, #e67e22 100%); 
             color: white; border: none; padding: 12px 0; border-radius: 50px;
-            font-weight: bold; font-size: 1.1rem; width: 100%;
-            box-shadow: 0 8px 20px rgba(230, 126, 34, 0.3);
+            font-weight: bold; font-size: 1.1rem; width: 100%; box-shadow: 0 8px 20px rgba(230, 126, 34, 0.3);
         }
 
-        /* 彈出視窗 */
+        /* 彈出視窗樣式 */
         .leaflet-popup-content-wrapper { border-radius: 20px; overflow: hidden; padding: 0; }
-        .leaflet-popup-content { margin: 0; width: 250px !important; }
-        .popup-img { width: 100%; height: 160px; object-fit: cover; background: #eee; }
-        .popup-info { padding: 15px; }
-        .popup-btn { background: #d32f2f; color: white !important; border-radius: 50px; padding: 10px 0; display: block; text-align: center; text-decoration: none !important; margin-top: 10px; }
+        .leaflet-popup-content { margin: 0; width: 260px !important; }
+        .popup-img { width: 100%; height: 170px; object-fit: cover; background: #eee; }
+        .popup-info { padding: 15px; color: #5d4037; }
+        .popup-btn {
+            background: #d32f2f; color: white !important; border-radius: 50px; 
+            padding: 10px 0; display: block; text-align: center; text-decoration: none !important;
+            font-weight: bold; margin-top: 10px;
+        }
 
-        /* 定位按鈕 */
-        .btn-locate { position: absolute; bottom: 110px; right: 20px; z-index: 900; width: 55px; height: 55px; border-radius: 50%; background: white; color: #d32f2f; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+        /* 右下角定位鈕 */
+        .btn-locate {
+            position: absolute; bottom: 110px; right: 20px; z-index: 900;
+            width: 55px; height: 55px; border-radius: 50%; background: white; 
+            color: #d32f2f; font-size: 1.5rem; display: flex; align-items: center; 
+            justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.15); border: 1px solid #efebe9;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
     <div id="guideOverlay">
         <div class="guide-card">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/guide_couple.png" class="guide-mascot" alt="小幫手">
-            <h3 style="color:#d32f2f; font-weight:bold; margin-bottom:10px;">尋神地圖指南</h3>
-            <p style="color:#8d6e63; margin-bottom:20px; font-size:0.95rem;">點擊地圖上的圖釘<br>看看神隊友躲在哪裡！</p>
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/guide_couple.png" class="guide-mascot">
+            <h3 style="color:#d32f2f; font-weight:bold;">尋神地圖指南</h3>
+            <p style="color:#8d6e63; margin-bottom:20px;">點擊地圖上的圖釘<br>看看神隊友躲在哪裡！</p>
             <button class="guide-btn" onclick="closeGuide()">收到，出發！</button>
         </div>
     </div>
@@ -75,52 +82,49 @@
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
     <script>
+        function closeGuide() { $('#guideOverlay').fadeOut(); }
+
         const DEFAULT_LAT = 24.4418;
         const DEFAULT_LNG = 120.6543;
         const DEFAULT_ZOOM = 14;
 
-        function closeGuide() { $('#guideOverlay').fadeOut(); }
-
-        /* 🚀 效能核心：Canvas 渲染 + 延遲啟動 */
+        /* 🚀 效能優化：開啟 Canvas 渲染 */
         var map = L.map('map', {
             zoomControl: false,
-            preferCanvas: true, // 效能關鍵
-            tap: false,
-            updateWhenIdle: true, // 只在停止移動時更新
-            updateWhenZooming: false
+            preferCanvas: true,
+            tap: false
         }).setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
 
-        /* 🔥 使用 CartoDB 全球加速節點，速度最快 */
+        /* 🔥 使用 CartoDB Voyager 圖資：比標準 OSM 更快且不會有格子破圖 */
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '© CartoDB',
-            subdomains: 'abcd', // 使用多線程加速下載
+            subdomains: 'abcd',
             maxZoom: 20
         }).addTo(map);
 
-        var markers = L.markerClusterGroup({ 
-            chunkedLoading: true, // 分批載入避免當機
-            maxClusterRadius: 60 
+        var markers = L.markerClusterGroup({ chunkedLoading: true });
+        
+        var simpleIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: "<div style='font-size:32px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.3));'>📍</div>",
+            iconSize: [30, 30], iconAnchor: [15, 30]
         });
 
+        /* 載入資料邏輯 */
         function loadLocations() {
+            // 注意：我們統一使用 /api/locations 接口
             $.getJSON('/api/locations', function(data) {
                 if(!data) return;
                 markers.clearLayers();
                 data.forEach(function(item) {
-                    var marker = L.marker([item.lat, item.lng], {
-                        icon: L.divIcon({
-                            className: 'custom-div-icon',
-                            html: "<div style='font-size:32px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.3));'>📍</div>",
-                            iconSize: [30, 30], iconAnchor: [15, 30]
-                        })
-                    });
+                    var marker = L.marker([item.lat, item.lng], { icon: simpleIcon });
                     
                     marker.on('click', function() {
                         var html = `
                             <img src="${item.image_url}" class="popup-img" loading="lazy">
                             <div class="popup-info">
-                                <b style="color:#5d4037;">👤 ${item.nickname || '熱心鄉親'}</b>
-                                <p style="margin:5px 0; font-size:0.9rem; color:#8d6e63;">${item.description || ''}</p>
+                                <b style="font-size:1.1rem;">👤 ${item.nickname || '熱心串友'}</b>
+                                <p style="margin:5px 0; font-size:0.9rem;">${item.description || '發現神蹟！'}</p>
                                 <a href="https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}" target="_blank" class="popup-btn">
                                     <i class="fas fa-location-arrow"></i> 導航去拜拜
                                 </a>
@@ -144,14 +148,11 @@
         }
 
         $(document).ready(function() {
-            // 1. 強制顯示指南
-            $('#guideOverlay').css('display', 'flex').hide().fadeIn();
-            
-            // 2. 異步載入資料
-            setTimeout(loadLocations, 300);
-            
-            // 3. 解決手機畫面跑掉的問題
-            setTimeout(() => { map.invalidateSize(); }, 600);
+            // 確保一開始就顯示指南
+            $('#guideOverlay').show();
+            loadLocations();
+            // 解決地圖尺寸跑掉的問題
+            setTimeout(() => { map.invalidateSize(); }, 500);
         });
     </script>
 {% endblock %}
