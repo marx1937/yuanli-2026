@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% set active_page = "map" %}
 
-{% block title %}尋神地圖 (里別數據統計版){% endblock %}
+{% block title %}尋神地圖 (高效數據版){% endblock %}
 
 {% block styles %}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
@@ -14,7 +14,7 @@
             z-index: 1; background-color: #fdfcf0; 
         }
         
-        /* 頂部導航 */
+        /* 頂部導航列 */
         .map-header {
             position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
             z-index: 1000; width: 95%; max-width: 500px; display: flex; gap: 8px;
@@ -30,6 +30,14 @@
         .data-badge {
             background: #5d4037; color: white; padding: 2px 8px; 
             border-radius: 10px; font-size: 0.75rem; margin-left: 5px;
+        }
+
+        /* 載入中動畫提示 */
+        #map-loader {
+            position: fixed; top: 75px; left: 50%; transform: translateX(-50%);
+            z-index: 1001; background: #fff; padding: 5px 15px; border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: none;
+            font-size: 0.8rem; color: #d32f2f;
         }
 
         /* 里別選擇面板 */
@@ -49,26 +57,23 @@
             border-radius: 12px; text-align: center; font-size: 0.8rem;
             color: #444; cursor: pointer; display: flex; flex-direction: column;
             align-items: center; gap: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            position: relative;
         }
-        .village-count-tag {
-            font-size: 10px; color: #888; font-weight: normal;
-        }
+        .village-count-tag { font-size: 10px; color: #888; }
         .color-indicator { width: 100%; height: 3px; border-radius: 2px; }
 
-        /* 彩色地圖標籤 */
+        /* 地圖標籤圖示 */
         .village-label-icon { 
             color: white; border-radius: 20px; 
             padding: 4px 12px; font-weight: bold; border: 2px solid white;
             box-shadow: 0 3px 8px rgba(0,0,0,0.3); white-space: nowrap; font-size: 12px;
-            text-align: center; display: flex; flex-direction: column; line-height: 1.2;
+            text-align: center; display: flex; flex-direction: column;
         }
         .village-label-count { font-size: 10px; opacity: 0.9; font-weight: normal; }
 
         .custom-div-icon { background: transparent; border: none; }
         .simple-pin { font-size: 32px; text-align: center; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3)); }
 
-        /* 彈窗 */
+        /* 彈窗樣式 */
         .leaflet-popup-content-wrapper { border-radius: 15px; overflow: hidden; padding: 0; }
         .popup-img-box { width: 100%; height: 160px; overflow: hidden; background: #eee; }
         .popup-img-box img { width: 100%; height: 100%; object-fit: cover; }
@@ -81,6 +86,8 @@
 {% endblock %}
 
 {% block content %}
+    <div id="map-loader"><i class="fas fa-spinner fa-spin"></i> 資料同步中...</div>
+
     <div class="map-header">
         <div class="header-capsule" onclick="resetMapView()">
             全苑裡 <span class="data-badge" id="totalCount">0</span>
@@ -92,10 +99,9 @@
 
     <div id="map"></div>
 
-    <!-- 里別管理面板 -->
     <div id="villagePanel">
         <div class="panel-handle" onclick="toggleVillagePanel()"></div>
-        <h4 style="text-align:center; color:#5d4037; margin-bottom:15px; font-weight:bold;">苑裡各里資料分佈</h4>
+        <h4 style="text-align:center; color:#5d4037; margin-bottom:15px; font-weight:bold;">苑裡各里資料分布</h4>
         <div class="village-grid" id="villageGrid"></div>
         <div style="height:40px;"></div>
     </div>
@@ -107,7 +113,7 @@
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
     <script>
-        // 苑裡 25 里數據
+        // 苑裡 25 里中心數據與初始計數
         const VILLAGES = [
             { name: "苑東里", lat: 24.4442, lng: 120.6558, color: "#e74c3c", count: 0 },
             { name: "苑南里", lat: 24.4388, lng: 120.6535, color: "#3498db", count: 0 },
@@ -137,25 +143,33 @@
         ];
 
         const DEFAULT_LAT = 24.4418, DEFAULT_LNG = 120.6543, DEFAULT_ZOOM = 13;
-        var map = L.map('map', { zoomControl: false, preferCanvas: true }).setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
+        
+        // 性能優化：preferCanvas 使用畫布渲染
+        var map = L.map('map', { 
+            zoomControl: false, 
+            preferCanvas: true 
+        }).setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
         
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
         var villageLayer = L.layerGroup().addTo(map);
-        var detailCluster = L.markerClusterGroup({ chunkedLoading: true });
+        
+        // 性能優化：chunkedLoading 防止大量標記造成頁面卡死
+        var detailCluster = L.markerClusterGroup({ 
+            chunkedLoading: true,
+            chunkInterval: 100,
+            showCoverageOnHover: false 
+        });
 
-        // 計算兩點之間的距離 (用於歸類資料點屬於哪個里)
         function getDistance(lat1, lon1, lat2, lon2) {
             return Math.sqrt(Math.pow(lat1 - lat2, 2) + Math.pow(lon1 - lon2, 2));
         }
 
-        // 初始化/更新里別標記 (包含數據量)
         function updateVillageUI() {
             villageLayer.clearLayers();
             $('#villageGrid').empty();
 
             VILLAGES.forEach(v => {
-                // 地圖標籤
                 var vMarker = L.marker([v.lat, v.lng], {
                     icon: L.divIcon({
                         className: 'custom-div-icon',
@@ -170,7 +184,6 @@
                 vMarker.on('click', () => goToVillage(v.lat, v.lng));
                 villageLayer.addLayer(vMarker);
                 
-                // 選單項目
                 $('#villageGrid').append(`
                     <div class="village-item" onclick="goToVillage(${v.lat}, ${v.lng})">
                         <div class="color-indicator" style="background-color: ${v.color}"></div>
@@ -181,6 +194,7 @@
             });
         }
 
+        // 當地圖放大時才顯示詳細點，縮小時顯示里別概況，節省效能
         map.on('zoomend', function() {
             var currentZoom = map.getZoom();
             if (currentZoom >= 15) {
@@ -193,53 +207,66 @@
         });
 
         function loadData() {
-            $.getJSON('/api/locations', function(data) {
-                $('#totalCount').text(data.length);
-                detailCluster.clearLayers();
-                
-                // 重置各里計數
-                VILLAGES.forEach(v => v.count = 0);
+            $('#map-loader').fadeIn();
+            console.log("開始從 /api/locations 抓取數據...");
+            
+            $.getJSON('/api/locations')
+                .done(function(data) {
+                    console.log("數據抓取成功，總筆數:", data ? data.length : 0);
+                    if(!data || data.length === 0) {
+                        $('#map-loader').html("<i class='fas fa-exclamation-triangle'></i> 目前無數據資料").delay(2000).fadeOut();
+                        return;
+                    }
 
-                var markers = [];
-                var pinIcon = L.divIcon({
-                    className: 'custom-div-icon',
-                    html: "<div class='simple-pin'>📍</div>",
-                    iconSize: [30, 30], iconAnchor: [15, 30]
-                });
+                    $('#totalCount').text(data.length);
+                    detailCluster.clearLayers();
+                    VILLAGES.forEach(v => v.count = 0);
 
-                data.forEach(item => {
-                    // 1. 邏輯歸類：找出距離此點最近的里
-                    let nearestVillage = null;
-                    let minDist = Infinity;
-                    VILLAGES.forEach(v => {
-                        let d = getDistance(item.lat, item.lng, v.lat, v.lng);
-                        if(d < minDist) {
-                            minDist = d;
-                            nearestVillage = v;
-                        }
+                    var markerList = [];
+                    var pinIcon = L.divIcon({
+                        className: 'custom-div-icon',
+                        html: "<div class='simple-pin'>📍</div>",
+                        iconSize: [30, 30], iconAnchor: [15, 30]
                     });
-                    if(nearestVillage) nearestVillage.count++;
 
-                    // 2. 建立標記
-                    var m = L.marker([item.lat, item.lng], { icon: pinIcon });
-                    m.on('click', function() {
-                        if(!this.getPopup()) {
-                            this.bindPopup(`
-                                <div class="popup-img-box"><img src="${item.image_url}" loading="lazy"></div>
-                                <div class="popup-info">
-                                    <b>${item.nickname || '鄉親'}</b>
-                                    <p>${item.description || '發現規劃點！'}</p>
-                                    <a href="https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}" target="_blank" class="popup-btn">導航</a>
-                                </div>
-                            `).openPopup();
-                        }
+                    data.forEach(item => {
+                        // 1. 里別歸類計算
+                        let nearestVillage = null;
+                        let minDist = Infinity;
+                        VILLAGES.forEach(v => {
+                            let d = getDistance(item.lat, item.lng, v.lat, v.lng);
+                            if(d < minDist) { minDist = d; nearestVillage = v; }
+                        });
+                        if(nearestVillage) nearestVillage.count++;
+
+                        // 2. 建立標記（不預先生成 Popup HTML 以節省記憶體）
+                        var m = L.marker([item.lat, item.lng], { icon: pinIcon });
+                        m.on('click', function() {
+                            if(!this.getPopup()) {
+                                // 點擊時才生成內容
+                                this.bindPopup(`
+                                    <div class="popup-img-box"><img src="${item.image_url}" onerror="this.src='https://placehold.co/400x300?text=No+Image'"></div>
+                                    <div class="popup-info">
+                                        <b>${item.nickname || '鄉親'}</b>
+                                        <p>${item.description || '發現規劃點！'}</p>
+                                        <a href="https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}" target="_blank" class="popup-btn">導航</a>
+                                    </div>
+                                `).openPopup();
+                            }
+                        });
+                        markerList.push(m);
                     });
-                    markers.push(m);
-                });
 
-                detailCluster.addLayers(markers);
-                updateVillageUI(); // 數據跑完後更新 UI
-            });
+                    // 批量加入地圖
+                    detailCluster.addLayers(markerList);
+                    updateVillageUI();
+                    $('#map-loader').fadeOut();
+                })
+                .fail(function(jqxhr, textStatus, error) {
+                    var err = textStatus + ", " + error;
+                    console.error("資料抓取失敗: " + err);
+                    $('#map-loader').html("<i class='fas fa-times'></i> 無法連接資料庫").delay(3000).fadeOut();
+                });
         }
 
         function goToVillage(lat, lng) {
