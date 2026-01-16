@@ -2,7 +2,7 @@
 {% set active_page = "home" %}
 
 {% block styles %}
-    /* 🔥 注意：這裡不要再寫 style 標籤了，因為 base.html 已經幫你寫了 */
+    /* 🔥 修正重點：這裡直接寫 CSS，不要再加 <style> 標籤了 */
 
     /* --- 1. APP 啟動遮罩 (強制鎖定樣式) --- */
     #app-splash-screen {
@@ -16,7 +16,7 @@
     }
     
     .splash-logo {
-        width: 100px !important;  /* 🔥 強制限制大小 */
+        width: 100px !important;  /* 🔥 強制限制大小，解決巨無霸問題 */
         height: 100px !important; 
         object-fit: contain; 
         margin-bottom: 20px;
@@ -82,8 +82,11 @@
     .news-ticker-container:active { transform: scale(0.96); transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1); }
 
     .bao-ma-zai-badge {
-        margin-right: 5px; display: flex; align-items: center;
-        z-index: 25; background: #fff8e1; padding-right: 5px;
+        /* 🔥 修改：把右邊距歸零，讓文字貼近圖示 */
+        margin-right: 0px; 
+        display: flex; align-items: center;
+        z-index: 25; background: #fff8e1; 
+        padding-right: 2px; /* 稍微留一點點呼吸空間就好 */
     }
     
     .bao-ma-zai-icon {
@@ -266,14 +269,14 @@
 {% block scripts %}
 <script>
     window.addEventListener('load', function() {
-        // 設定雙重保險：如果圖片載入太慢，3秒後也強制關閉遮罩
+        // 設定雙重保險：強制3秒後關閉遮罩，避免卡住
         setTimeout(function() {
              var splash = document.getElementById('app-splash-screen');
              if(splash && splash.style.display !== 'none') {
                  splash.style.opacity = '0';
                  setTimeout(function() { splash.style.display = 'none'; }, 800);
              }
-        }, 3000); // 最多顯示 3 秒
+        }, 3000); 
 
         setTimeout(function() {
             var splash = document.getElementById('app-splash-screen');
