@@ -1,148 +1,53 @@
-<script>
-/* =====================
-   基本設定
-===================== */
-const DEFAULT_LAT = 24.4418;
-const DEFAULT_LNG = 120.6543;
-const DEFAULT_ZOOM = 14;
-const DETAIL_CACHE = {};
+{% extends "base.html" %}
+{% set active_page = "map" %}
 
-function closeGuide() {
-    $('#guideOverlay').fadeOut();
-}
+{% block title %}尋神地圖 - 靈感雷達{% endblock %}
 
-/* =====================
-   初始化地圖（手機極限）
-===================== */
-var map = L.map('map', {
-    zoomControl: false,
-    preferCanvas: true,
-    inertia: true,
-    tap: false
-}).setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
+{% block styles %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
 
-/* =====================
-   底圖
-===================== */
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19
-}).addTo(map);
+    <style>
+        #map { position: absolute; top: 0; left: 0; width: 100%; height: 100vh; z-index: 1; background-color: #fdfcf0; }
+        
+        /* 廟宇紅匾額標題 */
+        .map-header { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 900; width: 90%; max-width: 400px; text-align: center; }
+        .header-badge {
+            background: #d32f2f; color: #fff; padding: 10px 25px; border-radius: 50px; font-weight: bold; 
+            box-shadow: 0 5px 15px rgba(211, 47, 47, 0.3); display: inline-flex; align-items: center; border: 2px solid #fff8e1;
+        }
 
-/* =====================
-   Canvas Marker Cluster
-===================== */
-var markers = L.markerClusterGroup({
-    chunkedLoading: true,
-    chunkInterval: 80,
-    chunkDelay: 20,
-    removeOutsideVisibleBounds: true,
-    maxClusterRadius: 60
-});
-map.addLayer(markers);
+        /* 小幫手遮罩 */
+        #guideOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(93, 64, 55, 0.7); z-index: 2000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px);
+        }
+        .guide-card {
+            background: #fff; width: 85%; max-width: 320px; border-radius: 30px; padding: 30px 25px; 
+            text-align: center; border: 4px solid #fff8e1; box-shadow: 0 15px 40px rgba(0,0,0,0.3); animation: popUp 0.4s ease-out;
+        }
+        .guide-mascot { display: block; margin: 0 auto 20px auto; width: 150px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); }
+        .guide-btn {
+            background: linear-gradient(135deg, #f0932b 0%, #e67e22 100%); color: white; border: none; padding: 12px 0; border-radius: 50px;
+            font-weight: bold; font-size: 1.1rem; width: 100%; box-shadow: 0 8px 20px rgba(230, 126, 34, 0.3);
+        }
 
-/* =====================
-   Icon（極簡）
-===================== */
-var simpleIcon = L.divIcon({
-    className: 'custom-div-icon',
-    html: "<div class='simple-pin'>📍</div>",
-    iconSize: [28, 28],
-    iconAnchor: [14, 28]
-});
+        /* 彈出視窗圓潤化 */
+        .leaflet-popup-content-wrapper { border-radius: 20px; overflow: hidden; padding: 0; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .leaflet-popup-content { margin: 0; width: 250px !important; }
+        .popup-img { width: 100%; height: 160px; object-fit: cover; background: #f5f5f5; }
+        .popup-info { padding: 15px; color: #5d4037; }
+        .popup-btn {
+            background: #d32f2f; color: white !important; border-radius: 50px; 
+            padding: 10px 0; display: block; text-align: center; font-weight: bold; margin-top: 10px;
+        }
 
-/* =====================
-   加入 Marker（不建 popup）
-===================== */
-function addLiteMarker(item) {
-    var marker = L.marker([item.lat, item.lng], { icon: simpleIcon });
+        /* 定位按鈕 */
+        .btn-locate {
+            position: absolute; bottom: 110px; right: 20px; z-index: 900;
+            width: 55px; height: 55px; border-radius: 50%; background: white; color: #d32f2f; font-size: 1.5rem;
+            display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
 
-    marker.on('click', function() {
-        openDetailPopup(item.id, marker);
-    });
-
-    markers.addLayer(marker);
-}
-
-/* =====================
-   點擊才載詳細資料
-===================== */
-function openDetailPopup(id, marker) {
-    if (DETAIL_CACHE[id]) {
-        marker.bindPopup(DETAIL_CACHE[id]).openPopup();
-        return;
-    }
-
-    marker.bindPopup('載入中...').openPopup();
-
-    $.getJSON(`/api/location/${id}`, function(item) {
-        var html = `
-            <div class="popup-img-box" data-img="${item.image_url}"></div>
-            <div class="popup-info">
-                <b>${item.nickname || '熱心鄉親'}</b>
-                <p>${item.description || ''}</p>
-                <a href="https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}"
-                   target="_blank" class="popup-btn">導航去拜拜</a>
-            </div>
-        `;
-
-        DETAIL_CACHE[id] = html;
-        marker.setPopupContent(html);
-
-        setTimeout(() => {
-            const box = document.querySelector('.popup-img-box');
-            if (box && !box.innerHTML) {
-                box.innerHTML = `<img src="${box.dataset.img}">`;
-            }
-        }, 50);
-    });
-}
-
-/* =====================
-   載入「輕量」資料（視窗內）
-===================== */
-function loadLiteLocations() {
-    if (map.getZoom() < 13) {
-        markers.clearLayers();
-        return;
-    }
-
-    const b = map.getBounds();
-
-    $.getJSON('/api/locations-lite', {
-        north: b.getNorth(),
-        south: b.getSouth(),
-        east: b.getEast(),
-        west: b.getWest()
-    }, function(data) {
-        markers.clearLayers();
-        if (!data) return;
-        data.forEach(addLiteMarker);
-    });
-}
-
-/* =====================
-   基本互動
-===================== */
-function resetMapView() {
-    map.flyTo([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
-}
-
-function locateUser() {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(pos => {
-        map.flyTo([pos.coords.latitude, pos.coords.longitude], 16);
-    });
-}
-
-/* =====================
-   初始化流程
-===================== */
-$(document).ready(function() {
-    $('#guideOverlay').show();
-
-    setTimeout(loadLiteLocations, 300);
-    map.on('moveend zoomend', loadLiteLocations);
-
-    setTimeout(() => map.invalidateSize(), 600);
-});
-</script>
+        .simple-pin { font-size: 32px; filter: drop-shadow
