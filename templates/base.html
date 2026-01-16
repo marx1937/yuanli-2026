@@ -39,13 +39,15 @@
         /* 小圖示 */
         .nav-icon {
             height: 42px; width: auto; margin-bottom: 3px;
-            filter: grayscale(100%) sepia(20%) opacity(0.6); /* 帶一點復古濾鏡 */
+            /* 拿掉灰階濾鏡，直接顯示圖片原色 (這樣你的手繪圖才好看) */
+            /* filter: grayscale(100%) sepia(20%) opacity(0.6); */
             transition: all 0.3s;
         }
         
-        /* 選中狀態：改為朱紅色 */
+        /* 選中狀態：放大並加強顏色 */
         .nav-item.active .nav-icon {
-            filter: none; transform: scale(1.1);
+            transform: scale(1.1);
+            filter: drop-shadow(0 2px 2px rgba(211, 47, 47, 0.2));
         }
         .nav-item.active span { color: #d32f2f; font-weight: bold; }
 
@@ -77,22 +79,26 @@
 
     <div class="bottom-nav">
         <a href="/" class="nav-item {% if active_page == 'home' %}active{% endif %}">
-            <img src="/static/nav_home.png" class="nav-icon" alt="首頁">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_home.png" class="nav-icon" alt="首頁">
             <span>首頁</span>
         </a>
+        
         <a href="/map" class="nav-item {% if active_page == 'map' %}active{% endif %}">
-            <img src="/static/nav_map.png" class="nav-icon" alt="地圖">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_map.png" class="nav-icon" alt="地圖">
             <span>地圖</span>
         </a>
+        
         <a href="/upload" class="nav-center-btn">
-            <img src="/static/nav_upload.png" class="nav-center-icon" alt="上傳">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_upload.png" class="nav-center-icon" alt="上傳">
         </a>
+        
         <a href="/gallery" class="nav-item {% if active_page == 'gallery' %}active{% endif %}">
-            <img src="/static/nav_gallery.png" class="nav-icon" alt="圖庫">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_gallery.png" class="nav-icon" alt="圖庫">
             <span>圖庫</span>
         </a>
+        
         <a href="/leaderboard" class="nav-item {% if active_page == 'leaderboard' %}active{% endif %}">
-            <img src="/static/nav_leaderboard.png" class="nav-icon" alt="榜單">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_leaderboard.png" class="nav-icon" alt="榜單">
             <span>榜單</span>
         </a>
     </div>
