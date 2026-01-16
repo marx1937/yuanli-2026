@@ -2,21 +2,19 @@
 {% set active_page = "home" %}
 
 {% block styles %}
-    /* 🔥 修正重點：這裡直接寫 CSS，不要再加 <style> 標籤了 */
-
-    /* --- 1. APP 啟動遮罩 (強制鎖定樣式) --- */
+    /* --- 1. APP 啟動遮罩 --- */
     #app-splash-screen {
         position: fixed !important; 
         top: 0; left: 0; width: 100%; height: 100%;
         background-color: #fff8e1;
-        z-index: 99999; /* 確保在最上層 */
+        z-index: 99999;
         display: flex; flex-direction: column;
         justify-content: center; align-items: center;
         transition: opacity 0.8s ease-out;
     }
     
     .splash-logo {
-        width: 100px !important;  /* 🔥 強制限制大小，解決巨無霸問題 */
+        width: 100px !important; 
         height: 100px !important; 
         object-fit: contain; 
         margin-bottom: 20px;
@@ -72,7 +70,8 @@
         background: #fff8e1; 
         border-radius: 15px; 
         box-shadow: 0 2px 8px rgba(93, 64, 55, 0.05); 
-        padding: 8px 15px; 
+        /* 🔥 修改 1：縮小左右內距 (15px -> 8px)，讓空間更緊湊 */
+        padding: 8px 8px; 
         display: flex; align-items: center;
         border: 1px solid #ffe082; 
         position: relative; z-index: 20;
@@ -82,15 +81,16 @@
     .news-ticker-container:active { transform: scale(0.96); transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1); }
 
     .bao-ma-zai-badge {
-        /* 🔥 修改：把右邊距歸零，讓文字貼近圖示 */
-        margin-right: 0px; 
+        /* 🔥 修改 2：使用負邊距 (-8px) 強制拉近距離！ */
+        margin-right: -8px; 
         display: flex; align-items: center;
         z-index: 25; background: #fff8e1; 
-        padding-right: 2px; /* 稍微留一點點呼吸空間就好 */
+        padding-right: 0; /* 確保沒有多餘填充 */
     }
     
     .bao-ma-zai-icon {
-        height: 42px; width: auto; margin-left: -8px; 
+        height: 42px; width: auto; 
+        margin-left: -5px; /* 左邊也稍微修一下 */
         vertical-align: middle;
         filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
     }
@@ -163,7 +163,6 @@
         display: flex; flex-direction: column; align-items: center; gap: 10px;
     }
     
-    /* 幽靈按鈕樣式 */
     .contact-admin-btn {
         background-color: transparent;
         border: 1px solid #8d6e63;
@@ -269,7 +268,6 @@
 {% block scripts %}
 <script>
     window.addEventListener('load', function() {
-        // 設定雙重保險：強制3秒後關閉遮罩，避免卡住
         setTimeout(function() {
              var splash = document.getElementById('app-splash-screen');
              if(splash && splash.style.display !== 'none') {
