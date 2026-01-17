@@ -44,3 +44,207 @@
     }
     .hero-banner-img {
         width: 100%;
+        max-width: 400px; /* 限制最大寬度，避免電腦版太大 */
+        height: auto;
+        display: block;
+        margin: 0 auto;
+        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+    }
+    
+    /* 老神在在狀態列 */
+    .status-bar {
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid #ffe0b2;
+        border-radius: 50px;
+        padding: 5px 20px;
+        display: inline-flex;
+        align-items: center;
+        margin-top: -10px; /* 稍微往上疊一點 */
+        position: relative;
+        z-index: 2;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .god-icon { width: 30px; margin-right: 8px; } /* god_cute.png */
+    .status-text { font-size: 0.85rem; color: #5d4037; font-weight: bold; }
+
+    /* 4. 報馬仔跑馬燈 (使用 bm.png) */
+    .notice-bar {
+        background: #fff3e0;
+        border: 2px solid #ffcc80;
+        border-radius: 15px;
+        padding: 12px 15px;
+        margin: 20px 20px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        transition: transform 0.1s;
+    }
+    .notice-bar:active { transform: scale(0.98); }
+    .bm-icon { width: 45px; margin-right: 12px; } /* bm.png */
+    .notice-content { flex: 1; font-size: 0.9rem; color: #e65100; font-weight: bold; line-height: 1.3; }
+
+    /* 5. 功能卡片 (使用 icon_*.png) */
+    .menu-grid {
+        display: flex; flex-direction: column; gap: 15px; padding: 0 20px;
+    }
+    .card-btn {
+        display: flex; align-items: center;
+        border-radius: 25px; padding: 15px 25px;
+        text-decoration: none !important;
+        position: relative; overflow: hidden;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        transition: transform 0.2s; height: 100px;
+    }
+    .card-btn:active { transform: scale(0.98); }
+
+    /* 紅色 (上傳) */
+    .card-red { background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%); color: white; }
+    /* 黃色 (地圖) */
+    .card-yellow { background: #fff9c4; border: 2px solid #fff176; color: #5d4037; }
+    /* 白色 (相簿) */
+    .card-white { background: #fff; border: 2px solid #eee; color: #5d4037; }
+
+    .card-icon { width: 70px; height: 70px; object-fit: contain; margin-right: 20px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
+    .card-info span { display: block; }
+    .card-title { font-size: 1.4rem; font-weight: bold; margin-bottom: 4px; }
+    .card-desc { font-size: 0.85rem; opacity: 0.9; }
+
+    /* Lucky 標籤 */
+    .lucky-tag {
+        position: absolute; top: 15px; right: -25px;
+        background: #f1c40f; color: #d35400; font-weight: bold;
+        padding: 5px 40px; transform: rotate(15deg); font-size: 0.75rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    /* 6. 底部社群導流 */
+    .footer-area { text-align: center; padding: 30px 0 100px 0; }
+    
+    .btn-messenger {
+        display: inline-flex; align-items: center; justify-content: center;
+        background: #0084ff; color: white;
+        padding: 10px 25px; border-radius: 50px;
+        font-weight: bold; text-decoration: none;
+        box-shadow: 0 4px 10px rgba(0, 132, 255, 0.3);
+        margin-bottom: 20px; transition: 0.2s;
+    }
+    .btn-messenger:hover { background: #0073e6; color: white; }
+    
+    .footer-link {
+        color: #b0bec5; font-size: 0.85rem; text-decoration: none;
+        display: block; margin-top: 5px;
+    }
+    .mark-r { color: #d32f2f; font-weight: bold; vertical-align: super; font-size: 0.7rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+    
+    <div id="splash-screen">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/logo.png" class="splash-logo" alt="Loading...">
+        <div class="splash-text">2026 苑裡串起來 (H版)</div>
+    </div>
+
+    <div class="hero-section">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/top.png" class="hero-banner-img" alt="Map My God">
+        
+        <div class="status-bar">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/god_cute.png" class="god-icon" alt="God">
+            <span class="status-text" id="system-status">連線 Hotmail 總部中...</span>
+        </div>
+    </div>
+
+    <div class="notice-bar" onclick="location.href='/map'">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/bm.png" class="bm-icon" alt="Ticker">
+        <div class="notice-content" id="news-ticker">
+            <i class="fas fa-spinner fa-spin"></i> 正在接收最新情報...
+        </div>
+        <i class="fas fa-chevron-right" style="color: #ffb74d; margin-left: auto;"></i>
+    </div>
+
+    <div class="menu-grid">
+        <a href="/upload" class="card-btn card-red">
+            <div class="lucky-tag">LUCKY!</div>
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/icon_camera.png" class="card-icon" alt="Camera">
+            <div class="card-info">
+                <span class="card-title">尋找神隊友</span>
+                <span class="card-desc">拍照上傳拿好運</span>
+            </div>
+        </a>
+
+        <a href="/map" class="card-btn card-yellow">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/icon_compass.png" class="card-icon" alt="Compass">
+            <div class="card-info">
+                <span class="card-title">搜尋方位</span>
+                <span class="card-desc">看看他們躲在哪</span>
+            </div>
+        </a>
+
+        <a href="/gallery" class="card-btn card-white">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/icon_album.png" class="card-icon" alt="Album">
+            <div class="card-info">
+                <span class="card-title">影像庫</span>
+                <span class="card-desc">尋神足跡紀錄</span>
+            </div>
+        </a>
+    </div>
+
+    <div class="footer-area">
+        <a href="https://m.me/Yuanli.Together.Club" target="_blank" class="btn-messenger">
+            <i class="fab fa-facebook-messenger" style="margin-right:8px; font-size:1.2rem;"></i> 聯絡小編 (私訊)
+        </a>
+        
+        <a href="https://www.facebook.com/Yuanli.Together.Club" target="_blank" class="footer-link">
+            2026 苑裡串起來<span class="mark-r">®</span> 粉絲團
+        </a>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // 1. Splash Screen 控制 (2秒後消失)
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            var splash = document.getElementById('splash-screen');
+            splash.style.opacity = '0';
+            setTimeout(function() {
+                splash.style.display = 'none';
+            }, 800);
+        }, 1500); // 停留 1.5 秒
+    });
+
+    // 2. 報馬仔資料連線
+    $(document).ready(function() {
+        $.getJSON('/api/locations', function(data) {
+            // 更新狀態
+            $('#system-status').html('H版專線暢通');
+            
+            if (data && data.length > 0) {
+                var latest = data[data.length - 1]; 
+                var nickname = latest.nickname || "熱心鄉親";
+                var area = "苑裡某處";
+                var desc = latest.description || "";
+                
+                // 嘗試解析地點 [xxx里]
+                if (desc.indexOf(']') > -1) {
+                    var parts = desc.split(']');
+                    if (parts.length > 0) area = parts[0].replace('[', ''); 
+                }
+
+                $('#news-ticker').html(`
+                    最新：${nickname} 在【${area}】<br>
+                    發現了神隊友！
+                `);
+            } else {
+                $('#news-ticker').html("目前尚無情報<br>快來搶頭香！");
+            }
+        }).fail(function() {
+            $('#system-status').text("離線模式");
+            $('#news-ticker').text("歡迎來到尋神情報站！");
+        });
+    });
+</script>
+{% endblock %}
