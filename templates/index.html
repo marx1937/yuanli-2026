@@ -2,6 +2,7 @@
 {% set active_page = "home" %}
 
 {% set cdn_base = "https://res.cloudinary.com/diuoghid2/image/upload" %}
+
 {% block styles %}
 <style>
     /* --- 1. 頂部 Hero 區 --- */
@@ -121,28 +122,44 @@
         60% {transform: rotate(15deg) translateY(-3px);}
     }
 
-    /* --- 4. 底部區 --- */
+    /* --- 4. 底部區 (修正：按鈕樣式 + 鎖頭位置) --- */
     .footer-area {
         text-align: center; margin-top: 30px; margin-bottom: 40px;
-        display: flex; flex-direction: column; align-items: center; gap: 15px;
+        display: flex; flex-direction: column; align-items: center; gap: 10px;
     }
+
+    /* 修正：改成白底棕色框樣式 (Image 2 風格) */
     .btn-messenger {
         display: inline-flex; align-items: center; justify-content: center;
-        background: #0084ff; color: white;
-        padding: 10px 25px; border-radius: 50px;
+        background: #fff; 
+        color: #5d4037; /* 棕色字 */
+        border: 1px solid #a1887f; /* 棕色細框 */
+        padding: 8px 25px; border-radius: 50px;
         font-weight: bold; text-decoration: none;
-        box-shadow: 0 4px 10px rgba(0, 132, 255, 0.3);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        font-size: 0.95rem;
         transition: 0.2s;
     }
-    .btn-messenger:active { transform: scale(0.95); }
+    .btn-messenger:active { transform: scale(0.95); background: #f5f5f5; }
+
+    /* 修正：版權文字與鎖頭放在同一行 */
+    .footer-copyright-row {
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+        margin-top: 5px;
+    }
+
     .footer-fb-link {
         color: #8d6e63; font-weight: bold; text-decoration: none; font-size: 0.9rem;
     }
     .footer-fb-link:hover { color: #d32f2f; }
+
+    /* 鎖頭樣式 */
     .admin-lock {
-        color: rgba(141, 110, 99, 0.3); font-size: 0.8rem; text-decoration: none;
-        margin-top: 5px;
+        color: #d7ccc8; /* 淺棕色 */
+        font-size: 0.8rem; text-decoration: none;
+        display: flex; align-items: center;
     }
+    .admin-lock:hover { color: #8d6e63; }
 </style>
 {% endblock %}
 
@@ -164,7 +181,7 @@
         <img src="{{ cdn_base }}/bm.png" class="bao-ma-zai-img" alt="報馬仔">
         
         <div class="ticker-content">
-            <div class="ticker-text active" id="ticker-msg">🔔 系統連線中... 準備接收情報...</div>
+            <div class="ticker-text active" id="ticker-msg">🔔 報馬仔連線中... 正在搜尋神蹟...</div>
         </div>
         <div style="color: #d7ccc8; font-size: 0.8rem; padding-left:5px;"><i class="fas fa-chevron-right"></i></div>
     </a>
@@ -204,42 +221,73 @@
 
     <div class="footer-area">
         <a href="https://m.me/Yuanli.Together.Club" target="_blank" class="btn-messenger">
-            <i class="fab fa-facebook-messenger" style="margin-right:8px;"></i> 聯絡小編 (私訊)
+            <i class="fab fa-facebook-messenger" style="color:#0084ff; margin-right:6px; font-size:1.1rem;"></i> 
+            聯絡小編 (私訊)
         </a>
 
-        <a href="https://www.facebook.com/Yuanli.Together.Club" target="_blank" class="footer-fb-link">
-            2026 苑裡串起來
-        </a>
-
-        <a href="/admin" class="admin-lock"><i class="fas fa-lock"></i></a>
+        <div class="footer-copyright-row">
+            <a href="https://www.facebook.com/Yuanli.Together.Club" target="_blank" class="footer-fb-link">
+                2026 苑裡串起來
+            </a>
+            <a href="/admin" class="admin-lock"><i class="fas fa-lock"></i></a>
+        </div>
     </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
+    // 預設訊息 (萬一沒資料時顯示)
     let realMsgs = ["🔔 報——！歡迎來到尋神情報站！", "💡 報馬仔提醒：發現神隊友請上傳！"];
     
-    // 這裡保留你原本的邏輯
-    fetch('/api/locations').then(r=>r.json()).then(d=>{if(d&&d.length>0){realMsgs=[];d.slice().reverse().slice(0,5).forEach(i=>{
-        let n = i.nickname || "熱心鄉親";
-        let place = i.description || "苑裡某處";
-        if (place.indexOf(']') > -1) {
-            let parts = place.split(']');
-            if (parts.length > 0) place = parts[0].replace('[', '');
-        } else {
-             if(place.length > 10) place = place.substring(0, 10) + "...";
-        }
-        realMsgs.push(`🙏 感謝！[${n}] 在 [${place}] 尋獲神蹟！`);
-    });
-    realMsgs.push(`🚩 目前戰報：全苑裡已尋獲 ${d.length} 尊！`);}}).catch(e=>{});
+    // 加強版資料抓取
+    fetch('/api/locations')
+    .then(r => r.json())
+    .then(d => {
+        // 確認有抓到資料 (陣列長度 > 0)
+        if(d && d.length > 0) {
+            realMsgs = []; // 清空預設訊息
+            
+            // 取最新的 5 筆 (倒序)
+            d.slice().reverse().slice(0, 5).forEach(i => {
+                // 1. 抓暱稱 (如果沒有就叫熱心鄉親)
+                let n = i.nickname || i.name || "熱心鄉親";
+                
+                // 2. 抓地點 (嘗試多種欄位 description, title, location)
+                let rawPlace = i.description || i.title || i.location || "苑裡某處";
+                let place = rawPlace;
 
-    let idx=0,el=document.getElementById('ticker-msg');
-    setInterval(()=>{
-        el.style.animation = 'none'; 
-        el.offsetHeight; 
-        idx=(idx+1)%realMsgs.length;
-        el.innerText=realMsgs[idx];
-        el.style.animation = null; 
-    }, 8000); 
+                // 3. 智慧簡化地點名稱 (如果太長或是包含 [xxx])
+                if (place.indexOf(']') > -1) {
+                    place = place.split(']')[0].replace('[', ''); // 只留框框裡的字
+                } else if (place.length > 12) {
+                    place = place.substring(0, 12) + "..."; // 太長就截斷
+                }
+                
+                realMsgs.push(`🙏 感謝！[${n}] 在 [${place}] 尋獲神蹟！`);
+            });
+            
+            // 最後補上一句總數統計
+            realMsgs.push(`🚩 目前戰報：全苑裡已尋獲 ${d.length} 尊！`);
+            
+            // 立即更新畫面上那一行，不用等輪播
+            let el = document.getElementById('ticker-msg');
+            if(realMsgs.length > 0) el.innerText = realMsgs[0];
+        }
+    })
+    .catch(e => {
+        console.log("Ticker Error:", e);
+        // 如果抓取失敗，就維持預設訊息，不讓畫面空白
+    });
+
+    // 輪播動畫控制
+    let idx = 0;
+    let el = document.getElementById('ticker-msg');
+    setInterval(() => {
+        el.style.animation = 'none'; // 重置動畫
+        el.offsetHeight; // 強制重繪
+        idx = (idx + 1) % realMsgs.length; // 換下一句
+        el.innerText = realMsgs[idx];
+        el.style.animation = null; // 恢復動畫
+    }, 8000); // 每 8 秒換一次
 </script>
 {% endblock %}
