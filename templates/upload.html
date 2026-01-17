@@ -5,7 +5,7 @@
 
 {% block styles %}
 <style>
-    /* 🍌 香蕉建議 1：延續溫暖感 - 暖米色點狀背景 */
+    /* 🍌 香蕉美學建議 1：延續溫暖感 - 暖米色點狀背景 */
     body {
         background-color: #fdfcf0;
         background-image: radial-gradient(#d7ccc8 1.5px, transparent 1.5px);
@@ -13,308 +13,313 @@
         font-family: "Microsoft JhengHei", sans-serif;
     }
 
-    /* 頂部標題 - 廟宇匾額風格 */
-    .temple-header {
-        text-align: center;
-        padding: 30px 0 10px 0;
-    }
-    .temple-badge {
-        background: #d32f2f;
-        color: #fff;
-        display: inline-block;
-        padding: 10px 30px;
-        border-radius: 50px;
-        font-weight: bold;
-        font-size: 1.3rem;
-        box-shadow: 0 5px 15px rgba(211, 47, 47, 0.3);
-        border: 2px solid #fff8e1;
+    /* --- 1. 場景化頂部設計 (宮廟匾額風格) --- */
+    .scene-header {
         position: relative;
-    }
-
-    /* 小幫手探頭 (Mascot) */
-    .helper-peek {
-        position: absolute;
-        top: 20px;
-        right: 15px;
-        width: 100px;
+        text-align: center;
+        margin-top: 30px;
+        margin-bottom: 35px;
         z-index: 10;
-        filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
-        animation: peek-float 3s ease-in-out infinite;
     }
-    @keyframes peek-float { 0%, 100% { transform: translateY(0) rotate(15deg); } 50% { transform: translateY(-5px) rotate(10deg); } }
 
-    /* 表單卡片 */
-    .form-card {
+    /* 匾額樣式 */
+    .temple-plaque {
+        display: inline-block;
+        background: linear-gradient(180deg, #d32f2f 0%, #b71c1c 100%); /* 深紅漸層 */
+        color: #fff;
+        padding: 12px 35px;
+        border-radius: 50px; /* 圓潤匾額 */
+        font-size: 1.3rem;
+        font-weight: bold;
+        letter-spacing: 2px;
+        border: 3px solid #f1c40f; /* 金色邊框 */
+        box-shadow: 0 5px 15px rgba(183, 28, 28, 0.4), 
+                    inset 0 2px 5px rgba(255,255,255,0.2);
+        position: relative;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+
+    /* 祥雲裝飾 (左右護法) */
+    .plaque-cloud {
+        color: #f1c40f;
+        font-size: 1.2rem;
+        filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
+    }
+
+    /* 小幫手/情報員定位 */
+    .helper-wrapper {
+        position: absolute;
+        top: -25px;
+        right: 15px; /* 根據畫面寬度可能微調 */
+        width: 85px;
+        pointer-events: none;
+        z-index: 20;
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    .helper-img {
+        width: 100%;
+        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+        transform: rotate(5deg); /* 稍微探頭的感覺 */
+    }
+
+    /* 對話框：讓小幫手說話 */
+    .speech-bubble {
+        position: absolute;
+        top: -25px;
+        right: 45px;
+        background: white;
+        padding: 6px 12px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        color: #5d4037;
+        font-weight: bold;
+        white-space: nowrap;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        border: 1px solid #eee;
+    }
+    .speech-bubble::after {
+        content: ''; position: absolute; bottom: -6px; right: 10px;
+        border-width: 6px 6px 0; border-style: solid;
+        border-color: white transparent; display: block; width: 0;
+    }
+
+    /* --- 2. 寶盒式表單區塊 --- */
+    .treasure-card {
         background: rgba(255, 255, 255, 0.98);
-        width: 92%;
-        max-width: 450px;
-        margin: 0 auto;
-        padding: 25px;
-        border-radius: 30px;
-        box-shadow: 0 15px 40px rgba(93, 64, 55, 0.1);
-        border: 1px solid #efebe9;
-        margin-top: 10px;
+        border-radius: 30px; /* 大圓角：柔化視覺 */
+        padding: 30px 20px;
+        box-shadow: 0 10px 30px rgba(243, 156, 18, 0.15); /* 暖黃色光暈 */
+        border: 2px solid rgba(255, 248, 225, 1);
+        position: relative;
+        margin-bottom: 100px;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    /* 縫線裝飾效果 */
+    .treasure-card::before {
+        content: '';
+        position: absolute; top: 12px; left: 12px; right: 12px; bottom: 12px;
+        border: 2px dashed #fdf2e9;
+        border-radius: 22px;
+        pointer-events: none;
+        z-index: 0;
+    }
+    .form-content { position: relative; z-index: 1; }
+
+    /* --- 3. 元素細節優化 --- */
+    
+    /* 狀態按鈕群 */
+    .status-group {
+        display: flex; gap: 10px; justify-content: center; margin-bottom: 25px;
+    }
+    .status-pill {
+        padding: 8px 18px; border-radius: 50px; font-size: 0.9rem; font-weight: bold;
+        display: flex; align-items: center; gap: 6px; cursor: pointer; transition: transform 0.2s;
+    }
+    .status-pill:active { transform: scale(0.95); }
+    
+    /* 方位鎖定：改為冠軍金 */
+    .pill-success { 
+        background: #f1c40f; color: #5d4037; 
+        box-shadow: 0 3px 10px rgba(241, 196, 15, 0.3);
+        border: 1px solid #f39c12;
+    }
+    .pill-retry { 
+        background: white; border: 1px solid #ccc; color: #7f8c8d; 
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
 
-    /* 🍌 香蕉建議 2：核心行動區 - 金色虛線框 */
-    .upload-zone {
-        border: 3px dashed #fbc531; /* 金色虛線 */
-        border-radius: 20px;
-        min-height: 240px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        background: #fffdf5; /* 極淡暖黃 */
+    /* 相機區塊 */
+    .camera-zone {
+        border: 3px dashed #f1c40f; /* 金色虛線 */
+        background: #fffdf5; /* 極淡黃底 */
+        border-radius: 25px;
+        height: 220px;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        margin-bottom: 30px;
         cursor: pointer;
-        transition: all 0.3s;
+        transition: all 0.2s;
         position: relative;
         overflow: hidden;
     }
-    .upload-zone:active { transform: scale(0.98); background: #fffde7; }
-    
-    .upload-icon { 
-        font-size: 3.5rem; 
-        color: #d32f2f; /* 🍌 正紅色相機 */
-        margin-bottom: 15px; 
-        filter: drop-shadow(0 2px 4px rgba(211, 47, 47, 0.2));
-        z-index: 5;
-    }
-    
-    /* 核心區浮水印 */
-    .watermark {
-        position: absolute;
-        font-size: 9rem;
-        color: rgba(251, 197, 49, 0.08); /* 超淡金色浮水印 */
-        z-index: 1;
-        pointer-events: none;
+    .camera-zone:active { transform: scale(0.98); background: #fff8e1; }
+    .camera-icon-bg {
+        width: 80px; height: 80px; background: rgba(211, 47, 47, 0.1);
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        margin-bottom: 12px;
     }
 
-    /* GPS 狀態 Pill (🍌 香蕉建議 3：收斂色彩) */
-    .gps-pill {
-        background: #fff3e0;
-        padding: 8px 15px;
-        border-radius: 50px;
-        font-size: 0.85rem;
-        font-weight: bold;
-        display: inline-flex;
-        align-items: center;
-        border: 1px solid #ffcc80;
-        color: #e65100; /* 大地橘色 */
+    /* 輸入框美化 */
+    .form-group { margin-bottom: 22px; text-align: left; }
+    .form-label { 
+        color: #d32f2f; font-weight: bold; font-size: 1rem; margin-bottom: 10px;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .custom-input, .custom-select {
+        width: 100%; padding: 14px 15px;
+        border: 2px solid #eee; border-radius: 15px;
+        background: #fafafa; font-size: 1rem; color: #555;
+        transition: all 0.3s;
+        box-sizing: border-box; /* 重要：防止寬度跑版 */
+    }
+    .custom-input:focus, .custom-select:focus {
+        border-color: #f1c40f; outline: none; background: white;
+        box-shadow: 0 0 0 3px rgba(241, 196, 15, 0.2);
     }
 
-    .btn-refresh-gps {
-        background: #fff;
-        border: 1px solid #d7ccc8;
-        padding: 8px 15px;
-        border-radius: 50px;
-        color: #8d6e63;
-        font-size: 0.85rem;
-        font-weight: bold;
-        margin-left: 8px;
+    /* 送出按鈕 */
+    .submit-btn {
+        width: 100%; padding: 16px;
+        background: #e0e0e0; /* 預設灰 */
+        color: #999; border: none; border-radius: 50px;
+        font-size: 1.1rem; font-weight: bold;
+        margin-top: 15px; transition: all 0.3s; pointer-events: none;
     }
-
-    /* 🍌 香蕉建議 4：UI 細節磨圓 */
-    .form-label { font-weight: bold; color: #5d4037; margin-bottom: 8px; font-size: 0.95rem; }
-    .custom-input {
-        border-radius: 15px; /* 圓角 */
-        border: 2px solid #efebe9;
-        background: #fafafa;
-        padding: 12px 18px;
-        height: auto;
-        font-size: 1rem;
-        transition: 0.3s;
-        color: #5d4037;
-    }
-    .custom-input:focus { border-color: #fbc531; background: white; outline: none; }
-
-    /* 提交按鈕 */
-    .btn-submit {
-        background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
-        border: none;
-        border-radius: 50px;
-        padding: 16px;
-        margin-top: 20px;
-        font-weight: bold;
-        width: 100%;
-        font-size: 1.2rem;
+    .submit-btn.ready {
+        background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); /* 啟用紅 */
         color: white;
-        box-shadow: 0 8px 20px rgba(183, 28, 28, 0.3);
+        box-shadow: 0 5px 20px rgba(211, 47, 47, 0.4);
+        pointer-events: auto;
+        cursor: pointer;
     }
-    /* 🍌 暖灰色禁用 */
-    .btn-submit:disabled {
-        background: #d7ccc8;
-        color: #fff;
-        box-shadow: none;
-    }
+    .submit-btn.ready:active { transform: scale(0.98); }
 
-    #preview { width: 100%; height: auto; object-fit: contain; border-radius: 15px; display: none; z-index: 10; }
+    @keyframes float {
+        0%, 100% { transform: translateY(0) rotate(5deg); }
+        50% { transform: translateY(-8px) rotate(5deg); }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-    <div class="temple-header">
-        <div class="temple-badge">尋神情報站</div>
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/mascot_couple.png" class="helper-peek" alt="小幫手">
+<div class="container" style="padding: 0 15px;">
+    
+    <div class="scene-header">
+        <div class="temple-plaque">
+            <i class="fas fa-cloud plaque-cloud" style="margin-right: 8px;"></i>
+            尋神情報站
+            <i class="fas fa-cloud plaque-cloud" style="margin-left: 8px;"></i>
+        </div>
+
+        <div class="helper-wrapper">
+            <div class="speech-bubble">拍清楚點喔!</div>
+            <img src="{{ url_for('static', filename='images/helper_icon.png') }}" class="helper-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4140/4140048.png'">
+        </div>
     </div>
 
-    <div class="form-card">
-        <form id="uploadForm">
-            <input type="hidden" id="lat" name="lat">
-            <input type="hidden" id="lng" name="lng">
-
-            <div class="d-flex justify-content-center align-items-center mb-3">
-                <div id="gpsStatus" class="gps-pill">
-                    <i class="fas fa-satellite-dish fa-spin mr-2"></i> 方位感應中...
+    <div class="treasure-card">
+        <div class="form-content">
+            
+            <div class="status-group">
+                <div class="status-pill pill-success">
+                    <i class="fas fa-check-circle"></i> 方位鎖定成功
                 </div>
-                <button type="button" class="btn-refresh-gps" onclick="startGPS()">
+                <div class="status-pill pill-retry" onclick="alert('重新偵測中...')">
                     <i class="fas fa-sync-alt"></i> 重新偵測
-                </button>
+                </div>
             </div>
 
-            <div class="form-group text-center">
-                <label for="photo" class="upload-zone">
-                    <i class="fas fa-crosshairs watermark"></i> <div id="uploadPlaceholder">
-                        <i class="fas fa-camera upload-icon"></i><br>
-                        <span style="font-weight:bold; color:#5d4037; font-size:1.1rem;">📸 捕捉神隊友金身</span><br>
-                        <small style="color:#a1887f;">點擊開啟相機</small>
+            <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
+                <div class="camera-zone" onclick="document.getElementById('fileInput').click()">
+                    <div class="camera-icon-bg">
+                        <i class="fas fa-camera" style="font-size: 2rem; color: #d32f2f;"></i>
                     </div>
-                    <img id="preview" alt="預覽圖">
-                    <input type="file" id="photo" name="photo" accept="image/*" capture="environment" style="display:none;" onchange="previewImage(this)">
-                </label>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label"><i class="fas fa-map-marker-alt text-danger mr-1"></i> 出沒區域 (必填)</label>
-                <select id="area" name="area" class="form-control custom-input" required>
-                    <option value="" disabled selected>-- 請選擇里別 --</option>
-                    <option value="苑東里">苑東里</option><option value="苑南里">苑南里</option><option value="苑北里">苑北里</option>
-                    <option value="西勢里">西勢里</option><option value="中正里">中正里</option><option value="客庄里">客庄里</option>
-                    <option value="苑港里">苑港里</option><option value="西平里">西平里</option><option value="海岸里">海岸里</option>
-                    <option value="房裡里">房裡里</option><option value="新復里">新復里</option><option value="田心里">田心里</option>
-                    <option value="舊社里">舊社里</option><option value="山腳里">山腳里</option><option value="福田里">福田里</option>
-                    <option value="泰田里">泰田里</option><option value="玉田里">玉田里</option><option value="上館里">上館里</option>
-                    <option value="南勢里">南勢里</option><option value="石鎮里">石鎮里</option><option value="蕉埔里">蕉埔里</option>
-                    <option value="山柑里">山柑里</option><option value="社苓里">社苓里</option><option value="水坡里">水坡里</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label"><i class="fas fa-user-tag text-info mr-1"></i> 尋神人員簽到 (限8字)</label>
-                <input type="text" class="form-control custom-input" id="nickname" name="nickname" maxlength="8" placeholder="熱心串友">
-            </div>
-
-            <div class="form-group mb-0">
-                <label class="form-label"><i class="fas fa-pen-fancy text-warning mr-1"></i> 線索描述 (選填)</label>
-                <textarea class="form-control custom-input" id="description" name="description" rows="2" placeholder="例如：在榕樹下很靈驗..."></textarea>
-            </div>
-
-            <button type="submit" class="btn-submit" id="submitBtn" disabled>
-                <i class="fas fa-sync fa-spin"></i> 等待 GPS 鎖定...
-            </button>
-        </form>
-    </div>
-
-    <div style="height: 100px;"></div>
-{% endblock %}
-
-{% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    var currentLat = null, currentLng = null;
-
-    // 語音祝賀
-    function speakHappy(text) {
-        if ('speechSynthesis' in window) {
-            var msg = new SpeechSynthesisUtterance();
-            msg.text = text; msg.lang = 'zh-TW'; msg.rate = 1.0; 
-            window.speechSynthesis.speak(msg);
-        }
-    }
-
-    // 啟動 GPS
-    function startGPS() {
-        $('#gpsStatus').html('<i class="fas fa-satellite-dish fa-spin mr-2"></i> 感應方位中...');
-        $('#submitBtn').prop('disabled', true).html('<i class="fas fa-sync fa-spin"></i> 等待 GPS 鎖定...');
-
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    currentLat = position.coords.latitude; 
-                    currentLng = position.coords.longitude;
-                    $('#lat').val(currentLat); $('#lng').val(currentLng);
+                    <h3 style="color:#5d4037; font-size:1.1rem; margin:0; font-weight:bold;">📸 捕捉神隊友金身</h3>
+                    <p style="color:#999; font-size:0.85rem; margin-top:5px;">點擊開啟相機</p>
                     
-                    $('#gpsStatus').addClass('success').html('<i class="fas fa-check-circle mr-1"></i> 方位鎖定成功');
-                    checkReady();
-                }, 
-                function(error) { 
-                    $('#gpsStatus').html('<i class="fas fa-exclamation-triangle mr-1"></i> 定位不穩 (請開啟GPS)');
-                    checkReady(); // 允許嘗試提交
-                },
-                { timeout: 10000 }
-            );
-        }
-    }
+                    <input type="file" id="fileInput" name="file" accept="image/*" style="display: none" onchange="previewImage(this)">
+                </div>
 
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-map-marker-alt"></i> 出沒區域 (必填)</label>
+                    <select class="custom-select" name="location" required>
+                        <option value="">-- 請選擇里別 --</option>
+                        <option value="苑東里">苑東里</option>
+                        <option value="苑南里">苑南里</option>
+                        <option value="苑北里">苑北里</option>
+                        <option value="客庄里">客庄里</option>
+                        <option value="中正里">中正里</option>
+                        <option value="房裡里">房裡里</option>
+                        <option value="新復里">新復里</option>
+                        <option value="西勢里">西勢里</option>
+                        <option value="海岸里">海岸里</option>
+                        <option value="出水里">出水里</option>
+                        <option value="山東里">山東里</option>
+                        <option value="山腳里">山腳里</option>
+                        <option value="舊社里">舊社里</option>
+                        <option value="石鎮里">石鎮里</option>
+                        <option value="蕉埔里">蕉埔里</option>
+                        <option value="南勢里">南勢里</option>
+                        <option value="泰田里">泰田里</option>
+                        <option value="玉田里">玉田里</option>
+                        <option value="上館里">上館里</option>
+                        <option value="西平里">西平里</option>
+                        <option value="苑坑里">苑坑里</option>
+                        <option value="水坡里">水坡里</option>
+                        <option value="山柑里">山柑里</option>
+                        <option value="社苓里">社苓里</option>
+                        <option value="田心里">田心里</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-user-tag"></i> 尋神人員簽到 (限8字)</label>
+                    <input type="text" class="custom-input" name="nickname" maxlength="8" placeholder="例如：熱心串友" value="熱心串友">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-pen-nib"></i> 線索描述 (選填)</label>
+                    <textarea class="custom-input" name="description" rows="3" placeholder="例如：在榕樹下很靈驗..."></textarea>
+                </div>
+
+                <input type="hidden" id="lat" name="lat" value="">
+                <input type="hidden" id="lng" name="lng" value="">
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <i class="fas fa-camera-retro"></i> 請先捕捉金身
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 預覽圖片邏輯
     function previewImage(input) {
         if (input.files && input.files[0]) {
             var reader = new FileReader();
             reader.onload = function(e) {
-                $('#preview').attr('src', e.target.result).show();
-                $('#uploadPlaceholder').hide();
-                $('.upload-zone').css('border-style', 'solid');
-                checkReady();
+                // 將圖片設為背景
+                var zone = document.querySelector('.camera-zone');
+                zone.style.background = `url(${e.target.result}) center/cover no-repeat`;
+                zone.innerHTML = ''; // 清空原本的圖示文字
+                
+                // 啟用按鈕
+                var btn = document.getElementById('submitBtn');
+                btn.classList.add('ready');
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> 發送神蹟情報';
             }
             reader.readAsDataURL(input.files[0]);
         }
     }
 
-    function checkReady() {
-        if ($('#photo').val()) {
-            $('#submitBtn').prop('disabled', false).html('<i class="fas fa-paper-plane"></i> 發送情報！歸檔！');
-        } else {
-            $('#submitBtn').html('📸 請先捕捉金身');
+    // 自動抓取座標 (Geolocation)
+    document.addEventListener("DOMContentLoaded", function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                document.getElementById('lat').value = position.coords.latitude;
+                document.getElementById('lng').value = position.coords.longitude;
+                console.log("座標已鎖定:", position.coords.latitude, position.coords.longitude);
+            }, function(error) {
+                console.warn("無法取得座標，將使用預設值");
+                document.querySelector('.pill-success').innerHTML = '<i class="fas fa-exclamation-triangle"></i> 座標誤差';
+                document.querySelector('.pill-success').style.background = '#e74c3c';
+                document.querySelector('.pill-success').style.color = 'white';
+            });
         }
-    }
-
-    $('#uploadForm').submit(function(e) {
-        e.preventDefault();
-        var nickname = $('#nickname').val() || '熱心串友';
-        var area = $('#area').val();
-        
-        // 顯示上傳中
-        Swal.fire({
-            title: '🙏 誠心傳送中...',
-            text: '正在將情報送往總部',
-            allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading(); }
-        });
-
-        var formData = new FormData(this);
-        var desc = $('#description').val();
-        formData.set('description', '[' + area + '] ' + desc);
-
-        $.ajax({
-            url: '/upload', type: 'POST', data: formData, contentType: false, processData: false,
-            success: function(response) {
-                var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公會保庇你喔！';
-                speakHappy(sayText); 
-                Swal.fire({
-                    title: '✅ 上傳成功！',
-                    html: `感謝 ${area} 的 ${nickname}，<br><b style="color:#d32f2f;">土地公會保庇你喔！</b>`,
-                    imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1/happy_landlord.png', 
-                    imageWidth: 200,
-                    confirmButtonText: '太棒了！', confirmButtonColor: '#d32f2f'
-                }).then(() => { window.location.href = '/map'; });
-            },
-            error: function() {
-                Swal.fire({ title: '❌ 上傳失敗', text: '請檢查網路', icon: 'error' });
-            }
-        });
-    });
-
-    $(document).ready(function() {
-        startGPS();
     });
 </script>
 {% endblock %}
