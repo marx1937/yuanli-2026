@@ -11,17 +11,22 @@
         padding-bottom: 100px;
     }
 
-    /* 頂部標題與吉祥物 */
+    /* 頂部標題區 */
     .page-header { text-align: center; padding: 25px 0 10px 0; width: 100%; position: relative; }
-    .header-capsule {
-        background: white; padding: 8px 25px; border-radius: 50px;
-        font-weight: bold; color: #5d4037; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        display: inline-flex; align-items: center; border: 1px solid rgba(255,255,255,0.8);
-        font-size: 1.1rem;
+    
+    /* 🔥 1. 匾額標題 (title_signboard.png) */
+    .page-title-img {
+        width: 85%; max-width: 320px; 
+        height: auto; display: block; margin: 0 auto;
+        filter: drop-shadow(0 8px 15px rgba(93, 64, 55, 0.4));
+        animation: float-title 4s ease-in-out infinite;
     }
+    @keyframes float-title { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+    /* 吉祥物 (報馬仔) */
     .helper-mascot {
-        position: absolute; top: -15px; right: 20px;
-        width: 90px; height: auto; z-index: 20;
+        position: absolute; top: -10px; right: 20px;
+        width: 80px; height: auto; z-index: 20;
         filter: drop-shadow(0 5px 10px rgba(0,0,0,0.15));
         animation: float-helper 3s ease-in-out infinite;
     }
@@ -48,16 +53,27 @@
     /* 相機觸發區 */
     .upload-zone {
         border: 2px dashed #d7ccc8; border-radius: 20px;
-        min-height: 220px;
+        min-height: 250px;
         display: flex; flex-direction: column; justify-content: center; align-items: center;
         background: #fafafa;
         cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
     }
     .upload-zone:active { background: #fff; border-color: #d32f2f; transform: scale(0.98); }
     
-    .upload-icon-img { width: 80px; height: 80px; object-fit: contain; margin-bottom: 10px; opacity: 0.8; }
-    .upload-text { font-weight: bold; color: #8d6e63; font-size: 1.1rem; }
+    /* 🔥 2. 金身土地公樣式 (god_camera.png) */
+    .god-camera-img {
+        width: 150px; height: auto; object-fit: contain; margin-bottom: 10px; 
+        filter: drop-shadow(0 0 15px rgba(255, 193, 7, 0.5));
+        animation: breathe-god 3s infinite ease-in-out;
+    }
+    @keyframes breathe-god {
+        0%, 100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(255, 193, 7, 0.5)); }
+        50% { transform: scale(1.05); filter: drop-shadow(0 0 25px rgba(255, 193, 7, 0.8)); }
+    }
     
+    .upload-text { font-weight: bold; color: #8d6e63; font-size: 1.1rem; margin-top: 5px; }
+    
+    /* 預覽圖 */
     #preview { 
         width: 100%; height: 100%; position: absolute; top:0; left:0;
         object-fit: cover; display: none; 
@@ -95,9 +111,7 @@
 {% block content %}
 
     <div class="page-header">
-        <div class="header-capsule">
-            <i class="fas fa-camera" style="color:#d32f2f; margin-right:8px;"></i> 尋神情報站
-        </div>
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/title_signboard.png" class="page-title-img" alt="尋神情報站">
         <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/bm.png" class="helper-mascot" alt="小幫手">
     </div>
 
@@ -114,9 +128,12 @@
             <div class="form-group text-center">
                 <label for="photo" class="upload-zone" id="uploadLabel">
                     <div id="uploadPlaceholder">
-                        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/icon_camera.png" class="upload-icon-img">
-                        <div class="upload-text">📸 捕捉神隊友金身</div>
-                        <small style="color:#aaa;">點擊開啟相機</small>
+                        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/god_camera.png" 
+                             class="god-camera-img" 
+                             alt="請上傳照片">
+                        
+                        <div class="upload-text">📸 點此奉上神蹟照片</div>
+                        <small style="color:#aaa;">開啟相機捕捉金身</small>
                     </div>
                     
                     <img id="preview" alt="預覽圖">
@@ -229,12 +246,12 @@
         if(!nickname) nickname = '熱心串友'; 
         var area = $('#area').val();
 
-        // 1. 不雅字過濾 -> 顯示生氣土地公 (377.jpg)
+        // 1. 不雅字過濾 (使用 Cloudinary 377.jpg)
         var badWords = ['笨蛋', '壞蛋', '王八', '白痴', '白癡', '智障', '幹', '靠', '死', '爛', '屌', '雞掰', '機車', 'fuck', 'shit']; 
         for (var word of badWords) {
             if (nickname.toLowerCase().includes(word)) {
                 Swal.fire({
-                    imageUrl: '/static/377.jpg', // 生氣土地公
+                    imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/377.jpg',
                     imageWidth: '100%', imageHeight: 'auto',
                     title: '暱稱不太好聽喔...', 
                     text: '請使用優雅一點的名字，土地公才聽得懂！',
@@ -256,24 +273,25 @@
         $.ajax({
             url: '/upload', type: 'POST', data: formData, contentType: false, processData: false,
             success: function(response) {
-                // 語音
                 var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公會保庇你喔！';
                 speakHappy(sayText); 
 
                 if (response.status === 'duplicate') {
-                    // 2. 重複資料 -> 顯示排隊審核圖 (pada.jpg)
+                    // 2. 重複資料 (使用 Cloudinary pada.jpg)
                     Swal.fire({
-                        imageUrl: '/static/pada.jpg', imageWidth: '100%', 
+                        imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/pada.jpg', 
+                        imageWidth: '100%', 
                         title: '📋 資料已送交審核',
                         html: `感謝您！不過此地點 (${area}) 附近似乎已有查報紀錄。<br>管理員確認品質後就會更新！`,
                         confirmButtonText: '收到，來去找下一座！', confirmButtonColor: '#ff9800'
                     }).then(() => { window.location.href = '/map'; });
                 } else {
-                    // 3. 成功 -> 顯示慶祝圖 (happy.jpg)
+                    // 3. 成功 (使用 Cloudinary happy.jpg)
                     Swal.fire({
                         title: '✅ 上傳成功！', 
                         html: `感謝 <b>${area}</b> 的 <b>${nickname}</b>，土地公收到囉！`, 
-                        imageUrl: '/static/happy.jpg', imageWidth: '100%',
+                        imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/happy.jpg', 
+                        imageWidth: '100%',
                         confirmButtonText: '太棒了！', confirmButtonColor: '#d32f2f'
                     }).then(() => { window.location.href = '/map'; });
                 }
