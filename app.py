@@ -26,9 +26,8 @@ def get_db_connection():
     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     return conn
 
-# --- 🔥 自動建表函式 (魔法關鍵) ---
+# --- 自動建表 ---
 def init_db():
-    """如果資料庫是空的，就自動建立表格"""
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -47,17 +46,15 @@ def init_db():
         conn.commit()
         cur.close()
         conn.close()
-        print("✅ 資料表檢查/建立完成")
     except Exception as e:
         print(f"❌ 建表失敗: {e}")
 
-# 啟動時執行一次建表
 try:
     init_db()
 except:
     pass
 
-# --- 數學公式：計算距離 ---
+# --- 距離計算 ---
 def haversine(lon1, lat1, lon2, lat2):
     lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
     dlon = lon2 - lon1 
@@ -70,7 +67,7 @@ def haversine(lon1, lat1, lon2, lat2):
 # --- 座標轉地名 ---
 def get_location_name(lat, lng):
     try:
-        geolocator = Nominatim(user_agent="yuanli_god_hunter_2026_final")
+        geolocator = Nominatim(user_agent="yuanli_god_hunter_2026_final_v2")
         location = geolocator.reverse(f"{lat}, {lng}", language='zh-tw')
         address = location.raw.get('address', {})
         area = address.get('village') or address.get('neighbourhood') or address.get('town')
@@ -84,40 +81,31 @@ def get_location_name(lat, lng):
         return "苑裡某處"
 
 # ================= 頁面路由 =================
-
 @app.route('/')
-def index():
-    return render_template('index.html')
+def index(): return render_template('index.html')
 
 @app.route('/map')
-def map_page():
-    return render_template('map.html')
+def map_page(): return render_template('map.html')
 
 @app.route('/leaderboard')
-def leaderboard_page():
-    return render_template('leaderboard.html')
+def leaderboard_page(): return render_template('leaderboard.html')
 
 @app.route('/gallery')
-def gallery_page():
-    return render_template('gallery.html')
+def gallery_page(): return render_template('gallery.html')
 
 @app.route('/login')
-def login_page():
-    return render_template('login.html')
+def login_page(): return render_template('login.html')
 
 @app.route('/admin')
 def admin_page():
-    if not session.get('is_admin'):
-        return redirect(url_for('login_page'))
+    if not session.get('is_admin'): return redirect(url_for('login_page'))
     return render_template('admin.html')
 
 @app.route('/report')
 @app.route('/upload_page')
-def show_upload_page():
-    return render_template('upload.html')
+def show_upload_page(): return render_template('upload.html')
 
 # ================= API 邏輯 =================
-
 @app.route('/api/login', methods=['POST'])
 def api_login():
     data = request.json
@@ -126,13 +114,13 @@ def api_login():
         return jsonify({'status': 'success'})
     return jsonify({'status': 'error', 'message': '密碼錯誤'})
 
+# 🔥 重點修改：上傳時把資料寫入雲端 (Context)
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'GET':
         return render_template('upload.html')
     
-    # 確保資料表存在
-    init_db()
+    init_db() # 再次確保有表格
 
     if 'photo' not in request.files:
         return jsonify({'status': 'error', 'message': '沒有檔案'})
@@ -158,8 +146,19 @@ def upload_file():
             
             detected_area = get_location_name(lat, lng)
 
-            # 上傳 Cloudinary
-            upload_result = cloudinary.uploader.upload(file)
+            # 🔥 上傳 Cloudinary + 寫入標籤 (關鍵!)
+            upload_result = cloudinary.uploader.upload(
+                file,
+                context={
+                    "custom": {
+                        "nickname": nickname,
+                        "area": detected_area,
+                        "caption": note,
+                        "lat": lat,
+                        "lng": lng
+                    }
+                }
+            )
             image_url = upload_result['secure_url']
 
             # 寫入 DB
@@ -198,7 +197,6 @@ def get_locations():
             })
         return jsonify(locations)
     except Exception:
-        # 如果還沒建表，回傳空陣列，不要報錯
         return jsonify([])
 
 @app.route('/api/leaderboard_data')
@@ -206,10 +204,8 @@ def leaderboard_data():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        # 英雄榜
         cur.execute("SELECT nickname, COUNT(*) as count FROM land_gods GROUP BY nickname ORDER BY count DESC LIMIT 10")
         user_rows = cur.fetchall()
-        # 地區榜
         cur.execute("SELECT area, COUNT(*) as count FROM land_gods GROUP BY area ORDER BY count DESC LIMIT 10")
         area_rows = cur.fetchall()
         conn.close()
@@ -222,41 +218,33 @@ def leaderboard_data():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-# ================= 🚑 資料救援專區 (含自動建表) =================
+# 🚑 救援功能 (不需要改，它現在已經能讀取上面新增的標籤了)
 @app.route('/api/admin/rescue_data')
 def rescue_data_from_cloudinary():
     try:
-        # 1. 先確保資料表存在！
         init_db()
-
-        # 2. 去 Cloudinary 抓照片
         import cloudinary.api
         result = cloudinary.api.resources(
-            type="upload", 
-            resource_type="image", 
-            max_results=500, 
-            context=True 
+            type="upload", resource_type="image", max_results=500, context=True 
         )
         resources = result.get('resources', [])
         
-        # 3. 寫入資料庫
         conn = get_db_connection()
         cur = conn.cursor()
         count = 0
-        
-        print(f"🚀 掃描到 {len(resources)} 張照片，開始救援...")
         
         for res in resources:
             url = res['secure_url']
             cur.execute("SELECT id FROM land_gods WHERE image_url = %s", (url,))
             if not cur.fetchone():
+                # 這裡會嘗試讀取我們新加的標籤
                 context = res.get('context', {}).get('custom', {})
                 cur.execute("""
                     INSERT INTO land_gods (image_url, nickname, note, lat, lng, area, created_at)
                     VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """, (
                     url, 
-                    context.get('nickname', '熱心串友'), 
+                    context.get('nickname', '熱心串友'), # 舊照片沒標籤，就變熱心串友
                     context.get('caption', ''), 
                     float(context.get('lat', 0)), 
                     float(context.get('lng', 0)), 
@@ -271,6 +259,21 @@ def rescue_data_from_cloudinary():
         return jsonify({'status': 'success', 'message': f'救援成功！恢復了 {count} 筆資料'})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)})
+
+@app.route('/api/delete', methods=['POST'])
+def delete_location():
+    if not session.get('is_admin'): return jsonify({'success': False})
+    location_id = request.form.get('id')
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute('DELETE FROM land_gods WHERE id = %s', (location_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({"success": True})
+    except Exception:
+        return jsonify({"success": False})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
