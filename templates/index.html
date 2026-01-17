@@ -34,7 +34,7 @@
         display: flex; align-items: center; gap: 5px;
     }
 
-    /* --- 2. 報馬仔 --- */
+    /* --- 2. 報馬仔區塊 --- */
     .news-ticker-container {
         width: 92%; max-width: 400px; 
         margin: 15px auto 25px auto; 
@@ -50,13 +50,21 @@
     }
     .news-ticker-container:active { transform: scale(0.96); transition: transform 0.1s; }
 
+    /* 負值縮距，讓報馬仔貼近文字 */
     .bao-ma-zai-img {
-        height: 40px; width: auto; 
-        margin-right: 10px;
+        height: 48px; 
+        width: auto; 
+        margin-right: -25px; /* 關鍵：縮短距離 */
+        position: relative;
+        left: -5px; 
+        z-index: 2; 
         filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
     }
 
-    .ticker-content { flex: 1; height: 24px; position: relative; overflow: hidden; }
+    .ticker-content { 
+        flex: 1; height: 24px; position: relative; overflow: hidden; 
+        padding-left: 10px; 
+    }
     
     .ticker-text {
         font-size: 0.9rem; color: #5d4037; font-weight: bold; 
@@ -122,18 +130,17 @@
         60% {transform: rotate(15deg) translateY(-3px);}
     }
 
-    /* --- 4. 底部區 (修正：按鈕樣式 + 鎖頭位置) --- */
+    /* --- 4. 底部區 --- */
     .footer-area {
         text-align: center; margin-top: 30px; margin-bottom: 40px;
         display: flex; flex-direction: column; align-items: center; gap: 10px;
     }
 
-    /* 修正：改成白底棕色框樣式 (Image 2 風格) */
     .btn-messenger {
         display: inline-flex; align-items: center; justify-content: center;
         background: #fff; 
-        color: #5d4037; /* 棕色字 */
-        border: 1px solid #a1887f; /* 棕色細框 */
+        color: #5d4037; 
+        border: 1px solid #a1887f; 
         padding: 8px 25px; border-radius: 50px;
         font-weight: bold; text-decoration: none;
         box-shadow: 0 2px 5px rgba(0,0,0,0.05);
@@ -142,7 +149,6 @@
     }
     .btn-messenger:active { transform: scale(0.95); background: #f5f5f5; }
 
-    /* 修正：版權文字與鎖頭放在同一行 */
     .footer-copyright-row {
         display: flex; align-items: center; justify-content: center; gap: 6px;
         margin-top: 5px;
@@ -153,10 +159,8 @@
     }
     .footer-fb-link:hover { color: #d32f2f; }
 
-    /* 鎖頭樣式 */
     .admin-lock {
-        color: #d7ccc8; /* 淺棕色 */
-        font-size: 0.8rem; text-decoration: none;
+        color: #d7ccc8; font-size: 0.8rem; text-decoration: none;
         display: flex; align-items: center;
     }
     .admin-lock:hover { color: #8d6e63; }
@@ -227,7 +231,7 @@
 
         <div class="footer-copyright-row">
             <a href="https://www.facebook.com/Yuanli.Together.Club" target="_blank" class="footer-fb-link">
-                2026 苑裡串起來
+                2026 苑裡串起來 ©
             </a>
             <a href="/admin" class="admin-lock"><i class="fas fa-lock"></i></a>
         </div>
@@ -236,58 +240,38 @@
 
 {% block scripts %}
 <script>
-    // 預設訊息 (萬一沒資料時顯示)
     let realMsgs = ["🔔 報——！歡迎來到尋神情報站！", "💡 報馬仔提醒：發現神隊友請上傳！"];
     
-    // 加強版資料抓取
     fetch('/api/locations')
     .then(r => r.json())
     .then(d => {
-        // 確認有抓到資料 (陣列長度 > 0)
         if(d && d.length > 0) {
-            realMsgs = []; // 清空預設訊息
-            
-            // 取最新的 5 筆 (倒序)
+            realMsgs = []; 
             d.slice().reverse().slice(0, 5).forEach(i => {
-                // 1. 抓暱稱 (如果沒有就叫熱心鄉親)
                 let n = i.nickname || i.name || "熱心鄉親";
-                
-                // 2. 抓地點 (嘗試多種欄位 description, title, location)
-                let rawPlace = i.description || i.title || i.location || "苑裡某處";
-                let place = rawPlace;
+                let place = i.description || i.title || i.location || "苑裡某處";
+                place = place.replace(/[\[\]]/g, ' ');
 
-                // 3. 智慧簡化地點名稱 (如果太長或是包含 [xxx])
-                if (place.indexOf(']') > -1) {
-                    place = place.split(']')[0].replace('[', ''); // 只留框框裡的字
-                } else if (place.length > 12) {
-                    place = place.substring(0, 12) + "..."; // 太長就截斷
-                }
-                
-                realMsgs.push(`🙏 感謝！[${n}] 在 [${place}] 尋獲神蹟！`);
+                // 👇👇👇 這裡修改了！把「發現神蹟」改為「成功尋獲神隊友」 👇👇👇
+                realMsgs.push(`🙏 感恩！${n} 於 [${place.trim()}] 成功尋獲神隊友！`);
             });
             
-            // 最後補上一句總數統計
             realMsgs.push(`🚩 目前戰報：全苑裡已尋獲 ${d.length} 尊！`);
             
-            // 立即更新畫面上那一行，不用等輪播
             let el = document.getElementById('ticker-msg');
             if(realMsgs.length > 0) el.innerText = realMsgs[0];
         }
     })
-    .catch(e => {
-        console.log("Ticker Error:", e);
-        // 如果抓取失敗，就維持預設訊息，不讓畫面空白
-    });
+    .catch(e => console.log("Ticker Error:", e));
 
-    // 輪播動畫控制
     let idx = 0;
     let el = document.getElementById('ticker-msg');
     setInterval(() => {
-        el.style.animation = 'none'; // 重置動畫
-        el.offsetHeight; // 強制重繪
-        idx = (idx + 1) % realMsgs.length; // 換下一句
+        el.style.animation = 'none'; 
+        el.offsetHeight; 
+        idx = (idx + 1) % realMsgs.length;
         el.innerText = realMsgs[idx];
-        el.style.animation = null; // 恢復動畫
-    }, 8000); // 每 8 秒換一次
+        el.style.animation = null; 
+    }, 8000); 
 </script>
 {% endblock %}
