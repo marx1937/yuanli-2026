@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% set active_page = "map" %}
 
-{% block title %}尋神地圖 - 絕對戰情版{% endblock %}
+{% block title %}尋神地圖 - 絕對顯形版{% endblock %}
 
 {% block styles %}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
@@ -9,15 +9,14 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
 
     <style>
-        /* --- 1. 版面強制修正 --- */
+        /* --- 1. 基礎設定：確保地圖滿版且不被遮擋 --- */
         html, body {
             height: 100%; width: 100%;
             margin: 0; padding: 0;
-            overflow: hidden; /* 鎖定滾動 */
-            background-color: #fdfcf0; /* 底色 */
+            overflow: hidden;
+            background-color: #fdfcf0; 
         }
 
-        /* 地圖滿版，絕對置底 */
         #map { 
             position: absolute; 
             top: 0; left: 0; right: 0; bottom: 0;
@@ -25,10 +24,29 @@
             z-index: 1; 
         }
 
-        /* --- 2. 懸浮介面 (保證在地圖之上) --- */
+        /* --- 2. 關鍵修正：確保圖釘永遠在最上面 --- */
+        .leaflet-marker-pane { z-index: 2000 !important; }
+        .leaflet-popup-pane { z-index: 2100 !important; }
+
+        /* --- 3. 圖釘跳動動畫 (讓你確認它存在) --- */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .pin-marker { 
+            font-size: 40px; 
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.4)); 
+            cursor: pointer;
+            /* 預設圖釘會跳動，吸引注意力 */
+            animation: bounce 1s infinite;
+        }
+        /* 滑鼠移過去停止跳動，放大 */
+        .pin-marker:hover { animation: none; transform: scale(1.2); }
+
+        /* --- 4. 介面樣式 --- */
         .map-header {
             position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
-            z-index: 1000; width: 90%; max-width: 400px; 
+            z-index: 3000; width: 90%; max-width: 400px; 
             display: flex; gap: 10px; pointer-events: auto;
         }
         
@@ -42,20 +60,11 @@
         }
         .header-btn:active { transform: scale(0.95); background: #f0f0f0; }
 
-        /* 狀態提示 */
-        #data-status {
-            position: fixed; bottom: 180px; left: 15px; z-index: 900;
-            padding: 5px 12px; background: rgba(255,255,255,0.9);
-            border-radius: 20px; font-size: 0.75rem; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        /* 底部里別選單 */
         #villagePanel {
             position: fixed; bottom: -60vh; left: 0; width: 100%; height: 50vh;
-            background: white; z-index: 2000; 
+            background: white; z-index: 3000; 
             border-radius: 20px 20px 0 0;
-            box-shadow: 0 -5px 30px rgba(0,0,0,0.2); 
+            box-shadow: 0 -5px 30px rgba(0,0,0,0.3); 
             transition: bottom 0.3s ease-out;
             padding: 15px; box-sizing: border-box; 
             display: flex; flex-direction: column;
@@ -70,49 +79,22 @@
             background: #f8f8f8; border: 1px solid #eee; padding: 10px 5px;
             border-radius: 10px; text-align: center; font-size: 0.9rem; cursor: pointer;
         }
-        .village-item:active { background: #ffe0b2; border-color: #f39c12; }
-
-        /* --- 3. 地圖圖示樣式 --- */
-        .custom-div-icon { background: transparent; border: none; }
-        /* 紅色大圖釘 */
-        .pin-marker { 
-            font-size: 36px; 
-            filter: drop-shadow(0 3px 2px rgba(0,0,0,0.3)); 
-            transition: transform 0.2s;
-        }
-        .pin-marker:hover { transform: scale(1.2); }
         
-        /* 里別文字標籤 */
-        .village-label {
-            background: rgba(255, 255, 255, 0.85);
-            border: 2px solid #5d4037;
-            border-radius: 15px; padding: 2px 8px;
-            font-size: 12px; font-weight: bold; color: #5d4037;
-            white-space: nowrap; text-align: center;
-        }
-
-        /* 彈窗樣式 */
+        /* 彈窗 */
         .leaflet-popup-content-wrapper { border-radius: 15px; padding: 0; overflow: hidden; }
         .leaflet-popup-content { margin: 0; width: 220px !important; }
         .popup-img { width: 100%; height: 140px; object-fit: cover; background: #eee; }
         .popup-body { padding: 12px; text-align: left; }
-        .nav-btn {
-            display: block; width: 100%; padding: 8px 0; margin-top: 8px;
-            background: #d32f2f; color: white; text-align: center;
-            border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 0.9rem;
-        }
     </style>
 {% endblock %}
 
 {% block content %}
-    <div id="data-status">準備中...</div>
-
     <div class="map-header">
         <div class="header-btn" onclick="resetView()">
-            <i class="fas fa-expand-arrows-alt" style="margin-right:5px; color:#f39c12;"></i> 全苑裡 (<span id="totalCount">0</span>)
+            <i class="fas fa-expand-arrows-alt" style="margin-right:5px; color:#f39c12;"></i> 全覽 (<span id="totalCount">0</span>)
         </div>
         <div class="header-btn" onclick="togglePanel()">
-            <i class="fas fa-list" style="margin-right:5px; color:#d32f2f;"></i> 25里清單
+            <i class="fas fa-list" style="margin-right:5px; color:#d32f2f;"></i> 25里選單
         </div>
     </div>
 
@@ -130,7 +112,7 @@
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
     <script>
-        // 1. 核心資料：苑裡 25 里中心座標
+        // 1. 核心資料
         const VILLAGES = [
             { name: "苑東里", lat: 24.4442, lng: 120.6558, color: "#e74c3c" },
             { name: "苑南里", lat: 24.4388, lng: 120.6535, color: "#3498db" },
@@ -163,35 +145,29 @@
         var map = L.map('map', { zoomControl: false }).setView([24.4418, 120.6543], 13);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
 
-        // 建立圖層：markersCluster (點點)
+        // --- 關鍵修改：Marker Cluster 設定 ---
+        // disableClusteringAtZoom: 14 -> 只要縮放大於 14，就強制不聚合，直接顯示點
         var markersCluster = L.markerClusterGroup({
-            disableClusteringAtZoom: 14, // 關鍵：拉到 14 級就會炸開顯示點，不再聚合
-            maxClusterRadius: 40,
+            disableClusteringAtZoom: 14, 
+            maxClusterRadius: 30,
             spiderfyOnMaxZoom: true
         });
-        map.addLayer(markersCluster); // 直接加入，不隱藏
-
-        // 建立圖層：villageLayer (文字標籤)
-        var villageLayer = L.layerGroup().addTo(map);
+        map.addLayer(markersCluster);
 
         // 2. 數據處理
         function processData(data) {
             $('#totalCount').text(data.length);
             markersCluster.clearLayers();
-            villageLayer.clearLayers();
             $('#villageGrid').empty();
-
-            // 統計每個里的數量
             VILLAGES.forEach(v => v.count = 0);
 
-            // 建立地圖圖釘
             let markers = [];
             data.forEach(item => {
                 let lat = parseFloat(item.lat || item.latitude);
                 let lng = parseFloat(item.lng || item.longitude);
                 if(isNaN(lat) || isNaN(lng)) return;
 
-                // 找最近的里 (統計用)
+                // 統計里別數量
                 let nearest = null, minDist = Infinity;
                 VILLAGES.forEach(v => {
                     let d = (lat - v.lat)**2 + (lng - v.lng)**2;
@@ -199,94 +175,75 @@
                 });
                 if(nearest) nearest.count++;
 
-                // 建立 Marker
+                // 建立會跳動的 Marker
                 let m = L.marker([lat, lng], {
                     icon: L.divIcon({
                         className: 'custom-div-icon',
                         html: '<div class="pin-marker">📍</div>',
-                        iconSize: [30, 30], iconAnchor: [15, 30]
+                        iconSize: [40, 40], iconAnchor: [20, 40]
                     })
                 });
 
-                // 綁定彈窗
                 m.bindPopup(`
                     <img src="${item.image_url || 'https://placehold.co/300x200?text=No+Image'}" class="popup-img">
                     <div class="popup-body">
                         <b>${item.nickname || '善心人士'}</b><br>
                         <span style="color:#666;font-size:0.85rem">${item.description || '無描述'}</span>
-                        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" class="nav-btn">
-                            <i class="fas fa-location-arrow"></i> 導航去這裡
-                        </a>
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" style="display:block;margin-top:5px;background:#d32f2f;color:white;text-align:center;padding:5px;border-radius:10px;text-decoration:none;">導航去這裡</a>
                     </div>
                 `);
                 markers.push(m);
             });
-
-            // 一次加入所有點
             markersCluster.addLayers(markers);
 
-            // 更新選單與地圖上的文字標籤
+            // 更新列表
             VILLAGES.forEach(v => {
-                if(v.count > 0) {
-                    // 1. 地圖上的文字標籤
-                    L.marker([v.lat, v.lng], {
-                        icon: L.divIcon({
-                            className: 'custom-div-icon',
-                            html: `<div class="village-label" style="border-color:${v.color}">${v.name} (${v.count})</div>`,
-                            iconSize: [80, 20], iconAnchor: [40, 10]
-                        })
-                    }).on('click', () => goToVillage(v.lat, v.lng)).addTo(villageLayer);
-                }
-
-                // 2. 底部選單按鈕
                 $('#villageGrid').append(`
                     <div class="village-item" onclick="goToVillage(${v.lat}, ${v.lng})">
                         <div style="color:${v.color}; font-weight:bold;">${v.name}</div>
-                        <div style="font-size:0.8rem; color:#888;">${v.count} 處</div>
+                        <div style="font-size:0.8rem; color:${v.count>0?'#d32f2f':'#ccc'};">${v.count} 處</div>
                     </div>
                 `);
             });
         }
 
-        // 3. 關鍵：生成「真正」落在里內的展示資料
+        // 3. 改良版演示數據：強制分散點位
         function generateSmartDemoData() {
-            $('#data-status').html('⚠️ 展示模式');
             let data = [];
-            
-            // 針對每個里，在其中心點附近隨機生成 5-15 個點
             VILLAGES.forEach(v => {
-                let count = Math.floor(Math.random() * 10) + 5; 
+                // 每個里隨機生 3-8 個點
+                let count = Math.floor(Math.random() * 6) + 3; 
                 for(let i=0; i<count; i++) {
-                    // 在該里座標附近 0.005 度範圍內隨機偏移
-                    let lat = v.lat + (Math.random() - 0.5) * 0.005;
-                    let lng = v.lng + (Math.random() - 0.5) * 0.005;
+                    // 讓點位分散開來 (0.003 約 300公尺範圍)
+                    // 這樣放大後才不會疊在一起
+                    let offsetLat = (Math.random() - 0.5) * 0.006;
+                    let offsetLng = (Math.random() - 0.5) * 0.006;
+                    
                     data.push({
-                        lat: lat, lng: lng,
-                        nickname: "熱心鄉親",
-                        description: `位於 ${v.name} 的神蹟點`
+                        lat: v.lat + offsetLat, 
+                        lng: v.lng + offsetLng,
+                        nickname: `熱心鄉親 (${v.name})`,
+                        description: "這是一筆自動生成的演示資料"
                     });
                 }
             });
             processData(data);
         }
 
-        // 4. 點擊里別後的動作
+        // 4. 點擊里別 -> 飛過去並強制放大到 16 (確保炸開)
         function goToVillage(lat, lng) {
-            $('#villagePanel').removeClass('active'); // 收起選單
-            map.flyTo([lat, lng], 16); // 飛過去，放大到 16 級 (這時候點點一定會炸開顯示)
+            $('#villagePanel').removeClass('active');
+            map.flyTo([lat, lng], 16); 
         }
 
         function togglePanel() { $('#villagePanel').toggleClass('active'); }
         function resetView() { map.flyTo([24.4418, 120.6543], 13); }
 
-        // 啟動
         $(document).ready(() => {
             $.getJSON('/api/locations')
                 .done(data => {
-                    if(data.length > 0) {
-                        $('#data-status').html('✅ 連線成功');
-                        processData(data);
-                    } else generateSmartDemoData();
+                    if(data.length > 0) processData(data);
+                    else generateSmartDemoData();
                 })
                 .fail(() => generateSmartDemoData());
         });
