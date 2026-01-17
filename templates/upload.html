@@ -11,10 +11,10 @@
         padding-bottom: 100px;
     }
 
-    /* 頂部標題區 */
+    /* 頂部標題區 (使用匾額) */
     .page-header { text-align: center; padding: 25px 0 10px 0; width: 100%; position: relative; }
     
-    /* 🔥 1. 匾額標題 (title_signboard.png) */
+    /* 🔥 匾額標題 (title_signboard.png) */
     .page-title-img {
         width: 85%; max-width: 320px; 
         height: auto; display: block; margin: 0 auto;
@@ -60,7 +60,7 @@
     }
     .upload-zone:active { background: #fff; border-color: #d32f2f; transform: scale(0.98); }
     
-    /* 🔥 2. 金身土地公樣式 (god_camera.png) */
+    /* 🔥 金身土地公樣式 (god_camera.png) */
     .god-camera-img {
         width: 150px; height: auto; object-fit: contain; margin-bottom: 10px; 
         filter: drop-shadow(0 0 15px rgba(255, 193, 7, 0.5));
@@ -282,8 +282,8 @@
                         imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/pada.jpg', 
                         imageWidth: '100%', 
                         title: '📋 資料已送交審核',
-                        html: `感謝您！不過此地點 (${area}) 附近似乎已有查報紀錄。<br>管理員確認品質後就會更新！`,
-                        confirmButtonText: '收到，來去找下一座！', confirmButtonColor: '#ff9800'
+                        html: `感謝您！不過此地點 (${area}) 附近似乎已有查報紀錄。<br>管理員確認後就會更新！`,
+                        confirmButtonText: '收到！', confirmButtonColor: '#ff9800'
                     }).then(() => { window.location.href = '/map'; });
                 } else {
                     // 3. 成功 (使用 Cloudinary happy.jpg)
