@@ -3,15 +3,15 @@
 
 {% block styles %}
 <style>
-    /* 全局背景：維持全站統一的暖色調 */
+    /* 全局背景 */
     body {
         background-color: #fdfcf0;
         background-image: radial-gradient(#d7ccc8 1.5px, transparent 1.5px);
         background-size: 24px 24px;
-        padding-bottom: 100px; /* 避開底部選單 */
+        padding-bottom: 100px;
     }
 
-    /* 頂部標題區 (氛圍感回歸) */
+    /* 頂部標題與吉祥物 */
     .page-header { text-align: center; padding: 25px 0 10px 0; width: 100%; position: relative; }
     .header-capsule {
         background: white; padding: 8px 25px; border-radius: 50px;
@@ -19,8 +19,6 @@
         display: inline-flex; align-items: center; border: 1px solid rgba(255,255,255,0.8);
         font-size: 1.1rem;
     }
-
-    /* 吉祥物 (報馬仔) */
     .helper-mascot {
         position: absolute; top: -15px; right: 20px;
         width: 90px; height: auto; z-index: 20;
@@ -29,7 +27,7 @@
     }
     @keyframes float-helper { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
-    /* 主表單卡片 (整合所有元素) */
+    /* 主表單卡片 */
     .form-card {
         background: rgba(255, 255, 255, 0.95); width: 92%; max-width: 500px;
         padding: 25px; border-radius: 30px;
@@ -38,16 +36,16 @@
         border: 2px solid #fff;
     }
 
-    /* GPS 狀態 Pill (放在卡片內) */
+    /* GPS 狀態 Pill */
     .gps-pill {
         background: #fff8e1; padding: 8px 15px; border-radius: 50px;
         font-size: 0.9rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         display: flex; align-items: center; justify-content: center;
         border: 1px solid #ffe0b2; color: #f57c00;
-        margin-bottom: 20px; width: 100%;
+        margin-bottom: 20px; width: 100%; cursor: pointer;
     }
     
-    /* 相機觸發區 (美化版) */
+    /* 相機觸發區 */
     .upload-zone {
         border: 2px dashed #d7ccc8; border-radius: 20px;
         min-height: 220px;
@@ -57,11 +55,9 @@
     }
     .upload-zone:active { background: #fff; border-color: #d32f2f; transform: scale(0.98); }
     
-    /* 相機圖示 (使用 icon_camera.png) */
     .upload-icon-img { width: 80px; height: 80px; object-fit: contain; margin-bottom: 10px; opacity: 0.8; }
     .upload-text { font-weight: bold; color: #8d6e63; font-size: 1.1rem; }
     
-    /* 預覽圖 */
     #preview { 
         width: 100%; height: 100%; position: absolute; top:0; left:0;
         object-fit: cover; display: none; 
@@ -69,10 +65,10 @@
     .re-take-hint {
         position: absolute; bottom: 10px; background: rgba(0,0,0,0.6); color: white;
         padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; pointer-events: none;
-        display: none; /* 有照片才顯示 */
+        display: none;
     }
 
-    /* 輸入框樣式 */
+    /* 輸入框 */
     .form-group { margin-bottom: 15px; text-align: left; }
     .form-label { font-weight: bold; color: #5d4037; margin-bottom: 5px; font-size: 0.95rem; display: block;}
     .custom-input {
@@ -80,9 +76,9 @@
         padding: 12px 15px; font-size: 1rem; transition: 0.3s;
     }
     .custom-input:focus { border-color: #d32f2f; outline: none; background: white; }
-    .custom-input::placeholder { color: #ccc; } /* 灰色提示字 */
+    .custom-input::placeholder { color: #ccc; }
 
-    /* 提交按鈕 (漸層紅) */
+    /* 提交按鈕 */
     .btn-submit {
         background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
         border: none; border-radius: 50px; padding: 15px; margin-top: 15px;
@@ -170,7 +166,6 @@
     var currentLat = null, currentLng = null;
     var isPhotoReady = false;
 
-    // 1. 語音播報 (靈魂功能)
     function speakHappy(text) {
         if ('speechSynthesis' in window) {
             var msg = new SpeechSynthesisUtterance();
@@ -179,17 +174,14 @@
         }
     }
 
-    // 2. 啟動 GPS
     function startGPS() {
         $('#gpsStatus').html('<i class="fas fa-satellite-dish fa-spin mr-2"></i> 定位中...');
-        
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 function(position) {
                     currentLat = position.coords.latitude; 
                     currentLng = position.coords.longitude;
                     $('#lat').val(currentLat); $('#lng').val(currentLng);
-                    
                     $('#gpsStatus').html('<i class="fas fa-check-circle mr-2"></i> 定位完成 (精準)').css('color', '#2ecc71');
                     checkReady();
                 }, 
@@ -203,7 +195,6 @@
         }
     }
 
-    // 3. 照片預覽
     function previewImage(input) {
         if (input.files && input.files[0]) {
             var reader = new FileReader();
@@ -218,11 +209,9 @@
         }
     }
 
-    // 4. 檢查按鈕狀態 (防呆)
     function checkReady() {
         let area = $('#area').val();
         let btn = $('#submitBtn');
-
         if (currentLat && isPhotoReady && area) {
             btn.addClass('ready').html('<i class="fas fa-paper-plane"></i> 發送情報！歸檔！');
         } else {
@@ -233,22 +222,23 @@
         }
     }
 
-    // 5. 提交表單 (含不雅字過濾)
     $('#uploadForm').submit(function(e) {
         e.preventDefault();
         
         var nickname = $('#nickname').val().trim();
-        if(!nickname) nickname = '熱心串友'; // 預設值
+        if(!nickname) nickname = '熱心串友'; 
         var area = $('#area').val();
 
-        // 不雅字過濾
+        // 1. 不雅字過濾 -> 顯示生氣土地公 (377.jpg)
         var badWords = ['笨蛋', '壞蛋', '王八', '白痴', '白癡', '智障', '幹', '靠', '死', '爛', '屌', '雞掰', '機車', 'fuck', 'shit']; 
         for (var word of badWords) {
             if (nickname.toLowerCase().includes(word)) {
                 Swal.fire({
-                    icon: 'warning',
-                    title: '暱稱不太好聽喔...', text: '土地公在看，請換個優雅的名字！',
-                    confirmButtonColor: '#d33'
+                    imageUrl: '/static/377.jpg', // 生氣土地公
+                    imageWidth: '100%', imageHeight: 'auto',
+                    title: '暱稱不太好聽喔...', 
+                    text: '請使用優雅一點的名字，土地公才聽得懂！',
+                    confirmButtonColor: '#d33', confirmButtonText: 'OK'
                 });
                 return; 
             }
@@ -256,29 +246,37 @@
 
         var btn = $('#submitBtn');
         if(!btn.hasClass('ready')) return;
-
         btn.removeClass('ready').html('<i class="fas fa-robot"></i> 正在傳送資料...').css('opacity', '0.8');
 
         var formData = new FormData(this);
-        // 手動把 nickname 加進去 (以防原本是空值)
         formData.set('nickname', nickname);
-        
         var desc = $('#description').val();
         formData.set('description', '[' + area + '] ' + desc);
 
         $.ajax({
             url: '/upload', type: 'POST', data: formData, contentType: false, processData: false,
             success: function(response) {
-                // 語音播報
+                // 語音
                 var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公會保庇你喔！';
                 speakHappy(sayText); 
-                
-                Swal.fire({
-                    title: '✅ 上傳成功！', 
-                    html: `感謝 <b>${area}</b> 的 <b>${nickname}</b><br><br><span style="color:#d32f2f;font-weight:bold;">土地公會保庇你喔！</span>`, 
-                    icon: 'success',
-                    confirmButtonText: '太棒了！', confirmButtonColor: '#d32f2f'
-                }).then(() => { window.location.href = '/map'; });
+
+                if (response.status === 'duplicate') {
+                    // 2. 重複資料 -> 顯示排隊審核圖 (pada.jpg)
+                    Swal.fire({
+                        imageUrl: '/static/pada.jpg', imageWidth: '100%', 
+                        title: '📋 資料已送交審核',
+                        html: `感謝您！不過此地點 (${area}) 附近似乎已有查報紀錄。<br>管理員確認品質後就會更新！`,
+                        confirmButtonText: '收到，來去找下一座！', confirmButtonColor: '#ff9800'
+                    }).then(() => { window.location.href = '/map'; });
+                } else {
+                    // 3. 成功 -> 顯示慶祝圖 (happy.jpg)
+                    Swal.fire({
+                        title: '✅ 上傳成功！', 
+                        html: `感謝 <b>${area}</b> 的 <b>${nickname}</b>，土地公收到囉！`, 
+                        imageUrl: '/static/happy.jpg', imageWidth: '100%',
+                        confirmButtonText: '太棒了！', confirmButtonColor: '#d32f2f'
+                    }).then(() => { window.location.href = '/map'; });
+                }
             },
             error: function() {
                 Swal.fire({ title: '❌ 上傳失敗', text: '請檢查網路連線', icon: 'error', confirmButtonText: '好' });
@@ -287,8 +285,6 @@
         });
     });
 
-    $(document).ready(function() {
-        startGPS();
-    });
+    $(document).ready(function() { startGPS(); });
 </script>
 {% endblock %}
