@@ -6,7 +6,7 @@
     /* --- 版面優化 --- */
     .upload-container {
         padding: 20px; max-width: 500px; margin: 0 auto;
-        padding-bottom: 100px; /* 避開底部選單 */
+        padding-bottom: 100px;
     }
 
     /* 頂部提示卡片 */
@@ -22,12 +22,11 @@
         border-radius: 20px; font-size: 0.8rem; color: #666;
     }
 
-    /* 照片預覽區 (預設隱藏，拍完才顯示) */
+    /* 照片預覽區 */
     .preview-box {
         width: 100%; height: 250px; background: #eee;
         border-radius: 15px; overflow: hidden; margin-bottom: 20px;
-        display: none; /* 預設隱藏 */
-        position: relative; border: 2px solid #fff;
+        display: none; position: relative; border: 2px solid #fff;
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
     .preview-img { width: 100%; height: 100%; object-fit: cover; }
@@ -35,10 +34,10 @@
         position: absolute; bottom: 10px; right: 10px;
         background: rgba(0,0,0,0.6); color: white;
         padding: 5px 12px; border-radius: 20px; font-size: 0.8rem;
-        pointer-events: none; /* 純提示用 */
+        pointer-events: none;
     }
 
-    /* 🔥 超大開啟相機按鈕 */
+    /* 開啟相機大按鈕 */
     .btn-camera-trigger {
         width: 100%; padding: 25px;
         background: white; border: 2px dashed #d7ccc8;
@@ -46,22 +45,23 @@
         margin-bottom: 25px; cursor: pointer;
         transition: all 0.2s;
     }
-    .btn-camera-trigger:active { background: #f5f5f5; border-color: #a1887f; transform: scale(0.98); }
+    .btn-camera-trigger:active { background: #f5f5f5; transform: scale(0.98); }
     .camera-icon-big { width: 60px; opacity: 0.6; margin-bottom: 10px; }
     .camera-text { color: #8d6e63; font-weight: bold; font-size: 1.1rem; }
 
     /* 表單優化 */
     .form-group { margin-bottom: 20px; }
     .form-label {
-        font-weight: bold; color: #5d4037; margin-bottom: 8px; display: block;
-        font-size: 1rem;
+        font-weight: bold; color: #5d4037; margin-bottom: 8px; display: block; font-size: 1rem;
     }
     .custom-input {
         width: 100%; padding: 15px; border-radius: 12px;
-        border: 1px solid #ddd; font-size: 1rem;
-        background: #fafafa;
+        border: 1px solid #ddd; font-size: 1rem; background: #fafafa;
     }
     .custom-input:focus { background: white; border-color: #d32f2f; outline: none; }
+    
+    /* 讓 placeholder 變成灰色 */
+    .custom-input::placeholder { color: #ccc; }
 
     /* 底部提交按鈕 */
     .btn-submit {
@@ -69,12 +69,9 @@
         background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
         color: white; font-weight: bold; font-size: 1.2rem;
         box-shadow: 0 5px 15px rgba(211, 47, 47, 0.3);
-        opacity: 0.5; pointer-events: none; /* 預設禁用 */
-        transition: 0.3s;
+        opacity: 0.5; pointer-events: none; transition: 0.3s;
     }
-    /* 當表單填完後，加上這個 class 讓按鈕變亮 */
     .btn-submit.ready { opacity: 1; pointer-events: auto; }
-
 </style>
 {% endblock %}
 
@@ -121,7 +118,7 @@
 
         <div class="form-group">
             <label class="form-label">👤 您的稱號</label>
-            <input type="text" name="nickname" id="nickname" class="custom-input" placeholder="例如：熱心串友" value="熱心串友">
+            <input type="text" name="nickname" id="nickname" class="custom-input" placeholder="例如：熱心串友 (預設)">
         </div>
 
         <div class="form-group">
@@ -142,7 +139,18 @@
     let isGpsReady = false;
     let isPhotoReady = false;
 
-    // 1. 啟動 GPS
+    // 1. 語音播報功能 (土地公保庇)
+    function speakHappy(text) {
+        if ('speechSynthesis' in window) {
+            var msg = new SpeechSynthesisUtterance();
+            msg.text = text; 
+            msg.lang = 'zh-TW'; 
+            msg.rate = 1.0; 
+            window.speechSynthesis.speak(msg);
+        }
+    }
+
+    // 2. 啟動 GPS
     function startGPS() {
         $('#gps-msg').html('<i class="fas fa-satellite-dish fa-spin mr-2"></i> 定位中...');
         if (navigator.geolocation) {
@@ -153,23 +161,21 @@
                 isGpsReady = true;
                 checkForm();
             }, function(err) {
-                $('#gps-msg').html('<i class="fas fa-times-circle text-danger mr-2"></i> 定位失敗').css('color', '#e74c3c');
-                isGpsReady = false; // 嚴格模式：沒定位不給傳
-                // 為了測試方便，如果定位失敗，你可以暫時把這裡改成 true，但正式版建議 false
+                $('#gps-msg').html('<i class="fas fa-times-circle text-danger mr-2"></i> 定位失敗 (請開GPS)').css('color', '#e74c3c');
+                isGpsReady = false; 
             });
         } else {
-            $('#gps-msg').text('不支援 GPS');
+            $('#gps-msg').text('手機不支援 GPS');
         }
     }
 
-    // 2. 處理照片選擇
+    // 3. 處理照片
     function handleFileSelect(input) {
         if (input.files && input.files[0]) {
             var reader = new FileReader();
             reader.onload = function(e) {
                 $('#previewImg').attr('src', e.target.result);
-                $('#previewBox').show(); // 顯示預覽
-                $('#cameraTrigger').hide(); // 隱藏大按鈕
+                $('#previewBox').show(); $('#cameraTrigger').hide();
                 isPhotoReady = true;
                 checkForm();
             }
@@ -177,11 +183,10 @@
         }
     }
 
-    // 3. 檢查表單狀態 (防呆核心)
+    // 4. 檢查表單
     function checkForm() {
         let area = $('#area').val();
         let btn = $('#submitBtn');
-        
         if (isGpsReady && isPhotoReady && area) {
             btn.addClass('ready').html('<i class="fas fa-paper-plane"></i> 確認上傳');
         } else {
@@ -192,48 +197,65 @@
         }
     }
 
-    // 4. 提交表單
+    // 5. 提交表單 (含不雅字過濾 + 語音)
     $('#uploadForm').submit(function(e) {
         e.preventDefault();
         
-        let btn = $('#submitBtn');
-        if (!btn.hasClass('ready')) return; // 防止硬按
+        // 暱稱檢查
+        let nickname = $('#nickname').val().trim();
+        if(!nickname) nickname = "熱心串友"; // 如果沒填就給預設值
+        
+        let area = $('#area').val();
+        
+        // 🔥 不雅字過濾清單
+        var badWords = ['笨蛋', '壞蛋', '王八', '白痴', '白癡', '智障', '幹', '靠', '死', '爛', '屌', '雞掰', 'fuck', 'shit'];
+        for (var word of badWords) {
+            if (nickname.toLowerCase().includes(word)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '暱稱不太好聽喔...',
+                    text: '請更換一個優雅的名字，土地公在看喔！',
+                    confirmButtonColor: '#d33'
+                });
+                return; 
+            }
+        }
 
-        // 鎖定按鈕
+        let btn = $('#submitBtn');
+        if (!btn.hasClass('ready')) return;
+
         btn.removeClass('ready').html('<i class="fas fa-spinner fa-spin"></i> 上傳中...').css('opacity', '0.8');
 
         var formData = new FormData(this);
-        // 合併描述與區域
         var desc = $('#description').val();
-        var area = $('#area').val();
+        // 如果暱稱是空的，這裡手動補進去給後端
+        if($('#nickname').val().trim() === "") formData.set('nickname', "熱心串友");
+        
         formData.set('description', `[${area}] ${desc}`);
 
         $.ajax({
             url: '/upload', type: 'POST', data: formData, contentType: false, processData: false,
             success: function(res) {
+                // 🔥 成功後的語音播報
+                var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公會保庇你喔！';
+                speakHappy(sayText);
+
                 Swal.fire({
                     title: '✅ 上傳成功！',
-                    text: '感謝您的熱心回報！',
+                    html: `感謝 <b>${area}</b> 的 <b>${nickname}</b><br>土地公會保庇你喔！`,
                     icon: 'success',
                     confirmButtonText: '太棒了',
                     confirmButtonColor: '#d32f2f'
                 }).then(() => { window.location.href = '/map'; });
             },
             error: function(xhr) {
-                // 顯示錯誤訊息
-                let errMsg = '請稍後再試';
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    errMsg = xhr.responseJSON.message;
-                }
+                let errMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : '請稍後再試';
                 Swal.fire({ title: '上傳失敗', text: errMsg, icon: 'error' });
                 btn.addClass('ready').html('重試上傳');
             }
         });
     });
 
-    // 初始化
-    $(document).ready(function() {
-        startGPS();
-    });
+    $(document).ready(function() { startGPS(); });
 </script>
 {% endblock %}
