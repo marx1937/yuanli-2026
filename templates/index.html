@@ -5,7 +5,7 @@
 
 {% block styles %}
 <style>
-    /* 1. 背景還原 (經典米色點點) */
+    /* 1. 經典背景：米色點點 (還原舊站質感) */
     body {
         background-color: #fdfcf0;
         background-image: radial-gradient(#d7ccc8 1.5px, transparent 1.5px);
@@ -13,43 +13,48 @@
         font-family: "Microsoft JhengHei", sans-serif;
     }
 
-    /* 2. 頂部報馬仔橫幅 (原本是歡迎詞，現在變聰明了) */
+    /* 2. 頂部橫幅 (還原舊站樣式，但加入動態功能) */
     .hero-banner {
         background: #fff8e1;
         border: 2px solid #ffe0b2;
         border-radius: 20px;
-        padding: 15px;
-        margin: 20px 20px 10px 20px;
+        padding: 15px 20px;
+        margin: 25px 20px 15px 20px;
         display: flex;
         align-items: center;
         box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         cursor: pointer;
+        transition: transform 0.2s;
     }
-    .hero-mascot { width: 50px; margin-right: 15px; }
-    .hero-text { color: #5d4037; font-weight: bold; font-size: 1rem; flex: 1; }
+    .hero-banner:active { transform: scale(0.98); }
+    
+    .hero-mascot { width: 55px; margin-right: 15px; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.1)); }
+    .hero-text { color: #5d4037; font-weight: bold; font-size: 1rem; flex: 1; line-height: 1.4; }
+    .hero-arrow { color: #d7ccc8; font-size: 0.9rem; }
 
-    /* 3. 卡片通用樣式 (還原截圖風格) */
+    /* 3. 卡片通用按鈕 (圓潤、陰影、大圖示) */
     .card-btn {
         display: flex;
         align-items: center;
         border-radius: 25px;
-        padding: 20px;
+        padding: 20px 25px;
         margin: 15px 20px;
         text-decoration: none !important;
         position: relative;
         overflow: hidden;
         transition: transform 0.2s;
         box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        height: 110px; /* 固定高度讓版面整齊 */
     }
     .card-btn:active { transform: scale(0.98); }
 
-    /* 紅色卡片 (尋找神隊友) */
+    /* 紅色卡片 (Lucky/上傳) */
     .card-red {
         background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
         color: white;
     }
     
-    /* 黃色卡片 (搜尋方位) */
+    /* 黃色卡片 (地圖) */
     .card-yellow {
         background: #fff9c4;
         border: 2px solid #fff176;
@@ -64,37 +69,25 @@
     }
 
     /* 卡片內容排版 */
-    .card-img { width: 90px; height: 90px; object-fit: contain; margin-right: 15px; }
+    .card-img { width: 80px; height: 80px; object-fit: contain; margin-right: 20px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
     .card-info { flex: 1; }
     .card-title { font-size: 1.5rem; font-weight: bold; display: block; margin-bottom: 5px; }
-    .card-desc { font-size: 0.95rem; opacity: 0.9; }
+    .card-desc { font-size: 0.9rem; opacity: 0.9; }
 
-    /* Lucky 標籤 */
+    /* Lucky 標籤 (還原舊站角度) */
     .lucky-tag {
-        position: absolute; top: 15px; right: -25px;
+        position: absolute; top: 18px; right: -30px;
         background: #f1c40f; color: #d35400;
         font-weight: bold; padding: 5px 40px;
         transform: rotate(15deg); font-size: 0.8rem;
         box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        z-index: 10;
     }
 
-    /* 底部區域 */
-    .footer-area { text-align: center; padding: 20px 0 120px 0; }
-    
-    .btn-contact {
-        display: inline-block;
-        background: #fff; border: 1px solid #d7ccc8;
-        color: #8d6e63; padding: 8px 20px;
-        border-radius: 50px; font-size: 0.9rem;
-        margin-bottom: 15px; text-decoration: none;
-    }
-
+    /* 底部資訊 */
+    .footer-area { text-align: center; padding: 30px 0 120px 0; }
     .footer-text { color: #b0bec5; font-size: 0.85rem; }
-    
-    /* 🔥 正字標記 ® */
-    .mark-r { 
-        color: #d32f2f; font-weight: bold; vertical-align: super; font-size: 0.7rem; margin-left: 2px;
-    }
+    .mark-r { color: #d32f2f; font-weight: bold; vertical-align: super; font-size: 0.7rem; margin-left: 2px; }
 </style>
 {% endblock %}
 
@@ -103,9 +96,10 @@
     <div class="hero-banner" onclick="location.reload()">
         <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/mascot_camera.png" class="hero-mascot">
         <div class="hero-text" id="news-ticker">
-            <i class="fas fa-spinner fa-spin"></i> 正在連線 Hotmail 總部...
+            歡迎來到尋神情報站！<br>
+            <span style="font-size:0.85rem; color:#8d6e63; font-weight:normal;">正在連線 Hotmail 總部...</span>
         </div>
-        <i class="fas fa-chevron-right" style="color:#d7ccc8;"></i>
+        <i class="fas fa-chevron-right hero-arrow"></i>
     </div>
 
     <a href="/upload" class="card-btn card-red">
@@ -136,10 +130,8 @@
     </a>
 
     <div class="footer-area">
-        <a href="#" class="btn-contact"><i class="fab fa-facebook-messenger"></i> 聯絡小編 (私訊)</a>
         <div class="footer-text">
             2026 苑裡串起來<span class="mark-r">®</span> (Hotmail Ver.)
-            <i class="fas fa-lock" style="font-size:0.7rem; margin-left:5px;"></i>
         </div>
     </div>
 
@@ -149,36 +141,34 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
-        // 🔥 聰明報馬仔邏輯：抓取最新一筆資料
+        // 🔥 自動抓取最新情報，但顯示在「舊版樣式」的橫幅裡
         $.getJSON('/api/locations', function(data) {
             if (data && data.length > 0) {
                 var latest = data[data.length - 1]; 
                 
-                // 1. 抓暱稱
+                // 抓暱稱與地點
                 var nickname = latest.nickname || "熱心鄉親";
-                
-                // 2. 抓地點 (邏輯：嘗試從 [xxx里] 中抓出文字)
                 var area = "苑裡某處";
                 var desc = latest.description || "";
                 
-                // 如果格式是 "[苑南里] 發現..."，我們就把括號裡的字抓出來
+                // 嘗試解析地點 [xxx里]
                 if (desc.indexOf(']') > -1) {
                     var parts = desc.split(']');
                     if (parts.length > 0) {
-                        area = parts[0].replace('[', ''); // 抓出 "苑南里"
+                        area = parts[0].replace('[', ''); 
                     }
                 }
 
-                // 3. 顯示在頂部橫幅
+                // 更新橫幅文字
                 $('#news-ticker').html(`
                     <span style="color:#e65100;">最新情報：</span><br>
                     <b>${nickname}</b> 在 <b>${area}</b> 發現了土地公！
                 `);
             } else {
-                $('#news-ticker').html("目前尚無情報<br>歡迎來到尋神情報站！");
+                $('#news-ticker').html("歡迎來到尋神情報站！<br><span style='font-size:0.85rem;font-weight:normal;'>目前尚無情報，快來搶頭香</span>");
             }
         }).fail(function() {
-            $('#news-ticker').text("歡迎來到尋神情報站！");
+            $('#news-ticker').html("歡迎來到尋神情報站！");
         });
     });
 </script>
