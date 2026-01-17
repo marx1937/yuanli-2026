@@ -65,4 +65,219 @@
         .leaflet-popup-content-wrapper { border-radius: 20px; overflow: hidden; padding: 0; }
         .leaflet-popup-content { margin: 0; width: 260px !important; }
         .popup-img-box { width: 100%; height: 160px; background: #eee; overflow: hidden; position: relative; }
-        .popup-img-box img { width:
+        .popup-img-box img { width: 100%; height: 100%; object-fit: cover; }
+        .popup-info { padding: 15px; text-align: left; }
+        
+        .custom-div-icon { background: transparent; border: none; }
+        .simple-pin { font-size: 36px; text-align: center; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.3)); cursor: pointer; }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id="data-status"><i class="fas fa-satellite-dish fa-spin"></i> 訊號搜尋中...</div>
+
+    <div class="map-header">
+        <div class="header-capsule" onclick="resetMapView()">
+            全苑裡 <span class="data-badge" id="totalCount">0</span>
+        </div>
+        <div class="header-capsule" onclick="toggleVillagePanel()">
+            <i class="fas fa-list-ul" style="margin-right:5px; color:#d32f2f;"></i> 25里分布
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <div id="villagePanel">
+        <div class="panel-handle" style="width:50px;height:6px;background:#e0e0e0;margin:0 auto 20px auto;border-radius:10px;" onclick="toggleVillagePanel()"></div>
+        <h4 style="text-align:center; color:#5d4037; font-weight:bold; margin-bottom:20px;">
+            <i class="fas fa-map-marked-alt"></i> 苑裡 25 里神蹟分布
+        </h4>
+        <div class="village-grid" id="villageGrid"></div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+
+    <script>
+        // 1. 苑裡 25 里座標與顏色設定 (精準座標)
+        const VILLAGES = [
+            { name: "苑東里", lat: 24.4442, lng: 120.6558, color: "#e74c3c", count: 0 },
+            { name: "苑南里", lat: 24.4388, lng: 120.6535, color: "#3498db", count: 0 },
+            { name: "苑北里", lat: 24.4465, lng: 120.6515, color: "#2ecc71", count: 0 },
+            { name: "客庄里", lat: 24.4395, lng: 120.6612, color: "#f1c40f", count: 0 },
+            { name: "中正里", lat: 24.4412, lng: 120.6508, color: "#9b59b6", count: 0 },
+            { name: "房裡里", lat: 24.4342, lng: 120.6455, color: "#1abc9c", count: 0 },
+            { name: "新復里", lat: 24.4255, lng: 120.6412, color: "#e67e22", count: 0 },
+            { name: "西勢里", lat: 24.4485, lng: 120.6385, color: "#34495e", count: 0 },
+            { name: "海岸里", lat: 24.4602, lng: 120.6355, color: "#2980b9", count: 0 },
+            { name: "出水里", lat: 24.4552, lng: 120.6458, color: "#27ae60", count: 0 },
+            { name: "山東里", lat: 24.4488, lng: 120.6655, color: "#8e44ad", count: 0 },
+            { name: "山腳里", lat: 24.4352, lng: 120.6885, color: "#d35400", count: 0 },
+            { name: "舊社里", lat: 24.4285, lng: 120.6812, color: "#7f8c8d", count: 0 },
+            { name: "石鎮里", lat: 24.4252, lng: 120.7155, color: "#c0392b", count: 0 },
+            { name: "蕉埔里", lat: 24.4055, lng: 120.7255, color: "#16a085", count: 0 },
+            { name: "南勢里", lat: 24.4152, lng: 120.6955, color: "#f39c12", count: 0 },
+            { name: "泰田里", lat: 24.4158, lng: 120.6585, color: "#d32f2f", count: 0 },
+            { name: "玉田里", lat: 24.4258, lng: 120.6655, color: "#1976d2", count: 0 },
+            { name: "上館里", lat: 24.4385, lng: 120.7185, color: "#388e3c", count: 0 },
+            { name: "西平里", lat: 24.4550, lng: 120.6350, color: "#ffa000", count: 0 },
+            { name: "苑坑里", lat: 24.4625, lng: 120.6755, color: "#7b1fa2", count: 0 },
+            { name: "水坡里", lat: 24.4552, lng: 120.6885, color: "#00796b", count: 0 },
+            { name: "山柑里", lat: 24.4685, lng: 120.6555, color: "#afb42b", count: 0 },
+            { name: "社苓里", lat: 24.4225, lng: 120.6755, color: "#689f38", count: 0 },
+            { name: "田心里", lat: 24.4325, lng: 120.6612, color: "#5d4037", count: 0 }
+        ];
+
+        const DEFAULT_LAT = 24.4418, DEFAULT_LNG = 120.6543, DEFAULT_ZOOM = 13;
+        
+        // 使用 Canvas 渲染與 CartoDB 圖層優化效能
+        var map = L.map('map', { zoomControl: false, preferCanvas: true }).setView([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '© CartoDB', maxZoom: 20
+        }).addTo(map);
+
+        var villageLayer = L.layerGroup().addTo(map);
+        var detailCluster = L.markerClusterGroup({ chunkedLoading: true, maxClusterRadius: 40, showCoverageOnHover: false });
+
+        // 2. 生成「展示用數據」(當 API 失敗時自動使用)
+        function generateDemoData(count) {
+            console.warn("⚠️ 正使用展示模式：自動生成 500 筆測試數據");
+            $('#data-status').html('<i class="fas fa-magic"></i> 預覽演示模式').removeClass('status-db').addClass('status-demo');
+            let demoData = [];
+            for (let i = 0; i < count; i++) {
+                // 隨機生成在苑裡範圍內的點
+                demoData.push({
+                    lat: 24.4 + Math.random() * 0.08,
+                    lng: 120.63 + Math.random() * 0.09,
+                    nickname: "熱心鄉親 " + (i + 1),
+                    description: "這是一筆自動生成的演示資料，用於展示地圖功能。",
+                    image_url: "https://picsum.photos/400/300?random=" + i
+                });
+            }
+            processData(demoData);
+        }
+
+        // 3. 核心處理邏輯
+        function processData(data) {
+            $('#totalCount').text(data.length);
+            detailCluster.clearLayers();
+            VILLAGES.forEach(v => v.count = 0);
+
+            let markerList = [];
+            let pinIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: "<div class='simple-pin'>📍</div>",
+                iconSize: [30, 30], iconAnchor: [15, 30]
+            });
+
+            data.forEach(item => {
+                let lat = item.lat || item.latitude;
+                let lng = item.lng || item.longitude;
+                if (!lat || !lng) return;
+
+                // 找出最近的里並增加計數
+                let nearest = null; let minDist = Infinity;
+                VILLAGES.forEach(v => {
+                    let d = Math.sqrt(Math.pow(lat - v.lat, 2) + Math.pow(lng - v.lng, 2));
+                    if (d < minDist) { minDist = d; nearest = v; }
+                });
+                if (nearest) nearest.count++;
+
+                let m = L.marker([lat, lng], { icon: pinIcon });
+                m.on('click', function() {
+                    // 修復：正確的 Google 導航連結
+                    let navUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+                    
+                    if (!this.getPopup()) {
+                        this.bindPopup(`
+                            <div class="popup-img-box">
+                                <img src="${item.image_url || ''}" onerror="this.src='https://placehold.co/400x300?text=暫無影像'">
+                            </div>
+                            <div class="popup-info">
+                                <b style="font-size:1.1rem; color:#5d4037;">👤 ${item.nickname || '未命名'}</b>
+                                <p style="font-size:0.9rem; color:#666; margin: 5px 0;">${item.description || '無詳細描述'}</p>
+                                <a href="${navUrl}" target="_blank" class="popup-btn" style="background:linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); color:white; display:block; text-align:center; padding:10px; border-radius:50px; text-decoration:none; margin-top:10px; font-weight:bold; box-shadow:0 4px 10px rgba(211,47,47,0.3);">
+                                    <i class="fas fa-location-arrow"></i> 導航去拜拜
+                                </a>
+                            </div>
+                        `).openPopup();
+                    }
+                });
+                markerList.push(m);
+            });
+
+            detailCluster.addLayers(markerList);
+            updateVillageUI();
+        }
+
+        // 更新 UI：里別標籤與底部面板
+        function updateVillageUI() {
+            villageLayer.clearLayers();
+            $('#villageGrid').empty();
+            
+            VILLAGES.forEach(v => {
+                // 地圖上的圓餅標籤
+                if (v.count > 0) {
+                    L.marker([v.lat, v.lng], {
+                        icon: L.divIcon({
+                            className: 'custom-div-icon',
+                            html: `<div class="village-label-icon" style="background-color:${v.color}">${v.name}<br><span style="font-size:10px;font-weight:normal;">(${v.count})</span></div>`,
+                            iconSize: [70, 40], iconAnchor: [35, 20]
+                        })
+                    }).on('click', () => goToVillage(v.lat, v.lng)).addTo(villageLayer);
+                }
+
+                // 底部面板卡片
+                $('#villageGrid').append(`
+                    <div class="village-item" onclick="goToVillage(${v.lat}, ${v.lng})">
+                        <div class="color-indicator" style="background-color:${v.color}"></div>
+                        <b style="color:#5d4037;">${v.name}</b><br>
+                        <span style="color:${v.count > 0 ? '#d32f2f' : '#ccc'}; font-weight:bold;">${v.count} 筆</span>
+                    </div>
+                `);
+            });
+        }
+
+        function loadData() {
+            // 嘗試連線後端
+            $.getJSON('/api/locations')
+                .done(function(data) {
+                    if (data && data.length > 0) {
+                        $('#data-status').html('<i class="fas fa-wifi"></i> 資料庫連線中').removeClass('status-demo').addClass('status-db');
+                        processData(data);
+                    } else {
+                        // 如果後端沒資料，啟動展示模式
+                        generateDemoData(500);
+                    }
+                })
+                .fail(function() {
+                    // 如果連線失敗，啟動展示模式
+                    generateDemoData(500); 
+                });
+        }
+
+        // 縮放監聽：遠看里別，近看圖釘
+        map.on('zoomend', function() {
+            if (map.getZoom() >= 15) {
+                if (map.hasLayer(villageLayer)) map.removeLayer(villageLayer);
+                if (!map.hasLayer(detailCluster)) map.addLayer(detailCluster);
+            } else {
+                if (!map.hasLayer(villageLayer)) map.addLayer(villageLayer);
+                if (map.hasLayer(detailCluster)) map.removeLayer(detailCluster);
+            }
+        });
+
+        function goToVillage(lat, lng) { 
+            $('#villagePanel').removeClass('active'); 
+            map.flyTo([lat, lng], 16); 
+        }
+        
+        function resetMapView() { map.flyTo([DEFAULT_LAT, DEFAULT_LNG], DEFAULT_ZOOM); }
+        function toggleVillagePanel() { $('#villagePanel').toggleClass('active'); }
+
+        $(document).ready(() => loadData());
+    </script>
+{% endblock %}
