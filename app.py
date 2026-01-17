@@ -3,13 +3,13 @@ from flask import Flask, render_template, request, jsonify, session, redirect, u
 import psycopg2
 import cloudinary
 import cloudinary.uploader
-import cloudinary.api  # 🔥 記得這個要加，救援才有用
+import cloudinary.api
 from math import radians, cos, sin, asin, sqrt
 from geopy.geocoders import Nominatim 
 
 app = Flask(__name__)
 
-# --- 設定密鑰 (Session 用) ---
+# --- 設定密鑰 ---
 app.secret_key = os.environ.get('SECRET_KEY', 'yuanli_secret_key')
 ADMIN_PASSWORD = 'ytc@358'
 
@@ -21,6 +21,42 @@ cloudinary.config(
     secure = True
 )
 
+# --- 資料庫連線 ---
+def get_db_connection():
+    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+    return conn
+
+# --- 🔥 自動建表函式 (魔法關鍵) ---
+def init_db():
+    """如果資料庫是空的，就自動建立表格"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS land_gods (
+                id SERIAL PRIMARY KEY,
+                image_url TEXT NOT NULL,
+                lat FLOAT,
+                lng FLOAT,
+                note TEXT,
+                nickname TEXT,
+                area TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
+        conn.commit()
+        cur.close()
+        conn.close()
+        print("✅ 資料表檢查/建立完成")
+    except Exception as e:
+        print(f"❌ 建表失敗: {e}")
+
+# 啟動時執行一次建表
+try:
+    init_db()
+except:
+    pass
+
 # --- 數學公式：計算距離 ---
 def haversine(lon1, lat1, lon2, lat2):
     lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
@@ -31,31 +67,23 @@ def haversine(lon1, lat1, lon2, lat2):
     r = 6371 
     return c * r
 
-# --- 資料庫連線 ---
-def get_db_connection():
-    conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
-    return conn
-
-# --- 座標轉地名 (反向地理編碼) ---
+# --- 座標轉地名 ---
 def get_location_name(lat, lng):
     try:
-        geolocator = Nominatim(user_agent="yuanli_god_hunter_2026_render")
+        geolocator = Nominatim(user_agent="yuanli_god_hunter_2026_final")
         location = geolocator.reverse(f"{lat}, {lng}", language='zh-tw')
-        
         address = location.raw.get('address', {})
         area = address.get('village') or address.get('neighbourhood') or address.get('town')
-        
         if area:
             if "苑裡" not in area:
                 return f"苑裡 {area}"
             return area
         else:
             return "苑裡某處"
-    except Exception as e:
-        print(f"翻譯失敗: {e}")
+    except:
         return "苑裡某處"
 
-# ================= 頁面路由 (Routes) =================
+# ================= 頁面路由 =================
 
 @app.route('/')
 def index():
@@ -88,7 +116,7 @@ def admin_page():
 def show_upload_page():
     return render_template('upload.html')
 
-# ================= 功能邏輯 (API) =================
+# ================= API 邏輯 =================
 
 @app.route('/api/login', methods=['POST'])
 def api_login():
@@ -98,11 +126,13 @@ def api_login():
         return jsonify({'status': 'success'})
     return jsonify({'status': 'error', 'message': '密碼錯誤'})
 
-# 上傳功能
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'GET':
         return render_template('upload.html')
+    
+    # 確保資料表存在
+    init_db()
 
     if 'photo' not in request.files:
         return jsonify({'status': 'error', 'message': '沒有檔案'})
@@ -118,18 +148,13 @@ def upload_file():
             conn = get_db_connection()
             cur = conn.cursor()
             
-            # 重複地點檢查
+            # 重複檢查
             cur.execute("SELECT lat, lng FROM land_gods")
             rows = cur.fetchall()
-            
             for row in rows:
-                db_lat = row[0]
-                db_lng = row[1]
-                dist = haversine(float(lng), float(lat), db_lng, db_lat)
-                
-                if dist < -1: 
+                if haversine(float(lng), float(lat), row[1], row[0]) < -1: 
                     conn.close()
-                    return jsonify({'status': 'pending', 'message': '地點重複，已送審'})
+                    return jsonify({'status': 'pending', 'message': '地點重複'})
             
             detected_area = get_location_name(lat, lng)
 
@@ -137,7 +162,7 @@ def upload_file():
             upload_result = cloudinary.uploader.upload(file)
             image_url = upload_result['secure_url']
 
-            # 寫入資料庫
+            # 寫入 DB
             cur.execute("INSERT INTO land_gods (image_url, lat, lng, note, nickname, area) VALUES (%s, %s, %s, %s, %s, %s)",
                         (image_url, float(lat), float(lng), note, nickname, detected_area))
             conn.commit()
@@ -145,93 +170,48 @@ def upload_file():
             conn.close()
 
             return jsonify({'status': 'success', 'url': image_url, 'area': detected_area})
-
         except Exception as e:
-            print("Error:", e)
             return jsonify({'status': 'error', 'message': str(e)})
     
     return jsonify({'status': 'error', 'message': '資料不完整'})
 
-# 地圖資料 API
 @app.route('/api/locations')
 def get_locations():
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute('SELECT id, lat, lng, area, note, image_url, nickname, created_at FROM land_gods')
-    rows = cur.fetchall()
-    conn.close()
-    
-    locations = []
-    for row in rows:
-        locations.append({
-            'id': row[0],
-            'lat': row[1],
-            'lng': row[2],
-            'area': row[3],
-            'note': row[4],
-            'image_url': row[5],
-            'nickname': row[6],
-            'timestamp': str(row[7])
-        })
-    return jsonify(locations)
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute('SELECT id, lat, lng, area, note, image_url, nickname, created_at FROM land_gods')
+        rows = cur.fetchall()
+        conn.close()
+        
+        locations = []
+        for row in rows:
+            locations.append({
+                'id': row[0],
+                'lat': row[1],
+                'lng': row[2],
+                'area': row[3],
+                'note': row[4],
+                'image_url': row[5],
+                'nickname': row[6],
+                'timestamp': str(row[7])
+            })
+        return jsonify(locations)
+    except Exception:
+        # 如果還沒建表，回傳空陣列，不要報錯
+        return jsonify([])
 
-# ================= 管理員專用 API =================
-
-@app.route('/api/admin/all_data')
-def get_all_data():
-    if not session.get('is_admin'):
-        return jsonify({'status': 'error', 'message': '權限不足'})
-
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute('''
-        SELECT id, area, nickname, note, image_url, created_at, lat, lng 
-        FROM land_gods 
-        ORDER BY id DESC
-    ''')
-    rows = cur.fetchall()
-    conn.close()
-
-    data = []
-    for row in rows:
-        data.append({
-            'id': row[0],
-            'area': row[1],
-            'nickname': row[2],
-            'note': row[3],
-            'image_url': row[4],
-            'created_at': str(row[5]),
-            'lat': row[6],
-            'lng': row[7]
-        })
-
-    return jsonify(data)
-
-# ================= 排行榜專用 API =================
 @app.route('/api/leaderboard_data')
 def leaderboard_data():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        
-        cur.execute("""
-            SELECT nickname, COUNT(*) as count 
-            FROM land_gods 
-            GROUP BY nickname 
-            ORDER BY count DESC 
-            LIMIT 10
-        """)
+        # 英雄榜
+        cur.execute("SELECT nickname, COUNT(*) as count FROM land_gods GROUP BY nickname ORDER BY count DESC LIMIT 10")
         user_rows = cur.fetchall()
-
-        cur.execute("""
-            SELECT area, COUNT(*) as count 
-            FROM land_gods 
-            GROUP BY area 
-            ORDER BY count DESC 
-            LIMIT 10
-        """)
+        # 地區榜
+        cur.execute("SELECT area, COUNT(*) as count FROM land_gods GROUP BY area ORDER BY count DESC LIMIT 10")
         area_rows = cur.fetchall()
-        
         conn.close()
         
         return jsonify({
@@ -239,40 +219,18 @@ def leaderboard_data():
             'by_user': [{'name': r[0] or '熱心串友', 'count': r[1]} for r in user_rows],
             'by_area': [{'name': r[0] or '未知區域', 'count': r[1]} for r in area_rows]
         })
-
     except Exception as e:
-        print("排行榜錯誤:", e)
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-@app.route('/api/delete', methods=['POST'])
-def delete_location():
-    if not session.get('is_admin'):
-        return jsonify({'success': False, 'message': '權限不足，請先登入'})
-
-    location_id = request.form.get('id')
-    
-    if not location_id:
-        return jsonify({'success': False, 'message': '找不到 ID'})
-
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute('DELETE FROM land_gods WHERE id = %s', (location_id,))
-        conn.commit()
-        cur.close()
-        conn.close()
-        return jsonify({"success": True, "message": "已成功刪除"})
-        
-    except Exception as e:
-        print("刪除失敗:", e)
-        return jsonify({"success": False, "message": "資料庫錯誤"})
-
-# ================= 🚑 資料救援專區 (放在最下面) =================
+# ================= 🚑 資料救援專區 (含自動建表) =================
 @app.route('/api/admin/rescue_data')
 def rescue_data_from_cloudinary():
     try:
-        # 1. 抓取雲端照片
-        print("🚀 開始救援...")
+        # 1. 先確保資料表存在！
+        init_db()
+
+        # 2. 去 Cloudinary 抓照片
+        import cloudinary.api
         result = cloudinary.api.resources(
             type="upload", 
             resource_type="image", 
@@ -281,16 +239,18 @@ def rescue_data_from_cloudinary():
         )
         resources = result.get('resources', [])
         
-        # 2. 寫入資料庫
+        # 3. 寫入資料庫
         conn = get_db_connection()
         cur = conn.cursor()
         count = 0
+        
+        print(f"🚀 掃描到 {len(resources)} 張照片，開始救援...")
+        
         for res in resources:
             url = res['secure_url']
             cur.execute("SELECT id FROM land_gods WHERE image_url = %s", (url,))
             if not cur.fetchone():
                 context = res.get('context', {}).get('custom', {})
-                # 簡單防呆：如果沒有暱稱就叫熱心串友
                 cur.execute("""
                     INSERT INTO land_gods (image_url, nickname, note, lat, lng, area, created_at)
                     VALUES (%s, %s, %s, %s, %s, %s, %s)
@@ -304,6 +264,7 @@ def rescue_data_from_cloudinary():
                     res['created_at']
                 ))
                 count += 1
+        
         conn.commit()
         cur.close()
         conn.close()
