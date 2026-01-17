@@ -1,218 +1,255 @@
 {% extends "base.html" %}
-{% set active_page = "index" %}
-
-{% block title %}尋神情報站 (H版){% endblock %}
+{% set active_page = "home" %}
 
 {% block styles %}
 <style>
-    /* 1. 全局背景 */
-    body {
-        background-color: #fdfcf0;
-        background-image: radial-gradient(#d7ccc8 1.5px, transparent 1.5px);
-        background-size: 24px 24px;
-        font-family: "Microsoft JhengHei", sans-serif;
-        overflow-x: hidden;
+    /* --- 1. 頂部 Hero 區 (完全保留你的設計) --- */
+    .hero-section { position: relative; margin-bottom: 15px; }
+    .hero-banner {
+        width: 100%; height: auto; display: block;
+        /* 你的遮罩效果 */
+        mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
     }
 
-    /* 🔥 2. Splash Screen (進場畫面) */
-    #splash-screen {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background-color: #fff8e1;
-        z-index: 9999;
-        display: flex; flex-direction: column; justify-content: center; align-items: center;
-        transition: opacity 0.8s ease-out;
+    .hero-text-container {
+        display: flex; flex-direction: column; align-items: center; width: 100%;
+        margin-top: -20px; position: relative; z-index: 10;
     }
-    .splash-logo { width: 120px; animation: breathe 2s infinite ease-in-out; }
-    .splash-text { margin-top: 20px; color: #8d6e63; font-weight: bold; letter-spacing: 2px; font-size: 0.9rem; }
-    @keyframes breathe { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
 
-    /* 3. Hero 區塊 */
-    .hero-section {
-        position: relative; text-align: center; padding-top: 20px; margin-bottom: 10px;
-    }
-    .hero-banner-img {
-        width: 100%; max-width: 400px; height: auto; display: block; margin: 0 auto;
-        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+    .app-logo-img {
+        width: 65%; max-width: 280px; height: auto; display: block;
+        filter: drop-shadow(0 5px 5px rgba(93, 64, 55, 0.2));
+        margin-top: 15px; margin-bottom: 5px;
     }
     
-    /* 老神在在狀態列 (god_cute.png) */
-    .status-bar {
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid #ffe0b2;
-        border-radius: 50px; padding: 5px 20px; display: inline-flex; align-items: center;
-        margin-top: -15px; position: relative; z-index: 2;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    .sub-title-badge {
+        background: rgba(255, 255, 255, 0.8); 
+        color: #8d6e63; font-weight: bold; font-size: 1rem;
+        padding: 5px 18px;
+        border: 1px solid #d7ccc8; 
+        border-radius: 50px;
+        backdrop-filter: blur(2px);
+        display: flex; align-items: center; gap: 5px;
     }
-    .god-icon { width: 28px; margin-right: 8px; }
-    .status-text { font-size: 0.85rem; color: #5d4037; font-weight: bold; }
 
-    /* 4. 報馬仔區塊 (bm.png) - 復刻截圖的米黃色 */
-    .notice-bar {
+    /* --- 2. 報馬仔 (換成 bm.png) --- */
+    .news-ticker-container {
+        width: 92%; max-width: 400px; 
+        margin: 15px auto 25px auto; 
         background: #fff8e1; 
-        border: 2px solid #ffe0b2;
-        border-radius: 20px; 
-        padding: 12px 15px; 
-        margin: 15px 20px;
-        display: flex; align-items: center; 
-        cursor: pointer;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.05); 
-        transition: transform 0.1s;
+        border-radius: 15px; 
+        box-shadow: 0 2px 8px rgba(93, 64, 55, 0.05); 
+        padding: 8px 15px; /* 稍微調整 padding */
+        display: flex; align-items: center;
+        border: 1px solid #ffe082; 
+        position: relative; z-index: 20;
+        text-decoration: none !important;
+        overflow: hidden; 
     }
-    .notice-bar:active { transform: scale(0.98); }
-    .bm-icon { width: 50px; margin-right: 15px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1)); } 
-    .notice-content { flex: 1; font-size: 0.95rem; color: #5d4037; font-weight: bold; line-height: 1.4; }
+    .news-ticker-container:active { transform: scale(0.96); transition: transform 0.1s; }
 
-    /* 5. 卡片按鈕 */
-    .menu-grid { display: flex; flex-direction: column; gap: 15px; padding: 0 20px; }
-    .card-btn {
-        display: flex; align-items: center; border-radius: 25px; padding: 15px 25px;
-        text-decoration: none !important; position: relative; overflow: hidden;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.1); transition: transform 0.2s; height: 110px;
-    }
-    .card-btn:active { transform: scale(0.98); }
-
-    .card-red { background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%); color: white; }
-    .card-yellow { background: #fff9c4; border: 2px solid #fff176; color: #5d4037; }
-    .card-white { background: #fff; border: 2px solid #eee; color: #5d4037; }
-
-    /* 使用指定的 icon_*.png */
-    .card-icon { width: 80px; height: 80px; object-fit: contain; margin-right: 20px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
-    .card-info span { display: block; }
-    .card-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 5px; }
-    .card-desc { font-size: 0.9rem; opacity: 0.9; }
-
-    .lucky-tag {
-        position: absolute; top: 15px; right: -30px;
-        background: #f1c40f; color: #d35400; font-weight: bold;
-        padding: 5px 40px; transform: rotate(15deg); font-size: 0.8rem;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    /* 報馬仔圖片 */
+    .bao-ma-zai-img {
+        height: 40px; width: auto; /* 設定高度，讓它自動縮放 */
+        margin-right: 10px;
+        filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
     }
 
-    /* 6. 底部社群 (私訊 + 粉絲團連結) */
-    .footer-area { text-align: center; padding: 30px 0 120px 0; }
+    .ticker-content { flex: 1; height: 24px; position: relative; overflow: hidden; }
     
-    /* 私訊按鈕 */
+    .ticker-text {
+        font-size: 0.9rem; color: #5d4037; font-weight: bold; 
+        position: absolute; white-space: nowrap; 
+        top: 2px; transform: translateX(100%); opacity: 0; 
+    }
+
+    .ticker-text.active { opacity: 1; animation: marquee-scroll 8s linear infinite; }
+
+    @keyframes marquee-scroll {
+        0%   { transform: translateX(100%); }
+        100% { transform: translateX(-150%); } 
+    }
+
+    /* --- 3. 按鈕區 (保留你的 CSS) --- */
+    .menu-btn {
+        display: block; width: 92%; max-width: 400px;
+        margin: 0 auto 28px auto; 
+        border-radius: 25px;
+        text-decoration: none !important; position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 20px rgba(93, 64, 55, 0.1); 
+        transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+    }
+    .menu-btn:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(93, 64, 55, 0.2); }
+
+    .btn-content {
+        padding: 5px 20px; height: 100%; display: flex; 
+        align-items: center; justify-content: flex-start;
+    }
+    .btn-text-group { text-align: left; flex: 1; }
+    
+    /* 紅色按鈕 */
+    .btn-primary-action {
+        background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); 
+        height: 110px; color: white; border: 2px solid rgba(255,255,255,0.2);
+    }
+    .btn-primary-action .btn-main-text { font-size: 1.6rem; font-weight: bold; margin-bottom: 2px; }
+    .btn-primary-action .btn-sub-text { font-size: 0.95rem; opacity: 0.9; font-weight: normal; }
+    .btn-primary-action .btn-icon-large {
+        height: 80px; width: auto; margin-right: 15px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2));
+    }
+
+    /* 黃/白按鈕 */
+    .btn-secondary-action { background: #fff; border: 2px solid #ffe082; height: 90px; }
+    .btn-secondary-action .btn-main-text { color: #5d4037; font-size: 1.4rem; font-weight: bold; }
+    .btn-secondary-action .btn-sub-text { color: #8d6e63; font-size: 0.85rem; }
+    .btn-secondary-action .btn-icon-large { height: 65px; width: auto; margin-right: 15px; margin-left: 5px; }
+    
+    .bg-map { background: linear-gradient(to right, #fff 30%, #fff8e1 100%); }
+    .bg-gallery { background: linear-gradient(to right, #fff 30%, #fff3e0 100%); }
+
+    /* Lucky Badge */
+    .lucky-badge {
+        position: absolute; top: 12px; right: 15px;
+        background: #ffca28; color: #b71c1c; 
+        font-size: 0.8rem; font-weight: bold;
+        padding: 4px 12px; border-radius: 12px; transform: rotate(15deg);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1); animation: bounce 2s infinite; z-index: 5;
+    }
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {transform: rotate(15deg) translateY(0);}
+        40% {transform: rotate(15deg) translateY(-5px);}
+        60% {transform: rotate(15deg) translateY(-3px);}
+    }
+
+    /* --- 4. 底部區 (私訊 + 粉絲團 + 鎖頭) --- */
+    .footer-area {
+        text-align: center; margin-top: 30px; margin-bottom: 40px;
+        display: flex; flex-direction: column; align-items: center; gap: 15px;
+    }
+
+    /* 藍色私訊按鈕 */
     .btn-messenger {
         display: inline-flex; align-items: center; justify-content: center;
-        background: #0084ff; color: white; 
-        padding: 12px 30px; border-radius: 50px;
-        font-weight: bold; text-decoration: none; font-size: 1rem;
-        box-shadow: 0 5px 15px rgba(0, 132, 255, 0.3); 
-        margin-bottom: 20px; transition: 0.2s;
+        background: #0084ff; color: white;
+        padding: 10px 25px; border-radius: 50px;
+        font-weight: bold; text-decoration: none;
+        box-shadow: 0 4px 10px rgba(0, 132, 255, 0.3);
+        transition: 0.2s;
     }
     .btn-messenger:active { transform: scale(0.95); }
-    
+
     /* 粉絲團文字連結 */
-    .footer-link {
-        color: #b0bec5; font-size: 0.9rem; text-decoration: none;
-        display: block; margin-top: 5px; font-weight: bold;
+    .footer-fb-link {
+        color: #8d6e63; font-weight: bold; text-decoration: none; font-size: 0.9rem;
     }
-    .footer-link:hover { color: #d32f2f; text-decoration: underline; }
-    .mark-r { color: #d32f2f; font-weight: bold; vertical-align: super; font-size: 0.7rem; }
+    .footer-fb-link:hover { color: #d32f2f; }
+
+    /* 管理員鎖頭 */
+    .admin-lock {
+        color: rgba(141, 110, 99, 0.3); font-size: 0.8rem; text-decoration: none;
+        margin-top: 5px;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-    
-    <div id="splash-screen">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/logo.png" class="splash-logo" alt="Loading...">
-        <div class="splash-text">2026 苑裡串起來 (H版)</div>
-    </div>
-
     <div class="hero-section">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/top.png" class="hero-banner-img" alt="Map My God">
-        <div class="status-bar">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/god_cute.png" class="god-icon" alt="God">
-            <span class="status-text" id="system-status">連線 Hotmail 總部中...</span>
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/top.png" class="hero-banner" alt="Banner">
+        
+        <div class="hero-text-container">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/toptext.png" class="app-logo-img" alt="MAP MY GOD">
+            <div class="sub-title-badge">
+                老神在在 
+                <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/god_cute.png" style="width:24px; margin:0 5px;" alt="God"> 
+                躲貓貓
+            </div>
         </div>
     </div>
-
-    <div class="notice-bar" onclick="location.href='/map'">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/bm.png" class="bm-icon" alt="Ticker">
-        <div class="notice-content" id="news-ticker">
-            <i class="fas fa-spinner fa-spin"></i> 正在接收最新情報...
+    
+    <a href="/leaderboard" class="news-ticker-container">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/bm.png" class="bao-ma-zai-img" alt="報馬仔">
+        
+        <div class="ticker-content">
+            <div class="ticker-text active" id="ticker-msg">🔔 系統連線中... 準備接收情報...</div>
         </div>
-        <i class="fas fa-chevron-right" style="color: #d7ccc8; margin-left: auto;"></i>
-    </div>
+        <div style="color: #d7ccc8; font-size: 0.8rem; padding-left:5px;"><i class="fas fa-chevron-right"></i></div>
+    </a>
 
-    <div class="menu-grid">
-        <a href="/upload" class="card-btn card-red">
-            <div class="lucky-tag">LUCKY!</div>
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/icon_camera.png" class="card-icon" alt="Camera">
-            <div class="card-info">
-                <span class="card-title">尋找神隊友</span>
-                <span class="card-desc">拍照上傳拿好運</span>
+    <a href="/upload" class="menu-btn btn-primary-action">
+        <div class="lucky-badge">LUCKY!</div>
+        <div class="btn-content">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/icon_camera.png" class="btn-icon-large" alt="Camera">
+            <div class="btn-text-group">
+                <div class="btn-main-text">尋找神隊友</div>
+                <div class="btn-sub-text">趕快幫祂拍張照</div>
             </div>
-        </a>
+        </div>
+    </a>
 
-        <a href="/map" class="card-btn card-yellow">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/icon_compass.png" class="card-icon" alt="Compass">
-            <div class="card-info">
-                <span class="card-title">搜尋方位</span>
-                <span class="card-desc">看看他們躲在哪</span>
+    <a href="/map" class="menu-btn btn-secondary-action bg-map">
+        <div class="btn-content">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/icon_compass.png" class="btn-icon-large" alt="Compass">
+            <div class="btn-text-group">
+                <div class="btn-main-text">搜尋方位</div>
+                <div class="btn-sub-text">看看他們躲在哪</div>
             </div>
-        </a>
+            <i class="fas fa-map-marked-alt" style="color:#ffe082; font-size:1.2rem; opacity:0.5;"></i>
+        </div>
+    </a>
 
-        <a href="/gallery" class="card-btn card-white">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/icon_album.png" class="card-icon" alt="Album">
-            <div class="card-info">
-                <span class="card-title">影像庫</span>
-                <span class="card-desc">尋神足跡紀錄</span>
+    <a href="/gallery" class="menu-btn btn-secondary-action bg-gallery">
+        <div class="btn-content">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/icon_album.png" class="btn-icon-large" alt="Gallery">
+            <div class="btn-text-group">
+                <div class="btn-main-text">影像庫</div>
+                <div class="btn-sub-text">尋神足跡紀錄</div>
             </div>
-        </a>
-    </div>
+            <i class="fas fa-images" style="color:#ffcc80; font-size:1.2rem; opacity:0.5;"></i>
+        </div>
+    </a>
 
     <div class="footer-area">
         <a href="https://m.me/Yuanli.Together.Club" target="_blank" class="btn-messenger">
-            <i class="fab fa-facebook-messenger" style="margin-right:8px; font-size:1.2rem;"></i> 聯絡小編 (私訊)
+            <i class="fab fa-facebook-messenger" style="margin-right:8px;"></i> 聯絡小編 (私訊)
         </a>
-        
-        <a href="https://www.facebook.com/Yuanli.Together.Club" target="_blank" class="footer-link">
-            2026 苑裡串起來<span class="mark-r">®</span> 粉絲團
-        </a>
-    </div>
 
+        <a href="https://www.facebook.com/Yuanli.Together.Club" target="_blank" class="footer-fb-link">
+            2026 苑裡串起來
+        </a>
+
+        <a href="/admin" class="admin-lock"><i class="fas fa-lock"></i></a>
+    </div>
 {% endblock %}
 
 {% block scripts %}
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    // Splash 動畫控制
-    window.addEventListener('load', function() {
-        setTimeout(function() {
-            var splash = document.getElementById('splash-screen');
-            splash.style.opacity = '0';
-            setTimeout(function() { splash.style.display = 'none'; }, 800);
-        }, 1500);
+    let realMsgs = ["🔔 報——！歡迎來到尋神情報站！", "💡 報馬仔提醒：發現神隊友請上傳！"];
+    
+    fetch('/api/locations').then(r=>r.json()).then(d=>{if(d&&d.length>0){realMsgs=[];d.slice().reverse().slice(0,5).forEach(i=>{
+        let n = i.nickname || "熱心鄉親";
+        // 智慧判斷地點
+        let place = i.description || "苑裡某處";
+        // 嘗試從描述中抓 [xxx里]
+        if (place.indexOf(']') > -1) {
+            let parts = place.split(']');
+            if (parts.length > 0) place = parts[0].replace('[', '');
+        } else {
+             if(place.length > 10) place = place.substring(0, 10) + "...";
+        }
+        
+        realMsgs.push(`🙏 感謝！[${n}] 在 [${place}] 尋獲神蹟！`);
     });
+    realMsgs.push(`🚩 目前戰報：全苑裡已尋獲 ${d.length} 尊！`);}}).catch(e=>{});
 
-    // 報馬仔連線邏輯
-    $(document).ready(function() {
-        $.getJSON('/api/locations', function(data) {
-            $('#system-status').html('H版專線暢通');
-            
-            if (data && data.length > 0) {
-                var latest = data[data.length - 1]; 
-                var nickname = latest.nickname || "熱心鄉親";
-                var area = "苑裡某處";
-                var desc = latest.description || "";
-                
-                if (desc.indexOf(']') > -1) {
-                    var parts = desc.split(']');
-                    if (parts.length > 0) area = parts[0].replace('[', ''); 
-                }
-
-                $('#news-ticker').html(`
-                    <span style="color:#e65100;">最新情報：</span><br>
-                    <b>${nickname}</b> 在 <b>${area}</b> 發現了神蹟！
-                `);
-            } else {
-                $('#news-ticker').html("歡迎來到尋神情報站！<br><span style='font-size:0.85rem;font-weight:normal;color:#8d6e63;'>目前尚無情報，快來搶頭香</span>");
-            }
-        }).fail(function() {
-            $('#system-status').text("離線模式");
-            $('#news-ticker').text("歡迎來到尋神情報站！");
-        });
-    });
+    let idx=0,el=document.getElementById('ticker-msg');
+    setInterval(()=>{
+        el.style.animation = 'none'; 
+        el.offsetHeight; 
+        idx=(idx+1)%realMsgs.length;
+        el.innerText=realMsgs[idx];
+        el.style.animation = null; 
+    }, 8000); 
 </script>
 {% endblock %}
