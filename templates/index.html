@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% set active_page = "home" %}
 
+{% set cdn_base = "https://res.cloudinary.com/diuoghid2/image/upload" %}
 {% block styles %}
 <style>
-    /* --- 1. 頂部 Hero 區 (完全保留你的設計) --- */
+    /* --- 1. 頂部 Hero 區 --- */
     .hero-section { position: relative; margin-bottom: 15px; }
     .hero-banner {
         width: 100%; height: auto; display: block;
-        /* 你的遮罩效果 */
         mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
         -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
     }
@@ -33,14 +33,14 @@
         display: flex; align-items: center; gap: 5px;
     }
 
-    /* --- 2. 報馬仔 (換成 bm.png) --- */
+    /* --- 2. 報馬仔 --- */
     .news-ticker-container {
         width: 92%; max-width: 400px; 
         margin: 15px auto 25px auto; 
         background: #fff8e1; 
         border-radius: 15px; 
         box-shadow: 0 2px 8px rgba(93, 64, 55, 0.05); 
-        padding: 8px 15px; /* 稍微調整 padding */
+        padding: 8px 15px;
         display: flex; align-items: center;
         border: 1px solid #ffe082; 
         position: relative; z-index: 20;
@@ -49,9 +49,8 @@
     }
     .news-ticker-container:active { transform: scale(0.96); transition: transform 0.1s; }
 
-    /* 報馬仔圖片 */
     .bao-ma-zai-img {
-        height: 40px; width: auto; /* 設定高度，讓它自動縮放 */
+        height: 40px; width: auto; 
         margin-right: 10px;
         filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
     }
@@ -63,7 +62,6 @@
         position: absolute; white-space: nowrap; 
         top: 2px; transform: translateX(100%); opacity: 0; 
     }
-
     .ticker-text.active { opacity: 1; animation: marquee-scroll 8s linear infinite; }
 
     @keyframes marquee-scroll {
@@ -71,7 +69,7 @@
         100% { transform: translateX(-150%); } 
     }
 
-    /* --- 3. 按鈕區 (保留你的 CSS) --- */
+    /* --- 3. 按鈕區 --- */
     .menu-btn {
         display: block; width: 92%; max-width: 400px;
         margin: 0 auto 28px auto; 
@@ -123,13 +121,11 @@
         60% {transform: rotate(15deg) translateY(-3px);}
     }
 
-    /* --- 4. 底部區 (私訊 + 粉絲團 + 鎖頭) --- */
+    /* --- 4. 底部區 --- */
     .footer-area {
         text-align: center; margin-top: 30px; margin-bottom: 40px;
         display: flex; flex-direction: column; align-items: center; gap: 15px;
     }
-
-    /* 藍色私訊按鈕 */
     .btn-messenger {
         display: inline-flex; align-items: center; justify-content: center;
         background: #0084ff; color: white;
@@ -139,14 +135,10 @@
         transition: 0.2s;
     }
     .btn-messenger:active { transform: scale(0.95); }
-
-    /* 粉絲團文字連結 */
     .footer-fb-link {
         color: #8d6e63; font-weight: bold; text-decoration: none; font-size: 0.9rem;
     }
     .footer-fb-link:hover { color: #d32f2f; }
-
-    /* 管理員鎖頭 */
     .admin-lock {
         color: rgba(141, 110, 99, 0.3); font-size: 0.8rem; text-decoration: none;
         margin-top: 5px;
@@ -156,20 +148,20 @@
 
 {% block content %}
     <div class="hero-section">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/top.png" class="hero-banner" alt="Banner">
+        <img src="{{ cdn_base }}/top.png" class="hero-banner" alt="Banner">
         
         <div class="hero-text-container">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/toptext.png" class="app-logo-img" alt="MAP MY GOD">
+            <img src="{{ cdn_base }}/toptext.png" class="app-logo-img" alt="MAP MY GOD">
             <div class="sub-title-badge">
                 老神在在 
-                <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/god_cute.png" style="width:24px; margin:0 5px;" alt="God"> 
+                <img src="{{ cdn_base }}/god_cute.png" style="width:24px; margin:0 5px;" alt="God"> 
                 躲貓貓
             </div>
         </div>
     </div>
     
     <a href="/leaderboard" class="news-ticker-container">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/bm.png" class="bao-ma-zai-img" alt="報馬仔">
+        <img src="{{ cdn_base }}/bm.png" class="bao-ma-zai-img" alt="報馬仔">
         
         <div class="ticker-content">
             <div class="ticker-text active" id="ticker-msg">🔔 系統連線中... 準備接收情報...</div>
@@ -180,7 +172,7 @@
     <a href="/upload" class="menu-btn btn-primary-action">
         <div class="lucky-badge">LUCKY!</div>
         <div class="btn-content">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/icon_camera.png" class="btn-icon-large" alt="Camera">
+            <img src="{{ cdn_base }}/icon_camera.png" class="btn-icon-large" alt="Camera">
             <div class="btn-text-group">
                 <div class="btn-main-text">尋找神隊友</div>
                 <div class="btn-sub-text">趕快幫祂拍張照</div>
@@ -190,7 +182,7 @@
 
     <a href="/map" class="menu-btn btn-secondary-action bg-map">
         <div class="btn-content">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/icon_compass.png" class="btn-icon-large" alt="Compass">
+            <img src="{{ cdn_base }}/icon_compass.png" class="btn-icon-large" alt="Compass">
             <div class="btn-text-group">
                 <div class="btn-main-text">搜尋方位</div>
                 <div class="btn-sub-text">看看他們躲在哪</div>
@@ -201,7 +193,7 @@
 
     <a href="/gallery" class="menu-btn btn-secondary-action bg-gallery">
         <div class="btn-content">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/icon_album.png" class="btn-icon-large" alt="Gallery">
+            <img src="{{ cdn_base }}/icon_album.png" class="btn-icon-large" alt="Gallery">
             <div class="btn-text-group">
                 <div class="btn-main-text">影像庫</div>
                 <div class="btn-sub-text">尋神足跡紀錄</div>
@@ -227,18 +219,16 @@
 <script>
     let realMsgs = ["🔔 報——！歡迎來到尋神情報站！", "💡 報馬仔提醒：發現神隊友請上傳！"];
     
+    // 這裡保留你原本的邏輯
     fetch('/api/locations').then(r=>r.json()).then(d=>{if(d&&d.length>0){realMsgs=[];d.slice().reverse().slice(0,5).forEach(i=>{
         let n = i.nickname || "熱心鄉親";
-        // 智慧判斷地點
         let place = i.description || "苑裡某處";
-        // 嘗試從描述中抓 [xxx里]
         if (place.indexOf(']') > -1) {
             let parts = place.split(']');
             if (parts.length > 0) place = parts[0].replace('[', '');
         } else {
              if(place.length > 10) place = place.substring(0, 10) + "...";
         }
-        
         realMsgs.push(`🙏 感謝！[${n}] 在 [${place}] 尋獲神蹟！`);
     });
     realMsgs.push(`🚩 目前戰報：全苑裡已尋獲 ${d.length} 尊！`);}}).catch(e=>{});
