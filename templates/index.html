@@ -5,7 +5,7 @@
 
 {% block styles %}
 <style>
-    /* 1. 經典背景：米色點點 (還原舊站質感) */
+    /* 1. 經典背景：米色點點 */
     body {
         background-color: #fdfcf0;
         background-image: radial-gradient(#d7ccc8 1.5px, transparent 1.5px);
@@ -13,7 +13,7 @@
         font-family: "Microsoft JhengHei", sans-serif;
     }
 
-    /* 2. 頂部橫幅 (還原舊站樣式，但加入動態功能) */
+    /* 2. 頂部橫幅 */
     .hero-banner {
         background: #fff8e1;
         border: 2px solid #ffe0b2;
@@ -32,7 +32,7 @@
     .hero-text { color: #5d4037; font-weight: bold; font-size: 1rem; flex: 1; line-height: 1.4; }
     .hero-arrow { color: #d7ccc8; font-size: 0.9rem; }
 
-    /* 3. 卡片通用按鈕 (圓潤、陰影、大圖示) */
+    /* 3. 卡片通用樣式 */
     .card-btn {
         display: flex;
         align-items: center;
@@ -44,37 +44,37 @@
         overflow: hidden;
         transition: transform 0.2s;
         box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-        height: 110px; /* 固定高度讓版面整齊 */
+        height: 110px;
     }
     .card-btn:active { transform: scale(0.98); }
 
-    /* 紅色卡片 (Lucky/上傳) */
+    /* 紅色卡片 */
     .card-red {
         background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
         color: white;
     }
     
-    /* 黃色卡片 (地圖) */
+    /* 黃色卡片 */
     .card-yellow {
         background: #fff9c4;
         border: 2px solid #fff176;
         color: #5d4037;
     }
 
-    /* 白色卡片 (影像庫) */
+    /* 白色卡片 */
     .card-white {
         background: #fff;
         border: 2px solid #eee;
         color: #5d4037;
     }
 
-    /* 卡片內容排版 */
+    /* 卡片圖片與文字 */
     .card-img { width: 80px; height: 80px; object-fit: contain; margin-right: 20px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
     .card-info { flex: 1; }
     .card-title { font-size: 1.5rem; font-weight: bold; display: block; margin-bottom: 5px; }
     .card-desc { font-size: 0.9rem; opacity: 0.9; }
 
-    /* Lucky 標籤 (還原舊站角度) */
+    /* Lucky 標籤 */
     .lucky-tag {
         position: absolute; top: 18px; right: -30px;
         background: #f1c40f; color: #d35400;
@@ -84,7 +84,7 @@
         z-index: 10;
     }
 
-    /* 底部資訊 */
+    /* 底部區域 */
     .footer-area { text-align: center; padding: 30px 0 120px 0; }
     .footer-text { color: #b0bec5; font-size: 0.85rem; }
     .mark-r { color: #d32f2f; font-weight: bold; vertical-align: super; font-size: 0.7rem; margin-left: 2px; }
@@ -94,17 +94,17 @@
 {% block content %}
 
     <div class="hero-banner" onclick="location.reload()">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/mascot_camera.png" class="hero-mascot">
+        <img src="/static/mascot_camera.png" class="hero-mascot" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3063/3063823.png'">
         <div class="hero-text" id="news-ticker">
             歡迎來到尋神情報站！<br>
-            <span style="font-size:0.85rem; color:#8d6e63; font-weight:normal;">正在連線 Hotmail 總部...</span>
+            <span style="font-size:0.85rem; color:#8d6e63; font-weight:normal;">連線 Hotmail 總部中...</span>
         </div>
         <i class="fas fa-chevron-right hero-arrow"></i>
     </div>
 
     <a href="/upload" class="card-btn card-red">
         <div class="lucky-tag">LUCKY!</div>
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/mascot_camera.png" class="card-img">
+        <img src="/static/mascot_camera.png" class="card-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3687/3687412.png'">
         <div class="card-info">
             <span class="card-title">尋找神隊友</span>
             <span class="card-desc">趕快幫祂拍張照</span>
@@ -112,7 +112,7 @@
     </a>
 
     <a href="/map" class="card-btn card-yellow">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/mascot_map.png" class="card-img">
+        <img src="/static/mascot_map.png" class="card-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/854/854878.png'">
         <div class="card-info">
             <span class="card-title">搜尋方位</span>
             <span class="card-desc">看看他們躲在哪</span>
@@ -121,7 +121,7 @@
     </a>
 
     <a href="/gallery" class="card-btn card-white">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/mascot_couple.png" class="card-img">
+        <img src="/static/mascot_couple.png" class="card-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/833/833281.png'">
         <div class="card-info">
             <span class="card-title">影像庫</span>
             <span class="card-desc">尋神足跡紀錄</span>
@@ -141,25 +141,18 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
-        // 🔥 自動抓取最新情報，但顯示在「舊版樣式」的橫幅裡
         $.getJSON('/api/locations', function(data) {
             if (data && data.length > 0) {
                 var latest = data[data.length - 1]; 
-                
-                // 抓暱稱與地點
                 var nickname = latest.nickname || "熱心鄉親";
                 var area = "苑裡某處";
                 var desc = latest.description || "";
                 
-                // 嘗試解析地點 [xxx里]
                 if (desc.indexOf(']') > -1) {
                     var parts = desc.split(']');
-                    if (parts.length > 0) {
-                        area = parts[0].replace('[', ''); 
-                    }
+                    if (parts.length > 0) area = parts[0].replace('[', ''); 
                 }
 
-                // 更新橫幅文字
                 $('#news-ticker').html(`
                     <span style="color:#e65100;">最新情報：</span><br>
                     <b>${nickname}</b> 在 <b>${area}</b> 發現了土地公！
