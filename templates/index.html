@@ -1,315 +1,204 @@
 {% extends "base.html" %}
-{% set active_page = "home" %}
+{% set active_page = "index" %}
+
+{% block title %}尋神情報站 (H版){% endblock %}
 
 {% block styles %}
-    /* --- 1. APP 啟動遮罩 --- */
-    #app-splash-screen {
-        position: fixed !important; 
-        top: 0; left: 0; width: 100%; height: 100%;
-        background-color: #fff8e1;
-        z-index: 99999;
-        display: flex; flex-direction: column;
-        justify-content: center; align-items: center;
-        transition: opacity 0.8s ease-out;
+<style>
+    /* 延續暖色系風格 */
+    body {
+        background-color: #fdfcf0;
+        background-image: radial-gradient(#d7ccc8 1.5px, transparent 1.5px);
+        background-size: 24px 24px;
+    }
+
+    /* 首頁專屬 Hero 區塊 */
+    .hero-section {
+        text-align: center;
+        padding: 30px 0 20px 0;
+        margin-bottom: 10px;
+        position: relative;
     }
     
-    .splash-logo {
-        width: 100px !important; 
-        height: 100px !important; 
-        object-fit: contain; 
-        margin-bottom: 20px;
-        filter: drop-shadow(0 5px 10px rgba(93, 64, 55, 0.2));
-        animation: pulse-logo 2s infinite ease-in-out;
+    /* 標題與標記 */
+    .app-title {
+        font-family: 'Brush Script MT', cursive; 
+        font-size: 3.5rem; 
+        color: #5d4037; 
+        margin: 0; 
+        text-shadow: 2px 2px 0px #fff;
     }
 
-    @keyframes pulse-logo {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
+    /* 🔥 H版專屬標記 */
+    .version-tag {
+        display: inline-block;
+        background: #2d3436;
+        color: #fab1a0;
+        font-size: 0.8rem;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+        margin-top: 5px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
 
-    /* --- 頂部英雄區 --- */
-    .hero-section { position: relative; margin-bottom: 15px; }
-    .hero-banner {
-        width: 100%; height: auto; display: block;
-        mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-        -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-    }
-
-    .hero-text-container {
-        display: flex; flex-direction: column; align-items: center; width: 100%;
-        margin-top: -20px; position: relative; z-index: 10;
-    }
-
-    .app-logo-img {
-        width: 65%; max-width: 280px; height: auto; display: block;
-        filter: drop-shadow(0 5px 5px rgba(93, 64, 55, 0.2));
-        margin-top: 15px; margin-bottom: 5px;
-    }
-    
-    .sub-title-badge {
-        background: rgba(255, 255, 255, 0.6); 
-        color: #8d6e63; font-weight: bold; font-size: 1rem;
-        padding: 5px 18px;
-        padding-top: 6px; padding-bottom: 6px;
-        border: 1px solid #d7ccc8; 
+    /* 狀態膠囊 */
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        background: #fff;
+        padding: 8px 20px;
         border-radius: 50px;
-        backdrop-filter: blur(2px);
-        display: inline-flex; align-items: center;
-    }
-    
-    .sub-title-icon {
-        height: 28px; width: auto; margin: 0 5px; 
-        filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
-    }
-
-    /* --- 報馬仔 (跑馬燈) --- */
-    .news-ticker-container {
-        width: 92%; max-width: 400px; 
-        margin: 15px auto 25px auto; 
-        background: #fff8e1; 
-        border-radius: 15px; 
-        box-shadow: 0 2px 8px rgba(93, 64, 55, 0.05); 
-        padding: 8px 10px; /* 稍微縮小內距 */
-        display: flex; align-items: center;
-        border: 1px solid #ffe082; 
-        position: relative; z-index: 20;
-        text-decoration: none !important;
-        overflow: hidden; 
-    }
-    .news-ticker-container:active { transform: scale(0.96); transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1); }
-
-    .bao-ma-zai-badge {
-        /* 🔥 關鍵修改：用 -25px 強制吃掉圖片右邊的透明空白！ */
-        margin-right: -25px; 
-        
-        display: flex; 
-        /* 改為底部對齊，讓公仔看起來像站在框框底線上 */
-        align-items: flex-end; 
-        z-index: 25; background: transparent; /* 背景透明，讓圖疊在文字區塊上也沒關係 */
-        padding-right: 0;
-    }
-    
-    .bao-ma-zai-icon {
-        height: 45px; /* 稍微加大一點點 */
-        width: auto; 
-        margin-left: -5px; 
-        filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
-    }
-
-    .ticker-content { 
-        flex: 1; height: 24px; position: relative; overflow: hidden; 
-        /* 稍微往左推一點，配合那個負邊距 */
-        margin-left: 5px; 
-    }
-    
-    .ticker-text {
-        font-size: 0.9rem; color: #5d4037; font-weight: bold; 
-        position: absolute; white-space: nowrap; 
-        top: 2px; transform: translateX(100%); opacity: 0; 
-    }
-    .ticker-text.active { opacity: 1; animation: marquee-scroll 8s linear infinite; }
-
-    @keyframes marquee-scroll {
-        0%   { transform: translateX(100%); }
-        100% { transform: translateX(-150%); } 
-    }
-
-    /* --- 按鈕樣式 --- */
-    .menu-btn {
-        display: block; width: 92%; max-width: 400px;
-        margin: 0 auto 28px auto; 
-        border-radius: 25px;
-        text-decoration: none !important; position: relative;
-        overflow: hidden;
-        box-shadow: 0 10px 20px rgba(93, 64, 55, 0.1); 
-        transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
-    }
-    .menu-btn:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(93, 64, 55, 0.2); }
-
-    .btn-content {
-        padding: 5px 20px; height: 100%; display: flex; 
-        align-items: center; justify-content: flex-start;
-    }
-    .btn-text-group { text-align: left; flex: 1; }
-    
-    .btn-primary-action {
-        background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); 
-        height: 110px; color: white;
-        border: 2px solid rgba(255,255,255,0.2);
-    }
-    .btn-primary-action .btn-main-text { font-size: 1.6rem; font-weight: bold; margin-bottom: 2px; }
-    .btn-primary-action .btn-sub-text { font-size: 0.95rem; opacity: 0.9; font-weight: normal; }
-    .btn-primary-action .btn-icon-large { height: 80px; width: auto; margin-right: 15px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2)); }
-
-    .btn-secondary-action { background: #fff; border: 2px solid #ffe082; height: 90px; }
-    .btn-secondary-action .btn-main-text { color: #5d4037; font-size: 1.4rem; font-weight: bold; }
-    .btn-secondary-action .btn-sub-text { color: #8d6e63; font-size: 0.85rem; }
-    .btn-secondary-action .btn-icon-large { height: 65px; width: auto; margin-right: 15px; margin-left: 5px; }
-    
-    .bg-map { background: linear-gradient(to right, #fff 30%, #fff8e1 100%); }
-    .bg-gallery { background: linear-gradient(to right, #fff 30%, #fff3e0 100%); }
-
-    .lucky-badge {
-        position: absolute; top: 12px; right: 15px;
-        background: #ffca28; color: #b71c1c; 
-        font-size: 0.8rem; font-weight: bold;
-        padding: 4px 12px; border-radius: 12px; transform: rotate(15deg);
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1); animation: bounce 2s infinite; z-index: 5;
-    }
-    @keyframes bounce {
-        0%, 20%, 50%, 80%, 100% {transform: rotate(15deg) translateY(0);}
-        40% {transform: rotate(15deg) translateY(-5px);}
-        60% {transform: rotate(15deg) translateY(-3px);}
-    }
-
-    /* 底部版權 & 聯絡按鈕 */
-    .secret-footer {
-        text-align: center; margin-top: 30px; margin-bottom: 40px;
-        display: flex; flex-direction: column; align-items: center; gap: 10px;
-    }
-    
-    /* 幽靈按鈕樣式 */
-    .contact-admin-btn {
-        background-color: transparent;
-        border: 1px solid #8d6e63;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         color: #8d6e63;
-        padding: 6px 16px;
-        border-radius: 50px;
-        font-size: 0.85rem;
-        text-decoration: none !important;
-        transition: all 0.2s;
-        display: inline-flex; align-items: center; gap: 6px;
+        font-weight: bold;
+        margin-top: 15px;
+        border: 1px solid #efebe9;
     }
-    .contact-admin-btn:hover { background-color: rgba(141, 110, 99, 0.1); transform: translateY(-2px); }
-    .contact-admin-btn:active { transform: scale(0.95); }
+
+    /* 🔥 報馬仔跑馬燈 (動態版) */
+    .notice-bar {
+        background: #fff3e0;
+        color: #e65100;
+        padding: 12px 20px;
+        border-radius: 15px;
+        margin: 0 20px 20px 20px;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        border: 1px dashed #ffcc80;
+        cursor: pointer;
+        transition: transform 0.2s;
+        box-shadow: 0 4px 10px rgba(230, 126, 34, 0.1);
+    }
+    .notice-bar:active { transform: scale(0.98); }
+    .notice-icon { margin-right: 10px; animation: tada 1.5s infinite; }
     
-    .copyright-text {
-        color: rgba(141, 110, 99, 0.4); font-size: 0.7rem; letter-spacing: 1px;
+    @keyframes tada {
+        0% { transform: scale(1); }
+        10%, 20% { transform: scale(0.9) rotate(-3deg); }
+        30%, 50%, 70%, 90% { transform: scale(1.1) rotate(3deg); }
+        40%, 60%, 80% { transform: scale(1.1) rotate(-3deg); }
+        100% { transform: scale(1) rotate(0); }
     }
-    .footer-fb-link {
-        color: inherit; text-decoration: none; font-weight: bold; transition: opacity 0.3s;
+
+    /* 大按鈕卡片通用設定 */
+    .action-card {
+        margin: 0 20px 20px 20px;
+        border-radius: 25px;
+        padding: 25px 20px;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        text-decoration: none !important;
+        border: 1px solid rgba(255,255,255,0.5);
     }
-    .footer-fb-link:hover { opacity: 0.7; text-decoration: underline; }
-    .secret-link { color: rgba(141, 110, 99, 0.2); text-decoration: none !important; }
+    .action-card:active { transform: scale(0.98); }
+
+    /* 紅色 Lucky 卡片 */
+    .card-lucky {
+        background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
+        color: white;
+        box-shadow: 0 10px 25px rgba(211, 47, 47, 0.3);
+    }
+    .lucky-tag {
+        position: absolute; right: -25px; top: 15px;
+        background: #f1c40f; color: #d35400;
+        font-weight: bold; padding: 5px 40px;
+        transform: rotate(15deg);
+        font-size: 0.8rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    /* 黃色地圖卡片 */
+    .card-map {
+        background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+        color: #5d4037;
+        box-shadow: 0 10px 25px rgba(255, 193, 7, 0.2);
+    }
+
+    /* 文字排版 */
+    .card-text { flex: 1; margin-left: 15px; }
+    .card-title { font-size: 1.4rem; font-weight: bold; margin-bottom: 5px; display: block; }
+    .card-desc { font-size: 0.95rem; opacity: 0.9; }
+    .card-icon { width: 70px; height: 70px; object-fit: contain; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
+
+</style>
 {% endblock %}
 
 {% block content %}
-    <div id="app-splash-screen">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/logo.png" class="splash-logo" alt="Loading...">
-        <div style="color: #8d6e63; font-weight: bold; font-size: 1.2rem; letter-spacing: 1px;">
-            尋神連線中...
-        </div>
-        <div style="margin-top: 10px; color: #d7ccc8; font-size: 0.8rem;">
-            (系統暖機請稍候)
-        </div>
-    </div>
-
     <div class="hero-section">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/top.png" class="hero-banner" alt="Banner">
+        <h1 class="app-title">MAP MY GOD</h1>
         
-        <div class="hero-text-container">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/toptext.png" class="app-logo-img" alt="MAP MY GOD">
-            <div class="sub-title-badge">
-                老神在在 
-                <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/god_cute.png" class="sub-title-icon" alt="Q版土地公"> 
-                躲貓貓
-            </div>
+        <div class="version-tag">
+            <i class="fab fa-hotjar"></i> Hotmail H版
+        </div>
+
+        <br>
+        <div class="status-pill">
+            <span id="system-status">連線新總部中...</span>
         </div>
     </div>
-    
-    <a href="/leaderboard" class="news-ticker-container">
-        <div class="bao-ma-zai-badge">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/bm.png" class="bao-ma-zai-icon" alt="報馬仔">
-        </div>
-        <div class="ticker-content">
-            <div class="ticker-text active" id="ticker-msg">🔔 系統連線中... 準備接收情報...</div>
-        </div>
-        <div style="color: #d7ccc8; font-size: 0.8rem; margin-left: 0px; z-index: 25; background: #fff8e1; padding-left:5px;"><i class="fas fa-chevron-right"></i></div>
-    </a>
 
-    <a href="/upload" class="menu-btn btn-primary-action">
-        <div class="lucky-badge">LUCKY!</div>
-        <div class="btn-content">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/icon_camera.png" class="btn-icon-large" alt="Camera">
-            <div class="btn-text-group">
-                <div class="btn-main-text">尋找神隊友</div>
-                <div class="btn-sub-text">趕快幫祂拍張照</div>
-            </div>
-        </div>
-    </a>
-
-    <a href="/map" class="menu-btn btn-secondary-action bg-map">
-        <div class="btn-content">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/icon_compass.png" class="btn-icon-large" alt="Compass">
-            <div class="btn-text-group">
-                <div class="btn-main-text">搜尋方位</div>
-                <div class="btn-sub-text">看看他們躲在哪</div>
-            </div>
-            <i class="fas fa-map-marked-alt" style="color:#ffe082; font-size:1.2rem; opacity:0.5;"></i>
-        </div>
-    </a>
-
-    <a href="/gallery" class="menu-btn btn-secondary-action bg-gallery">
-        <div class="btn-content">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/icon_album.png" class="btn-icon-large" alt="Gallery">
-            <div class="btn-text-group">
-                <div class="btn-main-text">影像庫</div>
-                <div class="btn-sub-text">尋神足跡紀錄</div>
-            </div>
-            <i class="fas fa-images" style="color:#ffcc80; font-size:1.2rem; opacity:0.5;"></i>
-        </div>
-    </a>
-
-    <div class="secret-footer">
-        <a href="https://m.me/Yuanli.Together.Club" target="_blank" class="contact-admin-btn">
-            <i class="fab fa-facebook-messenger"></i> 聯絡小編 (私訊)
-        </a>
-        <div class="copyright-text">
-            2026 <a href="https://www.facebook.com/Yuanli.Together.Club" target="_blank" class="footer-fb-link">苑裡串起來</a>
-            <a href="/admin" class="secret-link"><i class="fas fa-lock"></i></a>
-        </div>
+    <div class="notice-bar" onclick="location.href='/map'">
+        <i class="fas fa-bullhorn notice-icon"></i>
+        <span id="news-ticker">正在接收最新情報...</span>
+        <i class="fas fa-chevron-right" style="margin-left: auto; opacity: 0.6;"></i>
     </div>
+
+    <a href="/upload" class="action-card card-lucky">
+        <div class="lucky-tag">LUCKY!</div>
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/mascot_camera.png" class="card-icon" alt="Lucky">
+        <div class="card-text">
+            <span class="card-title">尋找神隊友</span>
+            <span class="card-desc">拍照上傳拿好運</span>
+        </div>
+        <i class="fas fa-camera" style="font-size: 1.5rem; opacity: 0.8;"></i>
+    </a>
+
+    <a href="/map" class="action-card card-map">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/mascot_map.png" class="card-icon" alt="Map">
+        <div class="card-text">
+            <span class="card-title">搜尋方位</span>
+            <span class="card-desc">看看大家都去哪拜</span>
+        </div>
+        <i class="fas fa-map-marked-alt" style="color: #ffb300; font-size: 1.5rem;"></i>
+    </a>
+
+    <div style="height: 100px;"></div>
 {% endblock %}
 
 {% block scripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    window.addEventListener('load', function() {
-        setTimeout(function() {
-             var splash = document.getElementById('app-splash-screen');
-             if(splash && splash.style.display !== 'none') {
-                 splash.style.opacity = '0';
-                 setTimeout(function() { splash.style.display = 'none'; }, 800);
-             }
-        }, 3000); 
-
-        setTimeout(function() {
-            var splash = document.getElementById('app-splash-screen');
-            if(splash) {
-                splash.style.opacity = '0'; 
-                setTimeout(function() {
-                    splash.style.display = 'none'; 
-                }, 800);
+    // 🔥 首頁一進來，馬上問資料庫最新的消息
+    $(document).ready(function() {
+        $.getJSON('/api/locations', function(data) {
+            // 1. 更新連線狀態
+            $('#system-status').html('✅ Hotmail 專線暢通');
+            
+            // 2. 更新跑馬燈
+            if (data && data.length > 0) {
+                // 拿最後一筆資料 (最新上傳)
+                var latest = data[data.length - 1]; 
+                
+                // 處理描述文字，避免太長
+                var desc = latest.description || "發現新神蹟！";
+                if(desc.length > 10) desc = desc.substring(0, 10) + "...";
+                
+                // 顯示內容
+                $('#news-ticker').text("最新：[" + (latest.nickname || "熱心鄉親") + "] 在苑裡上傳了照片！");
+            } else {
+                // 如果新資料庫是空的
+                $('#news-ticker').text("目前尚無情報，快來搶頭香！");
             }
-        }, 1200); 
+        }).fail(function() {
+            $('#system-status').text("⚠️ 訊號微弱");
+            $('#news-ticker').text("報馬仔休息中 (連線問題)");
+        });
     });
-
-    let realMsgs = ["🔔 報——！歡迎來到尋神情報站！", "💡 報馬仔提醒：發現神隊友請上傳！"];
-    fetch('/api/locations').then(r=>r.json()).then(d=>{if(d&&d.length>0){realMsgs=[];d.slice().reverse().slice(0,5).forEach(i=>{
-        let n = i.nickname || "熱心鄉親";
-        let place = i.area || i.description || i.note || "苑裡某處";
-        if(place.length > 10) place = place.substring(0, 10) + "...";
-        realMsgs.push(`🙏 感謝！[${n}] 在 [${place}] 尋獲神的足跡！`);
-    });
-    realMsgs.push(`🚩 目前戰報：全苑裡已尋獲 ${d.length} 尊！`);}}).catch(e=>{});
-
-    let idx=0,el=document.getElementById('ticker-msg');
-    setInterval(()=>{
-        el.style.animation = 'none'; 
-        el.offsetHeight; 
-        idx=(idx+1)%realMsgs.length;
-        el.innerText=realMsgs[idx];
-        el.style.animation = null; 
-    }, 8000); 
 </script>
 {% endblock %}
