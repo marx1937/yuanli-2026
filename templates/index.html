@@ -5,7 +5,7 @@
 
 {% block styles %}
 <style>
-    /* 1. 暖色系背景 */
+    /* 1. 背景還原 (經典米色點點) */
     body {
         background-color: #fdfcf0;
         background-image: radial-gradient(#d7ccc8 1.5px, transparent 1.5px);
@@ -13,174 +13,134 @@
         font-family: "Microsoft JhengHei", sans-serif;
     }
 
-    /* Hero 區塊 */
-    .hero-section {
-        text-align: center;
-        padding: 30px 0 20px 0;
-        margin-bottom: 10px;
-    }
-    
-    /* 標題 */
-    .app-title {
-        font-family: 'Brush Script MT', cursive; 
-        font-size: 3.2rem; 
-        color: #5d4037; 
-        margin: 0; 
-        text-shadow: 2px 2px 0px #fff;
-    }
-
-    /* 狀態顯示 */
-    .status-text {
-        font-size: 0.9rem;
-        color: #8d6e63;
-        margin-top: 10px;
-        background: rgba(255,255,255,0.6);
-        display: inline-block;
-        padding: 5px 15px;
+    /* 2. 頂部報馬仔橫幅 (原本是歡迎詞，現在變聰明了) */
+    .hero-banner {
+        background: #fff8e1;
+        border: 2px solid #ffe0b2;
         border-radius: 20px;
-    }
-
-    /* 🔥 報馬仔跑馬燈 (聰明版) */
-    .notice-bar {
-        background: #fff3e0;
-        color: #e65100;
-        padding: 12px 20px;
-        border-radius: 15px;
-        margin: 0 20px 20px 20px;
-        font-size: 0.95rem;
+        padding: 15px;
+        margin: 20px 20px 10px 20px;
         display: flex;
         align-items: center;
-        border: 1px dashed #ffcc80;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         cursor: pointer;
-        box-shadow: 0 4px 10px rgba(230, 126, 34, 0.1);
-        overflow: hidden;
-        white-space: nowrap;
     }
-    .notice-icon { margin-right: 10px; animation: tada 1.5s infinite; color: #d35400; }
-    
-    @keyframes tada {
-        0% { transform: scale(1); }
-        10%, 20% { transform: scale(0.9) rotate(-3deg); }
-        30%, 50%, 70%, 90% { transform: scale(1.1) rotate(3deg); }
-        40%, 60%, 80% { transform: scale(1.1) rotate(-3deg); }
-        100% { transform: scale(1) rotate(0); }
-    }
+    .hero-mascot { width: 50px; margin-right: 15px; }
+    .hero-text { color: #5d4037; font-weight: bold; font-size: 1rem; flex: 1; }
 
-    /* 卡片通用設定 */
-    .action-card {
-        margin: 0 20px 20px 20px;
+    /* 3. 卡片通用樣式 (還原截圖風格) */
+    .card-btn {
+        display: flex;
+        align-items: center;
         border-radius: 25px;
-        padding: 25px 20px;
+        padding: 20px;
+        margin: 15px 20px;
+        text-decoration: none !important;
         position: relative;
         overflow: hidden;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        text-decoration: none !important;
         transition: transform 0.2s;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     }
-    .action-card:active { transform: scale(0.98); }
+    .card-btn:active { transform: scale(0.98); }
 
-    /* 紅色 Lucky 卡片 */
-    .card-lucky {
+    /* 紅色卡片 (尋找神隊友) */
+    .card-red {
         background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
         color: white;
-        box-shadow: 0 10px 25px rgba(211, 47, 47, 0.3);
-    }
-    .lucky-tag {
-        position: absolute; right: -25px; top: 15px;
-        background: #f1c40f; color: #d35400;
-        font-weight: bold; padding: 5px 40px;
-        transform: rotate(15deg);
-        font-size: 0.8rem;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-
-    /* 黃色地圖卡片 */
-    .card-map {
-        background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
-        color: #5d4037;
-        box-shadow: 0 10px 25px rgba(255, 193, 7, 0.2);
     }
     
-    /* 影像庫卡片 */
-    .card-gallery {
+    /* 黃色卡片 (搜尋方位) */
+    .card-yellow {
+        background: #fff9c4;
+        border: 2px solid #fff176;
+        color: #5d4037;
+    }
+
+    /* 白色卡片 (影像庫) */
+    .card-white {
         background: #fff;
         border: 2px solid #eee;
         color: #5d4037;
     }
 
-    .card-text { flex: 1; margin-left: 15px; }
-    .card-title { font-size: 1.4rem; font-weight: bold; margin-bottom: 5px; display: block; }
-    .card-desc { font-size: 0.9rem; opacity: 0.9; }
-    .card-icon { width: 70px; height: 70px; object-fit: contain; }
+    /* 卡片內容排版 */
+    .card-img { width: 90px; height: 90px; object-fit: contain; margin-right: 15px; }
+    .card-info { flex: 1; }
+    .card-title { font-size: 1.5rem; font-weight: bold; display: block; margin-bottom: 5px; }
+    .card-desc { font-size: 0.95rem; opacity: 0.9; }
 
-    /* 🔥 底部版權區與 R 標記 */
-    .footer-mark {
-        text-align: center;
-        color: #b0bec5;
-        font-size: 0.85rem;
-        margin-top: 20px;
-        padding-bottom: 120px; /* 避開底部選單 */
+    /* Lucky 標籤 */
+    .lucky-tag {
+        position: absolute; top: 15px; right: -25px;
+        background: #f1c40f; color: #d35400;
+        font-weight: bold; padding: 5px 40px;
+        transform: rotate(15deg); font-size: 0.8rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
-    .r-mark {
-        color: #d32f2f;
-        font-weight: bold;
-        font-size: 1rem;
-        vertical-align: super;
-        margin-left: 2px;
+
+    /* 底部區域 */
+    .footer-area { text-align: center; padding: 20px 0 120px 0; }
+    
+    .btn-contact {
+        display: inline-block;
+        background: #fff; border: 1px solid #d7ccc8;
+        color: #8d6e63; padding: 8px 20px;
+        border-radius: 50px; font-size: 0.9rem;
+        margin-bottom: 15px; text-decoration: none;
+    }
+
+    .footer-text { color: #b0bec5; font-size: 0.85rem; }
+    
+    /* 🔥 正字標記 ® */
+    .mark-r { 
+        color: #d32f2f; font-weight: bold; vertical-align: super; font-size: 0.7rem; margin-left: 2px;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-    <div class="hero-section">
-        <h1 class="app-title">MAP MY GOD</h1>
-        <div class="status-text" id="system-status">
-            <i class="fas fa-satellite-dish"></i> 連線 Hotmail 總部中...
+
+    <div class="hero-banner" onclick="location.reload()">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/mascot_camera.png" class="hero-mascot">
+        <div class="hero-text" id="news-ticker">
+            <i class="fas fa-spinner fa-spin"></i> 正在連線 Hotmail 總部...
         </div>
+        <i class="fas fa-chevron-right" style="color:#d7ccc8;"></i>
     </div>
 
-    <div class="notice-bar" onclick="location.href='/map'">
-        <i class="fas fa-bullhorn notice-icon"></i>
-        <div id="news-ticker" style="overflow: hidden; text-overflow: ellipsis;">
-            正在接收最新情報...
-        </div>
-        <i class="fas fa-chevron-right" style="margin-left: auto; font-size: 0.8rem; opacity: 0.6;"></i>
-    </div>
-
-    <a href="/upload" class="action-card card-lucky">
+    <a href="/upload" class="card-btn card-red">
         <div class="lucky-tag">LUCKY!</div>
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/mascot_camera.png" class="card-icon" alt="Lucky">
-        <div class="card-text">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/mascot_camera.png" class="card-img">
+        <div class="card-info">
             <span class="card-title">尋找神隊友</span>
             <span class="card-desc">趕快幫祂拍張照</span>
         </div>
-        <i class="fas fa-camera" style="font-size: 1.5rem; opacity: 0.8;"></i>
     </a>
 
-    <a href="/map" class="action-card card-map">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/mascot_map.png" class="card-icon" alt="Map">
-        <div class="card-text">
+    <a href="/map" class="card-btn card-yellow">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/mascot_map.png" class="card-img">
+        <div class="card-info">
             <span class="card-title">搜尋方位</span>
             <span class="card-desc">看看他們躲在哪</span>
         </div>
-        <i class="fas fa-map-marked-alt" style="color: #ffb300; font-size: 1.5rem;"></i>
+        <i class="fas fa-map-marked-alt" style="font-size:1.5rem; color:#fbc02d;"></i>
     </a>
 
-    <a href="/gallery" class="action-card card-gallery">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/mascot_couple.png" class="card-icon" alt="Gallery">
-        <div class="card-text">
+    <a href="/gallery" class="card-btn card-white">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/mascot_couple.png" class="card-img">
+        <div class="card-info">
             <span class="card-title">影像庫</span>
-            <span class="card-desc">回顧神蹟紀錄</span>
+            <span class="card-desc">尋神足跡紀錄</span>
         </div>
-        <i class="fas fa-images" style="color: #bdbdbd; font-size: 1.5rem;"></i>
+        <i class="fas fa-images" style="font-size:1.5rem; color:#bdbdbd;"></i>
     </a>
 
-    <div class="footer-mark">
-        2026 苑裡串起來<span class="r-mark">®</span> (Hotmail Ver.)
-        <br>
-        <span style="font-size:0.7rem; opacity:0.6;">Design for Yuanli</span>
+    <div class="footer-area">
+        <a href="#" class="btn-contact"><i class="fab fa-facebook-messenger"></i> 聯絡小編 (私訊)</a>
+        <div class="footer-text">
+            2026 苑裡串起來<span class="mark-r">®</span> (Hotmail Ver.)
+            <i class="fas fa-lock" style="font-size:0.7rem; margin-left:5px;"></i>
+        </div>
     </div>
 
 {% endblock %}
@@ -189,22 +149,19 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
+        // 🔥 聰明報馬仔邏輯：抓取最新一筆資料
         $.getJSON('/api/locations', function(data) {
-            // 1. 更新連線狀態
-            $('#system-status').html('<i class="fas fa-check-circle" style="color:#2ecc71;"></i> Hotmail 專線暢通');
-            
-            // 2. 聰明報馬仔邏輯
             if (data && data.length > 0) {
                 var latest = data[data.length - 1]; 
                 
-                // 抓取暱稱
+                // 1. 抓暱稱
                 var nickname = latest.nickname || "熱心鄉親";
                 
-                // 🔥 嘗試從描述中抓取地點 [地點]
+                // 2. 抓地點 (邏輯：嘗試從 [xxx里] 中抓出文字)
                 var area = "苑裡某處";
                 var desc = latest.description || "";
                 
-                // 如果描述格式是 "[苑南里] 發現..."，我們就把括號裡的字抓出來
+                // 如果格式是 "[苑南里] 發現..."，我們就把括號裡的字抓出來
                 if (desc.indexOf(']') > -1) {
                     var parts = desc.split(']');
                     if (parts.length > 0) {
@@ -212,18 +169,16 @@
                     }
                 }
 
-                // 組合新的情報文字
-                var newsText = `最新：${nickname} 在【${area}】發現了土地公！`;
-                
+                // 3. 顯示在頂部橫幅
                 $('#news-ticker').html(`
-                    <span style="color:#d35400; font-weight:bold;">${newsText}</span>
+                    <span style="color:#e65100;">最新情報：</span><br>
+                    <b>${nickname}</b> 在 <b>${area}</b> 發現了土地公！
                 `);
             } else {
-                $('#news-ticker').text("目前尚無情報，快來搶頭香！");
+                $('#news-ticker').html("目前尚無情報<br>歡迎來到尋神情報站！");
             }
         }).fail(function() {
-            $('#system-status').text("⚠️ 訊號微弱");
-            $('#news-ticker').text("報馬仔休息中...");
+            $('#news-ticker').text("歡迎來到尋神情報站！");
         });
     });
 </script>
