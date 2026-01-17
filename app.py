@@ -3,8 +3,8 @@ from flask import Flask, render_template, request, jsonify, session, redirect, u
 import psycopg2
 import cloudinary
 import cloudinary.uploader
+import cloudinary.api  # 🔥 記得這個要加，救援才有用
 from math import radians, cos, sin, asin, sqrt
-# 👇 新增這個：地名翻譯官
 from geopy.geocoders import Nominatim 
 
 app = Flask(__name__)
@@ -36,19 +36,16 @@ def get_db_connection():
     conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
     return conn
 
-# --- 🔥 新增功能：座標轉地名 (反向地理編碼) ---
+# --- 座標轉地名 (反向地理編碼) ---
 def get_location_name(lat, lng):
     try:
-        # user_agent 必須是唯一的，隨便取個名字
         geolocator = Nominatim(user_agent="yuanli_god_hunter_2026_render")
         location = geolocator.reverse(f"{lat}, {lng}", language='zh-tw')
         
         address = location.raw.get('address', {})
-        # 抓取順序：村里 > 鄰居 > 鄉鎮
         area = address.get('village') or address.get('neighbourhood') or address.get('town')
         
         if area:
-            # 確保前面有掛上 "苑裡" 兩個字，看起來比較整齊
             if "苑裡" not in area:
                 return f"苑裡 {area}"
             return area
@@ -101,7 +98,7 @@ def api_login():
         return jsonify({'status': 'success'})
     return jsonify({'status': 'error', 'message': '密碼錯誤'})
 
-# 2. 核心：上傳功能 (包含重複檢查 + 🔥 自動翻譯地名)
+# 上傳功能
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'GET':
@@ -116,14 +113,12 @@ def upload_file():
     note = request.form.get('note')
     nickname = request.form.get('nickname')
     
-    # 這裡原本是 request.form.get('area')，我們現在要用後端算出來的
-    
     if file and lat and lng:
         try:
             conn = get_db_connection()
             cur = conn.cursor()
             
-            # --- 🛑 重複地點檢查 ---
+            # 重複地點檢查
             cur.execute("SELECT lat, lng FROM land_gods")
             rows = cur.fetchall()
             
@@ -132,21 +127,17 @@ def upload_file():
                 db_lng = row[1]
                 dist = haversine(float(lng), float(lat), db_lng, db_lat)
                 
-                if dist < -1: # 注意：你原本設 -1 是關閉檢查，如果開啟要改成 < 0.05
+                if dist < -1: 
                     conn.close()
                     return jsonify({'status': 'pending', 'message': '地點重複，已送審'})
             
-            # --- 🔥 關鍵：計算地名 ---
-            # 這裡呼叫我們的翻譯機
             detected_area = get_location_name(lat, lng)
-            print(f"新座標: {lat}, {lng} -> 翻譯結果: {detected_area}")
 
-            # --- ✅ 上傳 Cloudinary ---
+            # 上傳 Cloudinary
             upload_result = cloudinary.uploader.upload(file)
             image_url = upload_result['secure_url']
 
-            # --- 💾 寫入資料庫 ---
-            # 注意：最後一個欄位 area 改用 detected_area
+            # 寫入資料庫
             cur.execute("INSERT INTO land_gods (image_url, lat, lng, note, nickname, area) VALUES (%s, %s, %s, %s, %s, %s)",
                         (image_url, float(lat), float(lng), note, nickname, detected_area))
             conn.commit()
@@ -161,7 +152,7 @@ def upload_file():
     
     return jsonify({'status': 'error', 'message': '資料不完整'})
 
-# 3. 提供地圖資料 API
+# 地圖資料 API
 @app.route('/api/locations')
 def get_locations():
     conn = get_db_connection()
@@ -176,7 +167,7 @@ def get_locations():
             'id': row[0],
             'lat': row[1],
             'lng': row[2],
-            'area': row[3], # 這裡就會讀到 "苑裡 客庄里" 了
+            'area': row[3],
             'note': row[4],
             'image_url': row[5],
             'nickname': row[6],
@@ -275,6 +266,50 @@ def delete_location():
     except Exception as e:
         print("刪除失敗:", e)
         return jsonify({"success": False, "message": "資料庫錯誤"})
+
+# ================= 🚑 資料救援專區 (放在最下面) =================
+@app.route('/api/admin/rescue_data')
+def rescue_data_from_cloudinary():
+    try:
+        # 1. 抓取雲端照片
+        print("🚀 開始救援...")
+        result = cloudinary.api.resources(
+            type="upload", 
+            resource_type="image", 
+            max_results=500, 
+            context=True 
+        )
+        resources = result.get('resources', [])
+        
+        # 2. 寫入資料庫
+        conn = get_db_connection()
+        cur = conn.cursor()
+        count = 0
+        for res in resources:
+            url = res['secure_url']
+            cur.execute("SELECT id FROM land_gods WHERE image_url = %s", (url,))
+            if not cur.fetchone():
+                context = res.get('context', {}).get('custom', {})
+                # 簡單防呆：如果沒有暱稱就叫熱心串友
+                cur.execute("""
+                    INSERT INTO land_gods (image_url, nickname, note, lat, lng, area, created_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    url, 
+                    context.get('nickname', '熱心串友'), 
+                    context.get('caption', ''), 
+                    float(context.get('lat', 0)), 
+                    float(context.get('lng', 0)), 
+                    context.get('area', '苑裡'), 
+                    res['created_at']
+                ))
+                count += 1
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({'status': 'success', 'message': f'救援成功！恢復了 {count} 筆資料'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
