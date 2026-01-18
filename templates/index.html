@@ -5,7 +5,7 @@
 
 {% block styles %}
 <style>
-    /* --- CSS 樣式區 (V3.5 白色按鈕風格) --- */
+    /* --- 這裡保持不變，重點在下面的 Script --- */
     .hero-section { position: relative; margin-bottom: 15px; }
     .hero-banner {
         width: 100%; height: auto; display: block;
@@ -110,7 +110,6 @@
         text-align: center; margin-top: 30px; margin-bottom: 40px;
         display: flex; flex-direction: column; align-items: center; gap: 10px;
     }
-    /* 白色按鈕 */
     .btn-messenger {
         display: inline-flex; align-items: center; justify-content: center;
         background: #fff; 
@@ -140,8 +139,12 @@
 {% endblock %}
 
 {% block content %}
-    <div class="hero-section">
-        <img src="{{ cdn_base }}/top.png" class="hero-banner" alt="Banner">
+
+    <div style="background: red; color: white; text-align: center; font-weight: bold; padding: 5px; position: fixed; top: 0; width: 100%; z-index: 9999;">
+        DEBUG MODE V4.0 - 請確認我有出現！
+    </div>
+
+    <div class="hero-section" style="margin-top: 35px;"> <img src="{{ cdn_base }}/top.png" class="hero-banner" alt="Banner">
         
         <div class="hero-text-container">
             <img src="{{ cdn_base }}/toptext.png" class="app-logo-img" alt="MAP MY GOD">
@@ -214,47 +217,38 @@
 <script>
     let realMsgs = ["🔔 報——！歡迎來到尋神情報站！", "💡 報馬仔提醒：發現神隊友請上傳！"];
     
-    // 🔍 V3.7: 暴力搜索版
-    console.log("🔥 V3.7 Loaded: Brute Force Search for 'Li'");
+    console.log("🔥 V4.0 Loaded: Cache Busting Active!");
 
-    fetch('/api/locations')
+    // 🔥 關鍵修正：加了 timestamp 防止快取
+    fetch('/api/locations?t=' + new Date().getTime())
     .then(r => r.json())
     .then(d => {
-        console.log("🔥 報馬仔原始資料：", d);
+        console.log("🔥 報馬仔抓到的最新資料：", d);
 
         if(d && d.length > 0) {
             realMsgs = []; 
+            // 反轉資料，確保拿到最新的
             let latestData = d.slice().reverse().slice(0, 5);
             
             latestData.forEach(i => {
-                // 1. 抓暱稱
                 let n = i.nickname || i.name || i.user || "熱心鄉親";
                 if(n.trim() === "") n = "熱心鄉親"; 
 
-                // 2. 【V3.7 暴力搜索】
-                let place = "苑裡某處"; // 預設
-
-                // 步驟 A: 把所有欄位串在一起變成「文字大雜燴」
-                // (注意：這裡把所有可能藏著地點的欄位都加進來了)
+                // --- 暴力搜索邏輯 ---
+                let place = "苑裡某處";
+                // 把所有可能欄位串起來
                 let soup = (i.area || "") + " " + (i.address || "") + " " + (i.title || "") + " " + (i.description || "") + " " + (i.locationName || "");
                 
-                // 步驟 B: 用雷達掃描所有「xx里」
+                // 掃描「xx里」
                 let matches = soup.match(/[\u4e00-\u9fa5]{2,3}里/g);
 
                 if (matches && matches.length > 0) {
-                     // 步驟 C: 過濾掉假地名 (跟之前一樣)
                      let validLi = matches.find(term => {
                         return term !== "苑里" && term !== "這裡" && term !== "那里" && term !== "家裡" && term !== "公里";
                     });
-
-                    if (validLi) {
-                        place = validLi; // 找到了！直接用！
-                    } else {
-                        // 雖然有里字，但都是無效的，改抓標題 (去括號)
-                        place = (i.title || i.locationName || "苑裡").toString().replace(/[\[\]]/g, '').substring(0, 6);
-                    }
+                    if (validLi) place = validLi;
+                    else place = (i.title || i.locationName || "苑裡").toString().replace(/[\[\]]/g, '').substring(0, 6);
                 } else {
-                    // 完全沒找到里字，改抓標題
                     place = (i.title || i.locationName || "苑裡").toString().replace(/[\[\]]/g, '').substring(0, 6);
                 }
 
