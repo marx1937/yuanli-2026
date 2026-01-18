@@ -292,4 +292,21 @@
                 } else {
                     // 3. 成功 (使用 Cloudinary happy.jpg)
                     Swal.fire({
-                        title
+                        title: '✅ 上傳成功！', 
+                        html: `感謝 <b>${area}</b> 的 <b>${nickname}</b>，土地公收到囉！`, 
+                        imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/yuanli_ui/happy.jpg', 
+                        imageWidth: '100%',
+                        confirmButtonText: '太棒了！', confirmButtonColor: '#d32f2f'
+                    }).then(() => { window.location.href = '/map'; });
+                }
+            },
+            error: function() {
+                Swal.fire({ title: '❌ 上傳失敗', text: '請檢查網路連線', icon: 'error', confirmButtonText: '好' });
+                btn.addClass('ready').html('<i class="fas fa-paper-plane"></i> 重新發送');
+            }
+        });
+    });
+
+    $(document).ready(function() { startGPS(); });
+</script>
+{% endblock %}
