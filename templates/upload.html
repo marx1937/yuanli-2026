@@ -174,24 +174,17 @@
     var currentLat = null, currentLng = null;
     var isPhotoReady = false;
     
-    // 🔥 黑科技：將語音物件掛在全域變數，防止被瀏覽器垃圾回收 (Garbage Collection)
+    // 初始化語音變數
     window.synth = window.speechSynthesis;
-    window.utterance = null; 
 
-    // 🔥 核心語音功能
-    function speakHappy(text) {
+    // 🔥 說話函數
+    function speak(text) {
         if (!window.synth) return;
-        
-        window.synth.cancel(); // 1. 先安靜，清空隊列
-        
-        // 2. 建立新的語音物件
-        window.utterance = new SpeechSynthesisUtterance(text);
-        window.utterance.lang = 'zh-TW'; 
-        window.utterance.rate = 1.0; 
-        window.utterance.volume = 1.0;
-        
-        // 3. 播放
-        window.synth.speak(window.utterance);
+        var utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'zh-TW'; 
+        utterance.rate = 1.0; 
+        utterance.volume = 1.0;
+        window.synth.speak(utterance);
     }
 
     function startGPS() {
@@ -245,11 +238,11 @@
     $('#uploadForm').submit(function(e) {
         e.preventDefault();
         
-        // 🔥【關鍵黑科技】點擊瞬間，先用一個空字串「佔領」聲音通道！
-        // 這樣瀏覽器會認為這是使用者觸發的，稍後的 AJAX 回應就可以說話了。
+        // 🔥【語音修復關鍵】：按下去馬上說話，解鎖瀏覽器限制！
+        // 先取消之前的（避免卡住），然後說「資料傳送中」
         if (window.synth) {
-            var silent = new SpeechSynthesisUtterance(" ");
-            window.synth.speak(silent);
+            window.synth.cancel();
+            speak("資料傳送中，請稍候");
         }
 
         var nickname = $('#nickname').val().trim();
@@ -283,12 +276,11 @@
         $.ajax({
             url: '/upload', type: 'POST', data: formData, contentType: false, processData: false,
             success: function(response) {
-                // 🔥 資料回來了，通道已經打開，直接說話！
+                // 🔥 資料回來後，說第二句話！這時候通道已經打開了，一定會說。
                 var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公會保庇你喔！';
-                speakHappy(sayText); 
+                speak(sayText); 
 
                 if (response.status === 'duplicate') {
-                    // 2. 重複資料
                     Swal.fire({
                         imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/guide_couple.png', 
                         imageWidth: '100%', 
@@ -297,10 +289,10 @@
                         confirmButtonText: '收到，來去找下一座！', confirmButtonColor: '#ff9800'
                     }).then(() => { window.location.href = '/map'; });
                 } else {
-                    // 3. 成功
+                    // 🔥【文字排版修復】：使用 <br> 換行，並加強後半段語氣
                     Swal.fire({
                         title: '✅ 上傳成功！', 
-                        html: `感謝 <b>${area}</b> 的 <b>${nickname}</b>，土地公收到囉！`, 
+                        html: `感謝 <b>${area}</b> 的 <b>${nickname}</b><br><br><span style="font-size: 1.2rem; color: #d32f2f; font-weight: bold;">土地公收到囉！</span>`, 
                         imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/happy.jpg', 
                         imageWidth: '100%',
                         confirmButtonText: '太棒了！', confirmButtonColor: '#d32f2f'
