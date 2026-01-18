@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% set active_page = "map" %}
 
-{% block title %}尋神地圖 - 淨空測試版{% endblock %}
+{% block title %}尋神地圖 - 完美體驗版{% endblock %}
 
 {% block styles %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.css" />
@@ -9,45 +9,45 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.min.css" />
 
     <style>
-        /* 基礎設定 */
+        /* 1. 基礎設定 */
         html, body { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #fdfcf0; }
         #map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; z-index: 1; }
 
-        /* 教學遮罩 */
+        /* 2. 載入動畫 (關鍵修正：z-index 設為最高，蓋住底部選單) */
+        #map-loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(253, 252, 240, 1); /* 改為不透明，質感更好 */
+            z-index: 9999999 !important; /* 🔥 關鍵：無限高，蓋住一切 */
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.8s ease-out; /* 淡出更柔和 */
+        }
+        .loader-icon { width: 90px; height: auto; animation: pulse-load 1.2s infinite ease-in-out; }
+        .loader-text { margin-top: 15px; color: #8d6e63; font-weight: bold; font-size: 1.1rem; letter-spacing: 2px; }
+        @keyframes pulse-load { 0% { transform: scale(0.95); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(0.95); opacity: 0.8; } }
+
+        /* 3. 教學遮罩 */
         #tutorial-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); z-index: 9999;
+            background: rgba(0,0,0,0.8); z-index: 9999998; /* 比 loader 低一點點 */
             display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(3px); display: none;
+            backdrop-filter: blur(4px); display: none;
         }
         .tut-card {
             background: white; width: 85%; max-width: 320px;
             border-radius: 25px; padding: 30px 20px;
             text-align: center; position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
             animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         @keyframes pop-in { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        .tut-title { font-size: 1.5rem; color: #d32f2f; font-weight: bold; margin-bottom: 25px; letter-spacing: 1px; }
+        .tut-title { font-size: 1.5rem; color: #d32f2f; font-weight: bold; margin-bottom: 25px; }
         .tut-list { text-align: left; margin-bottom: 20px; padding-left: 10px; }
         .tut-item { display: flex; align-items: center; margin-bottom: 15px; font-size: 1rem; color: #5d4037; font-weight: bold; }
         .tut-icon-box { width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; margin-right: 12px; font-size: 1.2rem; }
-        .tut-img { width: 70%; max-width: 180px; height: auto; margin: 10px auto 20px auto; display: block; }
-        .btn-tut-start { background: #f57c00; color: white; border: none; width: 100%; padding: 12px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; box-shadow: 0 4px 10px rgba(245, 124, 0, 0.3); cursor: pointer; transition: transform 0.2s; }
-        .btn-tut-start:active { transform: scale(0.95); background: #ef6c00; }
+        .tut-img { width: 60%; height: auto; margin: 10px auto 20px auto; display: block; }
+        .btn-tut-start { background: #f57c00; color: white; border: none; width: 100%; padding: 12px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; box-shadow: 0 4px 10px rgba(245, 124, 0, 0.3); cursor: pointer; }
 
-        /* 載入動畫 */
-        #map-loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(253, 252, 240, 0.98); z-index: 5000;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.5s ease-out;
-        }
-        .loader-icon { width: 80px; height: auto; animation: pulse-load 1.5s infinite; }
-        .loader-text { margin-top: 15px; color: #8d6e63; font-weight: bold; font-size: 1.1rem; }
-        @keyframes pulse-load { 0% { transform: scale(0.95); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(0.95); opacity: 0.8; } }
-
-        /* 介面元件 */
+        /* 4. 介面元件 */
         .locate-btn { position: absolute; bottom: 80px; right: 20px; background: white; width: 50px; height: 50px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 2500; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; color: #d32f2f; cursor: pointer; }
         .map-header { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 3000; width: 90%; max-width: 400px; display: flex; gap: 10px; pointer-events: auto; }
         .header-btn { background: white; border: 2px solid white; padding: 10px 15px; border-radius: 50px; font-weight: bold; color: #5d4037; box-shadow: 0 4px 10px rgba(0,0,0,0.2); flex: 1; text-align: center; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -84,7 +84,7 @@
 
     <div id="map-loader">
         <img src="https://res.cloudinary.com/diuoghid2/image/upload/bm.png" class="loader-icon" alt="Loading">
-        <div class="loader-text">正在讀取...</div>
+        <div class="loader-text">情報彙整中...</div>
     </div>
 
     <div class="locate-btn" onclick="locateUser()"><i class="fas fa-crosshairs"></i></div>
@@ -159,6 +159,8 @@
             VILLAGES.forEach(v => v.count = 0);
             allMarkersObj = [];
 
+            let validMarkers = []; // 用來存有效的 marker 座標
+
             // 🔥 淨空濾網：只篩選出帶有 # 的新資料 🔥
             let validCount = 0;
             
@@ -169,7 +171,7 @@
 
                 let rawName = item.nickname || item.name || item.user || '';
                 
-                // 🛑 這裡就是「濾水器」！沒有 # 的資料，直接 return 跳過，不顯示！
+                // 濾水器：沒暗號就隱藏
                 if (rawName.indexOf('#') === -1) return;
 
                 // 解碼
@@ -177,13 +179,11 @@
                 let displayName = parts[0];       
                 let assignedVillageName = parts[1];
                 
-                // 統計
                 let village = VILLAGES.find(v => v.name === assignedVillageName);
                 if (village) village.count++;
 
-                validCount++; // 有效資料 +1
+                validCount++;
 
-                // 建立 Marker
                 let m = L.marker([lat, lng], { icon: godIcon });
                 m.bindPopup(`
                     <img src="${item.image_url || 'https://placehold.co/300x200?text=No+Image'}" class="popup-img">
@@ -197,12 +197,11 @@
                 m.villageName = assignedVillageName;
                 markersCluster.addLayer(m);
                 allMarkersObj.push(m);
+                validMarkers.push(m); // 收集起來準備聚焦
             });
 
-            // 更新右上角的數字 (現在只會顯示 1)
             $('#totalCount').text(validCount);
 
-            // 更新選單
             VILLAGES.forEach(v => {
                 $('#villageGrid').append(`
                     <div class="village-item" onclick="filterByVillage('${v.name}', ${v.lat}, ${v.lng})">
@@ -212,7 +211,15 @@
                 `);
             });
 
-            setTimeout(() => { $('#map-loader').fadeOut(500); }, 500);
+            // 🔥 關鍵：自動運鏡！讓地圖飛去看到那幾個點！
+            if (validMarkers.length > 0) {
+                let group = L.featureGroup(validMarkers);
+                // 使用 flyToBounds 會有動畫效果，更順暢
+                map.flyToBounds(group.getBounds(), { padding: [50, 50], maxZoom: 16 });
+            }
+
+            // 稍微延遲關閉遮罩，確保畫面已經飛到了
+            setTimeout(() => { $('#map-loader').fadeOut(800); }, 1000);
         }
 
         function filterByVillage(vName, lat, lng) {
@@ -220,7 +227,7 @@
             let targetMarkers = allMarkersObj.filter(m => m.villageName === vName);
             if (targetMarkers.length > 0) {
                 let group = L.featureGroup(targetMarkers);
-                map.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 17 });
+                map.flyToBounds(group.getBounds(), { padding: [50, 50], maxZoom: 17 });
             } else {
                 map.flyTo([lat, lng], 15);
             }
