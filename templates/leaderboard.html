@@ -20,14 +20,17 @@
         text-align: center; padding: 20px 0 15px 0;
         position: relative; margin-bottom: 5px;
     }
+    
+    /* 🔥 修正：確保圖片路徑正確，並增加預設高度避免破圖時塌陷 */
     .rank-banner-img {
         width: 90%; max-width: 360px; height: auto;
+        min-height: 100px; /* 預留空間 */
         filter: drop-shadow(0 8px 10px rgba(93, 64, 55, 0.3));
         animation: float-title 3s ease-in-out infinite;
     }
     @keyframes float-title { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
-    /* 🔥 雙榜切換按鈕 (Tabs) */
+    /* 雙榜切換按鈕 */
     .tab-container {
         display: flex; justify-content: center; gap: 10px;
         margin: 15px auto 20px auto; width: 90%; max-width: 400px;
@@ -59,10 +62,10 @@
     .rule-desc { font-size: 0.85rem; color: #888; }
     .rule-badge { background: #ffe0b2; padding: 4px 12px; border-radius: 10px; font-size: 0.85rem; color: #e65100; font-weight: bold; white-space: nowrap; }
 
-    /* 3. 頒獎台 (共用樣式) */
+    /* 3. 頒獎台 */
     .podium-container {
         display: flex; justify-content: center; align-items: flex-end;
-        gap: 8px; margin-bottom: 30px; padding: 0 10px; height: 210px;
+        gap: 8px; margin-bottom: 30px; padding: 0 10px; height: 230px; /* 稍微加高給皇冠空間 */
     }
     .podium-item {
         display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
@@ -83,7 +86,12 @@
     .rank-2 .rank-avatar { border-color: #c0c0c0; }
     .rank-3 .rank-avatar { border-color: #cd7f32; }
 
-    .crown { position: absolute; top: -35px; width: 40px; animation: spin-crown 3s infinite linear; filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.8)); }
+    /* 🔥 皇冠改用 Emoji，保證不破圖 */
+    .crown-icon {
+        position: absolute; top: -45px; font-size: 40px;
+        animation: spin-crown 3s infinite linear;
+        filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.8));
+    }
     @keyframes spin-crown { 0% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } 100% { transform: rotate(-5deg); } }
 
     .podium-block {
@@ -146,7 +154,8 @@
 
     <div class="rank-header">
         <img src="https://res.cloudinary.com/diuoghid2/image/upload/yuanli_ui/leaderboard_top.png" class="rank-banner-img" alt="尋神英雄榜">
-    </div>
+        
+        </div>
 
     <div class="tab-container">
         <div class="tab-btn active" onclick="switchTab('village')">
@@ -158,8 +167,7 @@
     </div>
 
     <div style="text-align:center; margin-bottom:20px;">
-        <div class="rules-toggle-btn" onclick="$('.rules-card').slideToggle();" 
-             style="display:inline-flex; align-items:center; color:#8d6e63; font-size:0.9rem; cursor:pointer;">
+        <div class="rules-toggle-btn" onclick="$('.rules-card').slideToggle();">
             <i class="fas fa-info-circle" style="margin-right:5px;"></i> 查看等級說明
         </div>
     </div>
@@ -177,17 +185,13 @@
     </div>
 
     <div id="tab-village" class="tab-content active">
-        <div class="podium-container" id="podium-village">
-            </div>
-        <div class="list-container" id="list-village">
-            </div>
+        <div class="podium-container" id="podium-village"></div>
+        <div class="list-container" id="list-village"></div>
     </div>
 
     <div id="tab-personal" class="tab-content">
-        <div class="podium-container" id="podium-personal">
-            </div>
-        <div class="list-container" id="list-personal">
-            </div>
+        <div class="podium-container" id="podium-personal"></div>
+        <div class="list-container" id="list-personal"></div>
     </div>
 
     <div style="height:30px;"></div>
@@ -202,11 +206,9 @@
         "山腳里", "舊社里", "石鎮里", "蕉埔里", "西平里"
     ];
 
-    // 初始化資料容器
     let villageData = [];
     let personalData = [];
 
-    // 切換分頁邏輯
     window.switchTab = function(type) {
         $('.tab-btn').removeClass('active');
         $('.tab-content').removeClass('active');
@@ -223,25 +225,21 @@
     fetch('/api/locations?t=' + new Date().getTime())
     .then(r => r.json())
     .then(data => {
-        // --- 1. 資料統計 ---
         let vCounts = {};
         ALL_VILLAGES.forEach(v => vCounts[v] = 0);
-        
-        let pCounts = {}; // Key: "暱稱#里別" (確保唯一性)
+        let pCounts = {}; 
 
         data.forEach(item => {
             let rawName = item.nickname || item.name || '';
             let displayName = rawName;
             let assignedVillage = null;
 
-            // 解碼
             if (rawName.indexOf('#') > -1) {
                 let parts = rawName.split('#');
                 displayName = parts[0];
                 let vName = parts[1];
                 if (ALL_VILLAGES.includes(vName)) assignedVillage = vName;
             } else {
-                // 舊資料暴力搜
                 let soup = (item.area || "") + " " + (item.address || "") + " " + (item.description || "");
                 let matches = soup.match(/[\u4e00-\u9fa5]{2,3}里/g);
                 if (matches) {
@@ -250,11 +248,8 @@
                 }
             }
 
-            // 統計里別
             if (assignedVillage) vCounts[assignedVillage]++;
 
-            // 統計個人 (使用 rawName 作為 key，避免不同里的同名人混淆)
-            // 只有當有名稱時才統計 (排除無名氏)
             if (displayName && displayName !== '熱心鄉親' && displayName !== '善心人士') {
                 let key = rawName; 
                 if (!pCounts[key]) pCounts[key] = { name: displayName, village: assignedVillage || '未知', count: 0 };
@@ -262,17 +257,11 @@
             }
         });
 
-        // --- 2. 轉換與排序 ---
-        // 里別榜
         villageData = Object.keys(vCounts).map(key => ({ name: key, count: vCounts[key] })).sort((a, b) => b.count - a.count);
-        
-        // 個人榜
         personalData = Object.values(pCounts).sort((a, b) => b.count - a.count);
 
-        // --- 3. 渲染畫面 ---
         renderPodium('village', villageData);
         renderList('village', villageData);
-        
         renderPodium('personal', personalData);
         renderList('personal', personalData);
 
@@ -280,12 +269,10 @@
     })
     .catch(e => { $('#loading-box').html('❌ 資料讀取失敗'); console.error(e); });
 
-    // 渲染頒獎台
     function renderPodium(type, data) {
         let container = $(`#podium-${type}`);
         let html = '';
         
-        // No.2
         let d2 = data[1] || { name: '從缺', count: '-' };
         html += `
             <div class="podium-item rank-2">
@@ -297,11 +284,10 @@
                 </div>
             </div>`;
             
-        // No.1
         let d1 = data[0] || { name: '從缺', count: '-' };
         html += `
             <div class="podium-item rank-1">
-                <img src="https://res.cloudinary.com/diuoghid2/image/upload/crown.png" class="crown" alt="Crown">
+                <div class="crown-icon">👑</div>
                 <div class="rank-avatar">🥇</div>
                 <div class="podium-block">
                     <div class="rank-name">${d1.name}</div>
@@ -310,7 +296,6 @@
                 </div>
             </div>`;
 
-        // No.3
         let d3 = data[2] || { name: '從缺', count: '-' };
         html += `
             <div class="podium-item rank-3">
@@ -325,7 +310,6 @@
         container.html(html);
     }
 
-    // 渲染列表
     function renderList(type, data) {
         let container = $(`#list-${type}`);
         let html = '';
@@ -333,11 +317,10 @@
 
         for (let i = 3; i < data.length; i++) {
             let item = data[i];
-            if (item.count === 0 && type === 'personal') continue; // 個人榜不顯示 0 的
+            if (item.count === 0 && type === 'personal') continue; 
 
             let percent = (item.count / maxCount) * 100;
             
-            // 稱號邏輯
             let levelTag = '';
             if (type === 'personal') {
                 if (item.count >= 20) levelTag = '<span class="lvl-tag lvl-max">在世土地公</span>';
@@ -345,7 +328,6 @@
                 else if (item.count >= 5) levelTag = '<span class="lvl-tag lvl-2">熱血護衛隊</span>';
                 else levelTag = '<span class="lvl-tag lvl-1">尋神小萌新</span>';
             } else {
-                // 里別榜可以加個 "熱門" 標籤
                 if (item.count >= 10) levelTag = '<span class="lvl-tag lvl-max">🔥 熱區</span>';
             }
 
