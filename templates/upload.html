@@ -3,6 +3,7 @@
 
 {% block styles %}
 <style>
+    /* 全局背景 */
     body {
         background-color: #fdfcf0;
         background-image: radial-gradient(#d7ccc8 1.5px, transparent 1.5px);
@@ -10,19 +11,29 @@
         padding-bottom: 100px;
         -webkit-tap-highlight-color: transparent;
     }
+
+    /* 頂部標題區 */
     .page-header { text-align: center; padding: 25px 0 10px 0; width: 100%; position: relative; }
+    
+    /* 匾額標題 */
     .page-title-img {
-        width: 85%; max-width: 320px; height: auto; display: block; margin: 0 auto;
+        width: 85%; max-width: 320px; 
+        height: auto; display: block; margin: 0 auto;
         filter: drop-shadow(0 8px 15px rgba(93, 64, 55, 0.4));
         animation: float-title 4s ease-in-out infinite;
     }
     @keyframes float-title { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+    /* 主表單卡片 */
     .form-card {
         background: rgba(255, 255, 255, 0.95); width: 92%; max-width: 500px;
         padding: 25px; border-radius: 30px;
         box-shadow: 0 10px 30px rgba(93, 64, 55, 0.1);
-        margin: 10px auto; position: relative; border: 2px solid #fff;
+        margin: 10px auto; position: relative;
+        border: 2px solid #fff;
     }
+
+    /* GPS 狀態 Pill */
     .gps-pill {
         background: #fff8e1; padding: 8px 15px; border-radius: 50px;
         font-size: 0.9rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
@@ -30,12 +41,18 @@
         border: 1px solid #ffe0b2; color: #f57c00;
         margin-bottom: 20px; width: 100%; cursor: pointer;
     }
+    
+    /* 相機觸發區 */
     .upload-zone {
-        border: 2px dashed #d7ccc8; border-radius: 20px; min-height: 250px;
+        border: 2px dashed #d7ccc8; border-radius: 20px;
+        min-height: 250px;
         display: flex; flex-direction: column; justify-content: center; align-items: center;
-        background: #fafafa; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
+        background: #fafafa;
+        cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
     }
     .upload-zone:active { background: #fff; border-color: #d32f2f; transform: scale(0.98); }
+    
+    /* 金身土地公樣式 */
     .god-camera-img {
         width: 150px; height: auto; object-fit: contain; margin-bottom: 10px; 
         filter: drop-shadow(0 0 15px rgba(255, 193, 7, 0.5));
@@ -45,12 +62,21 @@
         0%, 100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(255, 193, 7, 0.5)); }
         50% { transform: scale(1.05); filter: drop-shadow(0 0 25px rgba(255, 193, 7, 0.8)); }
     }
+    
     .upload-text { font-weight: bold; color: #8d6e63; font-size: 1.1rem; margin-top: 5px; }
-    #preview { width: 100%; height: 100%; position: absolute; top:0; left:0; object-fit: cover; display: none; }
+    
+    /* 預覽圖 */
+    #preview { 
+        width: 100%; height: 100%; position: absolute; top:0; left:0;
+        object-fit: cover; display: none; 
+    }
     .re-take-hint {
         position: absolute; bottom: 10px; background: rgba(0,0,0,0.6); color: white;
-        padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; pointer-events: none; display: none;
+        padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; pointer-events: none;
+        display: none;
     }
+
+    /* 輸入框 */
     .form-group { margin-bottom: 15px; text-align: left; }
     .form-label { font-weight: bold; color: #5d4037; margin-bottom: 5px; font-size: 0.95rem; display: block;}
     .custom-input {
@@ -58,41 +84,30 @@
         padding: 12px 15px; font-size: 1rem; transition: 0.3s;
     }
     .custom-input:focus { border-color: #d32f2f; outline: none; background: white; }
-    
+    .custom-input::placeholder { color: #ccc; }
+
+    /* 提交按鈕 */
     .btn-submit {
         background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
         border: none; border-radius: 50px; padding: 15px; margin-top: 15px;
         font-weight: bold; letter-spacing: 1px; width: 100%; font-size: 1.1rem; color: white;
         box-shadow: 0 8px 20px rgba(211, 47, 47, 0.3);
         opacity: 0.5; pointer-events: none; transition: 0.3s;
-        cursor: pointer; display: block;
     }
     .btn-submit.ready { opacity: 1; pointer-events: auto; }
     .btn-submit:active { transform: scale(0.98); }
 
-    /* 播放按鈕的特殊樣式 */
-    .play-btn-large {
-        font-size: 1.2rem; padding: 15px 30px; background: #4caf50; color: white;
-        border: none; border-radius: 50px; margin-top: 20px;
-        box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
-        animation: pulse-btn 2s infinite;
-    }
-    @keyframes pulse-btn { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 </style>
 {% endblock %}
 
 {% block content %}
+
     <div class="page-header">
         <img src="https://res.cloudinary.com/diuoghid2/image/upload/title_signboard.png" class="page-title-img" alt="尋神情報站">
     </div>
 
     <div class="form-card">
-        <!-- 備用音效：成功的叮咚聲 (Base64) -->
-        <!-- 這是一個通用的成功音效，不依賴手機語音包 -->
-        <audio id="successMp3">
-            <source src="data:audio/mp3;base64,//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" type="audio/mpeg">
-        </audio>
-
+        
         <div class="gps-pill" id="gpsStatus" onclick="startGPS()">
             <i class="fas fa-satellite-dish fa-spin mr-2"></i> 定位中... (點擊重抓)
         </div>
@@ -104,12 +119,17 @@
             <div class="form-group text-center">
                 <label for="photo" class="upload-zone" id="uploadLabel">
                     <div id="uploadPlaceholder">
-                        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1768691403/god_camera.png" class="god-camera-img" alt="請上傳照片">
+                        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1768691403/god_camera.png" 
+                             class="god-camera-img" 
+                             alt="請上傳照片">
+                        
                         <div class="upload-text">📸 點此奉上神跡照片</div>
                         <small style="color:#aaa;">開啟相機捕捉金身</small>
                     </div>
+                    
                     <img id="preview" alt="預覽圖">
                     <div class="re-take-hint" id="reTakeHint"><i class="fas fa-redo"></i> 點擊重拍</div>
+
                     <input type="file" id="photo" name="photo" accept="image/*" capture="environment" style="display:none;" onchange="previewImage(this)">
                 </label>
             </div>
@@ -144,104 +164,17 @@
             </button>
         </form>
     </div>
+
 {% endblock %}
 
 {% block scripts %}
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // --- 核心發聲函數 ---
-    function trySpeak(text) {
-        // 1. 嘗試 TTS
-        if ('speechSynthesis' in window) {
-            // Android 某些瀏覽器需要取消先前的才能播放新的
-            window.speechSynthesis.cancel();
-            
-            let u = new SpeechSynthesisUtterance(text);
-            u.lang = 'zh-TW';
-            u.rate = 1;
-            
-            // 嘗試播放
-            try {
-                window.speechSynthesis.speak(u);
-            } catch(e) {
-                console.log("TTS Error: " + e);
-                playMp3(); // 失敗轉 MP3
-            }
-            
-            // 為了保險，同時播放 MP3 (雙重聲音總比沒聲音好)
-            // 這樣就算 TTS 是啞巴，至少還有叮咚聲
-            playMp3(); 
-        } else {
-            playMp3(); // 不支援 TTS，直接 MP3
-        }
-    }
-
-    function playMp3() {
-        let audio = document.getElementById('successMp3');
-        if(audio) {
-            audio.currentTime = 0;
-            audio.play().catch(e => {
-                console.log("MP3 Autoplay Blocked: " + e);
-            });
-        }
-    }
-
-    // --- 提交處理邏輯 ---
-    $('#uploadForm').submit(function(e) {
-        e.preventDefault();
-        
-        let btn = $('#submitBtn');
-        if(!btn.hasClass('ready')) return;
-
-        let nickname = $('#nickname').val().trim() || '熱心串友'; 
-        let area = $('#area').val();
-        let sayText = `收到，資料傳送中。感謝${area}的${nickname}`;
-
-        // UI 變更
-        btn.removeClass('ready').html('<i class="fas fa-robot"></i> 正在傳送資料...').css('opacity', '0.8');
-
-        let formData = new FormData(this);
-        formData.set('nickname', nickname);
-        let desc = $('#description').val();
-        formData.set('description', '[' + area + '] ' + desc);
-
-        $.ajax({
-            url: '/upload', type: 'POST', data: formData, contentType: false, processData: false,
-            success: function(response) {
-                // 上傳成功後，彈出視窗請求「手動點擊播放」
-                // 這是繞過自動播放限制的唯一 100% 成功法
-                Swal.fire({
-                    title: '✅ 上傳成功！',
-                    html: `感謝 <b>${area}</b> 的 <b>${nickname}</b><br><br>
-                           <button id="finalPlayBtn" class="play-btn-large">
-                               🔊 點我聽土地公說話
-                           </button>`,
-                    icon: 'success',
-                    showConfirmButton: false, // 隱藏預設按鈕，強迫點我們的播放鈕
-                    allowOutsideClick: false
-                });
-
-                // 綁定視窗內的按鈕事件
-                $(document).on('click', '#finalPlayBtn', function() {
-                    trySpeak(sayText);
-                    // 播放後延遲一下跳轉
-                    setTimeout(() => {
-                        window.location.href = '/map';
-                    }, 2500); // 等 2.5 秒讓聲音播完
-                });
-            },
-            error: function() {
-                Swal.fire({ title: '❌ 上傳失敗', text: '請檢查網路', icon: 'error' });
-                btn.addClass('ready').html('<i class="fas fa-paper-plane"></i> 重新發送');
-            }
-        });
-    });
-
-    // --- GPS 與預覽 ---
     var currentLat = null, currentLng = null;
     var isPhotoReady = false;
 
+    // 啟動 GPS
     function startGPS() {
         $('#gpsStatus').html('<i class="fas fa-satellite-dish fa-spin mr-2"></i> 定位中...');
         if (navigator.geolocation) {
@@ -254,7 +187,7 @@
                     checkReady();
                 }, 
                 function(error) { 
-                    $('#gpsStatus').html('<i class="fas fa-exclamation-triangle mr-2"></i> 定位失敗').css('color', '#e74c3c');
+                    $('#gpsStatus').html('<i class="fas fa-exclamation-triangle mr-2"></i> 定位失敗 (點擊重試)').css('color', '#e74c3c');
                 },
                 { timeout: 10000 }
             );
@@ -290,8 +223,67 @@
         }
     }
 
+    $('#uploadForm').submit(function(e) {
+        e.preventDefault();
+        
+        var nickname = $('#nickname').val().trim();
+        if(!nickname) nickname = '熱心串友'; 
+        var area = $('#area').val();
+
+        // 1. 不雅字過濾
+        var badWords = ['笨蛋', '壞蛋', '王八', '白痴', '白癡', '智障', '幹', '靠', '死', '爛', '屌', '雞掰', '機車', 'fuck', 'shit']; 
+        for (var word of badWords) {
+            if (nickname.toLowerCase().includes(word)) {
+                Swal.fire({
+                    imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/377.jpg',
+                    imageWidth: '100%', imageHeight: 'auto',
+                    title: '暱稱不太好聽喔...', 
+                    text: '請使用優雅一點的名字，土地公才聽得懂！',
+                    confirmButtonColor: '#d33', confirmButtonText: 'OK'
+                });
+                return; 
+            }
+        }
+
+        var btn = $('#submitBtn');
+        if(!btn.hasClass('ready')) return;
+        btn.removeClass('ready').html('<i class="fas fa-robot"></i> 正在傳送資料...').css('opacity', '0.8');
+
+        var formData = new FormData(this);
+        formData.set('nickname', nickname);
+        var desc = $('#description').val();
+        formData.set('description', '[' + area + '] ' + desc);
+
+        $.ajax({
+            url: '/upload', type: 'POST', data: formData, contentType: false, processData: false,
+            success: function(response) {
+                if (response.status === 'duplicate') {
+                    // 2. 重複資料
+                    Swal.fire({
+                        imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/guide_couple.png', 
+                        imageWidth: '100%', 
+                        title: '📋 資料已送交審核',
+                        html: `感謝您！不過此地點 (${area}) 附近似乎已有查報紀錄。<br>管理員確認品質後就會更新！`,
+                        confirmButtonText: '收到，來去找下一座！', confirmButtonColor: '#ff9800'
+                    }).then(() => { window.location.href = '/map'; });
+                } else {
+                    // 3. 成功 (文字保留排版)
+                    Swal.fire({
+                        title: '✅ 上傳成功！', 
+                        html: `感謝 <b>${area}</b> 的 <b>${nickname}</b><br><br><span style="font-size: 1.2rem; color: #d32f2f; font-weight: bold;">土地公收到囉！</span>`, 
+                        imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/happy.jpg', 
+                        imageWidth: '100%',
+                        confirmButtonText: '太棒了！', confirmButtonColor: '#d32f2f'
+                    }).then(() => { window.location.href = '/map'; });
+                }
+            },
+            error: function() {
+                Swal.fire({ title: '❌ 上傳失敗', text: '請檢查網路連線', icon: 'error', confirmButtonText: '好' });
+                btn.addClass('ready').html('<i class="fas fa-paper-plane"></i> 重新發送');
+            }
+        });
+    });
+
     $(document).ready(function() { startGPS(); });
 </script>
 {% endblock %}
-
-
