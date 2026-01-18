@@ -14,7 +14,7 @@
     /* 頂部標題區 */
     .page-header { text-align: center; padding: 25px 0 10px 0; width: 100%; position: relative; }
     
-    /* 匾額標題 (絕對路徑) */
+    /* 匾額標題 */
     .page-title-img {
         width: 85%; max-width: 320px; 
         height: auto; display: block; margin: 0 auto;
@@ -51,7 +51,7 @@
     }
     .upload-zone:active { background: #fff; border-color: #d32f2f; transform: scale(0.98); }
     
-    /* 金身土地公樣式 (絕對路徑) */
+    /* 金身土地公樣式 */
     .god-camera-img {
         width: 150px; height: auto; object-fit: contain; margin-bottom: 10px; 
         filter: drop-shadow(0 0 15px rgba(255, 193, 7, 0.5));
@@ -174,19 +174,20 @@
     var currentLat = null, currentLng = null;
     var isPhotoReady = false;
 
-    // 🔥 語音修復：加入 cancel() 避免卡住，並確保 volume
+    // 🔥 核心語音功能
     function speakHappy(text) {
         if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel(); // 1. 先停止之前的發音
+            window.speechSynthesis.cancel(); // 先安靜
             var msg = new SpeechSynthesisUtterance();
             msg.text = text; 
             msg.lang = 'zh-TW'; 
             msg.rate = 1.0; 
-            msg.volume = 1.0; // 2. 確保音量
+            msg.volume = 1.0;
             window.speechSynthesis.speak(msg);
         }
     }
 
+    // 啟動 GPS
     function startGPS() {
         $('#gpsStatus').html('<i class="fas fa-satellite-dish fa-spin mr-2"></i> 定位中...');
         if (navigator.geolocation) {
@@ -238,6 +239,12 @@
     $('#uploadForm').submit(function(e) {
         e.preventDefault();
         
+        // 🔥【關鍵黑科技】點擊按鈕瞬間，先初始化語音引擎 (解鎖 Autoplay)
+        if ('speechSynthesis' in window) {
+            var silentMsg = new SpeechSynthesisUtterance(''); // 說一句空話
+            window.speechSynthesis.speak(silentMsg);
+        }
+
         var nickname = $('#nickname').val().trim();
         if(!nickname) nickname = '熱心串友'; 
         var area = $('#area').val();
@@ -269,7 +276,7 @@
         $.ajax({
             url: '/upload', type: 'POST', data: formData, contentType: false, processData: false,
             success: function(response) {
-                // 🔥 修復點：無論是成功還是重複，都先說話！
+                // 🔥 AJAX 成功後，真正的語音才會出來
                 var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公會保庇你喔！';
                 speakHappy(sayText); 
 
