@@ -11,10 +11,10 @@
         padding-bottom: 100px;
     }
 
-    /* 頂部標題區 (使用匾額) */
+    /* 頂部標題區 */
     .page-header { text-align: center; padding: 25px 0 10px 0; width: 100%; position: relative; }
     
-    /* 🔥 匾額標題 (路徑確認：根目錄) */
+    /* 匾額標題 (絕對路徑) */
     .page-title-img {
         width: 85%; max-width: 320px; 
         height: auto; display: block; margin: 0 auto;
@@ -51,7 +51,7 @@
     }
     .upload-zone:active { background: #fff; border-color: #d32f2f; transform: scale(0.98); }
     
-    /* 🔥 金身土地公樣式 (絕對路徑) */
+    /* 金身土地公樣式 (絕對路徑) */
     .god-camera-img {
         width: 150px; height: auto; object-fit: contain; margin-bottom: 10px; 
         filter: drop-shadow(0 0 15px rgba(255, 193, 7, 0.5));
@@ -104,7 +104,7 @@
 
     <div class="page-header">
         <img src="https://res.cloudinary.com/diuoghid2/image/upload/title_signboard.png" class="page-title-img" alt="尋神情報站">
-        </div>
+    </div>
 
     <div class="form-card">
         
@@ -174,10 +174,15 @@
     var currentLat = null, currentLng = null;
     var isPhotoReady = false;
 
+    // 🔥 語音修復：加入 cancel() 避免卡住，並確保 volume
     function speakHappy(text) {
         if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel(); // 1. 先停止之前的發音
             var msg = new SpeechSynthesisUtterance();
-            msg.text = text; msg.lang = 'zh-TW'; msg.rate = 1.0; 
+            msg.text = text; 
+            msg.lang = 'zh-TW'; 
+            msg.rate = 1.0; 
+            msg.volume = 1.0; // 2. 確保音量
             window.speechSynthesis.speak(msg);
         }
     }
@@ -264,6 +269,7 @@
         $.ajax({
             url: '/upload', type: 'POST', data: formData, contentType: false, processData: false,
             success: function(response) {
+                // 🔥 修復點：無論是成功還是重複，都先說話！
                 var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公會保庇你喔！';
                 speakHappy(sayText); 
 
