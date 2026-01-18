@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% set active_page = "map" %}
 
-{% block title %}尋神地圖 - 絕對顯形版{% endblock %}
+{% block title %}尋神地圖 - 威力加強版{% endblock %}
 
 {% block styles %}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
 
     <style>
-        /* --- 1. 基礎設定：確保地圖滿版且不被遮擋 --- */
+        /* --- 1. 基礎設定 --- */
         html, body {
             height: 100%; width: 100%;
             margin: 0; padding: 0;
@@ -24,11 +24,45 @@
             z-index: 1; 
         }
 
-        /* --- 2. 關鍵修正：確保圖釘永遠在最上面 --- */
+        /* --- 2. 載入動畫遮罩 (威力加強版新增) --- */
+        #map-loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(253, 252, 240, 0.95); /* 米色半透明背景 */
+            z-index: 9999;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            transition: opacity 0.5s ease-out;
+        }
+        .loader-icon {
+            width: 80px; height: auto;
+            animation: pulse-load 1.5s infinite;
+        }
+        .loader-text {
+            margin-top: 15px; color: #8d6e63; font-weight: bold;
+            font-size: 1.1rem; letter-spacing: 1px;
+        }
+        @keyframes pulse-load {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+
+        /* --- 3. 定位按鈕 (威力加強版新增) --- */
+        .locate-btn {
+            position: absolute; bottom: 80px; right: 20px;
+            background: white; width: 50px; height: 50px;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 2500;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 1.5rem; color: #d32f2f; cursor: pointer;
+        }
+        .locate-btn:active { transform: scale(0.9); background: #eee; }
+
+        /* --- 4. 原有樣式保持 --- */
         .leaflet-marker-pane { z-index: 2000 !important; }
         .leaflet-popup-pane { z-index: 2100 !important; }
 
-        /* --- 3. 圖釘跳動動畫 --- */
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
@@ -41,7 +75,6 @@
         }
         .pin-marker:hover { animation: none; transform: scale(1.2); }
 
-        /* --- 4. 介面樣式 --- */
         .map-header {
             position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
             z-index: 3000; width: 90%; max-width: 400px; 
@@ -78,7 +111,6 @@
             border-radius: 10px; text-align: center; font-size: 0.9rem; cursor: pointer;
         }
         
-        /* 彈窗 */
         .leaflet-popup-content-wrapper { border-radius: 15px; padding: 0; overflow: hidden; }
         .leaflet-popup-content { margin: 0; width: 220px !important; }
         .popup-img { width: 100%; height: 140px; object-fit: cover; background: #eee; }
@@ -87,6 +119,15 @@
 {% endblock %}
 
 {% block content %}
+    <div id="map-loader">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/bm.png" class="loader-icon" alt="Loading">
+        <div class="loader-text">報馬仔跑腿中... 請稍候</div>
+    </div>
+
+    <div class="locate-btn" onclick="locateUser()">
+        <i class="fas fa-crosshairs"></i>
+    </div>
+
     <div class="map-header">
         <div class="header-btn" onclick="resetView()">
             <i class="fas fa-expand-arrows-alt" style="margin-right:5px; color:#f39c12;"></i> 全覽 (<span id="totalCount">0</span>)
@@ -110,7 +151,7 @@
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
     <script>
-        // 1. 核心資料 (里名必須跟上傳選單完全一致)
+        // 核心里別資料
         const VILLAGES = [
             { name: "苑東里", lat: 24.4442, lng: 120.6558, color: "#e74c3c" },
             { name: "苑南里", lat: 24.4388, lng: 120.6535, color: "#3498db" },
@@ -150,7 +191,7 @@
         });
         map.addLayer(markersCluster);
 
-        // 2. 數據處理 (V6.0 解碼版)
+        // V6.0 解碼 + V7.0 渲染
         function processData(data) {
             $('#totalCount').text(data.length);
             markersCluster.clearLayers();
@@ -163,22 +204,18 @@
                 let lng = parseFloat(item.lng || item.longitude);
                 if(isNaN(lat) || isNaN(lng)) return;
 
-                // --- 🔥 V6.0 關鍵解碼邏輯 ---
+                // V6.0 解碼邏輯
                 let rawName = item.nickname || item.name || item.user || '善心鄉親';
                 let displayName = rawName;
                 let assignedVillage = null;
 
-                // 優先檢查暗號 (木馬戰術)
                 if (rawName.indexOf('#') > -1) {
                     let parts = rawName.split('#');
-                    displayName = parts[0];       // 顯示名稱 (例如: 快樂)
-                    let villageName = parts[1];   // 里名 (例如: 中正里)
-                    
-                    // 用暗號里的名字去尋找對應的里
+                    displayName = parts[0];       
+                    let villageName = parts[1];   
                     assignedVillage = VILLAGES.find(v => v.name === villageName);
                 }
 
-                // 如果沒暗號，或者暗號沒對上，就用 GPS 距離找最近的
                 if (!assignedVillage) {
                     let nearest = null, minDist = Infinity;
                     VILLAGES.forEach(v => {
@@ -188,10 +225,8 @@
                     assignedVillage = nearest;
                 }
 
-                // 統計歸類
                 if (assignedVillage) assignedVillage.count++;
 
-                // 建立 Marker (使用解碼後的 displayName)
                 let m = L.marker([lat, lng], {
                     icon: L.divIcon({
                         className: 'custom-div-icon',
@@ -221,9 +256,14 @@
                     </div>
                 `);
             });
+
+            // 🔥 資料載入完成，隱藏遮罩！
+            setTimeout(() => {
+                $('#map-loader').fadeOut(500);
+            }, 500); // 稍微延遲一點點，讓地圖有時間渲染
         }
 
-        // 演示數據
+        // 演示數據 (如果真的斷網)
         function generateSmartDemoData() {
             let data = [];
             VILLAGES.forEach(v => {
@@ -234,7 +274,7 @@
                     data.push({
                         lat: v.lat + offsetLat, 
                         lng: v.lng + offsetLng,
-                        nickname: `熱心鄉親#${v.name}`, // 模擬暗號格式
+                        nickname: `熱心鄉親#${v.name}`, 
                         description: "演示資料"
                     });
                 }
@@ -250,13 +290,26 @@
         function togglePanel() { $('#villagePanel').toggleClass('active'); }
         function resetView() { map.flyTo([24.4418, 120.6543], 13); }
 
+        // V7.0 定位功能
+        function locateUser() {
+            map.locate({setView: true, maxZoom: 16});
+        }
+        
+        map.on('locationfound', function(e) {
+            L.marker(e.latlng).addTo(map)
+                .bindPopup("您在這裡").openPopup();
+        });
+
         $(document).ready(() => {
             $.getJSON('/api/locations')
                 .done(data => {
                     if(data.length > 0) processData(data);
                     else generateSmartDemoData();
                 })
-                .fail(() => generateSmartDemoData());
+                .fail(() => {
+                    generateSmartDemoData(); // 失敗也生成假資料，避免空白
+                    $('#map-loader').fadeOut(500); // 失敗也要關掉遮罩
+                });
         });
     </script>
 {% endblock %}
