@@ -125,7 +125,7 @@
             <div class="form-group">
                 <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
                     <span><i class="fas fa-user-tag" style="color:#fbc02d;"></i> 您的稱號</span>
-                    <!-- 加上 touchstart 强制解锁 -->
+                    <!-- 加上 touchstart 強制解鎖 -->
                     <button type="button" class="test-voice-btn" ontouchstart="AudioCore.unlock()" onclick="testVoice()">🔊 測試語音</button>
                 </label>
                 <input type="text" class="custom-input" id="nickname" name="nickname" maxlength="8" placeholder="例如：熱心串友 (預設)">
@@ -149,7 +149,7 @@
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // --- AudioContext 解锁核心 ---
+    // --- AudioContext 解鎖核心 ---
     const AudioCore = {
         context: null,
         voices: [],
@@ -164,26 +164,26 @@
                 console.log('Web Audio API not supported');
             }
 
-            // 2. 预载入语音包
+            // 2. 預載入語音包
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.onvoiceschanged = () => {
                     this.voices = window.speechSynthesis.getVoices();
                     $('#debugMsg').text(`✅ 語音包已載入 (${this.voices.length} 個)`);
                 };
-                this.voices = window.speechSynthesis.getVoices(); // 尝试同步获取
+                this.voices = window.speechSynthesis.getVoices(); // 嘗試同步獲取
             }
         },
 
-        // 🔥 关键：解锁动作
+        // 🔥 關鍵：解鎖動作
         unlock: function() {
             if (this.unlocked || !this.context) return;
             
-            // 尝试恢复 AudioContext，这通常会触发浏览器权限
+            // 嘗試恢復 AudioContext，這通常會觸發瀏覽器權限
             this.context.resume().then(() => {
                 this.unlocked = true;
                 console.log('AudioContext Unlocked/Resumed!');
                 
-                // 顺便播一个极短的空白音，彻底骗过浏览器
+                // 順便播一個極短的空白音，徹底騙過瀏覽器
                 const oscillator = this.context.createOscillator();
                 oscillator.connect(this.context.destination);
                 oscillator.start(0);
@@ -192,7 +192,7 @@
         },
 
         speak: function(text) {
-            // 再次尝试解锁
+            // 再次嘗試解鎖
             this.unlock();
 
             if (!('speechSynthesis' in window)) return alert("您的手機不支援語音");
@@ -202,7 +202,7 @@
 
             const u = new SpeechSynthesisUtterance(text);
             
-            // 语音包选择逻辑
+            // 語音包選擇邏輯
             let voice = this.voices.find(v => v.lang === 'zh-TW') || 
                         this.voices.find(v => v.lang.indexOf('zh') !== -1);
             
@@ -217,15 +217,15 @@
 
             u.onerror = (event) => {
                 console.error("Speech Error:", event);
-                let msg = '未知错误';
-                if (event.error === 'not-allowed') msg = '浏览器拒绝自动播放 (not-allowed)';
-                if (event.error === 'canceled') msg = '播放被中断';
+                let msg = '未知錯誤';
+                if (event.error === 'not-allowed') msg = '瀏覽器拒絕自動播放 (not-allowed)';
+                if (event.error === 'canceled') msg = '播放被中斷';
                 
-                // 如果是 not-allowed，我们在界面上提示用户多点几下
+                // 如果是 not-allowed，我們在介面上提示用戶多點幾下
                 if(event.error === 'not-allowed') {
-                   $('#debugMsg').html('<span style="color:red">⚠️ 浏览器阻挡，请多点几次按钮解锁</span>');
+                   $('#debugMsg').html('<span style="color:red">⚠️ 瀏覽器阻擋，請多點幾次按鈕解鎖</span>');
                 } else {
-                   $('#debugMsg').text(`❌ 错误: ${msg}`);
+                   $('#debugMsg').text(`❌ 錯誤: ${msg}`);
                 }
             };
             
@@ -237,7 +237,7 @@
         }
     };
 
-    // --- 全局监听：只要手指碰到屏幕，就尝试解锁 ---
+    // --- 全局監聽：只要手指碰到螢幕，就嘗試解鎖 ---
     document.addEventListener('touchstart', function() {
         AudioCore.unlock();
     }, {once:true});
@@ -249,11 +249,11 @@
     function testVoice() {
         let area = $('#area').val() || "某個里";
         let nickname = $('#nickname').val() || "善心人士";
-        let text = `测试成功。感谢${area}的${nickname}`;
+        let text = `測試成功。感謝${area}的${nickname}`;
         AudioCore.speak(text);
     }
 
-    // --- GPS 与上传逻辑 ---
+    // --- GPS 與上傳邏輯 ---
     var currentLat = null, currentLng = null;
     var isPhotoReady = false;
 
@@ -322,7 +322,7 @@
         var btn = $('#submitBtn');
         if(!btn.hasClass('ready')) return;
 
-        // 🔥 播放最终动态语音
+        // 🔥 播放最終動態語音
         var sayText = `收到，資料傳送中。感謝${area}的${nickname}，土地公會保庇你喔！`;
         AudioCore.speak(sayText);
 
