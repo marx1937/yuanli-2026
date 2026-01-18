@@ -173,21 +173,27 @@
 <script>
     var currentLat = null, currentLng = null;
     var isPhotoReady = false;
+    
+    // 🔥 黑科技：將語音物件掛在全域變數，防止被瀏覽器垃圾回收 (Garbage Collection)
+    window.synth = window.speechSynthesis;
+    window.utterance = null; 
 
     // 🔥 核心語音功能
     function speakHappy(text) {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel(); // 先安靜
-            var msg = new SpeechSynthesisUtterance();
-            msg.text = text; 
-            msg.lang = 'zh-TW'; 
-            msg.rate = 1.0; 
-            msg.volume = 1.0;
-            window.speechSynthesis.speak(msg);
-        }
+        if (!window.synth) return;
+        
+        window.synth.cancel(); // 1. 先安靜，清空隊列
+        
+        // 2. 建立新的語音物件
+        window.utterance = new SpeechSynthesisUtterance(text);
+        window.utterance.lang = 'zh-TW'; 
+        window.utterance.rate = 1.0; 
+        window.utterance.volume = 1.0;
+        
+        // 3. 播放
+        window.synth.speak(window.utterance);
     }
 
-    // 啟動 GPS
     function startGPS() {
         $('#gpsStatus').html('<i class="fas fa-satellite-dish fa-spin mr-2"></i> 定位中...');
         if (navigator.geolocation) {
@@ -239,10 +245,11 @@
     $('#uploadForm').submit(function(e) {
         e.preventDefault();
         
-        // 🔥【關鍵黑科技】點擊按鈕瞬間，先初始化語音引擎 (解鎖 Autoplay)
-        if ('speechSynthesis' in window) {
-            var silentMsg = new SpeechSynthesisUtterance(''); // 說一句空話
-            window.speechSynthesis.speak(silentMsg);
+        // 🔥【關鍵黑科技】點擊瞬間，先用一個空字串「佔領」聲音通道！
+        // 這樣瀏覽器會認為這是使用者觸發的，稍後的 AJAX 回應就可以說話了。
+        if (window.synth) {
+            var silent = new SpeechSynthesisUtterance(" ");
+            window.synth.speak(silent);
         }
 
         var nickname = $('#nickname').val().trim();
@@ -276,7 +283,7 @@
         $.ajax({
             url: '/upload', type: 'POST', data: formData, contentType: false, processData: false,
             success: function(response) {
-                // 🔥 AJAX 成功後，真正的語音才會出來
+                // 🔥 資料回來了，通道已經打開，直接說話！
                 var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公會保庇你喔！';
                 speakHappy(sayText); 
 
