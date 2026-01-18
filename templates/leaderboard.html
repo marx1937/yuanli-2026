@@ -1,255 +1,122 @@
 {% extends "base.html" %}
 {% set active_page = "leaderboard" %}
 
-{% block title %}尋神風雲榜 - 雙重爭霸戰{% endblock %}
+{% block title %}尋神風雲榜 - 路徑偵測模式{% endblock %}
 
 {% block styles %}
 <style>
-    /* 1. 基礎設定 */
-    body {
-        background-color: #fdfcf0;
-        background-image: 
-            linear-gradient(to right, rgba(215, 204, 200, 0.1) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(215, 204, 200, 0.1) 1px, transparent 1px);
-        background-size: 20px 20px;
-        padding-bottom: 80px;
-    }
-
-    /* 2. 看板與切換區 */
-    .rank-header {
-        text-align: center; padding: 20px 0 15px 0;
-        position: relative; margin-bottom: 5px;
-    }
+    body { background-color: #fdfcf0; padding-bottom: 80px; }
     
-    .rank-banner-img {
-        width: 90%; max-width: 360px; height: auto;
-        min-height: 100px; /* 預留高度 */
-        filter: drop-shadow(0 8px 10px rgba(93, 64, 55, 0.3));
-        animation: float-title 3s ease-in-out infinite;
+    /* 偵測區樣式 */
+    .debug-zone {
+        background: #333; color: white; padding: 20px; text-align: center;
+        border-bottom: 5px solid #d32f2f;
     }
-    @keyframes float-title { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    .debug-img-container { margin-bottom: 20px; border-bottom: 1px dashed #555; padding-bottom: 10px; }
+    .debug-label { color: #ffeb3b; font-weight: bold; margin-bottom: 5px; display: block; }
+    .debug-img { 
+        width: 80%; max-width: 300px; height: auto; 
+        border: 2px solid red; background: white; min-height: 50px;
+    }
 
+    /* 原本的樣式 */
+    .rank-header { text-align: center; padding: 10px 0; display: none; /* 暫時隱藏原本標題，專心測試 */ }
+    
     /* 雙榜切換按鈕 */
-    .tab-container {
-        display: flex; justify-content: center; gap: 10px;
-        margin: 15px auto 20px auto; width: 90%; max-width: 400px;
-        background: #fff; padding: 5px; border-radius: 50px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #eee;
-    }
-    .tab-btn {
-        flex: 1; padding: 10px 0; border-radius: 40px;
-        text-align: center; font-weight: bold; color: #888;
-        cursor: pointer; transition: all 0.3s; font-size: 0.95rem;
-        display: flex; align-items: center; justify-content: center; gap: 6px;
-    }
-    .tab-btn.active {
-        background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
-        color: white; box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3);
-    }
+    .tab-container { display: flex; justify-content: center; gap: 10px; margin: 15px auto; width: 90%; max-width: 400px; background: #fff; padding: 5px; border-radius: 50px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .tab-btn { flex: 1; padding: 10px 0; border-radius: 40px; text-align: center; font-weight: bold; color: #888; cursor: pointer; transition: 0.3s; }
+    .tab-btn.active { background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); color: white; }
     
-    /* 說明區塊 */
-    .rules-card {
-        background: white; width: 90%; max-width: 450px; margin: 0 auto 30px auto;
-        border-radius: 20px; padding: 20px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 2px solid #fff3e0; display: none;
-    }
-    .rule-row { display: flex; align-items: center; margin-bottom: 12px; border-bottom: 1px dashed #eee; padding-bottom: 8px; }
-    .rule-row:last-child { border-bottom: none; margin-bottom: 0; }
-    .rule-icon { font-size: 1.8rem; width: 50px; text-align: center; margin-right: 10px; }
-    .rule-content { flex: 1; text-align: left; }
-    .rule-title { font-weight: bold; color: #5d4037; font-size: 1rem; }
-    .rule-desc { font-size: 0.85rem; color: #888; }
-    .rule-badge { background: #ffe0b2; padding: 4px 12px; border-radius: 10px; font-size: 0.85rem; color: #e65100; font-weight: bold; white-space: nowrap; }
-
-    /* 3. 頒獎台 */
-    .podium-container {
-        display: flex; justify-content: center; align-items: flex-end;
-        gap: 8px; margin-bottom: 30px; padding: 0 10px; height: 230px;
-    }
-    .podium-item {
-        display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-        position: relative; transition: transform 0.3s;
-    }
-    .rank-1 { width: 110px; z-index: 3; }
-    .rank-2 { width: 90px; z-index: 2; }
-    .rank-3 { width: 90px; z-index: 1; }
-
-    .rank-avatar {
-        width: 60px; height: 60px; background: white; border-radius: 50%;
-        border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        margin-bottom: -15px; z-index: 5; position: relative;
-        display: flex; justify-content: center; align-items: center;
-        font-size: 1.5rem; overflow: hidden; color: #5d4037;
-    }
+    .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 8px; margin-bottom: 30px; height: 230px; }
+    .podium-item { display: flex; flex-direction: column; align-items: center; }
+    .rank-1 { width: 110px; } .rank-2 { width: 90px; } .rank-3 { width: 90px; }
+    
+    .rank-avatar { width: 60px; height: 60px; background: white; border-radius: 50%; border: 4px solid #fff; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; margin-bottom: -15px; z-index: 5; position: relative; }
     .rank-1 .rank-avatar { width: 80px; height: 80px; border-color: #ffd700; font-size: 2rem; }
-    .rank-2 .rank-avatar { border-color: #c0c0c0; }
-    .rank-3 .rank-avatar { border-color: #cd7f32; }
-
-    /* Emoji 皇冠 */
-    .crown-icon {
-        position: absolute; top: -45px; font-size: 40px;
-        animation: spin-crown 3s infinite linear;
-        filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.8));
-    }
-    @keyframes spin-crown { 0% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } 100% { transform: rotate(-5deg); } }
-
-    .podium-block {
-        width: 100%; border-radius: 15px 15px 0 0;
-        display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-        padding-top: 25px; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-    }
-    .rank-1 .podium-block { height: 130px; background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%); border-top: 4px solid #fff9c4; }
-    .rank-2 .podium-block { height: 100px; background: linear-gradient(135deg, #e0e0e0 0%, #9e9e9e 100%); border-top: 4px solid #f5f5f5; }
-    .rank-3 .podium-block { height: 80px; background: linear-gradient(135deg, #ffab91 0%, #d84315 100%); border-top: 4px solid #ffccbc; }
-
-    .rank-name { font-weight: bold; font-size: 1rem; margin-bottom: 2px; text-align: center; padding: 0 5px; line-height: 1.1; }
-    .rank-sub { font-size: 0.75rem; opacity: 0.9; margin-bottom: 3px; font-weight: normal; }
-    .count-badge { background: rgba(0,0,0,0.2); padding: 2px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
-
-    /* 4. 列表樣式 */
-    .list-container {
-        width: 92%; max-width: 500px; margin: 0 auto;
-        background: white; border-radius: 25px;
-        padding: 10px; box-shadow: 0 5px 20px rgba(93, 64, 55, 0.08);
-        min-height: 200px;
-    }
-    .list-item {
-        display: flex; align-items: center; padding: 15px;
-        border-bottom: 1px solid #eee; transition: background 0.2s;
-        border-radius: 15px; position: relative;
-    }
-    .list-item:last-child { border-bottom: none; }
+    .crown-icon { position: absolute; top: -45px; font-size: 40px; animation: spin 3s infinite linear; }
+    @keyframes spin { 0% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } 100% { transform: rotate(-5deg); } }
     
-    .list-rank {
-        width: 28px; height: 28px; background: #8d6e63; color: white;
-        border-radius: 50%; display: flex; justify-content: center; align-items: center;
-        font-weight: bold; font-size: 0.8rem; margin-right: 12px; flex-shrink: 0;
-    }
-    .list-info { flex: 1; text-align: left; }
-    .list-name { font-weight: bold; color: #5d4037; font-size: 1.1rem; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
-    .list-sub { font-size: 0.85rem; color: #999; margin-top: 2px; }
+    .podium-block { width: 100%; border-radius: 15px 15px 0 0; display: flex; flex-direction: column; align-items: center; padding-top: 25px; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+    .rank-1 .podium-block { height: 130px; background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%); }
+    .rank-2 .podium-block { height: 100px; background: linear-gradient(135deg, #e0e0e0 0%, #9e9e9e 100%); }
+    .rank-3 .podium-block { height: 80px; background: linear-gradient(135deg, #ffab91 0%, #d84315 100%); }
     
-    /* 等級標籤樣式 */
-    .lvl-tag { font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; font-weight: normal; border: 1px solid #ddd; }
-    .lvl-1 { background: #f1f8e9; color: #558b2f; border-color: #c5e1a5; }
-    .lvl-2 { background: #e3f2fd; color: #1565c0; border-color: #90caf9; }
-    .lvl-3 { background: #fff3e0; color: #ef6c00; border-color: #ffcc80; }
-    .lvl-max { background: #ffebee; color: #c62828; border-color: #ef9a9a; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-
-    .list-bar-bg { width: 100%; height: 6px; background: #f0f0f0; border-radius: 10px; margin-top: 5px; overflow: hidden; }
-    .list-bar-fill { height: 100%; background: #d32f2f; border-radius: 10px; }
-    .list-count { font-weight: bold; color: #d32f2f; font-size: 1.2rem; margin-left: 10px; min-width: 30px; text-align: right; }
-
+    .list-container { width: 92%; margin: 0 auto; background: white; border-radius: 25px; padding: 10px; min-height: 200px; }
+    .list-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
+    .list-rank { width: 28px; height: 28px; background: #8d6e63; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-right: 12px; }
+    .list-info { flex: 1; }
+    .list-count { font-weight: bold; color: #d32f2f; }
+    .tab-content { display: none; } .tab-content.active { display: block; }
     #loading-box { text-align: center; padding: 50px; color: #aaa; }
-    
-    .tab-content { display: none; animation: fadeIn 0.3s; }
-    .tab-content.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 {% endblock %}
 
 {% block content %}
 
-    <div class="rank-header">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/yuanli_ui/leaderboard_top.png" 
-             class="rank-banner-img" 
-             alt="尋神英雄榜">
+    <div class="debug-zone">
+        <h3>🕵️‍♂️ 圖片路徑偵測中</h3>
+        <p>請告訴我哪一張圖顯示出來了？</p>
+
+        <div class="debug-img-container">
+            <span class="debug-label">測試 1: 加上 yuanli_ui 資料夾 (無版本號)</span>
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/yuanli_ui/leaderboard_top.png" class="debug-img">
+        </div>
+
+        <div class="debug-img-container">
+            <span class="debug-label">測試 2: 加上 yuanli_ui 資料夾 (有版本號)</span>
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1768742671/yuanli_ui/leaderboard_top.png" class="debug-img">
+        </div>
+
+        <div class="debug-img-container">
+            <span class="debug-label">測試 3: 只有檔名 (無資料夾/無版本號)</span>
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/leaderboard_top.png" class="debug-img">
+        </div>
+        
+        <div class="debug-img-container">
+            <span class="debug-label">測試 4: 你的原始連結 (檢查用)</span>
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1768742671/leaderboard_top.png" class="debug-img">
+        </div>
     </div>
 
     <div class="tab-container">
-        <div class="tab-btn active" onclick="switchTab('village')">
-            <i class="fas fa-flag"></i> 全里爭霸
-        </div>
-        <div class="tab-btn" onclick="switchTab('personal')">
-            <i class="fas fa-user-ninja"></i> 個人英雄
-        </div>
+        <div class="tab-btn active" onclick="switchTab('village')">全里爭霸</div>
+        <div class="tab-btn" onclick="switchTab('personal')">個人英雄</div>
     </div>
 
-    <div style="text-align:center; margin-bottom:20px;">
-        <div class="rules-toggle-btn" onclick="$('.rules-card').slideToggle();">
-            <i class="fas fa-info-circle" style="margin-right:5px;"></i> 查看等級說明
-        </div>
-    </div>
-
-    <div class="rules-card">
-        <h4 style="margin-top:0; color:#d32f2f; text-align:center; border-bottom:1px solid #ffe0b2; padding-bottom:10px; margin-bottom:15px;">📊 尋神等級說明</h4>
-        <div class="rule-row"><div class="rule-icon">🌱</div><div class="rule-content"><div class="rule-title">尋神小萌新</div><div class="rule-desc">累積 1~4 尊 | 初入江湖</div></div><div class="rule-badge">Lv.1</div></div>
-        <div class="rule-row"><div class="rule-icon">🛡️</div><div class="rule-content"><div class="rule-title">熱血護衛隊</div><div class="rule-desc">累積 5~9 尊 | 熟門熟路</div></div><div class="rule-badge">Lv.2</div></div>
-        <div class="rule-row"><div class="rule-icon">🏮</div><div class="rule-content"><div class="rule-title">虔誠爐主</div><div class="rule-desc">累積 10~19 尊 | 神明點讚</div></div><div class="rule-badge">Lv.3</div></div>
-        <div class="rule-row"><div class="rule-icon">😇</div><div class="rule-content"><div class="rule-title">在世土地公</div><div class="rule-desc">累積 20 尊以上 | 苑裡萬事通</div></div><div class="rule-badge">MAX</div></div>
-    </div>
-
-    <div id="loading-box">
-        <i class="fas fa-spinner fa-spin fa-2x"></i><br><br>正在計算雙榜戰績...
-    </div>
-
-    <div id="tab-village" class="tab-content active">
-        <div class="podium-container" id="podium-village"></div>
-        <div class="list-container" id="list-village"></div>
-    </div>
-
-    <div id="tab-personal" class="tab-content">
-        <div class="podium-container" id="podium-personal"></div>
-        <div class="list-container" id="list-personal"></div>
-    </div>
-
+    <div id="loading-box"><i class="fas fa-spinner fa-spin"></i> 讀取中...</div>
+    <div id="tab-village" class="tab-content active"><div class="podium-container" id="podium-village"></div><div class="list-container" id="list-village"></div></div>
+    <div id="tab-personal" class="tab-content"><div class="podium-container" id="podium-personal"></div><div class="list-container" id="list-personal"></div></div>
     <div style="height:30px;"></div>
 
 {% endblock %}
 
 {% block scripts %}
 <script>
-    const ALL_VILLAGES = [
-        "苑東里", "苑南里", "苑北里", "中正里", "客庄里", "房裡里", "新復里", "西勢里", "海岸里", "出水里", 
-        "山東里", "苑坑里", "水坡里", "山柑里", "社苓里", "田心里", "玉田里", "泰田里", "上館里", "南勢里", 
-        "山腳里", "舊社里", "石鎮里", "蕉埔里", "西平里"
-    ];
-
-    let villageData = [];
-    let personalData = [];
+    const ALL_VILLAGES = ["苑東里", "苑南里", "苑北里", "中正里", "客庄里", "房裡里", "新復里", "西勢里", "海岸里", "出水里", "山東里", "苑坑里", "水坡里", "山柑里", "社苓里", "田心里", "玉田里", "泰田里", "上館里", "南勢里", "山腳里", "舊社里", "石鎮里", "蕉埔里", "西平里"];
+    let villageData = [], personalData = [];
 
     window.switchTab = function(type) {
-        $('.tab-btn').removeClass('active');
-        $('.tab-content').removeClass('active');
-        
-        if (type === 'village') {
-            $('.tab-btn:first-child').addClass('active');
-            $('#tab-village').addClass('active');
-        } else {
-            $('.tab-btn:last-child').addClass('active');
-            $('#tab-personal').addClass('active');
-        }
+        $('.tab-btn').removeClass('active'); $('.tab-content').removeClass('active');
+        if (type === 'village') { $('.tab-btn:first-child').addClass('active'); $('#tab-village').addClass('active'); } 
+        else { $('.tab-btn:last-child').addClass('active'); $('#tab-personal').addClass('active'); }
     };
 
-    fetch('/api/locations?t=' + new Date().getTime())
-    .then(r => r.json())
-    .then(data => {
-        let vCounts = {};
+    fetch('/api/locations?t=' + new Date().getTime()).then(r => r.json()).then(data => {
+        let vCounts = {}, pCounts = {};
         ALL_VILLAGES.forEach(v => vCounts[v] = 0);
-        let pCounts = {}; 
 
         data.forEach(item => {
             let rawName = item.nickname || item.name || '';
-            let displayName = rawName;
-            let assignedVillage = null;
-
+            let displayName = rawName, assignedVillage = null;
             if (rawName.indexOf('#') > -1) {
-                let parts = rawName.split('#');
-                displayName = parts[0];
-                let vName = parts[1];
+                let parts = rawName.split('#'); displayName = parts[0]; let vName = parts[1];
                 if (ALL_VILLAGES.includes(vName)) assignedVillage = vName;
             } else {
-                let soup = (item.area || "") + " " + (item.address || "") + " " + (item.description || "");
+                let soup = (item.area || "") + (item.address || "") + (item.description || "");
                 let matches = soup.match(/[\u4e00-\u9fa5]{2,3}里/g);
-                if (matches) {
-                    let validLi = matches.find(term => ALL_VILLAGES.includes(term));
-                    if (validLi) assignedVillage = validLi;
-                }
+                if (matches) assignedVillage = matches.find(term => ALL_VILLAGES.includes(term));
             }
-
             if (assignedVillage) vCounts[assignedVillage]++;
-
             if (displayName && displayName !== '熱心鄉親' && displayName !== '善心人士') {
                 let key = rawName; 
                 if (!pCounts[key]) pCounts[key] = { name: displayName, village: assignedVillage || '未知', count: 0 };
@@ -259,97 +126,28 @@
 
         villageData = Object.keys(vCounts).map(key => ({ name: key, count: vCounts[key] })).sort((a, b) => b.count - a.count);
         personalData = Object.values(pCounts).sort((a, b) => b.count - a.count);
-
-        renderPodium('village', villageData);
-        renderList('village', villageData);
-        renderPodium('personal', personalData);
-        renderList('personal', personalData);
-
+        renderPodium('village', villageData); renderList('village', villageData);
+        renderPodium('personal', personalData); renderList('personal', personalData);
         $('#loading-box').hide();
-    })
-    .catch(e => { $('#loading-box').html('❌ 資料讀取失敗'); console.error(e); });
+    });
 
     function renderPodium(type, data) {
-        let container = $(`#podium-${type}`);
-        let html = '';
-        
-        let d2 = data[1] || { name: '從缺', count: '-' };
-        html += `
-            <div class="podium-item rank-2">
-                <div class="rank-avatar">🥈</div>
-                <div class="podium-block">
-                    <div class="rank-name">${d2.name}</div>
-                    ${type==='personal' && d2.count!=='-' ? `<div class="rank-sub">${d2.village}</div>` : ''}
-                    <div class="count-badge">${d2.count} ${d2.count!=='-'?'尊':''}</div>
-                </div>
-            </div>`;
-            
-        let d1 = data[0] || { name: '從缺', count: '-' };
-        html += `
-            <div class="podium-item rank-1">
-                <div class="crown-icon">👑</div>
-                <div class="rank-avatar">🥇</div>
-                <div class="podium-block">
-                    <div class="rank-name">${d1.name}</div>
-                    ${type==='personal' && d1.count!=='-' ? `<div class="rank-sub">${d1.village}</div>` : ''}
-                    <div class="count-badge">${d1.count} ${d1.count!=='-'?'尊':''}</div>
-                </div>
-            </div>`;
-
-        let d3 = data[2] || { name: '從缺', count: '-' };
-        html += `
-            <div class="podium-item rank-3">
-                <div class="rank-avatar">🥉</div>
-                <div class="podium-block">
-                    <div class="rank-name">${d3.name}</div>
-                    ${type==='personal' && d3.count!=='-' ? `<div class="rank-sub">${d3.village}</div>` : ''}
-                    <div class="count-badge">${d3.count} ${d3.count!=='-'?'尊':''}</div>
-                </div>
-            </div>`;
-            
-        container.html(html);
+        let d1=data[0]||{name:'從缺',count:'-'}, d2=data[1]||{name:'從缺',count:'-'}, d3=data[2]||{name:'從缺',count:'-'};
+        $(`#podium-${type}`).html(`
+            <div class="podium-item rank-2"><div class="rank-avatar">🥈</div><div class="podium-block"><div class="rank-name">${d2.name}</div><div class="count-badge">${d2.count}</div></div></div>
+            <div class="podium-item rank-1"><div class="crown-icon">👑</div><div class="rank-avatar">🥇</div><div class="podium-block"><div class="rank-name">${d1.name}</div><div class="count-badge">${d1.count}</div></div></div>
+            <div class="podium-item rank-3"><div class="rank-avatar">🥉</div><div class="podium-block"><div class="rank-name">${d3.name}</div><div class="count-badge">${d3.count}</div></div></div>
+        `);
     }
 
     function renderList(type, data) {
-        let container = $(`#list-${type}`);
-        let html = '';
-        let maxCount = data[0] ? data[0].count : 1;
-
+        let html = '', maxCount = data[0] ? data[0].count : 1;
         for (let i = 3; i < data.length; i++) {
-            let item = data[i];
-            if (item.count === 0 && type === 'personal') continue; 
-
+            let item = data[i]; if (item.count === 0 && type === 'personal') continue;
             let percent = (item.count / maxCount) * 100;
-            
-            let levelTag = '';
-            if (type === 'personal') {
-                if (item.count >= 20) levelTag = '<span class="lvl-tag lvl-max">在世土地公</span>';
-                else if (item.count >= 10) levelTag = '<span class="lvl-tag lvl-3">虔誠爐主</span>';
-                else if (item.count >= 5) levelTag = '<span class="lvl-tag lvl-2">熱血護衛隊</span>';
-                else levelTag = '<span class="lvl-tag lvl-1">尋神小萌新</span>';
-            } else {
-                if (item.count >= 10) levelTag = '<span class="lvl-tag lvl-max">🔥 熱區</span>';
-            }
-
-            html += `
-                <div class="list-item">
-                    <div class="list-rank">${i + 1}</div>
-                    <div class="list-info">
-                        <div class="list-name">
-                            ${item.name} ${levelTag}
-                        </div>
-                        ${type==='personal' ? `<div class="list-sub">${item.village}</div>` : ''}
-                        <div class="list-bar-bg">
-                            <div class="list-bar-fill" style="width: ${percent}%;"></div>
-                        </div>
-                    </div>
-                    <div class="list-count">${item.count}</div>
-                </div>
-            `;
+            html += `<div class="list-item"><div class="list-rank">${i+1}</div><div class="list-info"><div class="list-name">${item.name}</div><div class="list-bar-bg"><div class="list-bar-fill" style="width:${percent}%"></div></div></div><div class="list-count">${item.count}</div></div>`;
         }
-        
-        if(html === '') html = '<div style="text-align:center;color:#ccc;padding:20px;">等待英雄出現...</div>';
-        container.html(html);
+        $(`#list-${type}`).html(html);
     }
 </script>
 {% endblock %}
