@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% set active_page = "map" %}
 
-{% block title %}尋神地圖 - 極速顯形版{% endblock %}
+{% block title %}尋神地圖 - 淨空測試版{% endblock %}
 
 {% block styles %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.css" />
@@ -13,72 +13,78 @@
         html, body { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #fdfcf0; }
         #map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; z-index: 1; }
 
-        /* --- 關鍵修正：強制圖釘層級最高 --- */
-        .leaflet-pane { z-index: 1 !important; }
-        .leaflet-marker-pane { z-index: 2000 !important; }
-        .leaflet-popup-pane { z-index: 2100 !important; }
-        
-        /* 修正圖釘容器，防止縮成 0x0 */
-        .custom-div-icon {
-            background: transparent;
-            border: none;
-            width: 40px !important;
-            height: 40px !important;
+        /* 教學遮罩 */
+        #tutorial-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(3px); display: none;
         }
-
-        /* 圖釘動畫 */
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        .pin-marker { 
-            font-size: 40px; line-height: 40px;
-            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.4)); 
-            cursor: pointer; animation: bounce 1s infinite;
-            text-align: center; display: block;
+        .tut-card {
+            background: white; width: 85%; max-width: 320px;
+            border-radius: 25px; padding: 30px 20px;
+            text-align: center; position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .pin-marker:hover { animation: none; transform: scale(1.2); }
+        @keyframes pop-in { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .tut-title { font-size: 1.5rem; color: #d32f2f; font-weight: bold; margin-bottom: 25px; letter-spacing: 1px; }
+        .tut-list { text-align: left; margin-bottom: 20px; padding-left: 10px; }
+        .tut-item { display: flex; align-items: center; margin-bottom: 15px; font-size: 1rem; color: #5d4037; font-weight: bold; }
+        .tut-icon-box { width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; margin-right: 12px; font-size: 1.2rem; }
+        .tut-img { width: 70%; max-width: 180px; height: auto; margin: 10px auto 20px auto; display: block; }
+        .btn-tut-start { background: #f57c00; color: white; border: none; width: 100%; padding: 12px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; box-shadow: 0 4px 10px rgba(245, 124, 0, 0.3); cursor: pointer; transition: transform 0.2s; }
+        .btn-tut-start:active { transform: scale(0.95); background: #ef6c00; }
 
-        /* 載入動畫遮罩 */
+        /* 載入動畫 */
         #map-loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(253, 252, 240, 0.98);
-            z-index: 9999; display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
+            background: rgba(253, 252, 240, 0.98); z-index: 5000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
             transition: opacity 0.5s ease-out;
         }
         .loader-icon { width: 80px; height: auto; animation: pulse-load 1.5s infinite; }
         .loader-text { margin-top: 15px; color: #8d6e63; font-weight: bold; font-size: 1.1rem; }
         @keyframes pulse-load { 0% { transform: scale(0.95); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(0.95); opacity: 0.8; } }
 
-        /* 定位按鈕 */
-        .locate-btn {
-            position: absolute; bottom: 80px; right: 20px;
-            background: white; width: 50px; height: 50px; border-radius: 50%;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 2500;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 1.5rem; color: #d32f2f; cursor: pointer;
-        }
-
-        /* 介面按鈕 */
+        /* 介面元件 */
+        .locate-btn { position: absolute; bottom: 80px; right: 20px; background: white; width: 50px; height: 50px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 2500; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; color: #d32f2f; cursor: pointer; }
         .map-header { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 3000; width: 90%; max-width: 400px; display: flex; gap: 10px; pointer-events: auto; }
         .header-btn { background: white; border: 2px solid white; padding: 10px 15px; border-radius: 50px; font-weight: bold; color: #5d4037; box-shadow: 0 4px 10px rgba(0,0,0,0.2); flex: 1; text-align: center; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         
-        /* 底部選單 */
         #villagePanel { position: fixed; bottom: -60vh; left: 0; width: 100%; height: 50vh; background: white; z-index: 3000; border-radius: 20px 20px 0 0; box-shadow: 0 -5px 30px rgba(0,0,0,0.3); transition: bottom 0.3s ease-out; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; }
         #villagePanel.active { bottom: 0; }
         .village-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; overflow-y: auto; padding-bottom: 20px; }
         .village-item { background: #f8f8f8; border: 1px solid #eee; padding: 10px 5px; border-radius: 10px; text-align: center; font-size: 0.9rem; cursor: pointer; }
         
-        /* 彈窗樣式 */
         .leaflet-popup-content-wrapper { border-radius: 15px; padding: 0; overflow: hidden; }
         .leaflet-popup-content { margin: 0; width: 220px !important; }
         .popup-img { width: 100%; height: 140px; object-fit: cover; background: #eee; }
         .popup-body { padding: 12px; text-align: left; }
+        
+        .god-marker-icon { filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3)); transition: transform 0.2s; }
+        .god-marker-icon:active { transform: scale(1.2); }
     </style>
 {% endblock %}
 
 {% block content %}
+    <div id="tutorial-overlay">
+        <div class="tut-card">
+            <div class="tut-title">歡迎來到尋神地圖</div>
+            <div class="tut-list">
+                <div class="tut-item"><div class="tut-icon-box">📍</div><span>點擊圖釘：查看照片與導航</span></div>
+                <div class="tut-item"><div class="tut-icon-box">🔍</div><span>點擊標題：地圖一鍵歸位</span></div>
+                <div class="tut-item"><div class="tut-icon-box">🎯</div><span>瞄準按鈕：尋找你的位置</span></div>
+                <div class="tut-item"><div class="tut-icon-box">📸</div><span>中間相機：去上傳新情報</span></div>
+            </div>
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/guide_couple.png" class="tut-img" alt="Guide">
+            <button class="btn-tut-start" onclick="closeTutorial()">收到，出發尋神！</button>
+        </div>
+    </div>
+
     <div id="map-loader">
         <img src="https://res.cloudinary.com/diuoghid2/image/upload/bm.png" class="loader-icon" alt="Loading">
-        <div class="loader-text">地圖繪製中...</div>
+        <div class="loader-text">正在讀取...</div>
     </div>
 
     <div class="locate-btn" onclick="locateUser()"><i class="fas fa-crosshairs"></i></div>
@@ -106,7 +112,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 
     <script>
-        // 核心資料
         const VILLAGES = [
             { name: "苑東里", lat: 24.4442, lng: 120.6558, color: "#e74c3c" },
             { name: "苑南里", lat: 24.4388, lng: 120.6535, color: "#3498db" },
@@ -136,125 +141,105 @@
         ];
 
         var map = L.map('map', { zoomControl: false }).setView([24.4418, 120.6543], 13);
-        // 使用 CartoDB 的 Voyager 風格 (比較穩定)
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
 
-        var markersCluster = L.markerClusterGroup({
-            disableClusteringAtZoom: 14, 
-            maxClusterRadius: 30,
-            spiderfyOnMaxZoom: true
-        });
+        var markersCluster = L.markerClusterGroup({ disableClusteringAtZoom: 14, maxClusterRadius: 30 });
         map.addLayer(markersCluster);
 
-        // V6.0 解碼 + V7.1 渲染邏輯
+        var allMarkersObj = [];
+        var godIcon = L.icon({
+            iconUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/god_cute.png',
+            iconSize: [45, 45], iconAnchor: [22, 45], popupAnchor: [0, -40],
+            className: 'god-marker-icon'
+        });
+
         function processData(data) {
-            $('#totalCount').text(data.length);
             markersCluster.clearLayers();
             $('#villageGrid').empty();
             VILLAGES.forEach(v => v.count = 0);
+            allMarkersObj = [];
 
-            let markers = [];
+            // 🔥 淨空濾網：只篩選出帶有 # 的新資料 🔥
+            let validCount = 0;
+            
             data.forEach(item => {
                 let lat = parseFloat(item.lat || item.latitude);
                 let lng = parseFloat(item.lng || item.longitude);
                 if(isNaN(lat) || isNaN(lng)) return;
 
-                let rawName = item.nickname || item.name || item.user || '善心鄉親';
-                let displayName = rawName;
-                let assignedVillage = null;
+                let rawName = item.nickname || item.name || item.user || '';
+                
+                // 🛑 這裡就是「濾水器」！沒有 # 的資料，直接 return 跳過，不顯示！
+                if (rawName.indexOf('#') === -1) return;
 
-                // 解碼木馬
-                if (rawName.indexOf('#') > -1) {
-                    let parts = rawName.split('#');
-                    displayName = parts[0];       
-                    let villageName = parts[1];   
-                    assignedVillage = VILLAGES.find(v => v.name === villageName);
-                }
+                // 解碼
+                let parts = rawName.split('#');
+                let displayName = parts[0];       
+                let assignedVillageName = parts[1];
+                
+                // 統計
+                let village = VILLAGES.find(v => v.name === assignedVillageName);
+                if (village) village.count++;
 
-                if (!assignedVillage) {
-                    let nearest = null, minDist = Infinity;
-                    VILLAGES.forEach(v => {
-                        let d = (lat - v.lat)**2 + (lng - v.lng)**2;
-                        if(d < minDist) { minDist = d; nearest = v; }
-                    });
-                    assignedVillage = nearest;
-                }
-
-                if (assignedVillage) assignedVillage.count++;
+                validCount++; // 有效資料 +1
 
                 // 建立 Marker
-                let m = L.marker([lat, lng], {
-                    icon: L.divIcon({
-                        className: 'custom-div-icon',
-                        html: '<div class="pin-marker">📍</div>',
-                        iconSize: [40, 40], iconAnchor: [20, 40]
-                    })
-                });
-
+                let m = L.marker([lat, lng], { icon: godIcon });
                 m.bindPopup(`
                     <img src="${item.image_url || 'https://placehold.co/300x200?text=No+Image'}" class="popup-img">
                     <div class="popup-body">
                         <b>${displayName}</b><br>
                         <span style="color:#666;font-size:0.85rem">${item.description || '無描述'}</span>
-                        <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lng}" target="_blank" style="display:block;margin-top:5px;background:#d32f2f;color:white;text-align:center;padding:5px;border-radius:10px;text-decoration:none;">導航去這裡</a>
+                        <a href="http://googleusercontent.com/maps.google.com/?q=${lat},${lng}" target="_blank" style="display:block;margin-top:5px;background:#d32f2f;color:white;text-align:center;padding:5px;border-radius:10px;text-decoration:none;">導航去這裡</a>
                     </div>
                 `);
-                markers.push(m);
+                
+                m.villageName = assignedVillageName;
+                markersCluster.addLayer(m);
+                allMarkersObj.push(m);
             });
-            markersCluster.addLayers(markers);
 
+            // 更新右上角的數字 (現在只會顯示 1)
+            $('#totalCount').text(validCount);
+
+            // 更新選單
             VILLAGES.forEach(v => {
                 $('#villageGrid').append(`
-                    <div class="village-item" onclick="goToVillage(${v.lat}, ${v.lng})">
+                    <div class="village-item" onclick="filterByVillage('${v.name}', ${v.lat}, ${v.lng})">
                         <div style="color:${v.color}; font-weight:bold;">${v.name}</div>
                         <div style="font-size:0.8rem; color:${v.count>0?'#d32f2f':'#ccc'};">${v.count} 處</div>
                     </div>
                 `);
             });
 
-            // 資料處理完畢，淡出遮罩
             setTimeout(() => { $('#map-loader').fadeOut(500); }, 500);
         }
 
-        function generateSmartDemoData() {
-            let data = [];
-            VILLAGES.forEach(v => {
-                let count = Math.floor(Math.random() * 6) + 3; 
-                for(let i=0; i<count; i++) {
-                    let offsetLat = (Math.random() - 0.5) * 0.006;
-                    let offsetLng = (Math.random() - 0.5) * 0.006;
-                    data.push({
-                        lat: v.lat + offsetLat, 
-                        lng: v.lng + offsetLng,
-                        nickname: `熱心鄉親#${v.name}`, 
-                        description: "演示資料"
-                    });
-                }
-            });
-            processData(data);
+        function filterByVillage(vName, lat, lng) {
+            $('#villagePanel').removeClass('active');
+            let targetMarkers = allMarkersObj.filter(m => m.villageName === vName);
+            if (targetMarkers.length > 0) {
+                let group = L.featureGroup(targetMarkers);
+                map.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 17 });
+            } else {
+                map.flyTo([lat, lng], 15);
+            }
         }
 
-        function goToVillage(lat, lng) {
-            $('#villagePanel').removeClass('active');
-            map.flyTo([lat, lng], 16); 
+        function showTutorial() { $('#tutorial-overlay').css('display', 'flex').hide().fadeIn(); }
+        function closeTutorial() { 
+            $('#tutorial-overlay').fadeOut(); 
+            localStorage.setItem('tutorial_seen', 'true');
         }
 
         function togglePanel() { $('#villagePanel').toggleClass('active'); }
         function resetView() { map.flyTo([24.4418, 120.6543], 13); }
-
         function locateUser() { map.locate({setView: true, maxZoom: 16}); }
         map.on('locationfound', function(e) { L.marker(e.latlng).addTo(map).bindPopup("您在這裡").openPopup(); });
 
         $(document).ready(() => {
-            $.getJSON('/api/locations')
-                .done(data => {
-                    if(data.length > 0) processData(data);
-                    else generateSmartDemoData();
-                })
-                .fail(() => {
-                    generateSmartDemoData(); // 失敗時也產生演示資料
-                    $('#map-loader').fadeOut(500);
-                });
+            if (!localStorage.getItem('tutorial_seen')) { showTutorial(); }
+            $.getJSON('/api/locations').done(data => { if(data.length > 0) processData(data); });
         });
     </script>
 {% endblock %}
