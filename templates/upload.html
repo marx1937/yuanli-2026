@@ -174,12 +174,15 @@
     var currentLat = null, currentLng = null;
     var isPhotoReady = false;
     
-    // 初始化語音變數
+    // 初始化語音
     window.synth = window.speechSynthesis;
 
     // 🔥 說話函數
     function speak(text) {
         if (!window.synth) return;
+        
+        // 這裡「不」cancel()，因為我們要讓聲音排隊播放
+        // 這樣第一句「傳送中」講完，會接著講第二句「感謝」
         var utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'zh-TW'; 
         utterance.rate = 1.0; 
@@ -238,11 +241,10 @@
     $('#uploadForm').submit(function(e) {
         e.preventDefault();
         
-        // 🔥【語音修復關鍵】：按下去馬上說話，解鎖瀏覽器限制！
-        // 先取消之前的（避免卡住），然後說「資料傳送中」
+        // 🔥【絕對有效】按下去馬上說話！
         if (window.synth) {
-            window.synth.cancel();
-            speak("資料傳送中，請稍候");
+            window.synth.cancel(); // 停止之前的聲音
+            speak("收到！正在傳送資料，請稍候..."); // 立即播放
         }
 
         var nickname = $('#nickname').val().trim();
@@ -276,7 +278,7 @@
         $.ajax({
             url: '/upload', type: 'POST', data: formData, contentType: false, processData: false,
             success: function(response) {
-                // 🔥 資料回來後，說第二句話！這時候通道已經打開了，一定會說。
+                // 🔥 資料傳完後，這裡會接著播放第二句
                 var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公會保庇你喔！';
                 speak(sayText); 
 
@@ -289,7 +291,7 @@
                         confirmButtonText: '收到，來去找下一座！', confirmButtonColor: '#ff9800'
                     }).then(() => { window.location.href = '/map'; });
                 } else {
-                    // 🔥【文字排版修復】：使用 <br> 換行，並加強後半段語氣
+                    // 🔥【文字排版確認】：分行 + 加粗 + 變色
                     Swal.fire({
                         title: '✅ 上傳成功！', 
                         html: `感謝 <b>${area}</b> 的 <b>${nickname}</b><br><br><span style="font-size: 1.2rem; color: #d32f2f; font-weight: bold;">土地公收到囉！</span>`, 
