@@ -251,21 +251,31 @@
         if(d && d.length > 0) {
             realMsgs = []; 
             d.slice().reverse().slice(0, 5).forEach(i => {
-                // 1. 抓暱稱 (優先順序：nickname > name > user)
+                
+                // 1. 抓暱稱
                 let n = i.nickname || i.name || i.user || "熱心鄉親";
+                if(n.trim() === "") n = "熱心鄉親"; 
+
+                // 2. 準備所有可能的地址來源 (把所有欄位串起來找)
+                let fullInfo = (i.address || "") + (i.area || "") + (i.description || "") + (i.title || "");
                 
-                // 2. 抓地點 (超強力搜索：地址 > 區域 > 里 > 描述 > 標題)
-                // 只要這些欄位有任何一個有寫，就不會顯示「苑裡某處」
-                let rawPlace = i.address || i.area || i.li || i.description || i.title || i.locationName || "苑裡某處";
+                // 3. 【關鍵修正】里名雷達 📡
+                // 邏輯：尋找 "任意2~3字" + "里" (例如：舊社里、客庄里)
+                let liMatch = fullInfo.match(/(\S{2,3}里)/);
                 
-                // 3. 資料清洗 (去掉括號，如果地址太長就截斷)
-                let place = rawPlace.toString().replace(/[\[\]]/g, ' ');
-                if(place.length > 10) {
-                    place = place.substring(0, 10) + "..";
+                let place = "苑裡某處";
+
+                if (liMatch) {
+                    // 🎉 抓到了！直接顯示「xx里」
+                    place = liMatch[0];
+                } else {
+                    // 沒抓到「里」字？那就回頭抓 title 或 description，但只取前 6 個字
+                    let fallback = i.title || i.description || i.locationName || "苑裡";
+                    place = fallback.toString().replace(/[\[\]]/g, '').substring(0, 6);
                 }
 
                 // 4. 組合文案
-                realMsgs.push(`🙏 感恩！${n} 於 [${place.trim()}] 成功尋獲神隊友！`);
+                realMsgs.push(`🙏 感恩！${n} 於 [${place}] 成功尋獲神隊友！`);
             });
             
             realMsgs.push(`🚩 目前戰報：全苑裡已尋獲 ${d.length} 尊！`);
@@ -276,6 +286,7 @@
     })
     .catch(e => console.log("Ticker Error:", e));
 
+    // 動畫輪播
     let idx = 0;
     let el = document.getElementById('ticker-msg');
     setInterval(() => {
