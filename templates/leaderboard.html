@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% set active_page = "leaderboard" %}
 
-{% block title %}尋神英雄榜 - 苑裡 25 里爭霸戰{% endblock %}
+{% block title %}尋神風雲榜 - 雙重爭霸戰{% endblock %}
 
 {% block styles %}
 <style>
-    /* 1. 背景與基礎設定 */
+    /* 1. 基礎設定 */
     body {
         background-color: #fdfcf0;
         background-image: 
@@ -15,52 +15,58 @@
         padding-bottom: 80px;
     }
 
-    /* 2. 頂部看板區 (新圖樣式) */
+    /* 2. 看板與切換區 */
     .rank-header {
-        text-align: center; padding: 25px 0 10px 0;
-        position: relative; margin-bottom: 15px;
+        text-align: center; padding: 20px 0 15px 0;
+        position: relative; margin-bottom: 5px;
     }
     
     .rank-banner-img {
         width: 90%; max-width: 360px; height: auto;
+        min-height: 120px; /* 預留高度，避免破圖時版面塌陷 */
         filter: drop-shadow(0 8px 10px rgba(93, 64, 55, 0.3));
         animation: float-title 3s ease-in-out infinite;
+        background-color: #eee; /* 暫時背景色，破圖時至少看得到框 */
+        border-radius: 10px;
     }
     @keyframes float-title { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
-    /* 3. 戰力分析室 (等級說明) */
-    .rules-toggle-btn {
-        background: #fff; color: #d32f2f; border: 1px solid #ffcdd2;
-        padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; font-weight: bold;
-        display: inline-flex; align-items: center; cursor: pointer;
-        box-shadow: 0 4px 10px rgba(211, 47, 47, 0.1); margin-bottom: 10px;
-        transition: 0.2s;
+    /* 雙榜切換按鈕 */
+    .tab-container {
+        display: flex; justify-content: center; gap: 10px;
+        margin: 15px auto 20px auto; width: 90%; max-width: 400px;
+        background: #fff; padding: 5px; border-radius: 50px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #eee;
     }
-    .rules-toggle-btn:active { transform: scale(0.95); background: #ffebee; }
-
+    .tab-btn {
+        flex: 1; padding: 10px 0; border-radius: 40px;
+        text-align: center; font-weight: bold; color: #888;
+        cursor: pointer; transition: all 0.3s; font-size: 0.95rem;
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .tab-btn.active {
+        background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+        color: white; box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3);
+    }
+    
+    /* 說明區塊 */
     .rules-card {
         background: white; width: 90%; max-width: 450px; margin: 0 auto 30px auto;
         border-radius: 20px; padding: 20px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        border: 2px solid #fff3e0; 
-        display: none; /* 預設隱藏 */
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 2px solid #fff3e0; display: none;
     }
-    
     .rule-row { display: flex; align-items: center; margin-bottom: 12px; border-bottom: 1px dashed #eee; padding-bottom: 8px; }
     .rule-row:last-child { border-bottom: none; margin-bottom: 0; }
     .rule-icon { font-size: 1.8rem; width: 50px; text-align: center; margin-right: 10px; }
     .rule-content { flex: 1; text-align: left; }
     .rule-title { font-weight: bold; color: #5d4037; font-size: 1rem; }
     .rule-desc { font-size: 0.85rem; color: #888; }
-    .rule-badge { 
-        background: #ffe0b2; padding: 4px 12px; border-radius: 10px; 
-        font-size: 0.85rem; color: #e65100; font-weight: bold; white-space: nowrap;
-    }
+    .rule-badge { background: #ffe0b2; padding: 4px 12px; border-radius: 10px; font-size: 0.85rem; color: #e65100; font-weight: bold; white-space: nowrap; }
 
-    /* 4. 前三名頒獎台 */
+    /* 3. 頒獎台 */
     .podium-container {
         display: flex; justify-content: center; align-items: flex-end;
-        gap: 8px; margin-bottom: 30px; padding: 0 10px; height: 210px;
+        gap: 8px; margin-bottom: 30px; padding: 0 10px; height: 230px;
     }
     .podium-item {
         display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
@@ -75,14 +81,15 @@
         border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         margin-bottom: -15px; z-index: 5; position: relative;
         display: flex; justify-content: center; align-items: center;
-        font-size: 1.5rem; overflow: hidden;
+        font-size: 1.5rem; overflow: hidden; color: #5d4037;
     }
     .rank-1 .rank-avatar { width: 80px; height: 80px; border-color: #ffd700; font-size: 2rem; }
     .rank-2 .rank-avatar { border-color: #c0c0c0; }
     .rank-3 .rank-avatar { border-color: #cd7f32; }
 
-    .crown {
-        position: absolute; top: -35px; width: 40px; 
+    /* Emoji 皇冠 */
+    .crown-icon {
+        position: absolute; top: -45px; font-size: 40px;
         animation: spin-crown 3s infinite linear;
         filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.8));
     }
@@ -98,14 +105,16 @@
     .rank-2 .podium-block { height: 100px; background: linear-gradient(135deg, #e0e0e0 0%, #9e9e9e 100%); border-top: 4px solid #f5f5f5; }
     .rank-3 .podium-block { height: 80px; background: linear-gradient(135deg, #ffab91 0%, #d84315 100%); border-top: 4px solid #ffccbc; }
 
-    .village-name { font-weight: bold; font-size: 1.05rem; margin-bottom: 2px; }
+    .rank-name { font-weight: bold; font-size: 1rem; margin-bottom: 2px; text-align: center; padding: 0 5px; line-height: 1.1; }
+    .rank-sub { font-size: 0.75rem; opacity: 0.9; margin-bottom: 3px; font-weight: normal; }
     .count-badge { background: rgba(0,0,0,0.2); padding: 2px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
 
-    /* 5. 列表樣式 */
+    /* 4. 列表樣式 */
     .list-container {
         width: 92%; max-width: 500px; margin: 0 auto;
         background: white; border-radius: 25px;
         padding: 10px; box-shadow: 0 5px 20px rgba(93, 64, 55, 0.08);
+        min-height: 200px;
     }
     .list-item {
         display: flex; align-items: center; padding: 15px;
@@ -124,12 +133,11 @@
     .list-sub { font-size: 0.85rem; color: #999; margin-top: 2px; }
     
     /* 等級標籤樣式 */
-    .list-village { font-weight: bold; color: #5d4037; font-size: 1.1rem; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
     .lvl-tag { font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; font-weight: normal; border: 1px solid #ddd; }
-    .lvl-1 { background: #f1f8e9; color: #558b2f; border-color: #c5e1a5; } /* 小萌新 */
-    .lvl-2 { background: #e3f2fd; color: #1565c0; border-color: #90caf9; } /* 護衛隊 */
-    .lvl-3 { background: #fff3e0; color: #ef6c00; border-color: #ffcc80; } /* 爐主 */
-    .lvl-max { background: #ffebee; color: #c62828; border-color: #ef9a9a; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.1); } /* 土地公 */
+    .lvl-1 { background: #f1f8e9; color: #558b2f; border-color: #c5e1a5; }
+    .lvl-2 { background: #e3f2fd; color: #1565c0; border-color: #90caf9; }
+    .lvl-3 { background: #fff3e0; color: #ef6c00; border-color: #ffcc80; }
+    .lvl-max { background: #ffebee; color: #c62828; border-color: #ef9a9a; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
     .list-bar-bg { width: 100%; height: 6px; background: #f0f0f0; border-radius: 10px; margin-top: 5px; overflow: hidden; }
     .list-bar-fill { height: 100%; background: #d32f2f; border-radius: 10px; }
@@ -137,7 +145,6 @@
 
     #loading-box { text-align: center; padding: 50px; color: #aaa; }
     
-    /* 切換特效 */
     .tab-content { display: none; animation: fadeIn 0.3s; }
     .tab-content.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -147,7 +154,10 @@
 {% block content %}
 
     <div class="rank-header">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1768742671/yuanli_ui/leaderboard_top.png" class="rank-banner-img" alt="尋神英雄榜">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1768742671/yuanli_ui/leaderboard_top.png" 
+             class="rank-banner-img" 
+             alt="尋神英雄榜"
+             onerror="this.src='https://placehold.co/360x120?text=Leaderboard+Banner'">
     </div>
 
     <div class="tab-container">
