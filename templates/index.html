@@ -136,11 +136,12 @@
         display: flex; flex-direction: column; align-items: center; gap: 10px;
     }
 
+    /* ✅ 關鍵修正：這裡設定為「白色」背景 (之前是藍色) */
     .btn-messenger {
         display: inline-flex; align-items: center; justify-content: center;
-        background: #fff; 
-        color: #5d4037; 
-        border: 1px solid #a1887f; 
+        background: #fff; /* 白色底 */
+        color: #5d4037;   /* 棕色字 */
+        border: 1px solid #a1887f; /* 棕色框 */
         padding: 8px 25px; border-radius: 50px;
         font-weight: bold; text-decoration: none;
         box-shadow: 0 2px 5px rgba(0,0,0,0.05);
@@ -242,6 +243,9 @@
 <script>
     let realMsgs = ["🔔 報——！歡迎來到尋神情報站！", "💡 報馬仔提醒：發現神隊友請上傳！"];
     
+    // 🔍 這是驗證碼：請按 F12 看 Console，如果有出現 "V3.5 Loaded" 代表更新成功！
+    console.log("🔥 V3.5 Loaded: White Button + Li Radar Active");
+
     fetch('/api/locations')
     .then(r => r.json())
     .then(d => {
@@ -256,21 +260,32 @@
                 let n = i.nickname || i.name || i.user || "熱心鄉親";
                 if(n.trim() === "") n = "熱心鄉親"; 
 
-                // 2. 準備所有可能的地址來源 (把所有欄位串起來找)
-                let fullInfo = (i.address || "") + (i.area || "") + (i.description || "") + (i.title || "");
-                
-                // 3. 【關鍵修正】里名雷達 📡
-                // 邏輯：尋找 "任意2~3字" + "里" (例如：舊社里、客庄里)
-                let liMatch = fullInfo.match(/(\S{2,3}里)/);
-                
-                let place = "苑裡某處";
+                // 2. 【關鍵修正】更精準的「里」字搜尋邏輯
+                let addressInfo = (i.address || "");
+                let otherInfo = (i.title || "") + (i.description || "") + (i.area || "");
+                let searchStr = addressInfo + " " + otherInfo;
 
-                if (liMatch) {
-                    // 🎉 抓到了！直接顯示「xx里」
-                    place = liMatch[0];
+                // Regex: 抓取「里」前面 2 到 3 個中文字 (例如：舊社、客庄)
+                let liMatches = searchStr.match(/[\u4e00-\u9fa5]{2,3}里/g);
+                
+                let place = "苑裡某處"; // 預設值
+
+                if (liMatches) {
+                    // 過濾無效詞
+                    let validLi = liMatches.find(term => {
+                        return term !== "苑里" && term !== "這裡" && term !== "那里" && term !== "家裡" && term !== "公里";
+                    });
+
+                    if (validLi) {
+                        place = validLi; // 成功抓到！ (例如：客庄里)
+                    } else {
+                        // 沒抓到有效的里，改抓標題的前 6 個字
+                        let fallback = i.title || i.locationName || "苑裡";
+                        place = fallback.toString().replace(/[\[\]]/g, '').substring(0, 6);
+                    }
                 } else {
-                    // 沒抓到「里」字？那就回頭抓 title 或 description，但只取前 6 個字
-                    let fallback = i.title || i.description || i.locationName || "苑裡";
+                    // 完全沒提到里
+                    let fallback = i.title || i.locationName || "苑裡";
                     place = fallback.toString().replace(/[\[\]]/g, '').substring(0, 6);
                 }
 
