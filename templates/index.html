@@ -5,136 +5,43 @@
 
 {% block styles %}
 <style>
-    /* --- CSS 樣式區 (V3.5 白色按鈕風格) --- */
+    /* ... 請保留原本 V3.5 的 CSS (白色按鈕、負值 margin 等) ... */
+    /* 為確保正確，我把關鍵的 CSS 再貼一次 */
     .hero-section { position: relative; margin-bottom: 15px; }
-    .hero-banner {
-        width: 100%; height: auto; display: block;
-        mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-        -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-    }
-    .hero-text-container {
-        display: flex; flex-direction: column; align-items: center; width: 100%;
-        margin-top: -20px; position: relative; z-index: 10;
-    }
-    .app-logo-img {
-        width: 65%; max-width: 280px; height: auto; display: block;
-        filter: drop-shadow(0 5px 5px rgba(93, 64, 55, 0.2));
-        margin-top: 15px; margin-bottom: 5px;
-    }
-    .sub-title-badge {
-        background: rgba(255, 255, 255, 0.8); 
-        color: #8d6e63; font-weight: bold; font-size: 1rem;
-        padding: 5px 18px;
-        border: 1px solid #d7ccc8; 
-        border-radius: 50px;
-        backdrop-filter: blur(2px);
-        display: flex; align-items: center; gap: 5px;
-    }
-    .news-ticker-container {
-        width: 92%; max-width: 400px; 
-        margin: 15px auto 25px auto; 
-        background: #fff8e1; 
-        border-radius: 15px; 
-        box-shadow: 0 2px 8px rgba(93, 64, 55, 0.05); 
-        padding: 8px 15px;
-        display: flex; align-items: center;
-        border: 1px solid #ffe082; 
-        position: relative; z-index: 20;
-        text-decoration: none !important;
-        overflow: hidden; 
-    }
+    .hero-banner { width: 100%; height: auto; display: block; mask-image: linear-gradient(to bottom, black 70%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%); }
+    .hero-text-container { display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: -20px; position: relative; z-index: 10; }
+    .app-logo-img { width: 65%; max-width: 280px; height: auto; display: block; filter: drop-shadow(0 5px 5px rgba(93, 64, 55, 0.2)); margin-top: 15px; margin-bottom: 5px; }
+    .sub-title-badge { background: rgba(255, 255, 255, 0.8); color: #8d6e63; font-weight: bold; font-size: 1rem; padding: 5px 18px; border: 1px solid #d7ccc8; border-radius: 50px; backdrop-filter: blur(2px); display: flex; align-items: center; gap: 5px; }
+    .news-ticker-container { width: 92%; max-width: 400px; margin: 15px auto 25px auto; background: #fff8e1; border-radius: 15px; box-shadow: 0 2px 8px rgba(93, 64, 55, 0.05); padding: 8px 15px; display: flex; align-items: center; border: 1px solid #ffe082; position: relative; z-index: 20; text-decoration: none !important; overflow: hidden; }
     .news-ticker-container:active { transform: scale(0.96); transition: transform 0.1s; }
-    .bao-ma-zai-img {
-        height: 48px; width: auto; 
-        margin-right: -25px; 
-        position: relative; left: -5px; z-index: 2; 
-        filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
-    }
-    .ticker-content { 
-        flex: 1; height: 24px; position: relative; overflow: hidden; 
-        padding-left: 10px; 
-    }
-    .ticker-text {
-        font-size: 0.9rem; color: #5d4037; font-weight: bold; 
-        position: absolute; white-space: nowrap; 
-        top: 2px; transform: translateX(100%); opacity: 0; 
-    }
+    .bao-ma-zai-img { height: 48px; width: auto; margin-right: -25px; position: relative; left: -5px; z-index: 2; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1)); }
+    .ticker-content { flex: 1; height: 24px; position: relative; overflow: hidden; padding-left: 10px; }
+    .ticker-text { font-size: 0.9rem; color: #5d4037; font-weight: bold; position: absolute; white-space: nowrap; top: 2px; transform: translateX(100%); opacity: 0; }
     .ticker-text.active { opacity: 1; animation: marquee-scroll 8s linear infinite; }
-    @keyframes marquee-scroll {
-        0%   { transform: translateX(100%); }
-        100% { transform: translateX(-150%); } 
-    }
-    .menu-btn {
-        display: block; width: 92%; max-width: 400px;
-        margin: 0 auto 28px auto; 
-        border-radius: 25px;
-        text-decoration: none !important; position: relative;
-        overflow: hidden;
-        box-shadow: 0 10px 20px rgba(93, 64, 55, 0.1); 
-        transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
-    }
+    @keyframes marquee-scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-150%); } }
+    .menu-btn { display: block; width: 92%; max-width: 400px; margin: 0 auto 28px auto; border-radius: 25px; text-decoration: none !important; position: relative; overflow: hidden; box-shadow: 0 10px 20px rgba(93, 64, 55, 0.1); transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s; }
     .menu-btn:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(93, 64, 55, 0.2); }
-    .btn-content {
-        padding: 5px 20px; height: 100%; display: flex; 
-        align-items: center; justify-content: flex-start;
-    }
+    .btn-content { padding: 5px 20px; height: 100%; display: flex; align-items: center; justify-content: flex-start; }
     .btn-text-group { text-align: left; flex: 1; }
-    .btn-primary-action {
-        background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); 
-        height: 110px; color: white; border: 2px solid rgba(255,255,255,0.2);
-    }
+    .btn-primary-action { background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); height: 110px; color: white; border: 2px solid rgba(255,255,255,0.2); }
     .btn-primary-action .btn-main-text { font-size: 1.6rem; font-weight: bold; margin-bottom: 2px; }
     .btn-primary-action .btn-sub-text { font-size: 0.95rem; opacity: 0.9; font-weight: normal; }
-    .btn-primary-action .btn-icon-large {
-        height: 80px; width: auto; margin-right: 15px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2));
-    }
+    .btn-primary-action .btn-icon-large { height: 80px; width: auto; margin-right: 15px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2)); }
     .btn-secondary-action { background: #fff; border: 2px solid #ffe082; height: 90px; }
     .btn-secondary-action .btn-main-text { color: #5d4037; font-size: 1.4rem; font-weight: bold; }
     .btn-secondary-action .btn-sub-text { color: #8d6e63; font-size: 0.85rem; }
     .btn-secondary-action .btn-icon-large { height: 65px; width: auto; margin-right: 15px; margin-left: 5px; }
     .bg-map { background: linear-gradient(to right, #fff 30%, #fff8e1 100%); }
     .bg-gallery { background: linear-gradient(to right, #fff 30%, #fff3e0 100%); }
-    .lucky-badge {
-        position: absolute; top: 12px; right: 15px;
-        background: #ffca28; color: #b71c1c; 
-        font-size: 0.8rem; font-weight: bold;
-        padding: 4px 12px; border-radius: 12px; transform: rotate(15deg);
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1); animation: bounce 2s infinite; z-index: 5;
-    }
-    @keyframes bounce {
-        0%, 20%, 50%, 80%, 100% {transform: rotate(15deg) translateY(0);}
-        40% {transform: rotate(15deg) translateY(-5px);}
-        60% {transform: rotate(15deg) translateY(-3px);}
-    }
-    .footer-area {
-        text-align: center; margin-top: 30px; margin-bottom: 40px;
-        display: flex; flex-direction: column; align-items: center; gap: 10px;
-    }
-    /* 白色按鈕 */
-    .btn-messenger {
-        display: inline-flex; align-items: center; justify-content: center;
-        background: #fff; 
-        color: #5d4037; 
-        border: 1px solid #a1887f; 
-        padding: 8px 25px; border-radius: 50px;
-        font-weight: bold; text-decoration: none;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        font-size: 0.95rem;
-        transition: 0.2s;
-    }
+    .lucky-badge { position: absolute; top: 12px; right: 15px; background: #ffca28; color: #b71c1c; font-size: 0.8rem; font-weight: bold; padding: 4px 12px; border-radius: 12px; transform: rotate(15deg); box-shadow: 0 2px 5px rgba(0,0,0,0.1); animation: bounce 2s infinite; z-index: 5; }
+    @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: rotate(15deg) translateY(0);} 40% {transform: rotate(15deg) translateY(-5px);} 60% {transform: rotate(15deg) translateY(-3px);} }
+    .footer-area { text-align: center; margin-top: 30px; margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .btn-messenger { display: inline-flex; align-items: center; justify-content: center; background: #fff; color: #5d4037; border: 1px solid #a1887f; padding: 8px 25px; border-radius: 50px; font-weight: bold; text-decoration: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 0.95rem; transition: 0.2s; }
     .btn-messenger:active { transform: scale(0.95); background: #f5f5f5; }
-    .footer-copyright-row {
-        display: flex; align-items: center; justify-content: center; gap: 6px;
-        margin-top: 5px;
-    }
-    .footer-fb-link {
-        color: #8d6e63; font-weight: bold; text-decoration: none; font-size: 0.9rem;
-    }
+    .footer-copyright-row { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 5px; }
+    .footer-fb-link { color: #8d6e63; font-weight: bold; text-decoration: none; font-size: 0.9rem; }
     .footer-fb-link:hover { color: #d32f2f; }
-    .admin-lock {
-        color: #d7ccc8; font-size: 0.8rem; text-decoration: none;
-        display: flex; align-items: center;
-    }
+    .admin-lock { color: #d7ccc8; font-size: 0.8rem; text-decoration: none; display: flex; align-items: center; }
     .admin-lock:hover { color: #8d6e63; }
 </style>
 {% endblock %}
@@ -155,7 +62,6 @@
     
     <a href="/leaderboard" class="news-ticker-container">
         <img src="{{ cdn_base }}/bm.png" class="bao-ma-zai-img" alt="報馬仔">
-        
         <div class="ticker-content">
             <div class="ticker-text active" id="ticker-msg">🔔 報馬仔連線中... 正在搜尋神蹟...</div>
         </div>
@@ -172,7 +78,6 @@
             </div>
         </div>
     </a>
-
     <a href="/map" class="menu-btn btn-secondary-action bg-map">
         <div class="btn-content">
             <img src="{{ cdn_base }}/icon_compass.png" class="btn-icon-large" alt="Compass">
@@ -183,7 +88,6 @@
             <i class="fas fa-map-marked-alt" style="color:#ffe082; font-size:1.2rem; opacity:0.5;"></i>
         </div>
     </a>
-
     <a href="/gallery" class="menu-btn btn-secondary-action bg-gallery">
         <div class="btn-content">
             <img src="{{ cdn_base }}/icon_album.png" class="btn-icon-large" alt="Gallery">
@@ -194,17 +98,12 @@
             <i class="fas fa-images" style="color:#ffcc80; font-size:1.2rem; opacity:0.5;"></i>
         </div>
     </a>
-
     <div class="footer-area">
         <a href="https://m.me/Yuanli.Together.Club" target="_blank" class="btn-messenger">
-            <i class="fab fa-facebook-messenger" style="color:#0084ff; margin-right:6px; font-size:1.1rem;"></i> 
-            聯絡小編 (私訊)
+            <i class="fab fa-facebook-messenger" style="color:#0084ff; margin-right:6px; font-size:1.1rem;"></i> 聯絡小編 (私訊)
         </a>
-
         <div class="footer-copyright-row">
-            <a href="https://www.facebook.com/Yuanli.Together.Club" target="_blank" class="footer-fb-link">
-                2026 苑裡串起來 ©
-            </a>
+            <a href="https://www.facebook.com/Yuanli.Together.Club" target="_blank" class="footer-fb-link">2026 苑裡串起來 ©</a>
             <a href="/admin" class="admin-lock"><i class="fas fa-lock"></i></a>
         </div>
     </div>
@@ -214,7 +113,8 @@
 <script>
     let realMsgs = ["🔔 報——！歡迎來到尋神情報站！", "💡 報馬仔提醒：發現神隊友請上傳！"];
     
-    // 強制不讀取快取
+    console.log("🔥 V6.1 Final Decode: Cutting the # Tag");
+
     fetch('/api/locations?t=' + new Date().getTime())
     .then(r => r.json())
     .then(d => {
@@ -223,29 +123,39 @@
             let latestData = d.slice().reverse().slice(0, 5);
             
             latestData.forEach(i => {
-                let n = i.nickname || i.name || i.user || "熱心鄉親";
-                if(n.trim() === "") n = "熱心鄉親"; 
+                let rawName = i.nickname || i.name || i.user || "熱心鄉親";
+                let displayName = rawName; // 預設顯示完整名字
+                let place = "苑裡某處";    // 預設地點
 
-                // 暴力搜索邏輯 (V3.7)
-                let place = "苑裡某處";
-                let soup = (i.area || "") + " " + (i.address || "") + " " + (i.title || "") + " " + (i.description || "") + " " + (i.locationName || "");
-                let matches = soup.match(/[\u4e00-\u9fa5]{2,3}里/g);
-
-                if (matches && matches.length > 0) {
-                     let validLi = matches.find(term => {
-                        return term !== "苑里" && term !== "這裡" && term !== "那里" && term !== "家裡" && term !== "公里";
-                    });
-                    if (validLi) place = validLi;
-                    else place = (i.title || i.locationName || "苑裡").toString().replace(/[\[\]]/g, '').substring(0, 6);
+                // --- ✂️ V6.1 終極解碼邏輯 ---
+                // 檢查名字裡面有沒有我們偷藏的 '#'
+                if (rawName.indexOf('#') > -1) {
+                    let parts = rawName.split('#');
+                    // parts[0] 是人名 (例如: 中正機場)
+                    // parts[1] 是里名 (例如: 中正里)
+                    if (parts.length >= 2) {
+                        displayName = parts[0]; 
+                        place = parts[1];
+                    }
                 } else {
-                    place = (i.title || i.locationName || "苑裡").toString().replace(/[\[\]]/g, '').substring(0, 6);
+                    // 如果是舊資料 (沒有 #)，嘗試用 V3.7 的暴力搜索去抓地點
+                    let soup = (i.area || "") + " " + (i.address || "") + " " + (i.title || "") + " " + (i.description || "") + " " + (i.locationName || "");
+                    let matches = soup.match(/[\u4e00-\u9fa5]{2,3}里/g);
+                    if (matches && matches.length > 0) {
+                        let validLi = matches.find(term => term !== "苑里" && term !== "這裡" && term !== "那里" && term !== "家裡" && term !== "公里");
+                        if (validLi) place = validLi;
+                    }
+                    // 如果暴力搜索還是失敗，就用標題
+                    if (place === "苑裡某處") {
+                         place = (i.title || i.locationName || "苑裡").toString().replace(/[\[\]]/g, '').substring(0, 6);
+                    }
                 }
 
-                realMsgs.push(`🙏 感恩！${n} 於 [${place}] 成功尋獲神隊友！`);
+                // 組合最終文案
+                realMsgs.push(`🙏 感恩！${displayName} 於 [${place}] 成功尋獲神隊友！`);
             });
             
             realMsgs.push(`🚩 目前戰報：全苑裡已尋獲 ${d.length} 尊！`);
-            
             let el = document.getElementById('ticker-msg');
             if(realMsgs.length > 0) el.innerText = realMsgs[0];
         }
