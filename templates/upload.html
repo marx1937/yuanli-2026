@@ -251,6 +251,15 @@
 
         var formData = new FormData(this);
         formData.set('nickname', nickname);
+        
+        // --- 🔥 關鍵修正：強制把里名塞給所有可能的欄位 🔥 ---
+        // 既然後台喜歡覆蓋 area，我們就塞給 title 和 locationName
+        // 首頁的暴力搜索 (V3.7/V5.0) 會掃描這些欄位，只要其中一個有，就抓得到！
+        formData.set('title', area);          
+        formData.set('locationName', area);   
+        formData.set('address', area);  // 也試試看塞給地址
+        
+        // 保持描述裡的里名，雙重保險
         var desc = $('#description').val();
         formData.set('description', '[' + area + '] ' + desc);
 
