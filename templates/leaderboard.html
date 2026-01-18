@@ -15,42 +15,46 @@
         padding-bottom: 80px;
     }
 
-    /* 2. 頂部看板區 */
+    /* 2. 頂部看板區 (新圖樣式) */
     .rank-header {
-        text-align: center; padding: 20px 0 10px 0;
-        position: relative; margin-bottom: 10px;
+        text-align: center; padding: 25px 0 10px 0;
+        position: relative; margin-bottom: 15px;
     }
     
     .rank-banner-img {
-        width: 95%; max-width: 380px; height: auto;
-        filter: drop-shadow(0 8px 5px rgba(93, 64, 55, 0.2));
+        width: 90%; max-width: 360px; height: auto;
+        filter: drop-shadow(0 8px 10px rgba(93, 64, 55, 0.3));
         animation: float-title 3s ease-in-out infinite;
     }
     @keyframes float-title { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
-    /* 3. 等級說明按鈕與區塊 */
+    /* 3. 戰力分析室 (等級說明) */
     .rules-toggle-btn {
-        background: #fff; color: #8d6e63; border: 1px solid #d7ccc8;
-        padding: 6px 18px; border-radius: 20px; font-size: 0.9rem; font-weight: bold;
+        background: #fff; color: #d32f2f; border: 1px solid #ffcdd2;
+        padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; font-weight: bold;
         display: inline-flex; align-items: center; cursor: pointer;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 15px;
+        box-shadow: 0 4px 10px rgba(211, 47, 47, 0.1); margin-bottom: 10px;
         transition: 0.2s;
     }
-    .rules-toggle-btn:active { transform: scale(0.95); background: #f5f5f5; }
+    .rules-toggle-btn:active { transform: scale(0.95); background: #ffebee; }
 
     .rules-card {
         background: white; width: 90%; max-width: 450px; margin: 0 auto 30px auto;
         border-radius: 20px; padding: 20px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        border: 2px solid #fff8e1; display: none; /* 預設隱藏 */
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        border: 2px solid #fff3e0; 
+        display: none; /* 預設隱藏 */
     }
+    
     .rule-row { display: flex; align-items: center; margin-bottom: 12px; border-bottom: 1px dashed #eee; padding-bottom: 8px; }
     .rule-row:last-child { border-bottom: none; margin-bottom: 0; }
-    .rule-icon { font-size: 1.6rem; width: 50px; text-align: center; margin-right: 10px; }
-    .rule-text { flex: 1; text-align: left; font-size: 0.95rem; color: #5d4037; line-height: 1.4; }
+    .rule-icon { font-size: 1.8rem; width: 50px; text-align: center; margin-right: 10px; }
+    .rule-content { flex: 1; text-align: left; }
+    .rule-title { font-weight: bold; color: #5d4037; font-size: 1rem; }
+    .rule-desc { font-size: 0.85rem; color: #888; }
     .rule-badge { 
-        background: #ffe0b2; padding: 3px 10px; border-radius: 10px; 
-        font-size: 0.8rem; color: #e65100; font-weight: bold; white-space: nowrap;
+        background: #ffe0b2; padding: 4px 12px; border-radius: 10px; 
+        font-size: 0.85rem; color: #e65100; font-weight: bold; white-space: nowrap;
     }
 
     /* 4. 前三名頒獎台 */
@@ -134,11 +138,11 @@
 {% block content %}
 
     <div class="rank-header">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1737207600/MEITU_20260116_153010345-removebg-preview_1_z9x8qa.png" class="rank-banner-img" alt="尋神英雄榜">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/yuanli_ui/leaderboard_top.png" class="rank-banner-img" alt="尋神英雄榜">
         
         <div style="margin-top: 15px;">
             <div class="rules-toggle-btn" onclick="$('.rules-card').slideToggle();">
-                <i class="fas fa-scroll" style="margin-right:6px; color:#d32f2f;"></i> 戰力分析室 (點擊展開)
+                <i class="fas fa-chart-line" style="margin-right:6px;"></i> 戰力分析室 (點擊查看)
             </div>
         </div>
     </div>
@@ -150,22 +154,34 @@
         
         <div class="rule-row">
             <div class="rule-icon">🌱</div>
-            <div class="rule-text"><b>尋神小萌新</b><br>初入江湖 (1~4 尊)</div>
+            <div class="rule-content">
+                <div class="rule-title">尋神小萌新</div>
+                <div class="rule-desc">累積 1~4 尊 | 初入江湖</div>
+            </div>
             <div class="rule-badge">Lv.1</div>
         </div>
         <div class="rule-row">
             <div class="rule-icon">🛡️</div>
-            <div class="rule-text"><b>熱血護衛隊</b><br>熟門熟路 (5~9 尊)</div>
+            <div class="rule-content">
+                <div class="rule-title">熱血護衛隊</div>
+                <div class="rule-desc">累積 5~9 尊 | 熟門熟路</div>
+            </div>
             <div class="rule-badge">Lv.2</div>
         </div>
         <div class="rule-row">
             <div class="rule-icon">🏮</div>
-            <div class="rule-text"><b>虔誠爐主</b><br>神明也點讚 (10~19 尊)</div>
+            <div class="rule-content">
+                <div class="rule-title">虔誠爐主</div>
+                <div class="rule-desc">累積 10~19 尊 | 神明點讚</div>
+            </div>
             <div class="rule-badge">Lv.3</div>
         </div>
         <div class="rule-row">
             <div class="rule-icon">😇</div>
-            <div class="rule-text"><b>在世土地公</b><br>苑裡萬事通 (20 尊以上)</div>
+            <div class="rule-content">
+                <div class="rule-title">在世土地公</div>
+                <div class="rule-desc">累積 20 尊以上 | 苑裡萬事通</div>
+            </div>
             <div class="rule-badge">MAX</div>
         </div>
         <div style="text-align:center; font-size:0.8rem; color:#aaa; margin-top:10px;">
@@ -233,6 +249,7 @@
                 if (ALL_VILLAGES.includes(vName)) assignedVillage = vName;
             }
 
+            // 舊資料相容
             if (!assignedVillage) {
                 let soup = (item.area || "") + " " + (item.address || "") + " " + (item.title || "") + " " + (item.description || "");
                 let matches = soup.match(/[\u4e00-\u9fa5]{2,3}里/g);
@@ -254,7 +271,7 @@
         if (sortedList.length > 1) updatePodium(2, sortedList[1]);
         if (sortedList.length > 2) updatePodium(3, sortedList[2]);
 
-        // 列表 (顯示前 4-25 名)
+        // 列表
         let listHtml = '';
         let maxCount = sortedList[0].count || 1; 
 
@@ -262,12 +279,11 @@
             let item = sortedList[i];
             let percent = (item.count / maxCount) * 100;
             
-            // 🔥 自動掛稱號邏輯 🔥
-            let levelTag = '';
+            // 自動掛稱號
+            let levelTag = '<span class="lvl-tag lvl-1">尋神小萌新</span>';
             if (item.count >= 20) levelTag = '<span class="lvl-tag lvl-max">在世土地公</span>';
             else if (item.count >= 10) levelTag = '<span class="lvl-tag lvl-3">虔誠爐主</span>';
             else if (item.count >= 5) levelTag = '<span class="lvl-tag lvl-2">熱血護衛隊</span>';
-            else if (item.count >= 1) levelTag = '<span class="lvl-tag lvl-1">尋神小萌新</span>';
             
             listHtml += `
                 <div class="list-item">
