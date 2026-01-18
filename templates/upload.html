@@ -9,12 +9,12 @@
         background-image: radial-gradient(#d7ccc8 1.5px, transparent 1.5px);
         background-size: 24px 24px;
         padding-bottom: 100px;
+        /* 防止 iOS 點擊閃爍 */
+        -webkit-tap-highlight-color: transparent;
     }
 
-    /* 頂部標題區 */
     .page-header { text-align: center; padding: 25px 0 10px 0; width: 100%; position: relative; }
     
-    /* 匾額標題 */
     .page-title-img {
         width: 85%; max-width: 320px; 
         height: auto; display: block; margin: 0 auto;
@@ -23,7 +23,6 @@
     }
     @keyframes float-title { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
-    /* 主表單卡片 */
     .form-card {
         background: rgba(255, 255, 255, 0.95); width: 92%; max-width: 500px;
         padding: 25px; border-radius: 30px;
@@ -32,7 +31,6 @@
         border: 2px solid #fff;
     }
 
-    /* GPS 狀態 Pill */
     .gps-pill {
         background: #fff8e1; padding: 8px 15px; border-radius: 50px;
         font-size: 0.9rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
@@ -41,7 +39,6 @@
         margin-bottom: 20px; width: 100%; cursor: pointer;
     }
     
-    /* 相機觸發區 */
     .upload-zone {
         border: 2px dashed #d7ccc8; border-radius: 20px;
         min-height: 250px;
@@ -51,7 +48,7 @@
     }
     .upload-zone:active { background: #fff; border-color: #d32f2f; transform: scale(0.98); }
     
-    /* 金身土地公樣式 */
+    /* 金身土地公 (絕對路徑) */
     .god-camera-img {
         width: 150px; height: auto; object-fit: contain; margin-bottom: 10px; 
         filter: drop-shadow(0 0 15px rgba(255, 193, 7, 0.5));
@@ -62,10 +59,8 @@
         50% { transform: scale(1.05); filter: drop-shadow(0 0 25px rgba(255, 193, 7, 0.8)); }
     }
     
-    /* 文字修正：神跡 */
     .upload-text { font-weight: bold; color: #8d6e63; font-size: 1.1rem; margin-top: 5px; }
     
-    /* 預覽圖 */
     #preview { 
         width: 100%; height: 100%; position: absolute; top:0; left:0;
         object-fit: cover; display: none; 
@@ -76,7 +71,6 @@
         display: none;
     }
 
-    /* 輸入框 */
     .form-group { margin-bottom: 15px; text-align: left; }
     .form-label { font-weight: bold; color: #5d4037; margin-bottom: 5px; font-size: 0.95rem; display: block;}
     .custom-input {
@@ -86,7 +80,6 @@
     .custom-input:focus { border-color: #d32f2f; outline: none; background: white; }
     .custom-input::placeholder { color: #ccc; }
 
-    /* 提交按鈕 */
     .btn-submit {
         background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
         border: none; border-radius: 50px; padding: 15px; margin-top: 15px;
@@ -97,6 +90,11 @@
     .btn-submit.ready { opacity: 1; pointer-events: auto; }
     .btn-submit:active { transform: scale(0.98); }
 
+    /* 靜音提示 */
+    .mute-hint {
+        text-align: center; font-size: 0.8rem; color: #999; margin-top: 10px;
+        opacity: 0; transition: opacity 2s;
+    }
 </style>
 {% endblock %}
 
@@ -136,7 +134,7 @@
 
             <div class="form-group">
                 <label class="form-label"><i class="fas fa-map-marker-alt" style="color:#d32f2f;"></i> 出沒區域 (必填)</label>
-                <select id="area" name="area" class="custom-input" required onchange="checkReady()">
+                <select id="area" name="area" class="custom-input" required onchange="checkReady()" onfocus="GodVoice.unlock()">
                     <option value="" disabled selected>-- 請選擇里別 --</option>
                     <option value="苑東里">苑東里</option><option value="苑南里">苑南里</option><option value="苑北里">苑北里</option>
                     <option value="西勢里">西勢里</option><option value="中正里">中正里</option><option value="客庄里">客庄里</option>
@@ -151,17 +149,18 @@
 
             <div class="form-group">
                 <label class="form-label"><i class="fas fa-user-tag" style="color:#fbc02d;"></i> 您的稱號</label>
-                <input type="text" class="custom-input" id="nickname" name="nickname" maxlength="8" placeholder="例如：熱心串友 (預設)">
+                <input type="text" class="custom-input" id="nickname" name="nickname" maxlength="8" placeholder="例如：熱心串友 (預設)" onfocus="GodVoice.unlock()">
             </div>
 
             <div class="form-group mb-0">
                 <label class="form-label"><i class="fas fa-pen" style="color:#8d6e63;"></i> 線索描述 (選填)</label>
-                <textarea class="custom-input" id="description" name="description" rows="2" placeholder="例如：在榕樹下很靈驗..."></textarea>
+                <textarea class="custom-input" id="description" name="description" rows="2" placeholder="例如：在榕樹下很靈驗..." onfocus="GodVoice.unlock()"></textarea>
             </div>
 
             <button type="submit" class="btn-submit" id="submitBtn">
                 <i class="fas fa-sync fa-spin"></i> 等待 GPS 定位...
             </button>
+            <div class="mute-hint" id="muteHint">💡 請開啟音量，聆聽土地公的祝福</div>
         </form>
     </div>
 
@@ -171,28 +170,60 @@
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    // --- 🔥 終極語音引擎 GodVoice (抗 iOS 靜音版) ---
+    const GodVoice = {
+        hasUnlocked: false,
+        keepAlive: [], // 防止 GC 回收
+
+        // 1. 靜默解鎖：在使用者第一次觸摸螢幕時執行
+        unlock: function() {
+            if (this.hasUnlocked || !('speechSynthesis' in window)) return;
+            
+            // 播放一個極短的空白音訊，讓瀏覽器認為 "AudioContext 已啟用"
+            const u = new SpeechSynthesisUtterance('');
+            u.volume = 0; // 靜音
+            window.speechSynthesis.speak(u);
+            this.hasUnlocked = true;
+            // console.log("GodVoice Unlocked 🔓");
+        },
+
+        // 2. 組合拳播放：一次把所有話講完，不依賴 AJAX Callback
+        speakCombo: function(text1, text2) {
+            if (!('speechSynthesis' in window)) return;
+
+            // 強制重置，防止卡住
+            window.speechSynthesis.cancel();
+            this.keepAlive = []; // 清空舊的
+
+            // 建立第一句 (收到)
+            const u1 = new SpeechSynthesisUtterance(text1);
+            u1.lang = 'zh-TW'; u1.rate = 1.0; u1.pitch = 1.0;
+            
+            // 建立第二句 (感謝詞)
+            const u2 = new SpeechSynthesisUtterance(text2);
+            u2.lang = 'zh-TW'; u2.rate = 1.0; u2.pitch = 1.0;
+            
+            // *** 關鍵技巧 ***
+            // 將物件放入全域陣列，防止瀏覽器在播放中途回收記憶體
+            this.keepAlive.push(u1, u2);
+
+            // 依序播放 (Queue 機制)
+            window.speechSynthesis.speak(u1);
+            window.speechSynthesis.speak(u2);
+            
+            // 顯示提示
+            $('#muteHint').css('opacity', 1);
+        }
+    };
+
+    // 全局監聽點擊，確保至少解鎖一次 (針對那些沒點輸入框直接送出的人)
+    document.body.addEventListener('touchstart', function() { GodVoice.unlock(); }, {once:true, passive:true});
+    document.body.addEventListener('click', function() { GodVoice.unlock(); }, {once:true});
+
+
+    // --- 原有邏輯 ---
     var currentLat = null, currentLng = null;
     var isPhotoReady = false;
-
-    // 🔥 修正後的語音函數 (解決手機無法播放的問題)
-    function speakHappy(text) {
-        if (!('speechSynthesis' in window)) return;
-
-        // 1. 強制停止當前正在播放的語音 (解決 iOS 卡住問題)
-        window.speechSynthesis.cancel();
-
-        // 2. 使用 window 層級變數存儲 utterance，防止被垃圾回收 (GC) 清除
-        // 這是手機播放失敗最常見的原因
-        window.utterance = new SpeechSynthesisUtterance(text);
-        
-        // 3. 嘗試設定為中文，並設定備援
-        window.utterance.lang = 'zh-TW'; 
-        window.utterance.rate = 1.0; 
-        window.utterance.pitch = 1.0;
-
-        // 4. 強制執行播放
-        window.speechSynthesis.speak(window.utterance);
-    }
 
     function startGPS() {
         $('#gpsStatus').html('<i class="fas fa-satellite-dish fa-spin mr-2"></i> 定位中...');
@@ -245,10 +276,6 @@
     $('#uploadForm').submit(function(e) {
         e.preventDefault();
         
-        // 🔥 播放第一段語音：點擊按鈕是「使用者觸發事件」，這一段通常最穩定
-        // 這一句是用來「開嗓」的，確保瀏覽器解除靜音限制
-        speakHappy("收到，資料傳送中");
-
         var nickname = $('#nickname').val().trim();
         if(!nickname) nickname = '熱心串友'; 
         var area = $('#area').val();
@@ -270,6 +297,15 @@
 
         var btn = $('#submitBtn');
         if(!btn.hasClass('ready')) return;
+
+        // 🔥🔥🔥 終極奧義：直接在 Click Event 裡把所有話講完 (Optimistic UI) 🔥🔥🔥
+        // 這樣就不會被瀏覽器判定為 "AJAX 後的自動播放" 而阻擋
+        GodVoice.speakCombo(
+            "收到，資料傳送中。", 
+            "感謝 " + area + " 的 " + nickname + "，土地公會保庇你喔！"
+        );
+
+        // UI 變更
         btn.removeClass('ready').html('<i class="fas fa-robot"></i> 正在傳送資料...').css('opacity', '0.8');
 
         var formData = new FormData(this);
@@ -280,11 +316,7 @@
         $.ajax({
             url: '/upload', type: 'POST', data: formData, contentType: false, processData: false,
             success: function(response) {
-                // 🔥 播放第二段語音：感謝詞
-                // 因為前面已經 speakHappy 過一次，這裡再呼叫一次通常不會被擋
-                var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公會保庇你喔！';
-                speakHappy(sayText); 
-
+                // AJAX 成功這裡只要負責跳視窗就好，聲音剛剛已經講了
                 if (response.status === 'duplicate') {
                     Swal.fire({
                         imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/guide_couple.png', 
