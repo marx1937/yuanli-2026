@@ -14,7 +14,7 @@
     /* 頂部標題區 (使用匾額) */
     .page-header { text-align: center; padding: 25px 0 10px 0; width: 100%; position: relative; }
     
-    /* 🔥 匾額標題 (強制顯示) */
+    /* 🔥 匾額標題 (帳號修正為 dluoghid2) */
     .page-title-img {
         width: 85%; max-width: 320px; 
         height: auto; display: block; margin: 0 auto;
@@ -60,7 +60,7 @@
     }
     .upload-zone:active { background: #fff; border-color: #d32f2f; transform: scale(0.98); }
     
-    /* 🔥 金身土地公樣式 (強制顯示) */
+    /* 🔥 金身土地公樣式 (帳號修正為 dluoghid2) */
     .god-camera-img {
         width: 150px; height: auto; object-fit: contain; margin-bottom: 10px; 
         filter: drop-shadow(0 0 15px rgba(255, 193, 7, 0.5));
@@ -112,8 +112,8 @@
 {% block content %}
 
     <div class="page-header">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/yuanli_ui/title_signboard.png" class="page-title-img" alt="尋神情報站">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/yuanli_ui/bm.png" class="helper-mascot" alt="小幫手">
+        <img src="https://res.cloudinary.com/dluoghid2/image/upload/yuanli_ui/title_signboard.png" class="page-title-img" alt="尋神情報站">
+        <img src="https://res.cloudinary.com/dluoghid2/image/upload/yuanli_ui/bm.png" class="helper-mascot" alt="小幫手">
     </div>
 
     <div class="form-card">
@@ -129,7 +129,7 @@
             <div class="form-group text-center">
                 <label for="photo" class="upload-zone" id="uploadLabel">
                     <div id="uploadPlaceholder">
-                        <img src="https://res.cloudinary.com/diuoghid2/image/upload/yuanli_ui/god_camera.png" 
+                        <img src="https://res.cloudinary.com/dluoghid2/image/upload/yuanli_ui/god_camera.png" 
                              class="god-camera-img" 
                              alt="請上傳照片">
                         
@@ -247,12 +247,12 @@
         if(!nickname) nickname = '熱心串友'; 
         var area = $('#area').val();
 
-        // 1. 不雅字過濾 (使用 diuoghid2 377.jpg)
+        // 1. 不雅字過濾 (使用 dluoghid2 377.jpg)
         var badWords = ['笨蛋', '壞蛋', '王八', '白痴', '白癡', '智障', '幹', '靠', '死', '爛', '屌', '雞掰', '機車', 'fuck', 'shit']; 
         for (var word of badWords) {
             if (nickname.toLowerCase().includes(word)) {
                 Swal.fire({
-                    imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/yuanli_ui/377.jpg',
+                    imageUrl: 'https://res.cloudinary.com/dluoghid2/image/upload/yuanli_ui/377.jpg',
                     imageWidth: '100%', imageHeight: 'auto',
                     title: '暱稱不太好聽喔...', 
                     text: '請使用優雅一點的名字，土地公才聽得懂！',
@@ -278,20 +278,20 @@
                 speakHappy(sayText); 
 
                 if (response.status === 'duplicate') {
-                    // 2. 重複資料 (使用 guide_couple.png 替代 pada.jpg)
+                    // 2. 重複資料 (因為資料夾沒有 pada.jpg，暫時用 guide_couple.png 替代)
                     Swal.fire({
-                        imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/yuanli_ui/guide_couple.png', 
+                        imageUrl: 'https://res.cloudinary.com/dluoghid2/image/upload/yuanli_ui/guide_couple.png', 
                         imageWidth: '100%', 
                         title: '📋 資料已送交審核',
                         html: `感謝您！不過此地點 (${area}) 附近似乎已有查報紀錄。<br>管理員確認品質後就會更新！`,
                         confirmButtonText: '收到，來去找下一座！', confirmButtonColor: '#ff9800'
                     }).then(() => { window.location.href = '/map'; });
                 } else {
-                    // 3. 成功 (使用 happy.jpg)
+                    // 3. 成功 (使用 dluoghid2 happy.jpg)
                     Swal.fire({
                         title: '✅ 上傳成功！', 
                         html: `感謝 <b>${area}</b> 的 <b>${nickname}</b>，土地公收到囉！`, 
-                        imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/yuanli_ui/happy.jpg', 
+                        imageUrl: 'https://res.cloudinary.com/dluoghid2/image/upload/yuanli_ui/happy.jpg', 
                         imageWidth: '100%',
                         confirmButtonText: '太棒了！', confirmButtonColor: '#d32f2f'
                     }).then(() => { window.location.href = '/map'; });
