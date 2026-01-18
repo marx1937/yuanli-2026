@@ -23,11 +23,9 @@
     
     .rank-banner-img {
         width: 90%; max-width: 360px; height: auto;
-        min-height: 120px; /* 預留高度，避免破圖時版面塌陷 */
+        min-height: 100px; /* 預留高度 */
         filter: drop-shadow(0 8px 10px rgba(93, 64, 55, 0.3));
         animation: float-title 3s ease-in-out infinite;
-        background-color: #eee; /* 暫時背景色，破圖時至少看得到框 */
-        border-radius: 10px;
     }
     @keyframes float-title { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
@@ -154,10 +152,9 @@
 {% block content %}
 
     <div class="rank-header">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1768742671/yuanli_ui/leaderboard_top.png" 
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/yuanli_ui/leaderboard_top.png" 
              class="rank-banner-img" 
-             alt="尋神英雄榜"
-             onerror="this.src='https://placehold.co/360x120?text=Leaderboard+Banner'">
+             alt="尋神英雄榜">
     </div>
 
     <div class="tab-container">
