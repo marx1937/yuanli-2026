@@ -245,14 +245,26 @@
     fetch('/api/locations')
     .then(r => r.json())
     .then(d => {
+        // Debug: 在瀏覽器 F12 Console 顯示真實資料結構
+        console.log("🔥 報馬仔抓到的資料：", d);
+
         if(d && d.length > 0) {
             realMsgs = []; 
             d.slice().reverse().slice(0, 5).forEach(i => {
-                let n = i.nickname || i.name || "熱心鄉親";
-                let place = i.description || i.title || i.location || "苑裡某處";
-                place = place.replace(/[\[\]]/g, ' ');
+                // 1. 抓暱稱 (優先順序：nickname > name > user)
+                let n = i.nickname || i.name || i.user || "熱心鄉親";
+                
+                // 2. 抓地點 (超強力搜索：地址 > 區域 > 里 > 描述 > 標題)
+                // 只要這些欄位有任何一個有寫，就不會顯示「苑裡某處」
+                let rawPlace = i.address || i.area || i.li || i.description || i.title || i.locationName || "苑裡某處";
+                
+                // 3. 資料清洗 (去掉括號，如果地址太長就截斷)
+                let place = rawPlace.toString().replace(/[\[\]]/g, ' ');
+                if(place.length > 10) {
+                    place = place.substring(0, 10) + "..";
+                }
 
-                // 👇👇👇 這裡修改了！把「發現神蹟」改為「成功尋獲神隊友」 👇👇👇
+                // 4. 組合文案
                 realMsgs.push(`🙏 感恩！${n} 於 [${place.trim()}] 成功尋獲神隊友！`);
             });
             
