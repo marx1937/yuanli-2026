@@ -5,25 +5,22 @@
 
 {% block styles %}
 <style>
-    /* --- 1. 頂部 Hero 區 --- */
+    /* --- CSS 樣式區 (保持 V3.5 的完美白色按鈕與設定) --- */
     .hero-section { position: relative; margin-bottom: 15px; }
     .hero-banner {
         width: 100%; height: auto; display: block;
         mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
         -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
     }
-
     .hero-text-container {
         display: flex; flex-direction: column; align-items: center; width: 100%;
         margin-top: -20px; position: relative; z-index: 10;
     }
-
     .app-logo-img {
         width: 65%; max-width: 280px; height: auto; display: block;
         filter: drop-shadow(0 5px 5px rgba(93, 64, 55, 0.2));
         margin-top: 15px; margin-bottom: 5px;
     }
-    
     .sub-title-badge {
         background: rgba(255, 255, 255, 0.8); 
         color: #8d6e63; font-weight: bold; font-size: 1rem;
@@ -33,8 +30,6 @@
         backdrop-filter: blur(2px);
         display: flex; align-items: center; gap: 5px;
     }
-
-    /* --- 2. 報馬仔區塊 --- */
     .news-ticker-container {
         width: 92%; max-width: 400px; 
         margin: 15px auto 25px auto; 
@@ -49,36 +44,26 @@
         overflow: hidden; 
     }
     .news-ticker-container:active { transform: scale(0.96); transition: transform 0.1s; }
-
-    /* 負值縮距，讓報馬仔貼近文字 */
     .bao-ma-zai-img {
-        height: 48px; 
-        width: auto; 
-        margin-right: -25px; /* 關鍵：縮短距離 */
-        position: relative;
-        left: -5px; 
-        z-index: 2; 
+        height: 48px; width: auto; 
+        margin-right: -25px; 
+        position: relative; left: -5px; z-index: 2; 
         filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
     }
-
     .ticker-content { 
         flex: 1; height: 24px; position: relative; overflow: hidden; 
         padding-left: 10px; 
     }
-    
     .ticker-text {
         font-size: 0.9rem; color: #5d4037; font-weight: bold; 
         position: absolute; white-space: nowrap; 
         top: 2px; transform: translateX(100%); opacity: 0; 
     }
     .ticker-text.active { opacity: 1; animation: marquee-scroll 8s linear infinite; }
-
     @keyframes marquee-scroll {
         0%   { transform: translateX(100%); }
         100% { transform: translateX(-150%); } 
     }
-
-    /* --- 3. 按鈕區 --- */
     .menu-btn {
         display: block; width: 92%; max-width: 400px;
         margin: 0 auto 28px auto; 
@@ -89,14 +74,11 @@
         transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
     }
     .menu-btn:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(93, 64, 55, 0.2); }
-
     .btn-content {
         padding: 5px 20px; height: 100%; display: flex; 
         align-items: center; justify-content: flex-start;
     }
     .btn-text-group { text-align: left; flex: 1; }
-    
-    /* 紅色按鈕 */
     .btn-primary-action {
         background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); 
         height: 110px; color: white; border: 2px solid rgba(255,255,255,0.2);
@@ -106,17 +88,12 @@
     .btn-primary-action .btn-icon-large {
         height: 80px; width: auto; margin-right: 15px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2));
     }
-
-    /* 黃/白按鈕 */
     .btn-secondary-action { background: #fff; border: 2px solid #ffe082; height: 90px; }
     .btn-secondary-action .btn-main-text { color: #5d4037; font-size: 1.4rem; font-weight: bold; }
     .btn-secondary-action .btn-sub-text { color: #8d6e63; font-size: 0.85rem; }
     .btn-secondary-action .btn-icon-large { height: 65px; width: auto; margin-right: 15px; margin-left: 5px; }
-    
     .bg-map { background: linear-gradient(to right, #fff 30%, #fff8e1 100%); }
     .bg-gallery { background: linear-gradient(to right, #fff 30%, #fff3e0 100%); }
-
-    /* Lucky Badge */
     .lucky-badge {
         position: absolute; top: 12px; right: 15px;
         background: #ffca28; color: #b71c1c; 
@@ -129,19 +106,16 @@
         40% {transform: rotate(15deg) translateY(-5px);}
         60% {transform: rotate(15deg) translateY(-3px);}
     }
-
-    /* --- 4. 底部區 --- */
     .footer-area {
         text-align: center; margin-top: 30px; margin-bottom: 40px;
         display: flex; flex-direction: column; align-items: center; gap: 10px;
     }
-
-    /* ✅ 關鍵修正：這裡設定為「白色」背景 (之前是藍色) */
+    /* 白色按鈕樣式 */
     .btn-messenger {
         display: inline-flex; align-items: center; justify-content: center;
-        background: #fff; /* 白色底 */
-        color: #5d4037;   /* 棕色字 */
-        border: 1px solid #a1887f; /* 棕色框 */
+        background: #fff; 
+        color: #5d4037; 
+        border: 1px solid #a1887f; 
         padding: 8px 25px; border-radius: 50px;
         font-weight: bold; text-decoration: none;
         box-shadow: 0 2px 5px rgba(0,0,0,0.05);
@@ -149,17 +123,14 @@
         transition: 0.2s;
     }
     .btn-messenger:active { transform: scale(0.95); background: #f5f5f5; }
-
     .footer-copyright-row {
         display: flex; align-items: center; justify-content: center; gap: 6px;
         margin-top: 5px;
     }
-
     .footer-fb-link {
         color: #8d6e63; font-weight: bold; text-decoration: none; font-size: 0.9rem;
     }
     .footer-fb-link:hover { color: #d32f2f; }
-
     .admin-lock {
         color: #d7ccc8; font-size: 0.8rem; text-decoration: none;
         display: flex; align-items: center;
@@ -243,50 +214,48 @@
 <script>
     let realMsgs = ["🔔 報——！歡迎來到尋神情報站！", "💡 報馬仔提醒：發現神隊友請上傳！"];
     
-    // 🔍 這是驗證碼：請按 F12 看 Console，如果有出現 "V3.5 Loaded" 代表更新成功！
-    console.log("🔥 V3.5 Loaded: White Button + Li Radar Active");
+    // 🔍 V3.6 版本驗證：這行會出現在 Console，用來確認你吃到最新的程式碼
+    console.log("🔥 V3.6 Loaded: Priority AREA field logic");
 
     fetch('/api/locations')
     .then(r => r.json())
     .then(d => {
-        // Debug: 在瀏覽器 F12 Console 顯示真實資料結構
-        console.log("🔥 報馬仔抓到的資料：", d);
+        // Debug: 在瀏覽器 F12 Console 顯示真實資料，讓你知道 API 到底回傳了什麼
+        console.log("🔥 報馬仔抓到的原始資料：", d);
 
         if(d && d.length > 0) {
             realMsgs = []; 
-            d.slice().reverse().slice(0, 5).forEach(i => {
-                
+            // 確保是最新的 5 筆資料
+            let latestData = d.slice().reverse().slice(0, 5);
+            
+            latestData.forEach(i => {
                 // 1. 抓暱稱
                 let n = i.nickname || i.name || i.user || "熱心鄉親";
                 if(n.trim() === "") n = "熱心鄉親"; 
 
-                // 2. 【關鍵修正】更精準的「里」字搜尋邏輯
-                let addressInfo = (i.address || "");
-                let otherInfo = (i.title || "") + (i.description || "") + (i.area || "");
-                let searchStr = addressInfo + " " + otherInfo;
-
-                // Regex: 抓取「里」前面 2 到 3 個中文字 (例如：舊社、客庄)
-                let liMatches = searchStr.match(/[\u4e00-\u9fa5]{2,3}里/g);
-                
+                // 2. 【V3.6 關鍵修正】地點判斷邏輯
                 let place = "苑裡某處"; // 預設值
 
-                if (liMatches) {
-                    // 過濾無效詞
-                    let validLi = liMatches.find(term => {
-                        return term !== "苑里" && term !== "這裡" && term !== "那里" && term !== "家裡" && term !== "公里";
-                    });
+                // 🔥 第一優先：直接看有沒有 area (區域/里) 欄位
+                // 因為你的上傳成功畫面有「苑港里」，代表資料庫有這個欄位！
+                if (i.area && i.area.length > 0 && i.area.includes("里")) {
+                    place = i.area; 
+                } 
+                // 第二優先：如果 area 沒寫，才用 Regex 去地址撈
+                else {
+                    let fullInfo = (i.address || "") + " " + (i.title || "") + " " + (i.description || "");
+                    let liMatches = fullInfo.match(/[\u4e00-\u9fa5]{2,3}里/g);
 
-                    if (validLi) {
-                        place = validLi; // 成功抓到！ (例如：客庄里)
+                    if (liMatches) {
+                        let validLi = liMatches.find(term => {
+                            return term !== "苑里" && term !== "這裡" && term !== "那里" && term !== "家裡" && term !== "公里";
+                        });
+                        if (validLi) place = validLi;
                     } else {
-                        // 沒抓到有效的里，改抓標題的前 6 個字
+                        // 第三優先：Fallback 抓標題 (只取前6字)
                         let fallback = i.title || i.locationName || "苑裡";
                         place = fallback.toString().replace(/[\[\]]/g, '').substring(0, 6);
                     }
-                } else {
-                    // 完全沒提到里
-                    let fallback = i.title || i.locationName || "苑裡";
-                    place = fallback.toString().replace(/[\[\]]/g, '').substring(0, 6);
                 }
 
                 // 4. 組合文案
