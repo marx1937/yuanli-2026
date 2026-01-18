@@ -5,7 +5,7 @@
 
 {% block styles %}
 <style>
-    /* --- CSS 樣式區 (保持 V3.5 的完美白色按鈕與設定) --- */
+    /* --- CSS 樣式區 (V3.5 白色按鈕風格) --- */
     .hero-section { position: relative; margin-bottom: 15px; }
     .hero-banner {
         width: 100%; height: auto; display: block;
@@ -110,7 +110,7 @@
         text-align: center; margin-top: 30px; margin-bottom: 40px;
         display: flex; flex-direction: column; align-items: center; gap: 10px;
     }
-    /* 白色按鈕樣式 */
+    /* 白色按鈕 */
     .btn-messenger {
         display: inline-flex; align-items: center; justify-content: center;
         background: #fff; 
@@ -214,18 +214,16 @@
 <script>
     let realMsgs = ["🔔 報——！歡迎來到尋神情報站！", "💡 報馬仔提醒：發現神隊友請上傳！"];
     
-    // 🔍 V3.6 版本驗證：這行會出現在 Console，用來確認你吃到最新的程式碼
-    console.log("🔥 V3.6 Loaded: Priority AREA field logic");
+    // 🔍 V3.7: 暴力搜索版
+    console.log("🔥 V3.7 Loaded: Brute Force Search for 'Li'");
 
     fetch('/api/locations')
     .then(r => r.json())
     .then(d => {
-        // Debug: 在瀏覽器 F12 Console 顯示真實資料，讓你知道 API 到底回傳了什麼
-        console.log("🔥 報馬仔抓到的原始資料：", d);
+        console.log("🔥 報馬仔原始資料：", d);
 
         if(d && d.length > 0) {
             realMsgs = []; 
-            // 確保是最新的 5 筆資料
             let latestData = d.slice().reverse().slice(0, 5);
             
             latestData.forEach(i => {
@@ -233,32 +231,33 @@
                 let n = i.nickname || i.name || i.user || "熱心鄉親";
                 if(n.trim() === "") n = "熱心鄉親"; 
 
-                // 2. 【V3.6 關鍵修正】地點判斷邏輯
-                let place = "苑裡某處"; // 預設值
+                // 2. 【V3.7 暴力搜索】
+                let place = "苑裡某處"; // 預設
 
-                // 🔥 第一優先：直接看有沒有 area (區域/里) 欄位
-                // 因為你的上傳成功畫面有「苑港里」，代表資料庫有這個欄位！
-                if (i.area && i.area.length > 0 && i.area.includes("里")) {
-                    place = i.area; 
-                } 
-                // 第二優先：如果 area 沒寫，才用 Regex 去地址撈
-                else {
-                    let fullInfo = (i.address || "") + " " + (i.title || "") + " " + (i.description || "");
-                    let liMatches = fullInfo.match(/[\u4e00-\u9fa5]{2,3}里/g);
+                // 步驟 A: 把所有欄位串在一起變成「文字大雜燴」
+                // (注意：這裡把所有可能藏著地點的欄位都加進來了)
+                let soup = (i.area || "") + " " + (i.address || "") + " " + (i.title || "") + " " + (i.description || "") + " " + (i.locationName || "");
+                
+                // 步驟 B: 用雷達掃描所有「xx里」
+                let matches = soup.match(/[\u4e00-\u9fa5]{2,3}里/g);
 
-                    if (liMatches) {
-                        let validLi = liMatches.find(term => {
-                            return term !== "苑里" && term !== "這裡" && term !== "那里" && term !== "家裡" && term !== "公里";
-                        });
-                        if (validLi) place = validLi;
+                if (matches && matches.length > 0) {
+                     // 步驟 C: 過濾掉假地名 (跟之前一樣)
+                     let validLi = matches.find(term => {
+                        return term !== "苑里" && term !== "這裡" && term !== "那里" && term !== "家裡" && term !== "公里";
+                    });
+
+                    if (validLi) {
+                        place = validLi; // 找到了！直接用！
                     } else {
-                        // 第三優先：Fallback 抓標題 (只取前6字)
-                        let fallback = i.title || i.locationName || "苑裡";
-                        place = fallback.toString().replace(/[\[\]]/g, '').substring(0, 6);
+                        // 雖然有里字，但都是無效的，改抓標題 (去括號)
+                        place = (i.title || i.locationName || "苑裡").toString().replace(/[\[\]]/g, '').substring(0, 6);
                     }
+                } else {
+                    // 完全沒找到里字，改抓標題
+                    place = (i.title || i.locationName || "苑裡").toString().replace(/[\[\]]/g, '').substring(0, 6);
                 }
 
-                // 4. 組合文案
                 realMsgs.push(`🙏 感恩！${n} 於 [${place}] 成功尋獲神隊友！`);
             });
             
@@ -270,7 +269,6 @@
     })
     .catch(e => console.log("Ticker Error:", e));
 
-    // 動畫輪播
     let idx = 0;
     let el = document.getElementById('ticker-msg');
     setInterval(() => {
