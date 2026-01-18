@@ -9,7 +9,6 @@
         background-image: radial-gradient(#d7ccc8 1.5px, transparent 1.5px);
         background-size: 24px 24px;
         padding-bottom: 100px;
-        /* 防止 iOS 點擊閃爍 */
         -webkit-tap-highlight-color: transparent;
     }
 
@@ -48,7 +47,6 @@
     }
     .upload-zone:active { background: #fff; border-color: #d32f2f; transform: scale(0.98); }
     
-    /* 金身土地公 (絕對路徑) */
     .god-camera-img {
         width: 150px; height: auto; object-fit: contain; margin-bottom: 10px; 
         filter: drop-shadow(0 0 15px rgba(255, 193, 7, 0.5));
@@ -90,9 +88,6 @@
     .btn-submit.ready { opacity: 1; pointer-events: auto; }
     .btn-submit:active { transform: scale(0.98); }
 
-    .audio-hint {
-        text-align: center; font-size: 0.8rem; color: #888; margin-top: 10px;
-    }
 </style>
 {% endblock %}
 
@@ -158,7 +153,6 @@
             <button type="submit" class="btn-submit" id="submitBtn">
                 <i class="fas fa-sync fa-spin"></i> 等待 GPS 定位...
             </button>
-            <div class="audio-hint">🔊 將使用 Google 語音播報</div>
         </form>
     </div>
 
@@ -168,30 +162,29 @@
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // --- Google TTS 播放器 ---
-    // 這是解決手機沒聲音的終極大絕招：直接把 Google 小姐請過來！
-    function playGoogleTTS(text) {
-        // 1. 建立 Google 翻譯 TTS 連結 (client=tw-ob 是神奇的通關密語)
-        var safeText = encodeURIComponent(text);
-        var url = "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=zh-TW&q=" + safeText;
-
-        // 2. 建立 Audio 物件
-        var audio = new Audio(url);
-        audio.crossOrigin = "anonymous"; 
-        audio.playbackRate = 1.0; 
-
-        // 3. 播放 (必須在使用者點擊時觸發)
-        var playPromise = audio.play();
-
-        if (playPromise !== undefined) {
-            playPromise.then(_ => {
-                console.log("🔊 土地公發聲成功！");
-            }).catch(error => {
-                console.error("🔇 播放失敗:", error);
-                // 備案：如果還是失敗，震動一下提醒使用者
-                if(navigator.vibrate) navigator.vibrate([200]);
+    // --- Google MP3 串流播放器 ---
+    // 原理：直接向 Google 翻譯 API 請求 MP3 檔案，瀏覽器會將其視為音訊媒體播放
+    // 參數 client=tw-ob 是公開的測試接口
+    function playGoogleMP3(text) {
+        if (!text) return;
+        
+        // 1. 組合 Google 翻譯的 TTS 連結
+        // tl=zh-TW (目標語言: 繁體中文)
+        // q=文字內容 (需編碼)
+        var audioUrl = 'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=zh-TW&q=' + encodeURIComponent(text);
+        
+        // 2. 建立新的 Audio 物件
+        var audio = new Audio(audioUrl);
+        
+        // 3. 播放
+        // 這裡回傳 Promise，方便我們捕捉錯誤 (例如網路不通)
+        audio.play()
+            .then(() => {
+                console.log("Google Audio Playing: " + text);
+            })
+            .catch(error => {
+                console.error("Audio Playback Failed:", error);
             });
-        }
     }
 
     // --- 原有邏輯 ---
@@ -253,7 +246,7 @@
         if(!nickname) nickname = '熱心串友'; 
         var area = $('#area').val();
 
-        // 1. 不雅字過濾
+        // 髒話過濾
         var badWords = ['笨蛋', '壞蛋', '王八', '白痴', '白癡', '智障', '幹', '靠', '死', '爛', '屌', '雞掰', '機車', 'fuck', 'shit']; 
         for (var word of badWords) {
             if (nickname.toLowerCase().includes(word)) {
@@ -271,10 +264,11 @@
         var btn = $('#submitBtn');
         if(!btn.hasClass('ready')) return;
 
-        // 🔥🔥🔥 關鍵時刻：呼叫 Google 小姐 🔥🔥🔥
-        // 在按下按鈕的瞬間，直接去抓 Google 的聲音檔來播！
+        // 🔥🔥🔥 關鍵點：在這裡呼叫 Google MP3 🔥🔥🔥
+        // 這是直接的使用者點擊 (User Gesture)，所以瀏覽器允許播放 "MP3"
+        // 我們不依賴手機的 TTS 引擎，而是依賴 Google 的翻譯伺服器回傳聲音檔
         var sayText = "收到，資料傳送中。感謝" + area + "的" + nickname + "，土地公會保庇你喔！";
-        playGoogleTTS(sayText);
+        playGoogleMP3(sayText);
 
         btn.removeClass('ready').html('<i class="fas fa-robot"></i> 正在傳送資料...').css('opacity', '0.8');
 
@@ -286,6 +280,7 @@
         $.ajax({
             url: '/upload', type: 'POST', data: formData, contentType: false, processData: false,
             success: function(response) {
+                // 上傳成功後，這邊只負責跳視窗
                 if (response.status === 'duplicate') {
                     Swal.fire({
                         imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/guide_couple.png', 
@@ -311,6 +306,8 @@
         });
     });
 
-    $(document).ready(function() { startGPS(); });
+    $(document).ready(function() { 
+        startGPS(); 
+    });
 </script>
 {% endblock %}
