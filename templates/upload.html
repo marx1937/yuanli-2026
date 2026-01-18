@@ -59,25 +59,23 @@
     }
     .custom-input:focus { border-color: #d32f2f; outline: none; background: white; }
     
-    /* 改用 type=button 防止 form submit 搶走焦點 */
     .btn-submit {
         background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
         border: none; border-radius: 50px; padding: 15px; margin-top: 15px;
         font-weight: bold; letter-spacing: 1px; width: 100%; font-size: 1.1rem; color: white;
         box-shadow: 0 8px 20px rgba(211, 47, 47, 0.3);
         opacity: 0.5; pointer-events: none; transition: 0.3s;
-        cursor: pointer;
-        display: block; /* 確保佔滿 */
+        cursor: pointer; display: block;
     }
     .btn-submit.ready { opacity: 1; pointer-events: auto; }
     .btn-submit:active { transform: scale(0.98); }
 
-    .test-voice-btn {
-        background: #fbc02d; color: #5d4037; border: none; padding: 5px 15px;
-        border-radius: 20px; font-size: 0.8rem; font-weight: bold;
-        margin-left: 10px; cursor: pointer;
+    /* 除錯狀態條 */
+    .audio-status {
+        margin-top: 10px; padding: 10px; border-radius: 10px;
+        background: #eee; text-align: center; font-size: 0.8rem;
+        border: 1px solid #ccc;
     }
-    .debug-info { font-size: 0.7rem; color: #aaa; text-align: center; margin-top: 5px; }
 </style>
 {% endblock %}
 
@@ -87,8 +85,8 @@
     </div>
 
     <div class="form-card">
-        <!-- 🔥 備用音效 (當動態語音失敗時播放) -->
-        <audio id="backupSound" preload="auto">
+        <!-- 純淨的 Audio 標籤，不依賴任何 JS 初始化 -->
+        <audio id="dingSound">
             <source src="data:audio/mp3;base64,//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" type="audio/mpeg">
         </audio>
 
@@ -129,24 +127,20 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
-                    <span><i class="fas fa-user-tag" style="color:#fbc02d;"></i> 您的稱號</span>
-                    <!-- 測試按鈕：同時嘗試解鎖 -->
-                    <button type="button" class="test-voice-btn" ontouchstart="unlockAudio()" onclick="trySpeak('測試語音')">🔊 測試</button>
-                </label>
+                <label class="form-label"><i class="fas fa-user-tag" style="color:#fbc02d;"></i> 您的稱號</label>
                 <input type="text" class="custom-input" id="nickname" name="nickname" maxlength="8" placeholder="例如：熱心串友 (預設)">
             </div>
-            
-            <div class="debug-info" id="debugMsg">音訊準備就緒</div>
 
             <div class="form-group mb-0">
                 <label class="form-label"><i class="fas fa-pen" style="color:#8d6e63;"></i> 線索描述 (選填)</label>
                 <textarea class="custom-input" id="description" name="description" rows="2" placeholder="例如：在榕樹下很靈驗..."></textarea>
             </div>
 
-            <!-- 🔥 改成 button type="button" 完全手動控制，避免 form submit 干擾 -->
-            <!-- ontouchstart 比 onclick 更早觸發，能搶在瀏覽器封鎖前執行 -->
-            <button type="button" class="btn-submit" id="submitBtn" ontouchstart="handleTouchSubmit()" onclick="handleClickSubmit()">
+            <!-- 音效診斷區 -->
+            <div id="soundDebug" class="audio-status">🔇 尚未播放</div>
+
+            <!-- 按鈕直接呼叫 playSound，不經過複雜邏輯 -->
+            <button type="button" class="btn-submit" id="submitBtn" onclick="handleFinalSubmit()">
                 <i class="fas fa-sync fa-spin"></i> 等待 GPS 定位...
             </button>
         </form>
@@ -157,146 +151,83 @@
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // --- 混合音訊核心 ---
-    let voices = [];
-    
-    // 初始化
-    function initAudio() {
-        if('speechSynthesis' in window) {
-            voices = window.speechSynthesis.getVoices();
-            window.speechSynthesis.onvoiceschanged = () => {
-                voices = window.speechSynthesis.getVoices();
-            };
-        }
-    }
-    initAudio();
+    // --- 硬體除錯播放函數 ---
+    function playSoundDebug() {
+        let audio = document.getElementById("dingSound");
+        let debugBox = document.getElementById("soundDebug");
 
-    // 1. 解鎖函數 (播放無聲音訊)
-    function unlockAudio() {
-        if('speechSynthesis' in window) {
-            window.speechSynthesis.resume(); 
-        }
-        // 同時解鎖備用 MP3
-        let audio = document.getElementById("backupSound");
-        if(audio) {
-            audio.play().then(() => { audio.pause(); audio.currentTime=0; }).catch(()=>{});
-        }
-    }
+        debugBox.innerHTML = "⏳ 嘗試播放...";
+        debugBox.style.background = "#fff8e1";
 
-    // 2. 核心說話邏輯 (失敗自動降級)
-    function trySpeak(text) {
-        // A計畫：動態語音
-        if('speechSynthesis' in window) {
-            window.speechSynthesis.cancel(); // 清除隊列
+        // 強制重置
+        audio.currentTime = 0;
+        
+        let promise = audio.play();
 
-            let u = new SpeechSynthesisUtterance(text);
-            u.lang = 'zh-TW';
-            u.rate = 1.0;
-            
-            // 優先找中文引擎
-            let voice = voices.find(v => v.lang.includes('zh'));
-            if(voice) u.voice = voice;
-
-            // 如果報錯，立刻執行 B計畫
-            u.onerror = (e) => {
-                console.log("TTS Failed ("+e.error+"), playing backup.");
-                playBackupSound();
-            };
-
-            try {
-                window.speechSynthesis.speak(u);
-            } catch(e) {
-                playBackupSound();
-            }
-        } else {
-            // 不支援語音，直接 B計畫
-            playBackupSound();
-        }
-    }
-
-    // 3. 備用音效 (叮咚聲)
-    function playBackupSound() {
-        let audio = document.getElementById("backupSound");
-        if(audio) {
-            audio.currentTime = 0;
-            audio.play().catch(e => {
-                console.log("Backup sound blocked: " + e);
-                $('#debugMsg').text("⚠️ 靜音模式或被阻擋");
+        if (promise !== undefined) {
+            promise.then(_ => {
+                // 程式碼回報成功
+                debugBox.innerHTML = "✅ 播放訊號已發送！<br><b>若無聲請檢查手機【媒體音量】</b>";
+                debugBox.style.background = "#e8f5e9";
+                debugBox.style.color = "#2e7d32";
+                console.log("Audio Play Success");
+            }).catch(error => {
+                // 程式碼回報失敗 (通常是權限)
+                debugBox.innerHTML = "❌ 播放失敗: " + error.message + "<br>請嘗試重新整理頁面";
+                debugBox.style.background = "#ffebee";
+                debugBox.style.color = "#c62828";
+                console.log("Audio Play Error: " + error);
             });
         }
     }
 
-    // --- 提交處理邏輯 ---
-    // 為了相容性，我們同時監聽 touchstart 和 click，但用 flag 防止重複執行
-    let isSubmitting = false;
-
-    function handleTouchSubmit() {
-        if(isSubmitting) return;
-        // 在手指碰到螢幕的瞬間，立刻嘗試發聲 (成功率最高)
-        processSubmission();
-    }
-
-    function handleClickSubmit() {
-        if(isSubmitting) return;
-        // 如果 touchstart 沒觸發 (例如滑鼠點擊)，這裡補救
-        processSubmission();
-    }
-
-    function processSubmission() {
+    // --- 提交處理 ---
+    function handleFinalSubmit() {
         let btn = $('#submitBtn');
-        if(!btn.hasClass('ready')) return; // 還沒準備好
+        if(!btn.hasClass('ready')) return;
 
-        isSubmitting = true;
+        // 1. 先播放聲音 (這是同步操作)
+        playSoundDebug();
 
-        // 1. 取得資料
-        let area = $('#area').val();
-        let nickname = $('#nickname').val().trim() || '熱心串友';
-        let sayText = `收到，資料傳送中。感謝${area}的${nickname}`;
-
-        // 2. 🔥 關鍵：同步執行說話 (不要放在 callback 裡)
-        trySpeak(sayText);
-
-        // 3. UI 變更
+        // 2. UI 鎖定
         btn.removeClass('ready').html('<i class="fas fa-robot"></i> 正在傳送資料...').css('opacity', '0.8');
 
-        // 4. 準備上傳
+        // 3. 資料上傳
         let form = document.getElementById('uploadForm');
         let formData = new FormData(form);
+        let nickname = $('#nickname').val().trim() || '熱心串友';
+        let area = $('#area').val();
         formData.set('nickname', nickname);
         let desc = $('#description').val();
         formData.set('description', '[' + area + '] ' + desc);
 
-        // 5. AJAX 上傳
         $.ajax({
             url: '/upload', type: 'POST', data: formData, contentType: false, processData: false,
             success: function(response) {
-                isSubmitting = false; // 重置
                 if (response.status === 'duplicate') {
                     Swal.fire({
                         title: '📋 資料已送交',
                         text: `地點 (${area}) 附近已有紀錄。`,
-                        icon: 'info',
                         confirmButtonText: '收到', confirmButtonColor: '#ff9800'
                     }).then(() => { window.location.href = '/map'; });
                 } else {
                     Swal.fire({
                         title: '✅ 上傳成功！',
                         text: `感謝 ${area} 的 ${nickname}`,
-                        icon: 'success',
+                        imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/happy.jpg', 
+                        imageWidth: '100%',
                         confirmButtonText: '太棒了', confirmButtonColor: '#d32f2f'
                     }).then(() => { window.location.href = '/map'; });
                 }
             },
             error: function() {
-                isSubmitting = false; // 重置
                 Swal.fire({ title: '❌ 上傳失敗', text: '請檢查網路', icon: 'error' });
                 btn.addClass('ready').html('<i class="fas fa-paper-plane"></i> 重新發送');
             }
         });
     }
 
-
-    // --- GPS 邏輯 ---
+    // --- GPS 與預覽 ---
     var currentLat = null, currentLng = null;
     var isPhotoReady = false;
 
@@ -348,11 +279,7 @@
         }
     }
 
-    $(document).ready(function() { 
-        startGPS();
-        // 全局監聽觸摸，預先解鎖
-        document.body.addEventListener('touchstart', unlockAudio, {once:true});
-    });
+    $(document).ready(function() { startGPS(); });
 </script>
 {% endblock %}
 
