@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% set active_page = "leaderboard" %}
 
-{% block title %}尋神風雲榜 - 雙重爭霸戰{% endblock %}
+{% block title %}尋神風雲榜 - 美學覺醒版{% endblock %}
 
 {% block styles %}
 <style>
@@ -15,57 +15,72 @@
         padding-bottom: 80px;
     }
 
-    /* 2. 看板與切換區 */
+    /* 2. 看板區 */
     .rank-header {
-        text-align: center; padding: 20px 0 15px 0;
-        position: relative; margin-bottom: 5px;
+        text-align: center; padding: 25px 0 15px 0;
+        position: relative; margin-bottom: 10px;
     }
     
     .rank-banner-img {
         width: 90%; max-width: 360px; height: auto;
-        /* 預留高度避免閃爍 */
-        min-height: 120px; 
-        filter: drop-shadow(0 8px 10px rgba(93, 64, 55, 0.3));
+        min-height: 120px;
+        filter: drop-shadow(0 10px 15px rgba(93, 64, 55, 0.2)); /* 更柔和的投影 */
         animation: float-title 3s ease-in-out infinite;
     }
     @keyframes float-title { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
-    /* 雙榜切換按鈕 */
+    /* 🔥 香蕉美學 1: 浮動切換按鈕 (Glassmorphism) */
     .tab-container {
-        display: flex; justify-content: center; gap: 10px;
-        margin: 15px auto 20px auto; width: 90%; max-width: 400px;
-        background: #fff; padding: 5px; border-radius: 50px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #eee;
+        display: flex; justify-content: center; gap: 8px;
+        margin: 10px auto 25px auto; width: 88%; max-width: 380px;
+        background: rgba(255, 255, 255, 0.6); /* 半透明 */
+        backdrop-filter: blur(10px); /* 毛玻璃特效 */
+        padding: 6px; border-radius: 50px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05); /* 移除硬邊框，改用柔光 */
     }
     .tab-btn {
         flex: 1; padding: 10px 0; border-radius: 40px;
-        text-align: center; font-weight: bold; color: #888;
+        text-align: center; font-weight: bold; color: #8d6e63;
         cursor: pointer; transition: all 0.3s; font-size: 0.95rem;
         display: flex; align-items: center; justify-content: center; gap: 6px;
     }
+    /* 選中狀態：紅色柔光氣場 */
     .tab-btn.active {
         background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
-        color: white; box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3);
+        color: white; 
+        box-shadow: 0 4px 15px rgba(211, 47, 47, 0.4); /* 紅色光暈 */
+        transform: scale(1.02);
     }
     
-    /* 說明區塊 */
-    .rules-card {
-        background: white; width: 90%; max-width: 450px; margin: 0 auto 30px auto;
-        border-radius: 20px; padding: 20px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 2px solid #fff3e0; display: none;
+    /* 說明按鈕：浮動膠囊 */
+    .rules-toggle-btn {
+        background: white; color: #d32f2f; border: none;
+        padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; font-weight: bold;
+        display: inline-flex; align-items: center; cursor: pointer;
+        box-shadow: 0 4px 12px rgba(211, 47, 47, 0.15); /* 紅色柔光 */
+        margin-bottom: 10px; transition: 0.2s;
     }
-    .rule-row { display: flex; align-items: center; margin-bottom: 12px; border-bottom: 1px dashed #eee; padding-bottom: 8px; }
+    .rules-toggle-btn:active { transform: scale(0.95); }
+
+    .rules-card {
+        background: rgba(255, 255, 255, 0.95); width: 90%; max-width: 450px; 
+        margin: 0 auto 30px auto; border-radius: 25px; padding: 25px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08); /* 擴散陰影 */
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        display: none;
+    }
+    .rule-row { display: flex; align-items: center; margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
     .rule-row:last-child { border-bottom: none; margin-bottom: 0; }
     .rule-icon { font-size: 1.8rem; width: 50px; text-align: center; margin-right: 10px; }
     .rule-content { flex: 1; text-align: left; }
     .rule-title { font-weight: bold; color: #5d4037; font-size: 1rem; }
     .rule-desc { font-size: 0.85rem; color: #888; }
-    .rule-badge { background: #ffe0b2; padding: 4px 12px; border-radius: 10px; font-size: 0.85rem; color: #e65100; font-weight: bold; white-space: nowrap; }
+    .rule-badge { background: #fff3e0; padding: 4px 12px; border-radius: 10px; font-size: 0.85rem; color: #e65100; font-weight: bold; }
 
     /* 3. 頒獎台 */
     .podium-container {
         display: flex; justify-content: center; align-items: flex-end;
-        gap: 8px; margin-bottom: 30px; padding: 0 10px; height: 230px;
+        gap: 8px; margin-bottom: 30px; padding: 0 10px; height: 240px;
     }
     .podium-item {
         display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
@@ -75,78 +90,90 @@
     .rank-2 { width: 90px; z-index: 2; }
     .rank-3 { width: 90px; z-index: 1; }
 
+    /* 🔥 香蕉美學 2: 頭像光暈 (Breathing Avatar) */
     .rank-avatar {
         width: 60px; height: 60px; background: white; border-radius: 50%;
-        border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        border: 4px solid #fff; 
         margin-bottom: -15px; z-index: 5; position: relative;
         display: flex; justify-content: center; align-items: center;
         font-size: 1.5rem; overflow: hidden; color: #5d4037;
+        transition: transform 0.3s;
     }
-    .rank-1 .rank-avatar { width: 80px; height: 80px; border-color: #ffd700; font-size: 2rem; }
-    .rank-2 .rank-avatar { border-color: #c0c0c0; }
-    .rank-3 .rank-avatar { border-color: #cd7f32; }
+    /* 金銀銅光暈特效 */
+    .rank-1 .rank-avatar { 
+        width: 80px; height: 80px; border-color: #fff; font-size: 2rem; 
+        box-shadow: 0 0 20px rgba(255, 193, 7, 0.5); /* 金色光暈 */
+    }
+    .rank-2 .rank-avatar { 
+        border-color: #fff; 
+        box-shadow: 0 0 15px rgba(189, 189, 189, 0.5); /* 銀色光暈 */
+    }
+    .rank-3 .rank-avatar { 
+        border-color: #fff; 
+        box-shadow: 0 0 15px rgba(255, 112, 67, 0.4); /* 銅色光暈 */
+    }
 
-    /* Emoji 皇冠 */
     .crown-icon {
         position: absolute; top: -45px; font-size: 40px;
         animation: spin-crown 3s infinite linear;
-        filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.8));
+        filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.6));
     }
     @keyframes spin-crown { 0% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } 100% { transform: rotate(-5deg); } }
 
     .podium-block {
-        width: 100%; border-radius: 15px 15px 0 0;
+        width: 100%; border-radius: 20px 20px 0 0;
         display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-        padding-top: 25px; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        padding-top: 25px; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
-    .rank-1 .podium-block { height: 130px; background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%); border-top: 4px solid #fff9c4; }
-    .rank-2 .podium-block { height: 100px; background: linear-gradient(135deg, #e0e0e0 0%, #9e9e9e 100%); border-top: 4px solid #f5f5f5; }
-    .rank-3 .podium-block { height: 80px; background: linear-gradient(135deg, #ffab91 0%, #d84315 100%); border-top: 4px solid #ffccbc; }
+    .rank-1 .podium-block { height: 130px; background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%); }
+    .rank-2 .podium-block { height: 100px; background: linear-gradient(135deg, #bdbdbd 0%, #9e9e9e 100%); }
+    .rank-3 .podium-block { height: 80px; background: linear-gradient(135deg, #ff8a65 0%, #d84315 100%); }
 
     .rank-name { font-weight: bold; font-size: 1rem; margin-bottom: 2px; text-align: center; padding: 0 5px; line-height: 1.1; }
-    .rank-sub { font-size: 0.75rem; opacity: 0.9; margin-bottom: 3px; font-weight: normal; }
-    .count-badge { background: rgba(0,0,0,0.2); padding: 2px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
+    .rank-sub { font-size: 0.75rem; opacity: 0.95; margin-bottom: 3px; font-weight: normal; }
+    .count-badge { background: rgba(0,0,0,0.15); padding: 2px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; backdrop-filter: blur(2px); }
 
-    /* 4. 列表樣式 */
+    /* 4. 列表樣式 (浮動卡片) */
     .list-container {
-        width: 92%; max-width: 500px; margin: 0 auto;
+        width: 90%; max-width: 500px; margin: 0 auto;
         background: white; border-radius: 25px;
-        padding: 10px; box-shadow: 0 5px 20px rgba(93, 64, 55, 0.08);
-        min-height: 200px;
+        padding: 10px; 
+        box-shadow: 0 15px 40px rgba(93, 64, 55, 0.08); /* 柔和擴散陰影 */
+        min-height: 200px; border: none;
     }
     .list-item {
         display: flex; align-items: center; padding: 15px;
-        border-bottom: 1px solid #eee; transition: background 0.2s;
-        border-radius: 15px; position: relative;
+        border-bottom: 1px solid #f5f5f5; /* 極淡的分隔線 */
+        transition: background 0.2s; border-radius: 15px;
     }
     .list-item:last-child { border-bottom: none; }
+    .list-item:active { background: #fafafa; }
     
     .list-rank {
         width: 28px; height: 28px; background: #8d6e63; color: white;
         border-radius: 50%; display: flex; justify-content: center; align-items: center;
         font-weight: bold; font-size: 0.8rem; margin-right: 12px; flex-shrink: 0;
+        box-shadow: 0 2px 5px rgba(141, 110, 99, 0.3);
     }
     .list-info { flex: 1; text-align: left; }
     .list-name { font-weight: bold; color: #5d4037; font-size: 1.1rem; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
     .list-sub { font-size: 0.85rem; color: #999; margin-top: 2px; }
     
-    /* 等級標籤樣式 */
-    .lvl-tag { font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; font-weight: normal; border: 1px solid #ddd; }
-    .lvl-1 { background: #f1f8e9; color: #558b2f; border-color: #c5e1a5; }
-    .lvl-2 { background: #e3f2fd; color: #1565c0; border-color: #90caf9; }
-    .lvl-3 { background: #fff3e0; color: #ef6c00; border-color: #ffcc80; }
-    .lvl-max { background: #ffebee; color: #c62828; border-color: #ef9a9a; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .lvl-tag { font-size: 0.75rem; padding: 2px 8px; border-radius: 8px; font-weight: normal; border: 1px solid #eee; }
+    .lvl-1 { background: #f1f8e9; color: #558b2f; }
+    .lvl-2 { background: #e3f2fd; color: #1565c0; }
+    .lvl-3 { background: #fff3e0; color: #ef6c00; }
+    .lvl-max { background: #ffebee; color: #c62828; font-weight: bold; box-shadow: 0 2px 5px rgba(198, 40, 40, 0.15); border: none; }
 
-    .list-bar-bg { width: 100%; height: 6px; background: #f0f0f0; border-radius: 10px; margin-top: 5px; overflow: hidden; }
-    .list-bar-fill { height: 100%; background: #d32f2f; border-radius: 10px; }
+    .list-bar-bg { width: 100%; height: 6px; background: #f5f5f5; border-radius: 10px; margin-top: 6px; overflow: hidden; }
+    .list-bar-fill { height: 100%; background: linear-gradient(90deg, #ef5350, #d32f2f); border-radius: 10px; }
     .list-count { font-weight: bold; color: #d32f2f; font-size: 1.2rem; margin-left: 10px; min-width: 30px; text-align: right; }
 
     #loading-box { text-align: center; padding: 50px; color: #aaa; }
-    
-    .tab-content { display: none; animation: fadeIn 0.3s; }
+    .tab-content { display: none; animation: fadeIn 0.4s ease-out; }
     .tab-content.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 {% endblock %}
 
