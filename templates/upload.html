@@ -173,21 +173,16 @@
 <script>
     var currentLat = null, currentLng = null;
     var isPhotoReady = false;
-    
-    // 初始化語音
-    window.synth = window.speechSynthesis;
 
-    // 🔥 說話函數
-    function speak(text) {
-        if (!window.synth) return;
-        
-        // 這裡「不」cancel()，因為我們要讓聲音排隊播放
-        // 這樣第一句「傳送中」講完，會接著講第二句「感謝」
-        var utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'zh-TW'; 
-        utterance.rate = 1.0; 
-        utterance.volume = 1.0;
-        window.synth.speak(utterance);
+    // 🔥 0117 原版語音函數 (最原始、最穩定)
+    function speakHappy(text) {
+        if ('speechSynthesis' in window) {
+            var msg = new SpeechSynthesisUtterance();
+            msg.text = text; 
+            msg.lang = 'zh-TW'; 
+            msg.rate = 1.0; 
+            window.speechSynthesis.speak(msg);
+        }
     }
 
     function startGPS() {
@@ -241,11 +236,9 @@
     $('#uploadForm').submit(function(e) {
         e.preventDefault();
         
-        // 🔥【絕對有效】按下去馬上說話！
-        if (window.synth) {
-            window.synth.cancel(); // 停止之前的聲音
-            speak("收到！正在傳送資料，請稍候..."); // 立即播放
-        }
+        // 🔥 這裡加一行：按下去的瞬間先說「收到」
+        // 這會強制解鎖瀏覽器的音訊播放功能
+        speakHappy("收到，資料傳送中");
 
         var nickname = $('#nickname').val().trim();
         if(!nickname) nickname = '熱心串友'; 
@@ -278,9 +271,9 @@
         $.ajax({
             url: '/upload', type: 'POST', data: formData, contentType: false, processData: false,
             success: function(response) {
-                // 🔥 資料傳完後，這裡會接著播放第二句
+                // 🔥 資料傳完，再說第二句「感謝」
                 var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公會保庇你喔！';
-                speak(sayText); 
+                speakHappy(sayText); 
 
                 if (response.status === 'duplicate') {
                     Swal.fire({
@@ -291,7 +284,7 @@
                         confirmButtonText: '收到，來去找下一座！', confirmButtonColor: '#ff9800'
                     }).then(() => { window.location.href = '/map'; });
                 } else {
-                    // 🔥【文字排版確認】：分行 + 加粗 + 變色
+                    // 🔥【排版確認】：分行 + 加粗
                     Swal.fire({
                         title: '✅ 上傳成功！', 
                         html: `感謝 <b>${area}</b> 的 <b>${nickname}</b><br><br><span style="font-size: 1.2rem; color: #d32f2f; font-weight: bold;">土地公收到囉！</span>`, 
