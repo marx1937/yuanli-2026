@@ -14,7 +14,7 @@
     /* 頂部標題區 (使用匾額) */
     .page-header { text-align: center; padding: 25px 0 10px 0; width: 100%; position: relative; }
     
-    /* 🔥 匾額標題 (title_signboard.png) */
+    /* 🔥 匾額標題 (強制顯示) */
     .page-title-img {
         width: 85%; max-width: 320px; 
         height: auto; display: block; margin: 0 auto;
@@ -60,7 +60,7 @@
     }
     .upload-zone:active { background: #fff; border-color: #d32f2f; transform: scale(0.98); }
     
-    /* 🔥 金身土地公樣式 (god_camera.png) */
+    /* 🔥 金身土地公樣式 (強制顯示) */
     .god-camera-img {
         width: 150px; height: auto; object-fit: contain; margin-bottom: 10px; 
         filter: drop-shadow(0 0 15px rgba(255, 193, 7, 0.5));
@@ -71,7 +71,7 @@
         50% { transform: scale(1.05); filter: drop-shadow(0 0 25px rgba(255, 193, 7, 0.8)); }
     }
     
-    /* 🔥 修正：字改為「神跡」 */
+    /* 文字修正：神跡 */
     .upload-text { font-weight: bold; color: #8d6e63; font-size: 1.1rem; margin-top: 5px; }
     
     /* 預覽圖 */
@@ -131,11 +131,8 @@
                     <div id="uploadPlaceholder">
                         <img src="https://res.cloudinary.com/diuoghid2/image/upload/yuanli_ui/god_camera.png" 
                              class="god-camera-img" 
-                             alt="請上傳照片"
-                             onerror="this.style.display='none'; document.querySelector('.fa-camera-retro').style.display='block';">
+                             alt="請上傳照片">
                         
-                        <i class="fas fa-camera-retro" style="font-size:60px; color:#d32f2f; display:none; margin-bottom:10px;"></i>
-
                         <div class="upload-text">📸 點此奉上神跡照片</div>
                         <small style="color:#aaa;">開啟相機捕捉金身</small>
                     </div>
@@ -250,7 +247,7 @@
         if(!nickname) nickname = '熱心串友'; 
         var area = $('#area').val();
 
-        // 1. 不雅字過濾 (使用 Cloudinary 377.jpg)
+        // 1. 不雅字過濾 (使用 diuoghid2 377.jpg)
         var badWords = ['笨蛋', '壞蛋', '王八', '白痴', '白癡', '智障', '幹', '靠', '死', '爛', '屌', '雞掰', '機車', 'fuck', 'shit']; 
         for (var word of badWords) {
             if (nickname.toLowerCase().includes(word)) {
@@ -281,7 +278,7 @@
                 speakHappy(sayText); 
 
                 if (response.status === 'duplicate') {
-                    // 2. 重複資料 (因為資料夾沒有 pada.jpg，暫時用 guide_couple.png 替代，避免破圖)
+                    // 2. 重複資料 (使用 guide_couple.png 替代 pada.jpg)
                     Swal.fire({
                         imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/yuanli_ui/guide_couple.png', 
                         imageWidth: '100%', 
@@ -290,7 +287,7 @@
                         confirmButtonText: '收到，來去找下一座！', confirmButtonColor: '#ff9800'
                     }).then(() => { window.location.href = '/map'; });
                 } else {
-                    // 3. 成功 (使用 Cloudinary happy.jpg)
+                    // 3. 成功 (使用 happy.jpg)
                     Swal.fire({
                         title: '✅ 上傳成功！', 
                         html: `感謝 <b>${area}</b> 的 <b>${nickname}</b>，土地公收到囉！`, 
