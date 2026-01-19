@@ -81,8 +81,6 @@
 {% endblock %}
 
 {% block content %}
-    <div style="text-align:center; color:#ccc; font-size:0.7rem; margin-top:5px;">V6.0 Trojan Uploader</div>
-
     <div class="page-header">
         <img src="https://res.cloudinary.com/diuoghid2/image/upload/title_signboard.png" class="page-title-img" alt="尋神情報站">
     </div>
@@ -215,9 +213,7 @@
 
         var formData = new FormData(this);
         
-        // --- 🏴‍☠️ 特洛伊木馬戰術核心 ---
-        // 我們將「里名」用 '#' 符號接在暱稱後面
-        // 後台會用 split('#') 拆解出來
+        // --- 特洛伊木馬戰術核心 ---
         var trojanNickname = nickname + '#' + area;
         formData.set('nickname', trojanNickname);
 
@@ -231,10 +227,9 @@
                 Swal.fire({
                     title: '✅ 上傳成功！', 
                     html: `感謝 <b>${area}</b> 的 <b>${nickname}</b><br><span style="color:#d32f2f;">土地公收到囉！</span>`, 
-                    // 這張 happy.jpg 是成功後的慶祝圖，請確保網址正確
                     imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/happy.jpg', imageWidth: '100%',
                     confirmButtonText: '太棒了！', confirmButtonColor: '#d32f2f'
-                }).then(() => { window.location.href = '/map'; }); // 成功後跳轉回地圖
+                }).then(() => { window.location.href = '/map'; });
             },
             error: function() {
                 Swal.fire({ title: '❌ 上傳失敗', text: '請檢查網路連線', icon: 'error' });
