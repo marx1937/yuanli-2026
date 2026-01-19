@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 # --- 設定密鑰 ---
 app.secret_key = os.environ.get('SECRET_KEY', 'yuanli_secret_key_888')
-ADMIN_PASSWORD = '8888'  # 🔥 設定為新密碼
+ADMIN_PASSWORD = 'ytc@358'  # 🔥 設定為新密碼
 
 # --- Cloudinary 設定 ---
 cloudinary.config(
