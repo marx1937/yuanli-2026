@@ -29,34 +29,26 @@
     }
     @keyframes float-title { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
-    /* 🔥 新增：橫向捲動快篩列 (Chips) */
+    /* 3. 橫向捲動快篩列 (Chips) */
     .filter-scroll-container {
         width: 100%; overflow-x: auto; white-space: nowrap;
-        padding: 5px 15px 15px 15px; /* 下方留點空間給陰影 */
-        -webkit-overflow-scrolling: touch; /* 讓 iOS 滑動順暢 */
-        scrollbar-width: none; /* 隱藏捲軸 (Firefox) */
+        padding: 5px 15px 15px 15px; 
+        -webkit-overflow-scrolling: touch; scrollbar-width: none;
     }
-    .filter-scroll-container::-webkit-scrollbar { display: none; /* 隱藏捲軸 (Chrome/Safari) */ }
+    .filter-scroll-container::-webkit-scrollbar { display: none; }
 
     .filter-chip {
-        display: inline-block;
-        background: white; color: #8d6e63;
-        padding: 6px 16px; border-radius: 20px;
-        font-size: 0.9rem; font-weight: bold;
-        margin-right: 8px; cursor: pointer;
-        border: 1px solid #eee;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        transition: all 0.2s;
+        display: inline-block; background: white; color: #8d6e63;
+        padding: 6px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: bold;
+        margin-right: 8px; cursor: pointer; border: 1px solid #eee;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: all 0.2s;
     }
-    
-    /* 選中狀態 */
     .filter-chip.active {
-        background: #d32f2f; color: white;
-        box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3);
+        background: #d32f2f; color: white; box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3);
         border-color: #d32f2f; transform: scale(1.05);
     }
 
-    /* 3. 瀑布流佈局 */
+    /* 4. 瀑布流佈局 */
     .gallery-container {
         column-count: 2; column-gap: 12px;
         width: 94%; max-width: 600px; margin: 0 auto;
@@ -64,61 +56,63 @@
 
     .gallery-item {
         break-inside: avoid; background: white; border-radius: 15px;
-        margin-bottom: 12px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-        overflow: hidden; transition: transform 0.2s;
-        cursor: pointer; position: relative;
+        margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        overflow: hidden; transition: transform 0.2s; cursor: pointer; position: relative;
     }
     .gallery-item:active { transform: scale(0.98); }
 
-    .photo-thumb {
-        width: 100%; display: block;
-        background-color: #eee; min-height: 100px; object-fit: cover;
-    }
-
+    .photo-thumb { width: 100%; display: block; background-color: #eee; min-height: 100px; object-fit: cover; }
     .photo-info { padding: 8px 10px; }
-    
-    .photo-title {
-        font-size: 0.9rem; font-weight: bold; color: #5d4037;
-        margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    
-    .photo-meta {
-        display: flex; justify-content: space-between; align-items: center;
-        font-size: 0.75rem; color: #999;
-    }
+    .photo-title { font-size: 0.9rem; font-weight: bold; color: #5d4037; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .photo-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #999; }
 
-    /* 載入中 */
-    #loading-box { text-align: center; padding: 50px; color: #aaa; width: 100%; }
-    
-    /* Modal */
+    /* 5. Modal 與 功能按鈕區 */
     #photo-modal {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(0,0,0,0.95); z-index: 10000;
         display: none; justify-content: center; align-items: center;
         flex-direction: column; opacity: 0; transition: opacity 0.3s;
     }
-    #modal-img { max-width: 95%; max-height: 70vh; border-radius: 5px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+    #modal-img { max-width: 95%; max-height: 60vh; border-radius: 5px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
     #modal-desc { color: white; margin-top: 15px; text-align: center; padding: 0 20px; font-size: 1rem; line-height: 1.5; max-width: 90%; }
+    
+    /* 🔥 新增：按鈕區樣式 */
+    .modal-actions {
+        display: flex; gap: 15px; margin-top: 20px; width: 90%; justify-content: center;
+    }
+    .action-btn {
+        flex: 1; max-width: 120px; padding: 10px 0; border-radius: 30px;
+        text-align: center; color: white; font-weight: bold; text-decoration: none;
+        display: flex; align-items: center; justify-content: center; gap: 5px;
+        font-size: 0.9rem; transition: transform 0.2s; cursor: pointer; border: none;
+    }
+    .action-btn:active { transform: scale(0.95); }
+    
+    /* 顏色定義 */
+    .btn-nav { background: linear-gradient(135deg, #ff9800, #f57c00); box-shadow: 0 4px 10px rgba(245, 124, 0, 0.4); }
+    .btn-line { background: #06c755; box-shadow: 0 4px 10px rgba(6, 199, 85, 0.4); }
+    .btn-fb { background: #1877f2; box-shadow: 0 4px 10px rgba(24, 119, 242, 0.4); }
+
     #modal-close {
         position: absolute; top: 20px; right: 20px; color: white; font-size: 2rem; cursor: pointer;
         background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%;
         display: flex; align-items: center; justify-content: center;
     }
+    
+    #loading-box { text-align: center; padding: 50px; color: #aaa; width: 100%; }
 </style>
 {% endblock %}
 
 {% block content %}
 
     <div class="gallery-header">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/f_auto,q_auto/gallery_top.png" 
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/f_auto,q_auto/gallery_top.png?v=2" 
              class="gallery-banner-img" 
              alt="尋神足跡"
-             onerror="this.src='https://placehold.co/380x120?text=Check+Image+Name'"> 
+             onerror="this.src='https://placehold.co/380x120?text=Gallery+Banner'"> 
     </div>
 
-    <div class="filter-scroll-container" id="filter-bar">
-        </div>
+    <div class="filter-scroll-container" id="filter-bar"></div>
 
     <div id="loading-box">
         <i class="fas fa-spinner fa-spin fa-2x"></i><br><br>正在載入足跡...
@@ -129,7 +123,20 @@
     <div id="photo-modal" onclick="closeModal()">
         <div id="modal-close">&times;</div>
         <img id="modal-img" src="" alt="Zoomed Photo" onclick="event.stopPropagation()">
+        
         <div id="modal-desc"></div>
+
+        <div class="modal-actions" onclick="event.stopPropagation()">
+            <a href="#" id="btn-nav" target="_blank" class="action-btn btn-nav">
+                <i class="fas fa-location-arrow"></i> 導航
+            </a>
+            <a href="#" id="btn-line" target="_blank" class="action-btn btn-line">
+                <i class="fab fa-line"></i> 分享
+            </a>
+            <a href="#" id="btn-fb" target="_blank" class="action-btn btn-fb">
+                <i class="fab fa-facebook-f"></i> FB
+            </a>
+        </div>
     </div>
 
 {% endblock %}
@@ -142,20 +149,18 @@
         "山腳里", "舊社里", "石鎮里", "蕉埔里", "西平里"
     ];
 
-    let allPhotos = []; // 儲存所有照片資料，方便過濾
+    let allPhotos = [];
 
     fetch('/api/locations?t=' + new Date().getTime())
     .then(r => r.json())
     .then(data => {
-        // 1. 初始化資料
         allPhotos = data.filter(item => item.image_url && item.image_url.startsWith('http'));
         allPhotos.reverse();
 
-        // 2. 處理每一張照片的資料 (解碼里別)
         allPhotos.forEach(item => {
             let rawName = item.nickname || item.name || '善心人士';
             item.displayName = rawName;
-            item.villageName = '苑裡鎮'; // 預設
+            item.villageName = '苑裡鎮';
 
             if (rawName.indexOf('#') > -1) {
                 let parts = rawName.split('#');
@@ -171,12 +176,8 @@
             }
         });
 
-        // 3. 建立快篩按鈕
         renderFilterChips();
-
-        // 4. 顯示所有照片
         renderGallery('全部');
-
         $('#loading-box').hide();
     })
     .catch(e => {
@@ -184,40 +185,27 @@
         console.error(e);
     });
 
-    // 建立快篩按鈕
     function renderFilterChips() {
         let container = $('#filter-bar');
         let html = `<div class="filter-chip active" onclick="filterGallery(this, '全部')">全部</div>`;
-        
         ALL_VILLAGES.forEach(v => {
-            // 只有當該里有照片時，才顯示按鈕 (避免空按鈕)
-            let hasPhoto = allPhotos.some(p => p.villageName === v);
-            if (hasPhoto) {
+            if (allPhotos.some(p => p.villageName === v)) {
                 html += `<div class="filter-chip" onclick="filterGallery(this, '${v}')">${v}</div>`;
             }
         });
         container.html(html);
     }
 
-    // 過濾功能
     window.filterGallery = function(btn, village) {
-        // 變更按鈕樣式
         $('.filter-chip').removeClass('active');
         $(btn).addClass('active');
-
-        // 重新渲染瀑布流
         renderGallery(village);
     }
 
-    // 渲染瀑布流
     function renderGallery(filterVillage) {
         let grid = document.getElementById('gallery-grid');
         let html = '';
-        
-        let displayData = allPhotos;
-        if (filterVillage !== '全部') {
-            displayData = allPhotos.filter(p => p.villageName === filterVillage);
-        }
+        let displayData = filterVillage !== '全部' ? allPhotos.filter(p => p.villageName === filterVillage) : allPhotos;
 
         displayData.forEach(item => {
             let desc = item.description || '沒有描述';
@@ -225,9 +213,14 @@
             if(thumbUrl.includes('cloudinary.com')) {
                 thumbUrl = thumbUrl.replace('/upload/', '/upload/w_400,f_auto,q_auto/');
             }
+            
+            // 🔥 關鍵：這裡要把 lat, lng 傳進 openModal
+            // 如果 item 沒有 lat/lng，我們就傳空值
+            let lat = item.lat || item.latitude || '';
+            let lng = item.lng || item.longitude || '';
 
             html += `
-                <div class="gallery-item" onclick="openModal('${item.image_url}', '${item.displayName}', '${item.villageName}', '${desc.replace(/'/g, "\\'")}')">
+                <div class="gallery-item" onclick="openModal('${item.image_url}', '${item.displayName}', '${item.villageName}', '${desc.replace(/'/g, "\\'")}', '${lat}', '${lng}')">
                     <img src="${thumbUrl}" class="photo-thumb" loading="lazy">
                     <div class="photo-info">
                         <div class="photo-title">${item.displayName}</div>
@@ -243,13 +236,34 @@
         if (displayData.length === 0) {
             html = '<div style="text-align:center; width:100%; color:#999; margin-top:20px;">😅 這個里還沒有照片，快來搶頭香！</div>';
         }
-
         grid.innerHTML = html;
     }
 
-    function openModal(url, name, village, desc) {
+    // 🔥 Modal 開啟邏輯 (含按鈕設定)
+    function openModal(url, name, village, desc, lat, lng) {
         $('#modal-img').attr('src', url);
         $('#modal-desc').html(`<strong style="font-size:1.2rem; display:block; margin-bottom:8px; color:#ffd700;">${name} @ ${village}</strong><span style="opacity:0.9;">${desc}</span>`);
+        
+        // 1. 設定導航連結
+        let navBtn = $('#btn-nav');
+        if (lat && lng) {
+            navBtn.attr('href', `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`);
+            navBtn.show(); // 有座標才顯示
+        } else {
+            navBtn.hide(); // 沒座標就隱藏
+        }
+
+        // 2. 設定 Line 分享 (文字 + 圖片連結)
+        let shareText = encodeURIComponent(`🔥 我在【尋神情報站】發現 ${name} 在 ${village} 拍的土地公！\n快來看看：`);
+        let shareUrl = encodeURIComponent(url); // 這裡分享直接的圖片連結，或者你可以改成分享網站首頁
+        $('#btn-line').attr('href', `https://line.me/R/msg/text/?${shareText}%20${shareUrl}`);
+
+        // 3. 設定 FB 分享 (分享網站首頁比較好，因為 FB 抓大圖)
+        // 如果要分享單圖，FB 爬蟲需要 meta tag 支援，這比較複雜。
+        // 這裡我們先設定分享主網站，讓大家知道這個平台。
+        let siteUrl = encodeURIComponent(window.location.origin); 
+        $('#btn-fb').attr('href', `https://www.facebook.com/sharer/sharer.php?u=${siteUrl}`);
+
         $('#photo-modal').css('display', 'flex').animate({ opacity: 1 }, 200);
     }
 
