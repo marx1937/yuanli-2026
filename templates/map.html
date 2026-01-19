@@ -13,6 +13,7 @@
     #map { 
         position: fixed; top: 0; left: 0; bottom: 0; right: 0; 
         width: 100%; height: 100%; z-index: 0; 
+        background: #e6e6e6; /* 🔥 關鍵修正：給地圖一個實心底色，避免透出背景點點 */
     }
 
     /* 2. 頂部篩選列 */
@@ -20,7 +21,6 @@
         position: fixed; top: 15px; left: 0; right: 0; z-index: 1000;
         padding: 10px 15px; white-space: nowrap; overflow-x: auto;
         display: flex; gap: 8px;
-        /* 隱形捲軸 */
         -webkit-overflow-scrolling: touch; scrollbar-width: none;
     }
     .map-filter-container::-webkit-scrollbar { display: none; }
@@ -43,7 +43,7 @@
     }
     .filter-chip.active span { background: #fff; color: #d32f2f; }
 
-    /* 3. 右側懸浮工具列 (仿效你的影片) */
+    /* 3. 右側懸浮工具列 */
     .right-toolbar {
         position: fixed; right: 15px; top: 50%; transform: translateY(-50%);
         display: flex; flex-direction: column; gap: 15px; z-index: 900;
@@ -57,14 +57,14 @@
     .tool-btn:active { transform: scale(0.9); background: #f5f5f5; }
     .tool-btn.active { color: #d32f2f; }
 
-    /* 4. 底部資訊卡片 (Bottom Sheet) - 取代舊的 Popup */
+    /* 4. 底部資訊卡片 */
     #info-card {
         position: fixed; bottom: -100%; left: 0; right: 0;
         background: white; border-top-left-radius: 20px; border-top-right-radius: 20px;
         padding: 20px; z-index: 1100;
         box-shadow: 0 -5px 20px rgba(0,0,0,0.15);
         transition: bottom 0.3s ease-out;
-        padding-bottom: 80px; /* 避開底部導航 */
+        padding-bottom: 80px; 
     }
     #info-card.show { bottom: 0; }
     
@@ -80,7 +80,7 @@
     
     .btn-nav {
         display: block; width: 100%; margin-top: 15px;
-        background: linear-gradient(135deg, #2e7d32, #1b5e20); /* Google Maps 綠 */
+        background: linear-gradient(135deg, #2e7d32, #1b5e20); 
         color: white; text-align: center; padding: 12px; border-radius: 50px;
         text-decoration: none; font-weight: bold; box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
     }
@@ -137,10 +137,13 @@
     var villageCounts = {};
     var userMarker = null;
 
+    // 🔥 修正後的 25 里名單 (已移除山東里，加入福田里)
     const ALL_VILLAGES = [
-        "苑東里", "苑南里", "苑北里", "中正里", "客庄里", "房裡里", "新復里", "西勢里", "海岸里", "出水里", 
-        "山東里", "苑坑里", "水坡里", "山柑里", "社苓里", "田心里", "玉田里", "泰田里", "上館里", "南勢里", 
-        "山腳里", "舊社里", "石鎮里", "蕉埔里", "西平里"
+        "苑東里", "苑南里", "苑北里", "苑港里", "西平里", 
+        "西勢里", "海岸里", "房裡里", "客庄里", "中正里", 
+        "新復里", "山柑里", "社苓里", "田心里", "舊社里", 
+        "山腳里", "福田里", "泰田里", "玉田里", "南勢里", 
+        "石鎮里", "蕉埔里", "上館里", "水坡里", "苑坑里", "出水里"
     ];
 
     $(document).ready(function() {
@@ -149,20 +152,25 @@
     });
 
     function initMap() {
-        // 使用 OSM 標準圖層 (最快)
         map = L.map('map', { zoomControl: false }).setView([24.4429, 120.6558], 14);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap', maxZoom: 19
+        
+        // 使用 CartoDB Voyager 底圖 (乾淨、速度快、適合一般地圖)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap © CARTO',
+            maxZoom: 19
         }).addTo(map);
 
         markersCluster = L.markerClusterGroup({ showCoverageOnHover: false });
         map.addLayer(markersCluster);
         
-        // 點擊地圖空白處關閉卡片
         map.on('click', closeCard);
+        
+        // 🔥 關鍵修復：確保地圖載入後重新計算大小，解決破圖問題
+        setTimeout(function() {
+            map.invalidateSize();
+        }, 500);
     }
 
-    // 🔥 加上時間戳記，強制不讀快取 (解決資料不更新問題)
     function loadData() {
         let timestamp = new Date().getTime(); 
         fetch('/api/locations?t=' + timestamp)
@@ -187,11 +195,10 @@
             if (item.lat && item.lng) {
                 let marker = L.marker([item.lat, item.lng], { icon: godIcon });
                 
-                // 點擊圖釘 -> 打開底部卡片 (不使用預設 Popup)
                 marker.on('click', function(e) {
-                    L.DomEvent.stopPropagation(e); // 防止地圖點擊事件
+                    L.DomEvent.stopPropagation(e); 
                     showCard(item);
-                    map.flyTo([item.lat, item.lng], 16); // 鏡頭對準
+                    map.flyTo([item.lat, item.lng], 16); 
                 });
 
                 markersCluster.addLayer(marker);
@@ -199,7 +206,6 @@
         });
     }
 
-    // 顯示底部卡片
     function showCard(item) {
         let name = item.nickname ? item.nickname.split("#")[0] : "熱心串友";
         let village = getVillageName(item);
@@ -211,7 +217,8 @@
         $('#card-time').text(item.timestamp ? item.timestamp.substring(0,10) : '未知時間');
         $('#card-note').text(item.note || '無備註');
         $('#card-img').attr('src', thumbUrl);
-        $('#btn-google-nav').attr('href', `https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}`);
+        // 使用 Google Maps 通用連結
+        $('#btn-google-nav').attr('href', `https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`);
         
         $('#info-card').addClass('show');
     }
@@ -220,12 +227,12 @@
         $('#info-card').removeClass('show');
     }
 
-    // 🛠️ 偵錯模式選單 (User Requested Feature)
+    // 偵錯選單
     function openDebugMenu() {
         Swal.fire({
             title: '🛠️ 偵錯模式',
             html: `
-                <p style="font-size:0.9rem; color:#666;">如果地圖資料沒更新，請使用下方功能</p>
+                <p style="font-size:0.9rem; color:#666;">如果地圖不完整，請嘗試重新整理</p>
                 <button class="btn btn-primary btn-block mb-2" onclick="forceReload()">
                     <i class="fas fa-sync"></i> 重新載入地圖
                 </button>
@@ -239,12 +246,12 @@
     }
 
     window.forceReload = function() {
+        map.invalidateSize(); // 強制重繪地圖
         loadData();
-        Swal.fire('已重新載入', '資料已更新', 'success');
+        Swal.fire('已重繪', '地圖尺寸已重新計算', 'success');
     }
 
     window.clearCacheAndReload = function() {
-        // 清除瀏覽器快取並強制重整
         if ('caches' in window) {
             caches.keys().then((names) => {
                 names.forEach(name => caches.delete(name));
@@ -266,7 +273,6 @@
         }
     }
 
-    // 輔助函式
     function calculateCounts(data) {
         ALL_VILLAGES.forEach(v => villageCounts[v] = 0);
         data.forEach(item => {
@@ -274,11 +280,13 @@
             if (villageCounts[v] !== undefined) villageCounts[v]++;
         });
     }
+
     function getVillageName(item) {
         if(item.nickname && item.nickname.includes("#")) return item.nickname.split("#")[1];
         if (item.area) return item.area;
         return "其他";
     }
+
     function renderFilterChips() {
         let container = document.getElementById('filter-scroll');
         let html = `<div class="filter-chip active" onclick="filterMap('全部', this)">全覽 <span>${allMarkers.length}</span></div>`;
@@ -287,6 +295,7 @@
         });
         container.innerHTML = html;
     }
+
     window.filterMap = function(village, btn) {
         $('.filter-chip').removeClass('active');
         $(btn).addClass('active');
@@ -295,6 +304,9 @@
         let filtered = (village === '全部') ? allMarkers : allMarkers.filter(i => getVillageName(i) === village);
         renderMarkers(filtered);
         
+        // 🔥 關鍵修正：篩選後也重新計算地圖大小，確保不破圖
+        map.invalidateSize();
+
         if (filtered.length > 0) {
             let group = L.featureGroup(filtered.map(i => L.marker([i.lat, i.lng])));
             map.fitBounds(group.getBounds().pad(0.2));
