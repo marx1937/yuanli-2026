@@ -1,53 +1,58 @@
 {% extends "base.html" %}
 {% set active_page = "map" %}
 
-{% block title %}尋神地圖 - 測試版{% endblock %}
+{% block title %}地圖測試{% endblock %}
 
 {% block styles %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 
 <style>
-    /* 🔥 暴力清除：強制把所有背景改成白色，拿掉點點圖案 */
-    body, html {
-        background: #ffffff !important;
+    /* 🔥 核彈級 CSS：強制清除所有背景圖案 */
+    html, body, .container, .main-content, div {
         background-image: none !important;
+        background-color: #ffffff !important;
+    }
+
+    /* 確保地圖容器沒有任何邊距，並強制置頂 */
+    #map-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 999; /* 層級設超高，強壓所有背景 */
+        background: #eee; /* 給個灰色底，證明他在這 */
+    }
+
+    #map {
+        width: 100%;
         height: 100%;
-        margin: 0;
-        padding: 0;
-        overflow: hidden; /* 禁止滑動 */
     }
 
-    /* 🔥 地圖本體：設為絕對置底 */
-    #map { 
-        position: fixed; 
-        top: 0; 
-        left: 0; 
-        width: 100vw; 
-        height: 100vh; 
-        z-index: 1; /* 層級 1，確保在地板上 */
-    }
-
-    /* 定位按鈕 (簡單的小圓鈕) */
+    /* 定位按鈕 */
     .btn-gps {
         position: fixed;
-        bottom: 120px; /* 避開底部選單 */
+        bottom: 100px;
         right: 20px;
         width: 50px; height: 50px;
         background: white;
         border-radius: 50%;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         display: flex; align-items: center; justify-content: center;
-        font-size: 1.5rem; color: #555;
-        z-index: 1000; /* 層級高一點，浮在地圖上 */
+        font-size: 1.5rem; color: #333;
+        z-index: 1000; /* 比地圖更高 */
         cursor: pointer;
+        border: 2px solid #ccc;
     }
-    .btn-gps:active { background: #eee; }
+    .btn-gps:active { background: #ddd; }
 </style>
 {% endblock %}
 
 {% block content %}
     
-    <div id="map"></div>
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
 
     <div class="btn-gps" onclick="locateUser()">
         <i class="fas fa-crosshairs"></i>
@@ -62,25 +67,28 @@
     var map;
     var userMarker = null;
 
-    // 初始化：單純載入地圖
+    // 初始化地圖
     document.addEventListener("DOMContentLoaded", function() {
-        initMap();
+        // 稍微延遲一下，確保畫面長好再渲染地圖
+        setTimeout(initMap, 100);
     });
 
     function initMap() {
-        // 1. 建立地圖，中心點設在苑裡
-        map = L.map('map', { zoomControl: false }).setView([24.4429, 120.6558], 14);
+        console.log("初始化地圖...");
         
-        // 2. 載入圖層 (使用最穩定的 OSM)
+        // 1. 建立地圖
+        map = L.map('map', { 
+            zoomControl: false, // 隱藏預設縮放鈕，保持畫面乾淨
+            attributionControl: false // 隱藏右下角版權宣告，保持乾淨
+        }).setView([24.4429, 120.6558], 14);
+        
+        // 2. 載入 OSM 圖層 (最快、最標準)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap',
             maxZoom: 19
         }).addTo(map);
 
-        // 3. 強制重繪 (防止破圖的保險絲)
-        setTimeout(function() {
-            map.invalidateSize();
-        }, 500);
+        // 3. 關鍵：重整地圖尺寸 (解決破圖問題)
+        map.invalidateSize();
     }
 
     // 定位功能
@@ -90,30 +98,27 @@
                 var lat = pos.coords.latitude;
                 var lng = pos.coords.longitude;
 
-                // 如果已經有小藍點，先移除舊的
+                // 移除舊標記
                 if (userMarker) map.removeLayer(userMarker);
 
-                // 畫上新的小藍點
+                // 畫上藍色小圓點
                 userMarker = L.circleMarker([lat, lng], {
                     radius: 10,
-                    fillColor: "#2196f3", // 亮藍色
-                    color: "#ffffff",
+                    fillColor: "#2196f3",
+                    color: "white",
                     weight: 3,
                     opacity: 1,
-                    fillOpacity: 0.8
+                    fillOpacity: 0.9
                 }).addTo(map);
 
                 // 飛過去
                 map.flyTo([lat, lng], 16);
                 
-                // 跳個提示 (可選)
-                // alert("抓到你了！"); 
-
             }, err => {
-                alert("定位失敗，請確認 GPS 已開啟");
+                alert("無法抓取位置，請確認 GPS 已開啟");
             });
         } else {
-            alert("瀏覽器不支援定位功能");
+            alert("您的瀏覽器不支援定位");
         }
     }
 </script>
