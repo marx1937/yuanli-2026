@@ -23,8 +23,11 @@
     
     .gallery-banner-img {
         width: 92%; max-width: 380px; height: auto;
+        /* 預留高度避免閃爍 */
         min-height: 120px;
+        /* 柔和投影 */
         filter: drop-shadow(0 10px 15px rgba(93, 64, 55, 0.2));
+        /* 呼吸動畫 */
         animation: float-title 3s ease-in-out infinite;
     }
     @keyframes float-title { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
@@ -80,7 +83,7 @@
     /* 點擊放大的 Modal */
     #photo-modal {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.9); z-index: 10000;
+        background: rgba(0,0,0,0.95); z-index: 10000;
         display: none; justify-content: center; align-items: center;
         flex-direction: column; opacity: 0; transition: opacity 0.3s;
     }
@@ -95,7 +98,7 @@
     #modal-close {
         position: absolute; top: 20px; right: 20px;
         color: white; font-size: 2rem; cursor: pointer;
-        background: rgba(0,0,0,0.5); width: 40px; height: 40px;
+        background: rgba(255,255,255,0.2); width: 40px; height: 40px;
         border-radius: 50%; display: flex; align-items: center; justify-content: center;
     }
 </style>
@@ -104,7 +107,7 @@
 {% block content %}
 
     <div class="gallery-header">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/gallery_top.png" 
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/f_auto,q_auto/gallery_top.png" 
              class="gallery-banner-img" 
              alt="尋神足跡"
              onerror="this.src='https://placehold.co/380x120?text=Gallery+Banner'"> 
@@ -167,11 +170,18 @@
 
             // 處理描述文字 (如果太長截斷)
             let desc = item.description || '沒有描述';
-            let shortDesc = desc.length > 20 ? desc.substring(0, 20) + '...' : desc;
+            
+            // 圖片優化：列表圖也加上縮圖參數 (w_400)，讓列表載入更快
+            // 注意：只有 Cloudinary 的圖可以用這招，如果是其他圖床則用原圖
+            let thumbUrl = item.image_url;
+            if(thumbUrl.includes('cloudinary.com')) {
+                // 在 /upload/ 後面插入 w_400,f_auto,q_auto
+                thumbUrl = thumbUrl.replace('/upload/', '/upload/w_400,f_auto,q_auto/');
+            }
 
             html += `
                 <div class="gallery-item" onclick="openModal('${item.image_url}', '${displayName}', '${villageName}', '${desc.replace(/'/g, "\\'")}')">
-                    <img src="${item.image_url}" class="photo-thumb" loading="lazy">
+                    <img src="${thumbUrl}" class="photo-thumb" loading="lazy">
                     <div class="photo-info">
                         <div class="photo-title">${displayName}</div>
                         <div class="photo-meta">
