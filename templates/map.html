@@ -250,4 +250,58 @@
                 // Cloudinary 圖片優化
                 let thumbUrl = item.image_url || "";
                 if(thumbUrl.includes('cloudinary.com')) {
-                    thumbUrl = thumbUrl.replace('/upload/', '/upload/w_300,h_20
+                    thumbUrl = thumbUrl.replace('/upload/', '/upload/w_300,h_200,c_fill,q_auto/');
+                }
+
+                // 彈出視窗：提供者、GPS、備註
+                var popupContent = `
+                    <div style="cursor:pointer;" onclick="window.location.href='/gallery'">
+                        <img src="${thumbUrl}" class="popup-cover" onerror="this.src='https://placehold.co/300x200?text=No+Image'">
+                        <div class="popup-info">
+                            <div class="popup-row">
+                                <div class="popup-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                <div class="popup-val" style="font-weight:bold; color:#d32f2f;">${village}</div>
+                            </div>
+                            <div class="popup-row">
+                                <div class="popup-icon"><i class="fas fa-user"></i></div>
+                                <div class="popup-val">${name}</div>
+                            </div>
+                            <div class="popup-row">
+                                <div class="popup-icon"><i class="fas fa-compass"></i></div>
+                                <div class="popup-val" style="font-size:0.8rem; color:#888;">${item.lat.toFixed(5)}, ${item.lng.toFixed(5)}</div>
+                            </div>
+                            <div class="popup-row">
+                                <div class="popup-icon"><i class="fas fa-sticky-note"></i></div>
+                                <div class="popup-val" style="font-style:italic;">"${note}"</div>
+                            </div>
+                            
+                            <a href="http://googleusercontent.com/maps.google.com/maps?daddr=${item.lat},${item.lng}" target="_blank" class="popup-btn">
+                                <i class="fas fa-location-arrow"></i> 導航出發
+                            </a>
+                        </div>
+                    </div>
+                `;
+                marker.bindPopup(popupContent);
+                markersCluster.addLayer(marker);
+            }
+        });
+    }
+
+    function locateUser() {
+        if (navigator.geolocation) {
+            document.querySelector('.btn-locate').style.color = "#d32f2f";
+            navigator.geolocation.getCurrentPosition(pos => {
+                var lat = pos.coords.latitude;
+                var lng = pos.coords.longitude;
+                if (userMarker) map.removeLayer(userMarker);
+                userMarker = L.circleMarker([lat, lng], {
+                    radius: 8, fillColor: "#2196f3", color: "#fff", weight: 2, opacity: 1, fillOpacity: 0.8
+                }).addTo(map);
+                map.flyTo([lat, lng], 16);
+            }, err => { alert("無法定位"); });
+        }
+    }
+
+    initMap();
+</script>
+{% endblock %}
