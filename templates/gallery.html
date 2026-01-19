@@ -17,89 +17,93 @@
 
     /* 2. 看板區 */
     .gallery-header {
-        text-align: center; padding: 25px 0 15px 0;
-        position: relative; margin-bottom: 10px;
+        text-align: center; padding: 20px 0 10px 0;
+        position: relative; margin-bottom: 5px;
     }
     
     .gallery-banner-img {
         width: 92%; max-width: 380px; height: auto;
-        /* 預留高度避免閃爍 */
         min-height: 120px;
-        /* 柔和投影 */
         filter: drop-shadow(0 10px 15px rgba(93, 64, 55, 0.2));
-        /* 呼吸動畫 */
         animation: float-title 3s ease-in-out infinite;
     }
     @keyframes float-title { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
-    /* 3. 瀑布流佈局 (Masonry) */
+    /* 🔥 新增：橫向捲動快篩列 (Chips) */
+    .filter-scroll-container {
+        width: 100%; overflow-x: auto; white-space: nowrap;
+        padding: 5px 15px 15px 15px; /* 下方留點空間給陰影 */
+        -webkit-overflow-scrolling: touch; /* 讓 iOS 滑動順暢 */
+        scrollbar-width: none; /* 隱藏捲軸 (Firefox) */
+    }
+    .filter-scroll-container::-webkit-scrollbar { display: none; /* 隱藏捲軸 (Chrome/Safari) */ }
+
+    .filter-chip {
+        display: inline-block;
+        background: white; color: #8d6e63;
+        padding: 6px 16px; border-radius: 20px;
+        font-size: 0.9rem; font-weight: bold;
+        margin-right: 8px; cursor: pointer;
+        border: 1px solid #eee;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        transition: all 0.2s;
+    }
+    
+    /* 選中狀態 */
+    .filter-chip.active {
+        background: #d32f2f; color: white;
+        box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3);
+        border-color: #d32f2f; transform: scale(1.05);
+    }
+
+    /* 3. 瀑布流佈局 */
     .gallery-container {
-        column-count: 2; /* 手機版兩欄 */
-        column-gap: 12px;
+        column-count: 2; column-gap: 12px;
         width: 94%; max-width: 600px; margin: 0 auto;
     }
 
     .gallery-item {
-        break-inside: avoid; /* 防止卡片被切斷 */
-        background: white; border-radius: 15px;
+        break-inside: avoid; background: white; border-radius: 15px;
         margin-bottom: 12px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-        overflow: hidden;
-        transition: transform 0.2s;
-        cursor: pointer;
-        position: relative;
+        overflow: hidden; transition: transform 0.2s;
+        cursor: pointer; position: relative;
     }
     .gallery-item:active { transform: scale(0.98); }
 
     .photo-thumb {
         width: 100%; display: block;
-        background-color: #eee; min-height: 100px;
-        object-fit: cover;
+        background-color: #eee; min-height: 100px; object-fit: cover;
     }
 
-    .photo-info {
-        padding: 8px 10px;
-    }
+    .photo-info { padding: 8px 10px; }
     
     .photo-title {
         font-size: 0.9rem; font-weight: bold; color: #5d4037;
-        margin-bottom: 4px;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     
     .photo-meta {
         display: flex; justify-content: space-between; align-items: center;
         font-size: 0.75rem; color: #999;
     }
-    
-    .village-tag {
-        background: #fff3e0; color: #ef6c00; padding: 2px 6px;
-        border-radius: 6px; font-weight: bold; font-size: 0.7rem;
-    }
 
     /* 載入中 */
     #loading-box { text-align: center; padding: 50px; color: #aaa; width: 100%; }
     
-    /* 點擊放大的 Modal */
+    /* Modal */
     #photo-modal {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(0,0,0,0.95); z-index: 10000;
         display: none; justify-content: center; align-items: center;
         flex-direction: column; opacity: 0; transition: opacity 0.3s;
     }
-    #modal-img {
-        max-width: 95%; max-height: 70vh; 
-        border-radius: 5px; box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    }
-    #modal-desc {
-        color: white; margin-top: 15px; text-align: center; padding: 0 20px;
-        font-size: 1rem; line-height: 1.5; max-width: 90%;
-    }
+    #modal-img { max-width: 95%; max-height: 70vh; border-radius: 5px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+    #modal-desc { color: white; margin-top: 15px; text-align: center; padding: 0 20px; font-size: 1rem; line-height: 1.5; max-width: 90%; }
     #modal-close {
-        position: absolute; top: 20px; right: 20px;
-        color: white; font-size: 2rem; cursor: pointer;
-        background: rgba(255,255,255,0.2); width: 40px; height: 40px;
-        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        position: absolute; top: 20px; right: 20px; color: white; font-size: 2rem; cursor: pointer;
+        background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
     }
 </style>
 {% endblock %}
@@ -110,15 +114,17 @@
         <img src="https://res.cloudinary.com/diuoghid2/image/upload/f_auto,q_auto/gallery_top.png" 
              class="gallery-banner-img" 
              alt="尋神足跡"
-             onerror="this.src='https://placehold.co/380x120?text=Gallery+Banner'"> 
+             onerror="this.src='https://placehold.co/380x120?text=Check+Image+Name'"> 
     </div>
+
+    <div class="filter-scroll-container" id="filter-bar">
+        </div>
 
     <div id="loading-box">
         <i class="fas fa-spinner fa-spin fa-2x"></i><br><br>正在載入足跡...
     </div>
 
-    <div class="gallery-container" id="gallery-grid">
-        </div>
+    <div class="gallery-container" id="gallery-grid"></div>
 
     <div id="photo-modal" onclick="closeModal()">
         <div id="modal-close">&times;</div>
@@ -136,56 +142,97 @@
         "山腳里", "舊社里", "石鎮里", "蕉埔里", "西平里"
     ];
 
+    let allPhotos = []; // 儲存所有照片資料，方便過濾
+
     fetch('/api/locations?t=' + new Date().getTime())
     .then(r => r.json())
     .then(data => {
-        let grid = document.getElementById('gallery-grid');
-        
-        // 1. 過濾掉沒有圖片的資料
-        let validData = data.filter(item => item.image_url && item.image_url.startsWith('http'));
-        
-        // 2. 倒序排列 (最新的在最上面)
-        validData.reverse();
+        // 1. 初始化資料
+        allPhotos = data.filter(item => item.image_url && item.image_url.startsWith('http'));
+        allPhotos.reverse();
 
-        let html = '';
-        validData.forEach(item => {
-            // 解碼邏輯 (木馬戰術解碼)
+        // 2. 處理每一張照片的資料 (解碼里別)
+        allPhotos.forEach(item => {
             let rawName = item.nickname || item.name || '善心人士';
-            let displayName = rawName;
-            let villageName = '苑裡鎮';
+            item.displayName = rawName;
+            item.villageName = '苑裡鎮'; // 預設
 
             if (rawName.indexOf('#') > -1) {
                 let parts = rawName.split('#');
-                displayName = parts[0];
-                villageName = parts[1];
+                item.displayName = parts[0];
+                item.villageName = parts[1];
             } else {
-                // 舊資料嘗試從地址或描述找里名
                 let soup = (item.area || "") + (item.address || "") + (item.description || "");
                 let matches = soup.match(/[\u4e00-\u9fa5]{2,3}里/g);
                 if (matches) {
                     let v = matches.find(term => ALL_VILLAGES.includes(term));
-                    if (v) villageName = v;
+                    if (v) item.villageName = v;
                 }
             }
+        });
 
-            // 處理描述文字 (如果太長截斷)
+        // 3. 建立快篩按鈕
+        renderFilterChips();
+
+        // 4. 顯示所有照片
+        renderGallery('全部');
+
+        $('#loading-box').hide();
+    })
+    .catch(e => {
+        $('#loading-box').html('❌ 照片讀取失敗');
+        console.error(e);
+    });
+
+    // 建立快篩按鈕
+    function renderFilterChips() {
+        let container = $('#filter-bar');
+        let html = `<div class="filter-chip active" onclick="filterGallery(this, '全部')">全部</div>`;
+        
+        ALL_VILLAGES.forEach(v => {
+            // 只有當該里有照片時，才顯示按鈕 (避免空按鈕)
+            let hasPhoto = allPhotos.some(p => p.villageName === v);
+            if (hasPhoto) {
+                html += `<div class="filter-chip" onclick="filterGallery(this, '${v}')">${v}</div>`;
+            }
+        });
+        container.html(html);
+    }
+
+    // 過濾功能
+    window.filterGallery = function(btn, village) {
+        // 變更按鈕樣式
+        $('.filter-chip').removeClass('active');
+        $(btn).addClass('active');
+
+        // 重新渲染瀑布流
+        renderGallery(village);
+    }
+
+    // 渲染瀑布流
+    function renderGallery(filterVillage) {
+        let grid = document.getElementById('gallery-grid');
+        let html = '';
+        
+        let displayData = allPhotos;
+        if (filterVillage !== '全部') {
+            displayData = allPhotos.filter(p => p.villageName === filterVillage);
+        }
+
+        displayData.forEach(item => {
             let desc = item.description || '沒有描述';
-            
-            // 圖片優化：列表圖也加上縮圖參數 (w_400)，讓列表載入更快
-            // 注意：只有 Cloudinary 的圖可以用這招，如果是其他圖床則用原圖
             let thumbUrl = item.image_url;
             if(thumbUrl.includes('cloudinary.com')) {
-                // 在 /upload/ 後面插入 w_400,f_auto,q_auto
                 thumbUrl = thumbUrl.replace('/upload/', '/upload/w_400,f_auto,q_auto/');
             }
 
             html += `
-                <div class="gallery-item" onclick="openModal('${item.image_url}', '${displayName}', '${villageName}', '${desc.replace(/'/g, "\\'")}')">
+                <div class="gallery-item" onclick="openModal('${item.image_url}', '${item.displayName}', '${item.villageName}', '${desc.replace(/'/g, "\\'")}')">
                     <img src="${thumbUrl}" class="photo-thumb" loading="lazy">
                     <div class="photo-info">
-                        <div class="photo-title">${displayName}</div>
+                        <div class="photo-title">${item.displayName}</div>
                         <div class="photo-meta">
-                            <span>${villageName}</span>
+                            <span>${item.villageName}</span>
                             <span style="font-size:0.7rem">${new Date(item.created_at || Date.now()).toLocaleDateString().slice(5)}</span>
                         </div>
                     </div>
@@ -193,32 +240,21 @@
             `;
         });
 
-        if (validData.length === 0) {
-            html = '<div style="text-align:center; width:100%; color:#999; margin-top:20px;">📸 目前還沒有照片，快去上傳第一張！</div>';
+        if (displayData.length === 0) {
+            html = '<div style="text-align:center; width:100%; color:#999; margin-top:20px;">😅 這個里還沒有照片，快來搶頭香！</div>';
         }
 
-        $('#loading-box').hide();
         grid.innerHTML = html;
-    })
-    .catch(e => {
-        $('#loading-box').html('❌ 照片讀取失敗');
-        console.error(e);
-    });
+    }
 
-    // Modal 功能
     function openModal(url, name, village, desc) {
         $('#modal-img').attr('src', url);
-        $('#modal-desc').html(`
-            <strong style="font-size:1.2rem; display:block; margin-bottom:8px; color:#ffd700;">${name} @ ${village}</strong>
-            <span style="opacity:0.9;">${desc}</span>
-        `);
+        $('#modal-desc').html(`<strong style="font-size:1.2rem; display:block; margin-bottom:8px; color:#ffd700;">${name} @ ${village}</strong><span style="opacity:0.9;">${desc}</span>`);
         $('#photo-modal').css('display', 'flex').animate({ opacity: 1 }, 200);
     }
 
     function closeModal() {
-        $('#photo-modal').animate({ opacity: 0 }, 200, function(){
-            $(this).hide();
-        });
+        $('#photo-modal').animate({ opacity: 0 }, 200, function(){ $(this).hide(); });
     }
 </script>
 {% endblock %}
