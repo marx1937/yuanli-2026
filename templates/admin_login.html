@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理員登入</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body { background: #fdfcf0; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: "Microsoft JhengHei", sans-serif; }
+        /* 復刻截圖的紅色卡片風格 */
+        .login-card { background: white; width: 90%; max-width: 380px; padding: 40px 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid #d32f2f; }
+        .icon-circle { width: 80px; height: 80px; background: #ffebee; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; color: #d32f2f; font-size: 2rem; }
+        .login-title { font-size: 1.4rem; font-weight: bold; color: #333; margin-bottom: 30px; }
+        .input-group { position: relative; margin-bottom: 25px; }
+        .form-control { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 1rem; background: #f9f9f9; outline: none; transition: 0.3s; }
+        .form-control:focus { border-color: #d32f2f; background: white; }
+        .toggle-pwd { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #999; cursor: pointer; }
+        .btn-submit { width: 100%; padding: 12px; background: #d32f2f; color: white; border: none; border-radius: 50px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3); transition: 0.2s; }
+        .btn-submit:active { transform: scale(0.98); }
+        .back-link { display: block; margin-top: 20px; color: #999; text-decoration: none; font-size: 0.9rem; }
+        .error-msg { color: #d32f2f; background: #ffebee; padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; display: none; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="icon-circle"><i class="fas fa-user-lock"></i></div>
+        <div class="login-title">查報系統管理後台</div>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="error-msg" style="display:block;">{{ messages[0] }}</div>
+            {% endif %}
+        {% endwith %}
+
+        <form action="/admin" method="POST">
+            <div class="input-group">
+                <input type="password" name="password" id="pwdInput" class="form-control" placeholder="請輸入通行密碼" required>
+                <i class="fas fa-eye toggle-pwd" onclick="togglePwd()"></i>
+            </div>
+            <button type="submit" class="btn-submit">解鎖進入 <i class="fas fa-arrow-right"></i></button>
+        </form>
+        <a href="/" class="back-link"><i class="fas fa-chevron-left"></i> 返回首頁</a>
+    </div>
+
+    <script>
+        function togglePwd() {
+            var x = document.getElementById("pwdInput");
+            x.type = x.type === "password" ? "text" : "password";
+        }
+    </script>
+</body>
+</html>
