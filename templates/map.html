@@ -9,11 +9,19 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
 
 <style>
-    /* 1. 全螢幕地圖 */
+    /* 🔥 關鍵修正 1：強制移除 base.html 的背景設定，避免擋住地圖 */
+    body {
+        background: none !important; /* 讓背景透明 */
+        background-color: #f0f0f0 !important; /* 給一個乾淨的淺灰底 */
+        overflow: hidden; /* 禁止網頁捲動 */
+    }
+
+    /* 1. 全螢幕地圖容器 */
     #map { 
-        position: fixed; top: 0; left: 0; bottom: 0; right: 0; 
-        width: 100%; height: 100%; z-index: 0; 
-        background: #e6e6e6; /* 🔥 關鍵修正：給地圖一個實心底色，避免透出背景點點 */
+        position: fixed; 
+        top: 0; left: 0; bottom: 0; right: 0; 
+        width: 100vw; height: 100vh; 
+        z-index: 1; /* 🔥 關鍵修正 2：層級設為 1，確保蓋過預設底層，但低於 UI */
     }
 
     /* 2. 頂部篩選列 */
@@ -46,7 +54,8 @@
     /* 3. 右側懸浮工具列 */
     .right-toolbar {
         position: fixed; right: 15px; top: 50%; transform: translateY(-50%);
-        display: flex; flex-direction: column; gap: 15px; z-index: 900;
+        display: flex; flex-direction: column; gap: 15px; 
+        z-index: 1000; /* 確保浮在地圖上 */
     }
     .tool-btn {
         width: 45px; height: 45px; background: white; border-radius: 50%;
@@ -137,7 +146,7 @@
     var villageCounts = {};
     var userMarker = null;
 
-    // 🔥 修正後的 25 里名單 (已移除山東里，加入福田里)
+    // 🔥 修正後的 25 里名單 (補齊福田里，正確排列)
     const ALL_VILLAGES = [
         "苑東里", "苑南里", "苑北里", "苑港里", "西平里", 
         "西勢里", "海岸里", "房裡里", "客庄里", "中正里", 
@@ -152,11 +161,12 @@
     });
 
     function initMap() {
+        // 設定地圖中心 (苑裡) 與 預設縮放
         map = L.map('map', { zoomControl: false }).setView([24.4429, 120.6558], 14);
         
-        // 使用 CartoDB Voyager 底圖 (乾淨、速度快、適合一般地圖)
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            attribution: '© OpenStreetMap © CARTO',
+        // 使用 OSM 標準圖層 (速度快、穩定)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap',
             maxZoom: 19
         }).addTo(map);
 
@@ -165,13 +175,14 @@
         
         map.on('click', closeCard);
         
-        // 🔥 關鍵修復：確保地圖載入後重新計算大小，解決破圖問題
+        // 🔥 關鍵修復：強制重繪地圖，解決因容器大小變化導致的破圖
         setTimeout(function() {
             map.invalidateSize();
         }, 500);
     }
 
     function loadData() {
+        // 加上時間戳記，避免手機快取舊資料
         let timestamp = new Date().getTime(); 
         fetch('/api/locations?t=' + timestamp)
         .then(r => r.json())
@@ -217,8 +228,7 @@
         $('#card-time').text(item.timestamp ? item.timestamp.substring(0,10) : '未知時間');
         $('#card-note').text(item.note || '無備註');
         $('#card-img').attr('src', thumbUrl);
-        // 使用 Google Maps 通用連結
-        $('#btn-google-nav').attr('href', `https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`);
+        $('#btn-google-nav').attr('href', `https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}`);
         
         $('#info-card').addClass('show');
     }
@@ -304,7 +314,7 @@
         let filtered = (village === '全部') ? allMarkers : allMarkers.filter(i => getVillageName(i) === village);
         renderMarkers(filtered);
         
-        // 🔥 關鍵修正：篩選後也重新計算地圖大小，確保不破圖
+        // 篩選後也重算一次大小，雙重保險
         map.invalidateSize();
 
         if (filtered.length > 0) {
