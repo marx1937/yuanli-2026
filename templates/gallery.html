@@ -77,10 +77,9 @@
     .photo-title { font-size: 0.9rem; font-weight: bold; color: #5d4037; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .photo-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #999; }
 
-    /* 5. 🔥 沈浸式 Modal (美學升級重點區) */
+    /* 5. 🔥 沈浸式 Modal */
     #photo-modal {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        /* 升級背景：深酒紅棕色，營造廟宇內部氛圍 */
         background: rgba(45, 20, 20, 0.96); 
         z-index: 10000;
         display: none; justify-content: center; align-items: center;
@@ -90,7 +89,6 @@
     #modal-img { 
         max-width: 90%; max-height: 55vh; 
         border-radius: 12px; 
-        /* 升級相框：米白邊框 + 金色光暈 */
         border: 6px solid #fff8e1;
         box-shadow: 0 0 25px rgba(255, 215, 0, 0.3);
     }
@@ -99,14 +97,11 @@
         margin-top: 20px; text-align: center; padding: 0 20px;
         max-width: 90%;
     }
-    /* 標題文字美化 */
+    
     .modal-title-text {
         font-size: 1.3rem; display: block; margin-bottom: 8px;
-        color: #ffecb3; /* 暖金色 */
-        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        font-weight: bold;
+        color: #ffecb3; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-weight: bold;
     }
-    /* 描述文字美化 */
     .modal-desc-text {
         color: rgba(255,255,255,0.9); font-size: 0.95rem; line-height: 1.6;
     }
@@ -122,12 +117,8 @@
     }
     .action-btn:active { transform: scale(0.95); }
 
-    /* 按鈕配色升級 */
-    /* 導航：主題紅 */
     .btn-nav { background: linear-gradient(135deg, #d32f2f, #b71c1c); border: 1px solid #e57373; }
-    /* 分享：富貴金 */
     .btn-line { background: linear-gradient(135deg, #fbc02d, #f57f17); border: 1px solid #fff176; color: #5d4037; }
-    /* FB：品牌藍 + 金邊 */
     .btn-fb { background: #1877f2; border: 2px solid #ffca28; }
 
     #modal-close {
@@ -278,7 +269,6 @@
     function openModal(url, name, village, desc, lat, lng) {
         $('#modal-img').attr('src', url);
         
-        // 🔥 升級：加上 icon 的美化版文字
         $('#modal-desc').html(`
             <span class="modal-title-text">
                 <i class="fas fa-map-marker-alt" style="color:#ff6f00; margin-right:5px;"></i> ${name} @ ${village}
@@ -289,6 +279,7 @@
             </div>
         `);
         
+        // 🔥 關鍵修正：使用正確的 Google Maps 導航連結，並補上 $ 符號
         let navBtn = $('#btn-nav');
         if (lat && lng) {
             navBtn.attr('href', `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`);
