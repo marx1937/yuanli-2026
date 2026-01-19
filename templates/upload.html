@@ -5,67 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>回報神跡</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
-        /* 1. 全局溫暖色調 */
+        /* 1. 全局設定：溫暖的米黃色調，像一張宣紙 */
         body {
-            background-color: #fdfcf0; /* 米黃色宣紙底 */
+            background-color: #fdfcf0; 
             font-family: "Microsoft JhengHei", sans-serif;
             margin: 0; padding: 20px;
-            display: flex; justify-content: center; min-height: 100vh;
-            background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
-            background-size: 20px 20px; /* 淡淡的點陣背景 */
+            display: flex; justify-content: center; align-items: flex-start;
+            min-height: 100vh;
+            background-image: 
+                linear-gradient(to right, rgba(215, 204, 200, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(215, 204, 200, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
         }
 
         .container {
             width: 100%; max-width: 420px;
             background: rgba(255, 255, 255, 0.95);
-            padding: 25px 20px; border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(93, 64, 55, 0.1); /* 柔和陰影 */
+            padding: 30px 25px; 
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(93, 64, 55, 0.15); 
             position: relative;
-            border-top: 5px solid #d32f2f; /* 廟宇紅頂條 */
+            border-top: 6px solid #d32f2f; /* 廟宇紅頂條 */
+            margin-top: 20px;
+            margin-bottom: 50px;
         }
 
-        /* 2. 標題區 */
+        /* 2. 標題區：莊重又活潑 */
         h2 {
-            text-align: center; color: #d32f2f; margin-top: 0;
+            text-align: center; color: #d32f2f; margin-top: 0; margin-bottom: 5px;
             font-weight: 800; letter-spacing: 2px;
-            text-shadow: 1px 1px 0px rgba(0,0,0,0.1);
+            text-shadow: 1px 1px 0px rgba(0,0,0,0.05);
         }
         .subtitle {
-            text-align: center; color: #8d6e63; font-size: 0.9rem; margin-bottom: 20px;
+            text-align: center; color: #8d6e63; font-size: 0.95rem; margin-bottom: 25px;
+            font-weight: 500;
         }
 
-        /* 3. 修復破窗：美美的預覽區 */
+        /* 3. 重練核心：美美的上傳區 (取代原本的破圖) */
         .upload-zone {
-            width: 100%; height: 220px;
+            width: 100%; height: 240px;
             background: #fff8e1; /* 淡黃色背景 */
             border: 3px dashed #ffb74d; /* 橘色虛線框 */
-            border-radius: 15px;
+            border-radius: 16px;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             cursor: pointer; overflow: hidden; position: relative;
             transition: all 0.3s;
         }
         .upload-zone:active { transform: scale(0.98); background: #ffecb3; }
-        .upload-zone i { font-size: 3rem; color: #ff9800; margin-bottom: 10px; }
-        .upload-zone p { color: #bf360c; font-weight: bold; margin: 0; }
         
-        /* 預覽圖 (預設隱藏，選圖後顯示) */
+        /* 引導文字與圖示 */
+        .placeholder-content { text-align: center; pointer-events: none; }
+        .placeholder-content i { font-size: 3.5rem; color: #ff9800; margin-bottom: 15px; display: block; }
+        .placeholder-content p { color: #bf360c; font-weight: bold; margin: 0; font-size: 1.1rem; }
+        .placeholder-content span { color: #d84315; font-size: 0.85rem; opacity: 0.8; }
+
+        /* 預覽圖 (預設隱藏，有圖才顯示) */
         #preview-img {
             width: 100%; height: 100%; object-fit: cover;
-            display: none; /* 關鍵：預設不顯示，避免裂圖 */
+            display: none; 
         }
 
         /* 4. 溫暖表單輸入框 */
-        .form-group { margin-top: 20px; text-align: left; }
-        label { font-weight: bold; color: #5d4037; display: block; margin-bottom: 5px; }
+        .form-group { margin-top: 25px; text-align: left; }
+        label { font-weight: bold; color: #5d4037; display: block; margin-bottom: 8px; font-size: 1rem; }
         
         input[type="text"], textarea {
-            width: 100%; padding: 12px 15px;
+            width: 100%; padding: 14px 15px;
             border: 2px solid #eee; border-radius: 12px;
             font-size: 1rem; box-sizing: border-box;
             background: #fafafa; transition: 0.3s;
-            color: #333;
+            color: #333; font-family: inherit;
         }
         
         /* 🔥 關鍵美學：聚焦時的暖黃光暈 */
@@ -73,35 +86,40 @@
             outline: none;
             border-color: #ffc107;
             background: #fff;
-            box-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
+            box-shadow: 0 0 12px rgba(255, 193, 7, 0.25);
         }
 
         /* 5. 按鈕區 */
         .btn-submit {
-            width: 100%; padding: 15px; margin-top: 25px;
+            width: 100%; padding: 16px; margin-top: 30px;
             background: linear-gradient(135deg, #d32f2f, #b71c1c);
             color: white; border: none; border-radius: 50px;
-            font-size: 1.1rem; font-weight: bold; letter-spacing: 1px;
-            cursor: pointer; box-shadow: 0 5px 15px rgba(211, 47, 47, 0.4);
-            transition: transform 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
+            font-size: 1.1rem; font-weight: bold; letter-spacing: 2px;
+            cursor: pointer; box-shadow: 0 6px 20px rgba(211, 47, 47, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-        .btn-submit:active { transform: scale(0.95); }
-        .btn-submit:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
+        .btn-submit:active { transform: scale(0.97); box-shadow: 0 3px 10px rgba(211, 47, 47, 0.2); }
+        .btn-submit:disabled { 
+            background: #bdbdbd; box-shadow: none; cursor: not-allowed; opacity: 0.7;
+        }
 
         .btn-back {
-            display: block; text-align: center; margin-top: 15px;
-            color: #999; text-decoration: none; font-size: 0.9rem;
+            display: block; text-align: center; margin-top: 20px;
+            color: #999; text-decoration: none; font-size: 0.95rem;
+            transition: color 0.2s;
         }
+        .btn-back:hover { color: #5d4037; }
 
         /* GPS 狀態燈 */
         .gps-status {
-            text-align: center; margin-top: 10px; font-size: 0.85rem;
-            display: flex; align-items: center; justify-content: center; gap: 5px;
+            text-align: center; margin-top: 15px; font-size: 0.9rem;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 8px; border-radius: 8px; background: #f5f5f5;
         }
-        .gps-ok { color: #2e7d32; }
-        .gps-wait { color: #f57c00; }
-        .gps-error { color: #c62828; }
+        .gps-ok { color: #2e7d32; background: #e8f5e9; }
+        .gps-wait { color: #f57c00; background: #fff3e0; }
+        .gps-error { color: #c62828; background: #ffebee; }
 
         /* 隱藏原生檔案輸入框 */
         #file-input { display: none; }
@@ -116,40 +134,39 @@
     <form id="upload-form" enctype="multipart/form-data">
         
         <div class="upload-zone" onclick="document.getElementById('file-input').click()">
-            <div id="upload-placeholder">
+            <div id="upload-placeholder" class="placeholder-content">
                 <i class="fas fa-camera"></i>
                 <p>點擊拍攝 / 上傳照片</p>
+                <span>(建議使用直向照片)</span>
             </div>
             <img id="preview-img" alt="預覽圖">
         </div>
         <input type="file" id="file-input" name="photo" accept="image/*" onchange="previewFile()">
 
         <div class="form-group">
-            <label><i class="fas fa-user-edit" style="color:#ffa000"></i> 您的稱呼 (格式: 名字#里別)</label>
+            <label><i class="fas fa-user-edit" style="color:#ffb300"></i> 您的稱呼 (格式: 名字#里別)</label>
             <input type="text" name="nickname" id="nickname" placeholder="例如: 小明#中正里" required>
         </div>
 
         <div class="form-group">
-            <label><i class="fas fa-pen-nib" style="color:#ffa000"></i> 補充說明 (選填)</label>
+            <label><i class="fas fa-pen-nib" style="color:#ffb300"></i> 補充說明 (選填)</label>
             <textarea name="note" id="note" rows="3" placeholder="這尊土地公有什麼特色..."></textarea>
         </div>
 
         <input type="hidden" name="lat" id="lat">
         <input type="hidden" name="lng" id="lng">
 
-        <div class="gps-status" id="gps-msg">
+        <div class="gps-status gps-wait" id="gps-msg">
             <i class="fas fa-satellite-dish fa-spin"></i> 正在定位中...
         </div>
 
         <button type="button" class="btn-submit" id="submit-btn" onclick="doUpload()" disabled>
-            <i class="fas fa-paper-plane"></i> 確認上傳
+            <i class="fas fa-cloud-upload-alt"></i> 確認上傳
         </button>
     </form>
 
-    <a href="/" class="btn-back">返回首頁</a>
+    <a href="/" class="btn-back"><i class="fas fa-chevron-left"></i> 返回首頁</a>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     // 1. 初始化：一進來就抓 GPS
@@ -162,19 +179,25 @@
                     
                     let msg = document.getElementById('gps-msg');
                     msg.className = "gps-status gps-ok";
-                    msg.innerHTML = '<i class="fas fa-map-marker-alt"></i> 定位成功！';
+                    msg.innerHTML = '<i class="fas fa-map-marker-alt"></i> 定位成功！可以拍照了';
                     checkForm(); // 檢查是否可以啟用按鈕
                 },
                 (error) => {
                     let msg = document.getElementById('gps-msg');
                     msg.className = "gps-status gps-error";
                     msg.innerHTML = '<i class="fas fa-times-circle"></i> 定位失敗，請開啟 GPS';
-                    Swal.fire("無法定位", "請允許瀏覽器存取您的位置，否則無法紀錄地點喔！", "error");
+                    Swal.fire({
+                        icon: 'error',
+                        title: '無法定位',
+                        text: '請允許瀏覽器存取您的位置，或是確認 GPS 已開啟，否則無法紀錄地點喔！',
+                        confirmButtonColor: '#d32f2f'
+                    });
                 },
-                { enableHighAccuracy: true } // 要求高精準度
+                { enableHighAccuracy: true, timeout: 10000 } // 要求高精準度
             );
         } else {
             document.getElementById('gps-msg').innerHTML = "您的裝置不支援 GPS";
+            document.getElementById('gps-msg').className = "gps-status gps-error";
         }
     };
 
@@ -200,7 +223,6 @@
     function checkForm() {
         const hasFile = document.getElementById('file-input').files.length > 0;
         const hasGPS = document.getElementById('lat').value !== "";
-        // 這裡可以加入檢查 nickname 是否為空，如果不強制也可以拿掉
         const btn = document.getElementById('submit-btn');
 
         if (hasFile && hasGPS) {
@@ -208,20 +230,31 @@
             btn.innerHTML = '<i class="fas fa-paper-plane"></i> 確認上傳';
         } else {
             btn.disabled = true;
-            if (!hasGPS) btn.innerHTML = "等待定位中...";
-            else if (!hasFile) btn.innerHTML = "請先拍攝照片";
+            if (!hasGPS) btn.innerHTML = '<i class="fas fa-satellite-dish fa-spin"></i> 等待定位中...';
+            else if (!hasFile) btn.innerHTML = '<i class="fas fa-camera"></i> 請先拍攝照片';
         }
     }
 
     // 4. 執行上傳 (AJAX)
     function doUpload() {
+        const nickname = document.getElementById('nickname').value.trim();
+        if (!nickname) {
+            Swal.fire({
+                icon: 'warning',
+                title: '請輸入稱呼',
+                text: '我們需要知道是哪位熱心鄉親回報的喔！',
+                confirmButtonColor: '#ff9800'
+            });
+            return;
+        }
+
         const form = document.getElementById('upload-form');
         const formData = new FormData(form);
         const btn = document.getElementById('submit-btn');
 
         // 鎖定按鈕避免重複按
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 上傳中...';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 神跡傳送中...';
 
         fetch('/upload', {
             method: 'POST',
@@ -240,7 +273,12 @@
                     window.location.href = '/gallery'; // 上傳完跳轉到影像庫
                 });
             } else if (data.status === 'pending') {
-                 Swal.fire("重複地點", "這個地點似乎已經有人拍過了喔！", "warning");
+                 Swal.fire({
+                    title: '重複地點',
+                    text: '這個地點似乎已經有人拍過了喔！感謝您的熱心！',
+                    icon: 'warning',
+                    confirmButtonColor: '#ff9800'
+                 });
                  btn.disabled = false;
                  btn.innerHTML = '<i class="fas fa-paper-plane"></i> 再試一次';
             } else {
