@@ -13,35 +13,35 @@
     #map-wrapper {
         position: fixed; top: 0; left: 0; bottom: 0; right: 0;
         width: 100%; height: 100%; z-index: 0;
-        background: #e3f2fd; /* 預設海藍色背景，避免白屏 */
+        background: #f0f0f0; /* 改成淺灰底，載入時比較不刺眼 */
     }
 
-    #map { width: 100%; height: 100%; z-index: 1; opacity: 0; transition: opacity 0.5s; }
+    #map { width: 100%; height: 100%; z-index: 1; opacity: 0; transition: opacity 0.3s; }
     
-    /* 2. 🔥 靜態偽裝層 (欺騙眼睛用) */
+    /* 2. 靜態偽裝層 */
     #static-cover {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
         background-color: #fdfcf0;
-        /* 這裡放一張苑裡的地圖截圖當背景，沒載入前先看這張 */
+        /* 建議：這裡可以換成一張解析度較低的苑裡地圖截圖 */
         background-image: url('https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_static_map.png'); 
         background-size: cover; background-position: center;
-        z-index: 10; /* 蓋在真地圖上面 */
+        z-index: 10; 
         display: flex; flex-direction: column; justify-content: center; align-items: center;
-        transition: opacity 0.5s, transform 0.5s;
+        transition: opacity 0.5s;
     }
     
     .cover-msg {
-        background: rgba(255, 255, 255, 0.9);
-        padding: 15px 25px; border-radius: 50px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        text-align: center;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 20px 30px; border-radius: 50px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        text-align: center; border: 2px solid #d32f2f;
         animation: pulse 2s infinite;
     }
-    .cover-msg h2 { margin: 0; color: #d32f2f; font-weight: 800; font-size: 1.5rem; }
-    .cover-msg p { margin: 5px 0 0 0; color: #555; font-size: 0.9rem; }
-    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+    .cover-msg h2 { margin: 0; color: #d32f2f; font-weight: 800; font-size: 1.4rem; }
+    .cover-msg p { margin: 5px 0 0 0; color: #555; font-size: 0.9rem; font-weight: bold; }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
 
-    /* 3. 懸浮篩選列 (最上層) */
+    /* 3. 懸浮篩選列 */
     .map-filter-container {
         position: fixed; top: 15px; left: 0; right: 0; z-index: 1000;
         padding: 10px 15px; white-space: nowrap; overflow-x: auto;
@@ -75,7 +75,7 @@
         display: flex; align-items: center; justify-content: center;
         box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer;
         color: #444; font-size: 1.3rem; transition: 0.2s;
-        display: none; /* 靜態模式下先隱藏 */
+        display: none;
     }
 
     /* 5. 彈窗優化 */
@@ -100,12 +100,11 @@
     <div id="map-wrapper">
         <div id="static-cover" onclick="activateMap('全部')">
             <div class="cover-msg">
-                <h2>🗺️ 尋神地圖</h2>
-                <p>點擊任一按鈕開始探索</p>
-                <i class="fas fa-hand-pointer fa-2x" style="color:#ffa000; margin-top:10px;"></i>
+                <h2>🗺️ 點此載入地圖</h2>
+                <p>探索苑裡 194 處神跡</p>
+                <i class="fas fa-hand-pointer fa-2x" style="color:#d32f2f; margin-top:10px;"></i>
             </div>
         </div>
-
         <div id="map"></div>
     </div>
 
@@ -130,7 +129,6 @@
         "山腳里", "舊社里", "石鎮里", "蕉埔里", "西平里"
     ];
 
-    // 1. 頁面載入時：只載入數據，不載入地圖 (極速)
     $(document).ready(function() {
         loadDataOnly();
     });
@@ -142,28 +140,22 @@
             allMarkers = data;
             calculateCounts(data);
             renderFilterChips(); 
-            // 這裡不 initMap，只顯示按鈕
         });
     }
 
-    // 2. 當使用者點擊按鈕：啟動真地圖 (Activate)
     window.activateMap = function(filterTarget, btn) {
-        // 視覺切換
-        $('#static-cover').css('opacity', '0').css('pointer-events', 'none'); // 淡出靜態圖
-        setTimeout(() => $('#static-cover').hide(), 500);
-        $('#map').css('opacity', '1'); // 顯示真地圖
+        $('#static-cover').css('opacity', '0').css('pointer-events', 'none'); 
+        setTimeout(() => $('#static-cover').hide(), 300); // 加快消失速度
+        $('#map').css('opacity', '1'); 
         $('.btn-locate').fadeIn();
 
-        // 如果地圖還沒初始化，現在才初始化 (省資源)
         if (!isMapInitialized) {
             initMapAndRender(filterTarget);
             isMapInitialized = true;
         } else {
-            // 如果已經初始化過，直接篩選
             filterMap(filterTarget, btn);
         }
 
-        // 按鈕樣式處理
         if(btn) {
             $('.filter-chip').removeClass('active');
             $(btn).addClass('active');
@@ -171,20 +163,21 @@
     }
 
     function initMapAndRender(initialFilter) {
-        // 建立地圖
-        map = L.map('map', { zoomControl: false }).setView([24.4429, 120.6558], 13);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            attribution: '© OpenStreetMap', maxZoom: 19
+        // 🔥 關鍵修改 1：Zoom Level 改為 15 (更近，載入更快)
+        map = L.map('map', { zoomControl: false }).setView([24.4429, 120.6558], 15);
+        
+        // 🔥 關鍵修改 2：換回 OSM 標準圖層 (速度最快)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap', 
+            maxZoom: 19
         }).addTo(map);
 
         markersCluster = L.markerClusterGroup({ showCoverageOnHover: false });
         map.addLayer(markersCluster);
 
-        // 執行第一次篩選
         filterMap(initialFilter);
     }
 
-    // 計算數量
     function calculateCounts(data) {
         ALL_VILLAGES.forEach(v => villageCounts[v] = 0);
         data.forEach(item => {
@@ -199,7 +192,6 @@
         return "其他";
     }
 
-    // 渲染按鈕
     function renderFilterChips() {
         let container = document.getElementById('filter-scroll');
         let html = `<div class="filter-chip" id="btn-all" onclick="activateMap('全部', this)">
@@ -214,7 +206,6 @@
         container.innerHTML = html;
     }
 
-    // 真正的地圖篩選與飛行邏輯
     function filterMap(village) {
         if (!isMapInitialized) return;
 
@@ -223,7 +214,6 @@
 
         let tempGroup = L.featureGroup();
         
-        // Q版圖示
         var godIcon = L.icon({
             iconUrl: 'https://cdn-icons-png.flaticon.com/512/3710/3710266.png', 
             iconSize: [40, 40], iconAnchor: [20, 40], popupAnchor: [0, -35],
@@ -256,15 +246,13 @@
             }
         });
 
-        // 自動飛行 (FlyTo)
         if (filteredData.length > 0) {
+            // 🔥 關鍵修改 3：如果是「全覽」，不要飛太高，鎖定在 Zoom 14
             if (village === '全部') {
-                map.flyTo([24.4429, 120.6558], 13);
+                map.setView([24.4429, 120.6558], 14); 
             } else {
                 map.fitBounds(tempGroup.getBounds().pad(0.2));
             }
-        } else {
-            if(village !== '全部') alert(`${village} 還沒有資料喔！`);
         }
     }
 
