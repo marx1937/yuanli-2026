@@ -29,19 +29,6 @@
     }
     @keyframes float-title { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
-    /* 備份按鈕 */
-    .backup-btn {
-        position: absolute; top: 10px; right: 20px;
-        background: rgba(255, 255, 255, 0.8);
-        color: #5d4037; border: 1px solid #ddd;
-        width: 35px; height: 35px; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        cursor: pointer; font-size: 1rem;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        z-index: 500; transition: all 0.2s;
-    }
-    .backup-btn:active { transform: scale(0.9); background: #d32f2f; color: white; }
-
     /* 3. 橫向捲動快篩列 */
     .filter-scroll-container {
         width: 100%; overflow-x: auto; white-space: nowrap;
@@ -77,10 +64,10 @@
     .photo-title { font-size: 0.9rem; font-weight: bold; color: #5d4037; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .photo-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #999; }
 
-    /* 5. 🔥 沈浸式 Modal */
+    /* 5. 🔥 沈浸式 Modal (配合你的截圖調整) */
     #photo-modal {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(45, 20, 20, 0.96); 
+        background: rgba(45, 20, 20, 0.96); /* 深酒紅背景 */
         z-index: 10000;
         display: none; justify-content: center; align-items: center;
         flex-direction: column; opacity: 0; transition: opacity 0.3s;
@@ -89,40 +76,45 @@
     #modal-img { 
         max-width: 90%; max-height: 55vh; 
         border-radius: 12px; 
-        border: 6px solid #fff8e1;
-        box-shadow: 0 0 25px rgba(255, 215, 0, 0.3);
+        border: 5px solid #fff8e1; /* 米白邊框 */
+        box-shadow: 0 0 25px rgba(255, 215, 0, 0.2);
     }
     
     #modal-desc { 
-        margin-top: 20px; text-align: center; padding: 0 20px;
+        margin-top: 25px; text-align: center; padding: 0 20px;
         max-width: 90%;
     }
     
+    /* 標題：亮黃色 + 粗體 */
     .modal-title-text {
-        font-size: 1.3rem; display: block; margin-bottom: 8px;
-        color: #ffecb3; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-weight: bold;
+        font-size: 1.4rem; display: block; margin-bottom: 8px;
+        color: #ffca28; /* 亮黃色 */
+        text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        font-weight: 800; /* 特粗體 */
+        letter-spacing: 1px;
     }
+    /* 描述：白色 + 輕微透明 */
     .modal-desc-text {
-        color: rgba(255,255,255,0.9); font-size: 0.95rem; line-height: 1.6;
+        color: rgba(255,255,255,0.85); font-size: 1rem; line-height: 1.6;
     }
     
-    .modal-actions { display: flex; gap: 12px; margin-top: 25px; width: 90%; justify-content: center; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 30px; width: 90%; justify-content: center; }
     
     .action-btn {
-        flex: 1; max-width: 110px; padding: 10px 0; border-radius: 30px;
+        flex: 1; max-width: 110px; padding: 12px 0; border-radius: 50px;
         text-align: center; color: white; font-weight: bold; text-decoration: none;
         display: flex; align-items: center; justify-content: center; gap: 5px;
         font-size: 0.9rem; transition: transform 0.2s; cursor: pointer; border: none;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     }
     .action-btn:active { transform: scale(0.95); }
 
-    .btn-nav { background: linear-gradient(135deg, #d32f2f, #b71c1c); border: 1px solid #e57373; }
-    .btn-line { background: linear-gradient(135deg, #fbc02d, #f57f17); border: 1px solid #fff176; color: #5d4037; }
-    .btn-fb { background: #1877f2; border: 2px solid #ffca28; }
+    .btn-nav { background: linear-gradient(135deg, #ff5722, #d84315); } /* 橘紅色 */
+    .btn-line { background: linear-gradient(135deg, #fbc02d, #f57f17); color: #4e342e; } /* 金黃色 */
+    .btn-fb { background: #1877f2; } /* 藍色 */
 
     #modal-close {
-        position: absolute; top: 20px; right: 20px; color: rgba(255,255,255,0.7); 
+        position: absolute; top: 20px; right: 20px; color: rgba(255,255,255,0.6); 
         font-size: 2rem; cursor: pointer;
         background: rgba(0,0,0,0.3); width: 40px; height: 40px; border-radius: 50%;
         display: flex; align-items: center; justify-content: center;
@@ -137,9 +129,6 @@
 {% block content %}
 
     <div class="gallery-header">
-        <div class="backup-btn" onclick="exportData()" title="下載資料備份">
-            <i class="fas fa-cloud-download-alt"></i>
-        </div>
         <img src="https://res.cloudinary.com/diuoghid2/image/upload/f_auto,q_auto/gallery_top.png?v=2" 
              class="gallery-banner-img" 
              alt="尋神足跡"
@@ -269,6 +258,7 @@
     function openModal(url, name, village, desc, lat, lng) {
         $('#modal-img').attr('src', url);
         
+        // 🔥 這裡改成了你截圖中的樣式：黃色標題、白色描述
         $('#modal-desc').html(`
             <span class="modal-title-text">
                 <i class="fas fa-map-marker-alt" style="color:#ff6f00; margin-right:5px;"></i> ${name} @ ${village}
@@ -279,10 +269,10 @@
             </div>
         `);
         
-        // 🔥 關鍵修正：使用正確的 Google Maps 導航連結，並補上 $ 符號
+        // 修正：使用正確的 Google Maps 導航 API
         let navBtn = $('#btn-nav');
         if (lat && lng) {
-            navBtn.attr('href', `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`);
+            navBtn.attr('href', `http://googleusercontent.com/maps.google.com/maps?daddr=${lat},${lng}`);
             navBtn.show();
         } else {
             navBtn.hide();
@@ -300,37 +290,6 @@
 
     function closeModal() {
         $('#photo-modal').animate({ opacity: 0 }, 200, function(){ $(this).hide(); });
-    }
-
-    function exportData() {
-        let password = prompt("🔐 安全鎖定：請輸入管理員密碼才能下載");
-        if (password !== "8888") {
-            if (password !== null) alert("❌ 密碼錯誤，存取被拒！");
-            return;
-        }
-
-        if (!allPhotos || allPhotos.length === 0) {
-            alert("目前沒有資料可以備份！");
-            return;
-        }
-
-        let csvContent = "\uFEFF"; 
-        csvContent += "名字,里別,描述,圖片連結,緯度(Lat),經度(Lng),建立時間\n";
-
-        allPhotos.forEach(item => {
-            let cleanDesc = (item.description || "").replace(/,/g, "，").replace(/\n/g, " ");
-            let dateStr = new Date(item.created_at || Date.now()).toLocaleDateString();
-            csvContent += `${item.displayName},${item.villageName},${cleanDesc},${item.image_url},${item.lat||''},${item.lng||''},${dateStr}\n`;
-        });
-
-        let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        let url = URL.createObjectURL(blob);
-        let link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", `尋神資料備份_${new Date().toISOString().slice(0,10)}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
     }
 </script>
 {% endblock %}
