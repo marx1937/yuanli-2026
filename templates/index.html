@@ -1,175 +1,199 @@
 {% extends "base.html" %}
 {% set active_page = "home" %}
 
-{% set cdn_base = "https://res.cloudinary.com/diuoghid2/image/upload" %}
-
 {% block styles %}
 <style>
-    /* ... 請保留原本 V3.5 的 CSS (白色按鈕、負值 margin 等) ... */
-    /* 為確保正確，我把關鍵的 CSS 再貼一次 */
-    .hero-section { position: relative; margin-bottom: 15px; }
-    .hero-banner { width: 100%; height: auto; display: block; mask-image: linear-gradient(to bottom, black 70%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%); }
-    .hero-text-container { display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: -20px; position: relative; z-index: 10; }
-    .app-logo-img { width: 65%; max-width: 280px; height: auto; display: block; filter: drop-shadow(0 5px 5px rgba(93, 64, 55, 0.2)); margin-top: 15px; margin-bottom: 5px; }
-    .sub-title-badge { background: rgba(255, 255, 255, 0.8); color: #8d6e63; font-weight: bold; font-size: 1rem; padding: 5px 18px; border: 1px solid #d7ccc8; border-radius: 50px; backdrop-filter: blur(2px); display: flex; align-items: center; gap: 5px; }
-    .news-ticker-container { width: 92%; max-width: 400px; margin: 15px auto 25px auto; background: #fff8e1; border-radius: 15px; box-shadow: 0 2px 8px rgba(93, 64, 55, 0.05); padding: 8px 15px; display: flex; align-items: center; border: 1px solid #ffe082; position: relative; z-index: 20; text-decoration: none !important; overflow: hidden; }
-    .news-ticker-container:active { transform: scale(0.96); transition: transform 0.1s; }
-    .bao-ma-zai-img { height: 48px; width: auto; margin-right: -25px; position: relative; left: -5px; z-index: 2; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1)); }
-    .ticker-content { flex: 1; height: 24px; position: relative; overflow: hidden; padding-left: 10px; }
-    .ticker-text { font-size: 0.9rem; color: #5d4037; font-weight: bold; position: absolute; white-space: nowrap; top: 2px; transform: translateX(100%); opacity: 0; }
-    .ticker-text.active { opacity: 1; animation: marquee-scroll 8s linear infinite; }
-    @keyframes marquee-scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-150%); } }
-    .menu-btn { display: block; width: 92%; max-width: 400px; margin: 0 auto 28px auto; border-radius: 25px; text-decoration: none !important; position: relative; overflow: hidden; box-shadow: 0 10px 20px rgba(93, 64, 55, 0.1); transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s; }
-    .menu-btn:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(93, 64, 55, 0.2); }
-    .btn-content { padding: 5px 20px; height: 100%; display: flex; align-items: center; justify-content: flex-start; }
-    .btn-text-group { text-align: left; flex: 1; }
-    .btn-primary-action { background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); height: 110px; color: white; border: 2px solid rgba(255,255,255,0.2); }
-    .btn-primary-action .btn-main-text { font-size: 1.6rem; font-weight: bold; margin-bottom: 2px; }
-    .btn-primary-action .btn-sub-text { font-size: 0.95rem; opacity: 0.9; font-weight: normal; }
-    .btn-primary-action .btn-icon-large { height: 80px; width: auto; margin-right: 15px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2)); }
-    .btn-secondary-action { background: #fff; border: 2px solid #ffe082; height: 90px; }
-    .btn-secondary-action .btn-main-text { color: #5d4037; font-size: 1.4rem; font-weight: bold; }
-    .btn-secondary-action .btn-sub-text { color: #8d6e63; font-size: 0.85rem; }
-    .btn-secondary-action .btn-icon-large { height: 65px; width: auto; margin-right: 15px; margin-left: 5px; }
-    .bg-map { background: linear-gradient(to right, #fff 30%, #fff8e1 100%); }
-    .bg-gallery { background: linear-gradient(to right, #fff 30%, #fff3e0 100%); }
-    .lucky-badge { position: absolute; top: 12px; right: 15px; background: #ffca28; color: #b71c1c; font-size: 0.8rem; font-weight: bold; padding: 4px 12px; border-radius: 12px; transform: rotate(15deg); box-shadow: 0 2px 5px rgba(0,0,0,0.1); animation: bounce 2s infinite; z-index: 5; }
-    @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: rotate(15deg) translateY(0);} 40% {transform: rotate(15deg) translateY(-5px);} 60% {transform: rotate(15deg) translateY(-3px);} }
-    .footer-area { text-align: center; margin-top: 30px; margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-    .btn-messenger { display: inline-flex; align-items: center; justify-content: center; background: #fff; color: #5d4037; border: 1px solid #a1887f; padding: 8px 25px; border-radius: 50px; font-weight: bold; text-decoration: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 0.95rem; transition: 0.2s; }
-    .btn-messenger:active { transform: scale(0.95); background: #f5f5f5; }
-    .footer-copyright-row { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 5px; }
-    .footer-fb-link { color: #8d6e63; font-weight: bold; text-decoration: none; font-size: 0.9rem; }
-    .footer-fb-link:hover { color: #d32f2f; }
-    .admin-lock { color: #d7ccc8; font-size: 0.8rem; text-decoration: none; display: flex; align-items: center; }
-    .admin-lock:hover { color: #8d6e63; }
+    /* 頂部橫幅區 */
+    .hero-section { position: relative; width: 100%; overflow: hidden; margin-bottom: -5px; }
+    .hero-img { width: 100%; display: block; height: auto; object-fit: cover; }
+    
+    /* 標題區 */
+    .title-section { text-align: center; padding: 20px 0; position: relative; z-index: 10; }
+    .main-title { 
+        font-size: 2.8rem; font-weight: 900; color: #5d4037; 
+        font-family: 'Brush Script MT', cursive; 
+        text-shadow: 2px 2px 0px #fff, 4px 4px 0px rgba(0,0,0,0.1);
+        margin: 0; letter-spacing: 2px;
+    }
+    
+    /* 按鈕容器 */
+    .menu-container { padding: 10px 15px; display: flex; flex-direction: column; gap: 15px; }
+
+    /* 功能卡片通用樣式 */
+    .menu-card {
+        background: #fff; border-radius: 20px; padding: 15px 20px;
+        display: flex; align-items: center; justify-content: space-between;
+        box-shadow: 0 5px 15px rgba(93, 64, 55, 0.08);
+        border: 2px solid #fff; transition: transform 0.2s;
+        text-decoration: none; position: relative; overflow: hidden;
+    }
+    .menu-card:active { transform: scale(0.98); background: #fafafa; }
+
+    /* 各別卡片配色 */
+    .card-map { border-color: #ffe0b2; background: linear-gradient(to right, #fffbf0, #fff); }
+    .card-upload { background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%); color: white; border: none; box-shadow: 0 8px 20px rgba(198, 40, 40, 0.3); }
+    .card-gallery { border-color: #ffccbc; }
+    .card-rank { border-color: #c8e6c9; }
+
+    /* 文字樣式 */
+    .card-text { flex: 1; margin-left: 15px; }
+    .card-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 3px; display: block; }
+    .card-desc { font-size: 0.85rem; opacity: 0.8; font-weight: normal; }
+    .card-icon-img { width: 65px; height: 65px; object-fit: contain; }
+
+    /* PWA 平安符按鈕 (只在首頁) */
+    #pwa-install-btn {
+        display: none; /* JS 會控制顯示 */
+        position: fixed; bottom: 115px; right: 15px; z-index: 2100; 
+        cursor: pointer; transform-origin: top center;
+        animation: windChime 3.5s ease-in-out infinite;
+        filter: drop-shadow(2px 5px 5px rgba(0,0,0,0.2));
+    }
+    #pwa-install-btn img { width: 60px; height: auto; transition: transform 0.2s; }
+    #pwa-install-btn:active { animation: none; transform: scale(0.95); }
+    @keyframes windChime {
+        0% { transform: rotate(0deg); } 25% { transform: rotate(4deg); }
+        50% { transform: rotate(0deg); } 75% { transform: rotate(-4deg); } 100% { transform: rotate(0deg); }
+    }
+
+    /* 請神等待畫面 (只在首頁) */
+    #loading-layer {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: #fffbf0; z-index: 9999;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        transition: opacity 0.5s ease-out;
+    }
+    .loading-god { width: 150px; animation: float 2s ease-in-out infinite; }
+    .loading-text { margin-top: 20px; color: #d32f2f; font-weight: bold; font-size: 1.1rem; text-align: center; line-height: 1.6; }
+    .loading-subtext { color: #8d6e63; font-size: 0.9rem; margin-top: 5px; }
+    .spinner { margin-top: 15px; width: 30px; height: 30px; border: 4px solid #f3f3f3; border-top: 4px solid #d32f2f; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
 </style>
 {% endblock %}
 
 {% block content %}
-    <div class="hero-section">
-        <img src="{{ cdn_base }}/top.png" class="hero-banner" alt="Banner">
-        
-        <div class="hero-text-container">
-            <img src="{{ cdn_base }}/toptext.png" class="app-logo-img" alt="MAP MY GOD">
-            <div class="sub-title-badge">
-                老神在在 
-                <img src="{{ cdn_base }}/god_cute.png" style="width:24px; margin:0 5px;" alt="God"> 
-                躲貓貓
-            </div>
-        </div>
-    </div>
-    
-    <a href="/leaderboard" class="news-ticker-container">
-        <img src="{{ cdn_base }}/bm.png" class="bao-ma-zai-img" alt="報馬仔">
-        <div class="ticker-content">
-            <div class="ticker-text active" id="ticker-msg">🔔 報馬仔連線中... 正在搜尋神蹟...</div>
-        </div>
-        <div style="color: #d7ccc8; font-size: 0.8rem; padding-left:5px;"><i class="fas fa-chevron-right"></i></div>
-    </a>
 
-    <a href="/upload" class="menu-btn btn-primary-action">
-        <div class="lucky-badge">LUCKY!</div>
-        <div class="btn-content">
-            <img src="{{ cdn_base }}/icon_camera.png" class="btn-icon-large" alt="Camera">
-            <div class="btn-text-group">
-                <div class="btn-main-text">尋找神隊友</div>
-                <div class="btn-sub-text">趕快幫祂拍張照</div>
-            </div>
+    <div id="loading-layer">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1768525265/logo.png" class="loading-god">
+        <div class="loading-text">
+            土地公正在穿鞋子...<br>
+            <span style="font-size:0.9rem; color:#555;">(資料連線中，請稍候)</span>
         </div>
-    </a>
-    <a href="/map" class="menu-btn btn-secondary-action bg-map">
-        <div class="btn-content">
-            <img src="{{ cdn_base }}/icon_compass.png" class="btn-icon-large" alt="Compass">
-            <div class="btn-text-group">
-                <div class="btn-main-text">搜尋方位</div>
-                <div class="btn-sub-text">看看他們躲在哪</div>
-            </div>
-            <i class="fas fa-map-marked-alt" style="color:#ffe082; font-size:1.2rem; opacity:0.5;"></i>
-        </div>
-    </a>
-    <a href="/gallery" class="menu-btn btn-secondary-action bg-gallery">
-        <div class="btn-content">
-            <img src="{{ cdn_base }}/icon_album.png" class="btn-icon-large" alt="Gallery">
-            <div class="btn-text-group">
-                <div class="btn-main-text">影像庫</div>
-                <div class="btn-sub-text">尋神足跡紀錄</div>
-            </div>
-            <i class="fas fa-images" style="color:#ffcc80; font-size:1.2rem; opacity:0.5;"></i>
-        </div>
-    </a>
-    <div class="footer-area">
-        <a href="https://m.me/Yuanli.Together.Club" target="_blank" class="btn-messenger">
-            <i class="fab fa-facebook-messenger" style="color:#0084ff; margin-right:6px; font-size:1.1rem;"></i> 聯絡小編 (私訊)
-        </a>
-        <div class="footer-copyright-row">
-            <a href="https://www.facebook.com/Yuanli.Together.Club" target="_blank" class="footer-fb-link">2026 苑裡串起來 ©</a>
-            <a href="/admin" class="admin-lock"><i class="fas fa-lock"></i></a>
+        <div class="spinner"></div>
+        <div class="loading-subtext" id="loading-hint">如果等太久，可能是土地公還在睡覺... 😴</div>
+    </div>
+
+    <div id="pwa-install-btn" onclick="showInstallGuide()">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/install_amulet.png" alt="下載APP">
+    </div>
+
+    <div class="hero-section">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/banner_top.jpg" class="hero-img">
+    </div>
+
+    <div class="title-section">
+        <h1 class="main-title">MAP MY GOD</h1>
+        <div style="margin-top:5px;">
+            <span style="background:#fff; padding:5px 15px; border-radius:20px; color:#8d6e63; font-weight:bold; font-size:0.9rem; border:1px solid #eee;">
+                老神在在 🎎 躲貓貓
+            </span>
         </div>
     </div>
+
+    <div class="menu-container">
+        
+        <a href="/map" class="menu-card card-map">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/icon_map_couple.png" class="card-icon-img">
+            <div class="card-text">
+                <span class="card-title" style="color:#e65100;">搜尋方位</span>
+                <span class="card-desc" style="color:#ef6c00;">看看他們躲在哪</span>
+            </div>
+            <i class="fas fa-map-marked-alt" style="color:#ffe0b2; font-size:1.5rem;"></i>
+        </a>
+
+        <a href="/upload" class="menu-card card-upload">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/icon_camera_couple.png" class="card-icon-img">
+            <div class="card-text">
+                <span class="card-title">尋找神隊友</span>
+                <span class="card-desc" style="color:rgba(255,255,255,0.9);">趕快幫祂拍張照</span>
+                <div style="margin-top:5px;">
+                    <span style="background:#fdd835; color:#c62828; font-size:0.75rem; padding:2px 8px; border-radius:4px; font-weight:bold; transform: rotate(-5deg); display:inline-block;">LUCKY!</span>
+                </div>
+            </div>
+            <i class="fas fa-chevron-right"></i>
+        </a>
+
+        <a href="/gallery" class="menu-card card-gallery">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/icon_album_couple.png" class="card-icon-img">
+            <div class="card-text">
+                <span class="card-title" style="color:#4e342e;">影像庫</span>
+                <span class="card-desc">尋神足跡紀錄</span>
+            </div>
+            <i class="fas fa-images" style="color:#ffccbc; font-size:1.5rem;"></i>
+        </a>
+
+        <a href="/leaderboard" class="menu-card card-rank">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/icon_rank_boy.png" class="card-icon-img">
+            <div class="card-text">
+                <span class="card-title" style="color:#2e7d32;">英雄榜</span>
+                <span class="card-desc">誰是尋神達人</span>
+            </div>
+            <i class="fas fa-trophy" style="color:#c8e6c9; font-size:1.5rem;"></i>
+        </a>
+
+    </div>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
-    let realMsgs = ["🔔 報——！歡迎來到尋神情報站！", "💡 報馬仔提醒：發現神隊友請上傳！"];
-    
-    console.log("🔥 V6.1 Final Decode: Cutting the # Tag");
-
-    fetch('/api/locations?t=' + new Date().getTime())
-    .then(r => r.json())
-    .then(d => {
-        if(d && d.length > 0) {
-            realMsgs = []; 
-            let latestData = d.slice().reverse().slice(0, 5);
-            
-            latestData.forEach(i => {
-                let rawName = i.nickname || i.name || i.user || "熱心鄉親";
-                let displayName = rawName; // 預設顯示完整名字
-                let place = "苑裡某處";    // 預設地點
-
-                // --- ✂️ V6.1 終極解碼邏輯 ---
-                // 檢查名字裡面有沒有我們偷藏的 '#'
-                if (rawName.indexOf('#') > -1) {
-                    let parts = rawName.split('#');
-                    // parts[0] 是人名 (例如: 中正機場)
-                    // parts[1] 是里名 (例如: 中正里)
-                    if (parts.length >= 2) {
-                        displayName = parts[0]; 
-                        place = parts[1];
-                    }
-                } else {
-                    // 如果是舊資料 (沒有 #)，嘗試用 V3.7 的暴力搜索去抓地點
-                    let soup = (i.area || "") + " " + (i.address || "") + " " + (i.title || "") + " " + (i.description || "") + " " + (i.locationName || "");
-                    let matches = soup.match(/[\u4e00-\u9fa5]{2,3}里/g);
-                    if (matches && matches.length > 0) {
-                        let validLi = matches.find(term => term !== "苑里" && term !== "這裡" && term !== "那里" && term !== "家裡" && term !== "公里");
-                        if (validLi) place = validLi;
-                    }
-                    // 如果暴力搜索還是失敗，就用標題
-                    if (place === "苑裡某處") {
-                         place = (i.title || i.locationName || "苑裡").toString().replace(/[\[\]]/g, '').substring(0, 6);
-                    }
-                }
-
-                // 組合最終文案
-                realMsgs.push(`🙏 感恩！${displayName} 於 [${place}] 成功尋獲神隊友！`);
-            });
-            
-            realMsgs.push(`🚩 目前戰報：全苑裡已尋獲 ${d.length} 尊！`);
-            let el = document.getElementById('ticker-msg');
-            if(realMsgs.length > 0) el.innerText = realMsgs[0];
+    // 安裝按鈕顯示邏輯
+    function checkInstallState() {
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+        // 如果不是 App 模式，就顯示按鈕
+        if (!isStandalone) {
+            document.getElementById('pwa-install-btn').style.display = 'block';
         }
-    })
-    .catch(e => console.log("Ticker Error:", e));
+    }
+    
+    // 安裝教學彈窗
+    window.showInstallGuide = function() {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+            Swal.fire({
+                title: '📲 安裝到 iPhone',
+                html: `<div style="text-align:left;">1. 點擊下方 <b>分享</b> <i class="fas fa-share-square"></i><br>2. 往下滑選 <b>加入主畫面</b> <i class="far fa-plus-square"></i><br>3. 點擊 <b>新增</b> 即可！</div>`,
+                imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1768525265/logo.png',
+                imageWidth: 80, confirmButtonText: '好！'
+            });
+        } else {
+            Swal.fire({
+                title: '📲 安裝到手機',
+                html: `<div style="text-align:left;">1. 點擊右上角 <b>選單</b> <i class="fas fa-ellipsis-v"></i><br>2. 點選 <b>加到主畫面</b> 或 <b>安裝應用程式</b><br>3. 確認安裝即可！</div>`,
+                imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1768525265/logo.png',
+                imageWidth: 80, confirmButtonText: '好，我試試', confirmButtonColor: '#2e7d32'
+            });
+        }
+    }
+    
+    // 啟動檢查
+    checkInstallState();
 
-    let idx = 0;
-    let el = document.getElementById('ticker-msg');
-    setInterval(() => {
-        el.style.animation = 'none'; 
-        el.offsetHeight; 
-        idx = (idx + 1) % realMsgs.length;
-        el.innerText = realMsgs[idx];
-        el.style.animation = null; 
-    }, 8000); 
+    // 移除等待畫面 (讓首頁可以滑動)
+    window.addEventListener('load', function() {
+        var loader = document.getElementById('loading-layer');
+        var hint = document.getElementById('loading-hint');
+        setTimeout(function() {
+            loader.style.opacity = '0'; 
+            setTimeout(function() { loader.style.display = 'none'; }, 500); 
+        }, 800); 
+        
+        setTimeout(function() {
+            if(loader.style.display !== 'none') {
+                hint.innerHTML = "免費伺服器喚醒中...<br>第一次會比較久，請喝口茶🍵";
+            }
+        }, 5000);
+    });
 </script>
 {% endblock %}
