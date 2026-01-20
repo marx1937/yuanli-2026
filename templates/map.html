@@ -14,16 +14,43 @@
     <style>
         /* 2. 基礎設定 */
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background: #fff; font-family: "Microsoft JhengHei", sans-serif; }
-
-        /* 3. 地圖滿版 */
         #map { width: 100vw; height: 100vh; z-index: 1; }
+
+        /* --- 🔥 CSS 煉金術：純代碼畫出「立體紅色計數圈」 --- */
+        /* 這是覆蓋原本 Leaflet 聚合器的樣式 */
+        .marker-cluster-custom {
+            background: radial-gradient(circle at 30% 30%, #fff9c4, #fbc02d); /* 蛋黃漸層 */
+            border: 3px solid #c62828; /* 深紅邊框 */
+            border-radius: 50%; /* 變圓 */
+            color: #fff; /* 文字白 */
+            text-align: center;
+            font-weight: 900;
+            font-family: Arial, sans-serif;
+            box-shadow: 
+                inset 0 -3px 5px rgba(0,0,0,0.2), /* 內部立體感 */
+                0 4px 8px rgba(0,0,0,0.3); /* 外部陰影 */
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            /* 文字描邊效果 (Text Stroke) */
+            text-shadow: 
+                -1px -1px 0 #b71c1c,  
+                 1px -1px 0 #b71c1c,
+                -1px  1px 0 #b71c1c,
+                 1px  1px 0 #b71c1c;
+        }
+        .marker-cluster-custom span {
+            line-height: 1;
+            font-size: 1.1rem; 
+        }
+        /* 針對不同數量級距微調大小 (Leaflet 會自動處理，這裡只需一種樣式即可通吃) */
+
 
         /* 4. 頂部篩選列 */
         .map-filter-container {
             position: fixed; top: 15px; left: 0; right: 0; z-index: 1000;
             padding: 10px 15px; white-space: nowrap; overflow-x: auto;
-            display: flex; gap: 8px;
-            -webkit-overflow-scrolling: touch; scrollbar-width: none;
+            display: flex; gap: 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none;
         }
         .map-filter-container::-webkit-scrollbar { display: none; }
 
@@ -58,7 +85,7 @@
             padding: 20px; z-index: 1100;
             box-shadow: 0 -5px 20px rgba(0,0,0,0.15);
             transition: bottom 0.3s ease-out;
-            padding-bottom: 110px; /* 🔥 避開加高的導航列 */
+            padding-bottom: 110px; 
         }
         #info-card.show { bottom: 0; }
         
@@ -75,7 +102,7 @@
             text-align: center; padding: 12px; border-radius: 50px; text-decoration: none; font-weight: bold;
         }
 
-        /* 7. 🔥 完美復刻底部導航列 (樣式與 base.html 完全一致) */
+        /* 7. 完美復刻導航列 */
         .fake-navbar {
             position: fixed; bottom: 0; width: 100%; 
             background: #fff; border-top: 1px solid #efebe9; 
@@ -83,41 +110,18 @@
             display: flex; justify-content: space-around; align-items: center; 
             z-index: 2000; box-shadow: 0 -5px 20px rgba(93, 64, 55, 0.05);
         }
-        
-        .nav-item { 
-            text-align: center; color: #a1887f; text-decoration: none; 
-            font-size: 0.75rem; flex: 1; display: flex; flex-direction: column; align-items: center; 
-        }
-
-        .nav-icon {
-            height: 42px; width: auto; margin-bottom: 3px;
-            transition: all 0.3s;
-        }
-        
-        /* 選中狀態 */
-        .nav-item.active .nav-icon {
-            transform: scale(1.1);
-            filter: drop-shadow(0 2px 2px rgba(211, 47, 47, 0.2));
-        }
+        .nav-item { text-align: center; color: #a1887f; text-decoration: none; font-size: 0.75rem; flex: 1; display: flex; flex-direction: column; align-items: center; }
+        .nav-icon { height: 42px; width: auto; margin-bottom: 3px; transition: all 0.3s; }
+        .nav-item.active .nav-icon { transform: scale(1.1); filter: drop-shadow(0 2px 2px rgba(211, 47, 47, 0.2)); }
         .nav-item.active span { color: #d32f2f; font-weight: bold; }
-
-        /* 中間大按鈕 */
         .nav-center-btn {
-            width: 80px; height: 80px;
-            background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
-            border-radius: 50%; border: 6px solid #f9f7f2;
-            display: flex; align-items: center; justify-content: center;
-            transform: translateY(-35px);
-            box-shadow: 0 8px 15px rgba(198, 40, 40, 0.3);
-            overflow: hidden; text-decoration: none;
+            width: 80px; height: 80px; background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+            border-radius: 50%; border: 6px solid #f9f7f2; display: flex; align-items: center; justify-content: center;
+            transform: translateY(-35px); box-shadow: 0 8px 15px rgba(198, 40, 40, 0.3); overflow: hidden; text-decoration: none;
         }
-        .nav-center-icon {
-            height: 55px; width: auto; display: block;
-            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
-            margin: 0;
-        }
+        .nav-center-icon { height: 55px; width: auto; display: block; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2)); margin: 0; }
 
-        /* 小幫手樣式 */
+        /* 其他 */
         .guide-list { text-align: left; margin: 20px 0; font-size: 1rem; line-height: 2; color: #555; }
         .guide-item i { width: 25px; text-align: center; color: #d32f2f; margin-right: 10px; }
         .guide-img { width: 150px; margin-bottom: 10px; }
@@ -129,7 +133,6 @@
 <body>
 
     <div class="map-filter-container" id="filter-scroll"></div>
-
     <div id="map"></div>
 
     <div class="right-toolbar">
@@ -162,29 +165,11 @@
     </div>
 
     <div class="fake-navbar">
-        <a href="/" class="nav-item">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_home.png" class="nav-icon" alt="首頁">
-            <span>首頁</span>
-        </a>
-        
-        <a href="/map" class="nav-item active">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_map.png" class="nav-icon" alt="地圖">
-            <span>地圖</span>
-        </a>
-        
-        <a href="/upload" class="nav-center-btn">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_upload.png" class="nav-center-icon" alt="上傳">
-        </a>
-        
-        <a href="/gallery" class="nav-item">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_gallery.png" class="nav-icon" alt="圖庫">
-            <span>圖庫</span>
-        </a>
-        
-        <a href="/leaderboard" class="nav-item">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_leaderboard.png" class="nav-icon" alt="榜單">
-            <span>榜單</span>
-        </a>
+        <a href="/" class="nav-item"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_home.png" class="nav-icon"><span>首頁</span></a>
+        <a href="/map" class="nav-item active"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_map.png" class="nav-icon"><span>地圖</span></a>
+        <a href="/upload" class="nav-center-btn"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_upload.png" class="nav-center-icon"></a>
+        <a href="/gallery" class="nav-item"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_gallery.png" class="nav-icon"><span>圖庫</span></a>
+        <a href="/leaderboard" class="nav-item"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_leaderboard.png" class="nav-icon"><span>榜單</span></a>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
@@ -216,7 +201,25 @@
                 maxZoom: 19, attribution: '© OpenStreetMap'
             }).addTo(map);
 
-            markersCluster = L.markerClusterGroup({ showCoverageOnHover: false });
+            // 🔥 這裡設定自定義的聚合器樣式 (紅色金幣圈圈)
+            markersCluster = L.markerClusterGroup({ 
+                showCoverageOnHover: false,
+                iconCreateFunction: function(cluster) {
+                    var childCount = cluster.getChildCount();
+                    // 根據數量決定大小 (CSS 會自動處理，這裡只要設定 class)
+                    var c = 'marker-cluster-custom';
+                    var size = 40; // 預設大小
+                    if (childCount > 10) size = 50; // 多一點變大
+                    if (childCount > 50) size = 60; // 很多變更大
+
+                    return new L.DivIcon({ 
+                        html: '<div><span>' + childCount + '</span></div>', 
+                        className: c, 
+                        iconSize: new L.Point(size, size) 
+                    });
+                }
+            });
+            
             map.addLayer(markersCluster);
             map.on('click', closeCard);
             setTimeout(() => map.invalidateSize(), 500);
@@ -234,15 +237,19 @@
 
         function renderMarkers(data) {
             markersCluster.clearLayers();
-            // 自定義圖標 (請確認這個連結是否需要更換)
-            var icon = L.icon({
-                iconUrl: 'https://cdn-icons-png.flaticon.com/512/3442/3442632.png', 
-                iconSize: [40, 40], iconAnchor: [20, 40]
+            
+            // 🔥 1. 使用你上傳的「宮廟圖」做為神像標記
+            // 請確保你的圖片已上傳到 Cloudinary 並替換下面的網址
+            var templeIcon = L.icon({
+                iconUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1/marker_temple.png', // 記得換成你的真實連結
+                iconSize: [48, 48], 
+                iconAnchor: [24, 48], // 底部尖端對齊
+                popupAnchor: [0, -45]
             });
 
             data.forEach(item => {
                 if (item.lat && item.lng) {
-                    let m = L.marker([item.lat, item.lng], { icon: icon });
+                    let m = L.marker([item.lat, item.lng], { icon: templeIcon });
                     m.on('click', (e) => {
                         L.DomEvent.stopPropagation(e);
                         showCard(item);
@@ -253,109 +260,47 @@
             });
         }
 
-        function showCard(item) {
-            let name = item.nickname ? item.nickname.split("#")[0] : "熱心串友";
-            let v = (item.nickname && item.nickname.includes("#")) ? item.nickname.split("#")[1] : (item.area || "其他");
-            let img = item.image_url.replace('/upload/', '/upload/w_200,h_200,c_fill,q_auto/');
-            $('#card-village').text(v);
-            $('#card-name').text(name);
-            $('#card-user').text(name);
-            $('#card-time').text(item.timestamp ? item.timestamp.substring(0,10) : '');
-            $('#card-note').text(item.note || '無備註');
-            $('#card-img').attr('src', img);
-            $('#btn-google-nav').attr('href', `https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}`);
-            $('#info-card').addClass('show');
-        }
-
-        function closeCard() { $('#info-card').removeClass('show'); }
-
         function locateUser() {
             $('#btn-gps').css('color', '#d32f2f');
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(pos => {
                     let lat = pos.coords.latitude, lng = pos.coords.longitude;
+                    
                     if (userMarker) map.removeLayer(userMarker);
-                    userMarker = L.circleMarker([lat, lng], { radius: 8, fillColor: "#2196f3", color: "#fff", weight: 3, fillOpacity: 0.9 }).addTo(map);
+                    
+                    // 🔥 2. 使用你上傳的「金腳印」做為使用者位置
+                    // 請確保你的圖片已上傳到 Cloudinary 並替換下面的網址
+                    var footprintIcon = L.icon({
+                        iconUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1/marker_footprint.png', // 記得換成你的真實連結
+                        iconSize: [40, 40], 
+                        iconAnchor: [20, 20] // 中心對齊
+                    });
+
+                    userMarker = L.marker([lat, lng], { icon: footprintIcon }).addTo(map);
                     map.flyTo([lat, lng], 17);
                 });
             }
         }
 
-        function calculateCounts(data) {
-            ALL_VILLAGES.forEach(v => villageCounts[v] = 0);
-            data.forEach(i => {
-                let v = (i.nickname && i.nickname.includes("#")) ? i.nickname.split("#")[1] : (i.area || "其他");
-                if (villageCounts[v] !== undefined) villageCounts[v]++;
-            });
+        // ... (其餘輔助函式保持不變) ...
+        function showCard(item) {
+            let name = item.nickname ? item.nickname.split("#")[0] : "熱心串友";
+            let v = (item.nickname && item.nickname.includes("#")) ? item.nickname.split("#")[1] : (item.area || "其他");
+            let img = item.image_url.replace('/upload/', '/upload/w_200,h_200,c_fill,q_auto/');
+            $('#card-village').text(v); $('#card-name').text(name); $('#card-user').text(name);
+            $('#card-time').text(item.timestamp ? item.timestamp.substring(0,10) : '');
+            $('#card-note').text(item.note || '無備註'); $('#card-img').attr('src', img);
+            $('#btn-google-nav').attr('href', `https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}`);
+            $('#info-card').addClass('show');
         }
-
-        function renderFilterChips() {
-            let html = `<div class="filter-chip active" onclick="filterMap('全部', this)">全覽 <span>${allMarkers.length}</span></div>`;
-            ALL_VILLAGES.forEach(v => {
-                html += `<div class="filter-chip" onclick="filterMap('${v}', this)">${v} <span>${villageCounts[v]||0}</span></div>`;
-            });
-            $('#filter-scroll').html(html);
-        }
-
-        window.filterMap = function(v, btn) {
-            $('.filter-chip').removeClass('active');
-            $(btn).addClass('active');
-            closeCard();
-            let d = (v === '全部') ? allMarkers : allMarkers.filter(i => {
-                let check = (i.nickname && i.nickname.includes("#")) ? i.nickname.split("#")[1] : (i.area || "其他");
-                return check === v;
-            });
-            renderMarkers(d);
-            map.invalidateSize();
-            if (d.length > 0) {
-                let group = L.featureGroup(d.map(i => L.marker([i.lat, i.lng])));
-                map.fitBounds(group.getBounds().pad(0.2));
-            }
-        }
-
-        window.showGuide = function() {
-            Swal.fire({
-                title: '<span style="color:#d32f2f;">歡迎來到尋神地圖</span>',
-                html: `
-                    <div class="guide-list">
-                        <div class="guide-item"><i class="fas fa-map-marker-alt"></i> 點擊圖釘：查看照片與導航</div>
-                        <div class="guide-item"><i class="fas fa-crosshairs"></i> 瞄準按鈕：尋找你的位置</div>
-                        <div class="guide-item"><i class="fas fa-camera"></i> 中間相機：去上傳新情報</div>
-                        <div class="guide-item"><i class="fas fa-cog"></i> 紅色齒輪：地圖資料更新</div>
-                    </div>
-                `,
-                confirmButtonText: '收到，出發尋神！',
-                confirmButtonColor: '#e64a19',
-                background: '#fff8e1',
-                backdrop: `rgba(0,0,0,0.6)`
-            });
-        }
-
-        window.openDebugMenu = function() {
-            Swal.fire({
-                title: '🛠️ 偵錯模式',
-                html: `
-                    <p style="font-size:0.9rem; color:#666;">如果地圖不完整或資料沒更新</p>
-                    <button class="swal2-confirm swal2-styled debug-btn" style="background-color:#2e7d32;" onclick="forceReloadData()">
-                        <i class="fas fa-sync"></i> 重新載入 (Reload)
-                    </button>
-                    <button class="swal2-deny swal2-styled debug-btn" style="background-color:#c62828;" onclick="hardReset()">
-                        <i class="fas fa-trash"></i> 清除快取並重置 (Reset)
-                    </button>
-                `,
-                showConfirmButton: false, showCloseButton: true
-            });
-        }
-
-        window.forceReloadData = function() {
-            map.invalidateSize(); loadData();
-            Swal.fire({icon: 'success', title: '已重新載入', text: '資料與地圖已更新', timer: 1500, showConfirmButton: false});
-        }
-
-        window.hardReset = function() {
-            if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => caches.delete(name)); }); }
-            window.location.reload(true);
-        }
+        function closeCard() { $('#info-card').removeClass('show'); }
+        function calculateCounts(data) { ALL_VILLAGES.forEach(v => villageCounts[v] = 0); data.forEach(i => { let v = (i.nickname && i.nickname.includes("#")) ? i.nickname.split("#")[1] : (i.area || "其他"); if (villageCounts[v] !== undefined) villageCounts[v]++; }); }
+        function renderFilterChips() { let html = `<div class="filter-chip active" onclick="filterMap('全部', this)">全覽 <span>${allMarkers.length}</span></div>`; ALL_VILLAGES.forEach(v => { html += `<div class="filter-chip" onclick="filterMap('${v}', this)">${v} <span>${villageCounts[v]||0}</span></div>`; }); $('#filter-scroll').html(html); }
+        window.filterMap = function(v, btn) { $('.filter-chip').removeClass('active'); $(btn).addClass('active'); closeCard(); let d = (v === '全部') ? allMarkers : allMarkers.filter(i => { let check = (i.nickname && i.nickname.includes("#")) ? i.nickname.split("#")[1] : (i.area || "其他"); return check === v; }); renderMarkers(d); map.invalidateSize(); if (d.length > 0) { let group = L.featureGroup(d.map(i => L.marker([i.lat, i.lng]))); map.fitBounds(group.getBounds().pad(0.2)); } }
+        window.showGuide = function() { Swal.fire({ title: '<span style="color:#d32f2f;">歡迎來到尋神地圖</span>', html: `<div class="guide-list"><div class="guide-item"><i class="fas fa-map-marker-alt"></i> 點擊圖釘：查看照片與導航</div><div class="guide-item"><i class="fas fa-crosshairs"></i> 瞄準按鈕：尋找你的位置</div><div class="guide-item"><i class="fas fa-camera"></i> 中間相機：去上傳新情報</div><div class="guide-item"><i class="fas fa-cog"></i> 紅色齒輪：地圖資料更新</div></div>`, confirmButtonText: '收到，出發尋神！', confirmButtonColor: '#e64a19', background: '#fff8e1', backdrop: `rgba(0,0,0,0.6)` }); }
+        window.openDebugMenu = function() { Swal.fire({ title: '🛠️ 偵錯模式', html: `<p style="font-size:0.9rem; color:#666;">如果地圖不完整或資料沒更新</p><button class="swal2-confirm swal2-styled debug-btn" style="background-color:#2e7d32;" onclick="forceReloadData()"><i class="fas fa-sync"></i> 重新載入 (Reload)</button><button class="swal2-deny swal2-styled debug-btn" style="background-color:#c62828;" onclick="hardReset()"><i class="fas fa-trash"></i> 清除快取並重置 (Reset)</button>`, showConfirmButton: false, showCloseButton: true }); }
+        window.forceReloadData = function() { map.invalidateSize(); loadData(); Swal.fire({icon: 'success', title: '已重新載入', text: '資料與地圖已更新', timer: 1500, showConfirmButton: false}); }
+        window.hardReset = function() { if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => caches.delete(name)); }); } window.location.reload(true); }
     </script>
 </body>
 </html>
