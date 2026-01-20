@@ -46,32 +46,44 @@
         }
         .nav-center-icon { height: 55px; width: auto; display: block; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2)); margin: 0; }
 
-        /* 🔥 PWA 平安符按鈕樣式 */
+        /* 🔥 PWA 平安符按鈕 (微風搖曳版) */
         #pwa-install-btn {
             display: none; /* 預設隱藏 */
             position: fixed; 
-            bottom: 100px; /* 在導航列上方 */
-            right: 10px;
-            z-index: 2100; /* 確保浮在最上面 */
+            bottom: 115px; /* 在導航列上方一點點 */
+            right: 15px; /* 貼齊右側 */
+            z-index: 2100; 
             cursor: pointer;
-            animation: bounce 2.5s infinite ease-in-out; /* 緩慢跳動動畫 */
-            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3)); /* 增加陰影立體感 */
+            
+            /* ✨ 魔法關鍵：設定旋轉支點在「圖片的正上方中間」(繩結處) */
+            transform-origin: top center;
+            
+            /* 3.5秒一次，像風鈴一樣來回擺動 */
+            animation: windChime 3.5s ease-in-out infinite;
+            
+            /* 加一點陰影，增加立體感 */
+            filter: drop-shadow(2px 5px 5px rgba(0,0,0,0.2));
         }
 
         #pwa-install-btn img {
-            width: 85px; /* 設定御守大小 */
+            width: 90px; /* 御守大小，夠大才看得到流蘇 */
             height: auto;
-            transition: transform 0.2s;
+            transition: transform 0.2s; /* 點擊時的縮放過渡 */
         }
 
-        #pwa-install-btn:active img {
-            transform: scale(0.9); /* 點擊縮小回饋 */
+        /* 點擊時稍微縮小，增加手感 */
+        #pwa-install-btn:active {
+            animation: none; /* 點擊時暫停搖擺 */
+            transform: scale(0.95);
         }
 
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
-            40% {transform: translateY(-12px);}
-            60% {transform: translateY(-6px);}
+        /* ✨ 微風搖曳動畫 Keyframes */
+        @keyframes windChime {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(4deg); }  /* 向右飄一點 */
+            50% { transform: rotate(0deg); }  /* 回正 */
+            75% { transform: rotate(-4deg); } /* 向左飄一點 */
+            100% { transform: rotate(0deg); } /* 回正 */
         }
 
         /* 請神等待畫面 */
@@ -147,7 +159,6 @@
         window.showInstallGuide = function() {
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             if (isIOS) {
-                // iOS 教學
                 Swal.fire({
                     title: '📲 安裝到 iPhone',
                     html: `
@@ -162,7 +173,6 @@
                     confirmButtonText: '好！'
                 });
             } else {
-                // Android 教學 (修正文案：加入主畫面)
                 Swal.fire({
                     title: '📲 安裝到手機',
                     html: `
