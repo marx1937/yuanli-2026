@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         /* 2. 基礎設定 */
@@ -39,8 +40,8 @@
 
         /* 5. 右側工具列 */
         .right-toolbar {
-            position: fixed; right: 15px; top: 50%; transform: translateY(-50%);
-            display: flex; flex-direction: column; gap: 15px; z-index: 1000;
+            position: fixed; right: 15px; top: 45%; transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 12px; z-index: 1000;
         }
         .tool-btn {
             width: 45px; height: 45px; background: white; border-radius: 50%;
@@ -74,7 +75,7 @@
             text-align: center; padding: 12px; border-radius: 50px; text-decoration: none; font-weight: bold;
         }
 
-        /* 7. 🔥 偽裝切版導航列 */
+        /* 7. 偽裝切版導航列 */
         .fake-navbar {
             position: fixed; bottom: 0; left: 0; right: 0; height: 75px;
             background: rgba(255,255,255,0.98); 
@@ -83,39 +84,33 @@
             z-index: 2000;
             border-top-left-radius: 20px; border-top-right-radius: 20px;
         }
-        
         .nav-item {
             text-decoration: none; color: #888; text-align: center; font-size: 0.7rem; font-weight: bold;
             display: flex; flex-direction: column; align-items: center; gap: 4px;
             width: 20%; position: relative;
         }
-
         .nav-icon-img {
-            width: 32px; height: 32px; /* 稍微調大一點，配合首頁圖標 */
-            object-fit: contain;
-            transition: transform 0.2s;
-            filter: grayscale(100%) opacity(0.6); 
+            width: 32px; height: 32px; object-fit: contain;
+            transition: transform 0.2s; filter: grayscale(100%) opacity(0.6); 
         }
-
-        .nav-item.active .nav-icon-img {
-            transform: scale(1.1);
-            filter: grayscale(0%) opacity(1);
-        }
+        .nav-item.active .nav-icon-img { transform: scale(1.1); filter: grayscale(0%) opacity(1); }
         .nav-item.active { color: #d32f2f; }
-
-        /* 中間那顆特大號按鈕 */
         .nav-fab-wrapper { position: relative; top: -25px; }
         .nav-fab-img {
-            width: 65px; height: 65px; 
-            border-radius: 50%; 
-            background: #fff;
-            padding: 5px;
-            box-shadow: 0 5px 15px rgba(211, 47, 47, 0.4);
-            object-fit: contain;
-            transition: transform 0.2s;
-            /* 保持原色，不套濾鏡 */
+            width: 65px; height: 65px; border-radius: 50%; background: #fff;
+            padding: 5px; box-shadow: 0 5px 15px rgba(211, 47, 47, 0.4);
+            object-fit: contain; transition: transform 0.2s;
         }
         .nav-fab-wrapper:active .nav-fab-img { transform: scale(0.95); }
+
+        /* 8. 小幫手彈窗樣式 */
+        .guide-list { text-align: left; margin: 20px 0; font-size: 1rem; line-height: 2; color: #555; }
+        .guide-item i { width: 25px; text-align: center; color: #d32f2f; margin-right: 10px; }
+        .guide-img { width: 150px; margin-bottom: 10px; }
+
+        /* SweetAlert 按鈕樣式 */
+        .swal2-actions { gap: 10px; width: 100%; justify-content: center; }
+        .debug-btn { width: 100% !important; margin: 5px 0 !important; }
 
     </style>
 </head>
@@ -129,6 +124,10 @@
         <div class="tool-btn" onclick="map.zoomIn()"><i class="fas fa-plus"></i></div>
         <div class="tool-btn" onclick="map.zoomOut()"><i class="fas fa-minus"></i></div>
         <div class="tool-btn" onclick="locateUser()" id="btn-gps"><i class="fas fa-crosshairs"></i></div>
+        
+        <div class="tool-btn" onclick="showGuide()" style="color:#2e7d32;"><i class="fas fa-question"></i></div>
+        
+        <div class="tool-btn" onclick="openDebugMenu()" style="color:#d32f2f;"><i class="fas fa-cog"></i></div>
     </div>
 
     <div id="info-card">
@@ -157,21 +156,17 @@
             <img src="https://res.cloudinary.com/diuoghid2/image/upload/god_cute.png" class="nav-icon-img" alt="首頁">
             <span>首頁</span>
         </a>
-        
         <a href="/map" class="nav-item active">
             <img src="https://res.cloudinary.com/diuoghid2/image/upload/icon_compass.png" class="nav-icon-img" alt="地圖">
             <span>地圖</span>
         </a>
-        
         <a href="/report" class="nav-item nav-fab-wrapper">
             <img src="https://res.cloudinary.com/diuoghid2/image/upload/icon_camera.png" class="nav-fab-img" alt="搜神">
         </a>
-        
         <a href="/gallery" class="nav-item">
             <img src="https://res.cloudinary.com/diuoghid2/image/upload/icon_album.png" class="nav-icon-img" alt="圖庫">
             <span>圖庫</span>
         </a>
-        
         <a href="/leaderboard" class="nav-item">
             <img src="https://res.cloudinary.com/diuoghid2/image/upload/bm.png" class="nav-icon-img" alt="榜單">
             <span>榜單</span>
@@ -198,8 +193,48 @@
         $(document).ready(function() {
             initMap();
             loadData();
+            // 🔥 網頁載入時，自動跳出小幫手
+            showGuide();
         });
 
+        // 🔥 小幫手函式
+        window.showGuide = function() {
+            Swal.fire({
+                title: '<span style="color:#d32f2f;">歡迎來到尋神地圖</span>',
+                html: `
+                    <img src="https://res.cloudinary.com/diuoghid2/image/upload/god_cute.png" class="guide-img">
+                    <div class="guide-list">
+                        <div class="guide-item"><i class="fas fa-map-marker-alt"></i> 點擊圖釘：查看照片與導航</div>
+                        <div class="guide-item"><i class="fas fa-crosshairs"></i> 瞄準按鈕：尋找你的位置</div>
+                        <div class="guide-item"><i class="fas fa-camera"></i> 中間相機：去上傳新情報</div>
+                        <div class="guide-item"><i class="fas fa-cog"></i> 紅色齒輪：地圖資料更新</div>
+                    </div>
+                `,
+                confirmButtonText: '收到，出發尋神！',
+                confirmButtonColor: '#e64a19',
+                background: '#fff8e1',
+                backdrop: `rgba(0,0,0,0.6)`
+            });
+        }
+
+        // 偵錯模式函式
+        window.openDebugMenu = function() {
+            Swal.fire({
+                title: '🛠️ 偵錯模式',
+                html: `
+                    <p style="font-size:0.9rem; color:#666;">如果地圖不完整或資料沒更新</p>
+                    <button class="swal2-confirm swal2-styled debug-btn" style="background-color:#2e7d32;" onclick="forceReloadData()">
+                        <i class="fas fa-sync"></i> 重新載入 (Reload)
+                    </button>
+                    <button class="swal2-deny swal2-styled debug-btn" style="background-color:#c62828;" onclick="hardReset()">
+                        <i class="fas fa-trash"></i> 清除快取並重置 (Reset)
+                    </button>
+                `,
+                showConfirmButton: false, showCloseButton: true
+            });
+        }
+
+        // ... 以下為原有的地圖邏輯 ...
         function initMap() {
             map = L.map('map', { zoomControl: false }).setView([24.4429, 120.6558], 14);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -224,7 +259,6 @@
 
         function renderMarkers(data) {
             markersCluster.clearLayers();
-            // 使用 Q 版廟宇圖標 (記得換成你自己的)
             var icon = L.icon({
                 iconUrl: 'https://cdn-icons-png.flaticon.com/512/3442/3442632.png', 
                 iconSize: [40, 40], iconAnchor: [20, 40]
@@ -301,6 +335,17 @@
                 let group = L.featureGroup(d.map(i => L.marker([i.lat, i.lng])));
                 map.fitBounds(group.getBounds().pad(0.2));
             }
+        }
+
+        window.forceReloadData = function() {
+            map.invalidateSize();
+            loadData();
+            Swal.fire({icon: 'success', title: '已重新載入', text: '資料與地圖已更新', timer: 1500, showConfirmButton: false});
+        }
+
+        window.hardReset = function() {
+            if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => caches.delete(name)); }); }
+            window.location.reload(true);
         }
     </script>
 </body>
