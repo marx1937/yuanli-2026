@@ -11,13 +11,22 @@
         padding-bottom: 100px;
     }
 
-    /* 頂部標題 (移除吉祥物後，讓標題置中更清爽) */
-    .page-header { text-align: center; padding: 25px 0 15px 0; width: 100%; position: relative; }
-    .header-capsule {
-        background: white; padding: 8px 25px; border-radius: 50px;
-        font-weight: bold; color: #5d4037; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        display: inline-flex; align-items: center; border: 1px solid rgba(255,255,255,0.8);
-        font-size: 1.1rem;
+    /* 頂部標題區 (匾額樣式) */
+    .page-header { 
+        text-align: center; 
+        padding: 20px 0 10px 0; 
+        width: 100%; 
+        position: relative; 
+    }
+    
+    /* 新增：匾額圖片樣式 */
+    .title-signboard {
+        width: 70%;           /* 寬度佔螢幕 70% */
+        max-width: 280px;     /* 最大不超過 280px */
+        height: auto; 
+        display: block; 
+        margin: 0 auto;       /* 置中 */
+        filter: drop-shadow(0 5px 5px rgba(93, 64, 55, 0.15)); /* 加一點陰影更有立體感 */
     }
 
     /* 主表單卡片 */
@@ -89,10 +98,8 @@
 {% block content %}
 
     <div class="page-header">
-        <div class="header-capsule">
-            <i class="fas fa-camera" style="color:#d32f2f; margin-right:8px;"></i> 尋神情報站
-        </div>
-        </div>
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1768691402/title_signboard.png" class="title-signboard" alt="尋神情報站">
+    </div>
 
     <div class="form-card">
         
@@ -222,7 +229,6 @@
         if(!nickname) nickname = '熱心串友'; 
         var area = $('#area').val();
 
-        // 不雅字過濾
         var badWords = ['笨蛋', '壞蛋', '王八', '白痴', '白癡', '智障', '幹', '靠', '死', '爛', '屌', '雞掰', '機車', 'fuck', 'shit']; 
         for (var word of badWords) {
             if (nickname.toLowerCase().includes(word)) {
@@ -262,7 +268,7 @@
                 } else {
                     Swal.fire({
                         title: '✅ 上傳成功！', 
-                        html: `感謝 <b>${area}</b> 的 <b>${nickname}</b>，土地公收到囉！`, 
+                        html: `感謝 <b>${area}</b> 的 <b>${nickname}</b>，<br>土地公收到囉！`, 
                         imageUrl: '/static/happy.jpg', imageWidth: '100%',
                         confirmButtonText: '太棒了！', confirmButtonColor: '#d32f2f'
                     }).then(() => { window.location.href = '/map'; });
