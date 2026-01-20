@@ -8,7 +8,7 @@
         background-color: #fdfcf0;
         background-image: radial-gradient(#d7ccc8 1.5px, transparent 1.5px);
         background-size: 24px 24px;
-        padding-bottom: 100px;
+        margin: 0; 
     }
 
     /* 頂部標題區 */
@@ -16,7 +16,7 @@
     
     .title-signboard {
         width: 70%; max-width: 280px; height: auto; 
-        display: block; margin: 0 auto;
+        display: block; margin: 0 auto; /* 確保置中 */
         filter: drop-shadow(0 5px 5px rgba(93, 64, 55, 0.15)); 
     }
 
@@ -51,10 +51,7 @@
     .upload-icon-img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; opacity: 0.9; }
     .upload-text { font-weight: bold; color: #8d6e63; font-size: 1.1rem; }
     
-    #preview { 
-        width: 100%; height: 100%; position: absolute; top:0; left:0;
-        object-fit: cover; display: none; 
-    }
+    #preview { width: 100%; height: 100%; position: absolute; top:0; left:0; object-fit: cover; display: none; }
     .re-take-hint {
         position: absolute; bottom: 10px; background: rgba(0,0,0,0.6); color: white;
         padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; pointer-events: none;
@@ -81,10 +78,7 @@
     }
     .btn-submit.ready { opacity: 1; pointer-events: auto; }
     .btn-submit:active { transform: scale(0.98); }
-    
-    .btn-submit.disabled-zone {
-        background: #9e9e9e !important; box-shadow: none !important; cursor: not-allowed;
-    }
+    .btn-submit.disabled-zone { background: #9e9e9e !important; box-shadow: none !important; cursor: not-allowed; }
 
     /* SweetAlert Tweaks */
     .swal2-title { margin-top: 15px !important; padding-top: 10px !important; }
@@ -195,28 +189,13 @@
                         checkReady();
                     } else {
                         $('#gpsStatus').html('<i class="fas fa-times-circle mr-2"></i> 神明隱身中...').css('color', '#e74c3c');
-                        
                         Swal.fire({
                             imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1/god_hide_seek.jpg',
-                            imageWidth: 220, 
-                            imageHeight: 'auto',
-                            imageAlt: '神明躲貓貓',
+                            imageWidth: 220, imageHeight: 'auto', imageAlt: '神明躲貓貓',
                             title: '<span style="color:#d32f2f; font-weight:900;">喔喔！神明隱身中？</span>',
-                            html: `
-                                <div style="text-align: left; font-size: 1rem; line-height: 1.6; padding: 0 10px;">
-                                    <span style="color: #757575; font-size: 0.95rem;">偵測到您目前的位置不在苑裡鎮。</span><br><br>
-                                    <span style="color: #5d4037; font-weight: normal;">
-                                        這裡的神明正在跟您玩 <b style="font-size: 1.1rem; color:#d32f2f;">躲貓貓</b>，<br>
-                                        記得要回到 <b style="font-size: 1.1rem; color:#d32f2f;">苑裡地區</b> 才能成功捕捉祂們的金身喔！
-                                    </span>
-                                </div>
-                            `,
-                            confirmButtonText: '好，我去苑裡找祂們',
-                            confirmButtonColor: '#8d6e63',
-                            background: '#fffbf0',
-                            backdrop: `rgba(0,0,0,0.5)`
+                            html: `<div style="text-align: left; font-size: 1rem; line-height: 1.6; padding: 0 10px;"><span style="color: #757575; font-size: 0.95rem;">偵測到您目前的位置不在苑裡鎮。</span><br><br><span style="color: #5d4037; font-weight: normal;">這裡的神明正在跟您玩 <b style="font-size: 1.1rem; color:#d32f2f;">躲貓貓</b>，<br>記得要回到 <b style="font-size: 1.1rem; color:#d32f2f;">苑裡地區</b> 才能成功捕捉祂們的金身喔！</span></div>`,
+                            confirmButtonText: '好，我去苑裡找祂們', confirmButtonColor: '#8d6e63', background: '#fffbf0', backdrop: `rgba(0,0,0,0.5)`
                         });
-
                         $('#submitBtn').addClass('disabled-zone').text('🚫 神明隱身中，無法上傳');
                     }
                 }, 
@@ -266,30 +245,21 @@
 
     $('#uploadForm').submit(function(e) {
         e.preventDefault();
-        
-        if (!isInsideYuanli) {
-            Swal.fire({ icon: 'error', title: '神明隱身中', text: '請移動到苑裡鎮範圍內再試。' });
-            return;
-        }
-
+        if (!isInsideYuanli) { Swal.fire({ icon: 'error', title: '神明隱身中', text: '請移動到苑裡鎮範圍內再試。' }); return; }
         var nickname = $('#nickname').val().trim();
         if(!nickname) nickname = '熱心串友'; 
         var area = $('#area').val();
-
         var badWords = ['笨蛋', '壞蛋', '王八', '白痴', '白癡', '智障', '幹', '靠', '死', '爛', '屌', '雞掰', '機車', 'fuck', 'shit']; 
         for (var word of badWords) {
             if (nickname.toLowerCase().includes(word)) {
                 Swal.fire({
-                    imageUrl: '/static/377.jpg', 
-                    imageWidth: '100%', imageHeight: 'auto',
-                    title: '暱稱不太好聽喔...', 
-                    text: '請使用優雅一點的名字，土地公才聽得懂！',
+                    imageUrl: '/static/377.jpg', imageWidth: '100%', imageHeight: 'auto',
+                    title: '暱稱不太好聽喔...', text: '請使用優雅一點的名字，土地公才聽得懂！',
                     confirmButtonColor: '#d33', confirmButtonText: 'OK'
                 });
                 return; 
             }
         }
-
         var btn = $('#submitBtn');
         if(!btn.hasClass('ready')) return;
         btn.removeClass('ready').html('<i class="fas fa-robot"></i> 正在傳送資料...').css('opacity', '0.8');
@@ -304,40 +274,19 @@
             success: function(response) {
                 var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公會保庇你喔！';
                 speakHappy(sayText); 
-
                 if (response.status === 'duplicate') {
-                    // 🔥 排隊畫面：邏輯與成功畫面完全同步
                     Swal.fire({
                         title: '📋 資料已排隊中',
-                        html: `
-                            <div style="font-size: 1.1rem; color:#5d4037; line-height:1.6;">
-                                感謝 <span style="color:#d32f2f; font-weight:bold; font-size:1.2rem;">${nickname}</span> 的熱心！<br>
-                                不過 <span style="color:#d32f2f; font-weight:bold; font-size:1.2rem;">${area}</span> 附近似乎已有紀錄囉。<br>
-                                資料已送交審核，<br>
-                                確認無誤就會更新！
-                            </div>
-                        `,
+                        html: `<div style="font-size: 1.1rem; color:#5d4037; line-height:1.6;">感謝 <span style="color:#d32f2f; font-weight:bold; font-size:1.2rem;">${nickname}</span> 的熱心！<br>不過 <span style="color:#d32f2f; font-weight:bold; font-size:1.2rem;">${area}</span> 附近似乎已有紀錄囉。<br>資料已送交審核，<br>確認無誤就會更新！</div>`,
                         imageUrl: '/static/pada.jpg', imageWidth: '100%', 
-                        confirmButtonText: '收到，來去找下一座！', confirmButtonColor: '#ff9800',
-                        background: '#fffbf0',
-                        backdrop: `rgba(0,0,0,0.5)`
+                        confirmButtonText: '收到，來去找下一座！', confirmButtonColor: '#ff9800', background: '#fffbf0', backdrop: `rgba(0,0,0,0.5)`
                     }).then(() => { window.location.href = '/map'; });
                 } else {
-                    // 成功畫面：保持完美一致
                     Swal.fire({
                         title: '✅ 上傳成功！', 
-                        html: `
-                            <div style="font-size: 1.1rem; color:#5d4037; line-height:1.6;">
-                                感謝 <span style="color:#d32f2f; font-weight:bold; font-size:1.2rem;">${area}</span> 的 
-                                <span style="color:#d32f2f; font-weight:bold; font-size:1.2rem;">${nickname}</span>，<br>
-                                土地公收到囉！<br>
-                                <span style="color:#d32f2f; font-weight:bold;">會保庇你喔！</span>
-                            </div>
-                        `, 
+                        html: `<div style="font-size: 1.1rem; color:#5d4037; line-height:1.6;">感謝 <span style="color:#d32f2f; font-weight:bold; font-size:1.2rem;">${area}</span> 的 <span style="color:#d32f2f; font-weight:bold; font-size:1.2rem;">${nickname}</span>，<br>土地公收到囉！<br><span style="color:#d32f2f; font-weight:bold;">會保庇你喔！</span></div>`, 
                         imageUrl: '/static/happy.jpg', imageWidth: '100%',
-                        confirmButtonText: '太棒了！', confirmButtonColor: '#d32f2f',
-                        background: '#fffbf0',
-                        backdrop: `rgba(0,0,0,0.5)`
+                        confirmButtonText: '太棒了！', confirmButtonColor: '#d32f2f', background: '#fffbf0', backdrop: `rgba(0,0,0,0.5)`
                     }).then(() => { window.location.href = '/map'; });
                 }
             },
