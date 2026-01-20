@@ -46,62 +46,45 @@
         }
         .nav-center-icon { height: 55px; width: auto; display: block; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2)); margin: 0; }
 
-        /* PWA 安裝按鈕 */
+        /* 🔥 PWA 平安符按鈕樣式 */
         #pwa-install-btn {
-            display: none; position: fixed; bottom: 110px; right: 15px;
-            background: #333; color: white; padding: 10px 20px; border-radius: 50px;
-            font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            z-index: 1900; cursor: pointer; align-items: center; gap: 8px;
-            animation: bounce 2s infinite;
+            display: none; /* 預設隱藏 */
+            position: fixed; 
+            bottom: 100px; /* 在導航列上方 */
+            right: 10px;
+            z-index: 2100; /* 確保浮在最上面 */
+            cursor: pointer;
+            animation: bounce 2.5s infinite ease-in-out; /* 緩慢跳動動畫 */
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3)); /* 增加陰影立體感 */
         }
+
+        #pwa-install-btn img {
+            width: 85px; /* 設定御守大小 */
+            height: auto;
+            transition: transform 0.2s;
+        }
+
+        #pwa-install-btn:active img {
+            transform: scale(0.9); /* 點擊縮小回饋 */
+        }
+
         @keyframes bounce {
             0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
-            40% {transform: translateY(-10px);}
-            60% {transform: translateY(-5px);}
+            40% {transform: translateY(-12px);}
+            60% {transform: translateY(-6px);}
         }
 
-        /* 🔥 新增：請神等待畫面 (Loading Screen) */
+        /* 請神等待畫面 */
         #loading-layer {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #fffbf0; /* 米黃色，溫暖不刺眼 */
-            z-index: 9999; /* 蓋在所有東西上面 */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.5s ease-out; /* 淡出動畫 */
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #fffbf0; z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.5s ease-out;
         }
-        
-        .loading-god {
-            width: 150px;
-            animation: float 2s ease-in-out infinite;
-        }
-
-        .loading-text {
-            margin-top: 20px;
-            color: #d32f2f;
-            font-weight: bold;
-            font-size: 1.1rem;
-            text-align: center;
-            line-height: 1.6;
-        }
-
-        .loading-subtext {
-            color: #8d6e63;
-            font-size: 0.9rem;
-            margin-top: 5px;
-        }
-
-        /* 轉圈圈動畫 */
-        .spinner {
-            margin-top: 15px;
-            width: 30px; height: 30px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #d32f2f;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
+        .loading-god { width: 150px; animation: float 2s ease-in-out infinite; }
+        .loading-text { margin-top: 20px; color: #d32f2f; font-weight: bold; font-size: 1.1rem; text-align: center; line-height: 1.6; }
+        .loading-subtext { color: #8d6e63; font-size: 0.9rem; margin-top: 5px; }
+        .spinner { margin-top: 15px; width: 30px; height: 30px; border: 4px solid #f3f3f3; border-top: 4px solid #d32f2f; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
 
@@ -113,23 +96,18 @@
 
     <div id="loading-layer">
         <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1768525265/logo.png" class="loading-god">
-        
         <div class="loading-text">
             土地公正在穿鞋子...<br>
             <span style="font-size:0.9rem; color:#555;">(資料連線中，請稍候)</span>
         </div>
-        
         <div class="spinner"></div>
-
-        <div class="loading-subtext" id="loading-hint">
-            如果等太久，可能是土地公還在睡覺... 😴
-        </div>
+        <div class="loading-subtext" id="loading-hint">如果等太久，可能是土地公還在睡覺... 😴</div>
     </div>
 
     {% block content %}{% endblock %}
 
     <div id="pwa-install-btn" onclick="showInstallGuide()">
-        <i class="fas fa-download"></i> 下載 APP
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/install_amulet.png" alt="下載APP">
     </div>
 
     <div class="fake-navbar">
@@ -151,7 +129,6 @@
     </div>
 
     <script>
-        // 1. PWA 註冊
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/static/service-worker.js')
@@ -160,56 +137,57 @@
             });
         }
 
-        // 2. 安裝按鈕顯示邏輯
         function checkInstallState() {
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
             if (!isStandalone) {
-                document.getElementById('pwa-install-btn').style.display = 'flex';
+                document.getElementById('pwa-install-btn').style.display = 'block';
             }
         }
         
         window.showInstallGuide = function() {
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             if (isIOS) {
+                // iOS 教學
                 Swal.fire({
                     title: '📲 安裝到 iPhone',
                     html: `
                         <div style="text-align:left; font-size:0.95rem; line-height:1.6; color:#555;">
                             1. 點擊瀏覽器下方的 <b>分享按鈕</b> <i class="fas fa-share-square"></i><br>
                             2. 往下滑找到 <b>加入主畫面</b> <i class="far fa-plus-square"></i><br>
-                            3. 點擊 <b>新增</b>，就完成囉！
+                            3. 點擊 <b>新增</b>，就能放在桌面囉！
                         </div>
                     `,
                     imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1768525265/logo.png',
                     imageWidth: 80,
-                    confirmButtonText: '收到！'
+                    confirmButtonText: '好！'
                 });
             } else {
+                // Android 教學 (修正文案：加入主畫面)
                 Swal.fire({
                     title: '📲 安裝到手機',
-                    html: '點擊瀏覽器選單 ➡ 安裝應用程式',
+                    html: `
+                        <div style="text-align:left; font-size:0.95rem; line-height:1.6; color:#555;">
+                            1. 點擊瀏覽器右上角的 <b>選單</b> <i class="fas fa-ellipsis-v"></i><br>
+                            2. 找到 <b>加到主畫面</b> 或 <b>安裝應用程式</b><br>
+                            3. 確認後，就能像 APP 一樣使用囉！
+                        </div>
+                    `,
                     imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1768525265/logo.png',
                     imageWidth: 80,
-                    confirmButtonText: '好'
+                    confirmButtonText: '好，我試試',
+                    confirmButtonColor: '#2e7d32'
                 });
             }
         }
         checkInstallState();
 
-        // 🔥 3. 移除載入畫面 (當網頁載入完成後執行)
         window.addEventListener('load', function() {
             var loader = document.getElementById('loading-layer');
             var hint = document.getElementById('loading-hint');
-            
-            // 延遲一點點消失，讓使用者看清楚「土地公穿鞋子」的可愛動畫，避免閃爍
             setTimeout(function() {
-                loader.style.opacity = '0'; // 開始變透明
-                setTimeout(function() {
-                    loader.style.display = 'none'; // 完全移除
-                }, 500); // 等待淡出動畫結束
-            }, 800); // 至少顯示 0.8 秒
-
-            // 如果載入超過 5 秒還沒好，顯示安慰訊息
+                loader.style.opacity = '0'; 
+                setTimeout(function() { loader.style.display = 'none'; }, 500); 
+            }, 800); 
             setTimeout(function() {
                 if(loader.style.display !== 'none') {
                     hint.innerHTML = "免費伺服器喚醒中...<br>第一次會比較久，請喝口茶🍵";
