@@ -63,11 +63,4 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/static/service-worker.js').then(reg => console.log('✅ PWA OK')).catch(err => console.log('❌ PWA Fail'));
-            });
-        }
-    </script>
-
-    {% block scripts %}{% endblock %}
-</body>
-</html>
+                navigator.serviceWorker.register('/static/service-
