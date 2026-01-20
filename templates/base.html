@@ -9,7 +9,6 @@
     <meta name="theme-color" content="#d32f2f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Map My God">
     <link rel="apple-touch-icon" href="https://res.cloudinary.com/diuoghid2/image/upload/v1768525265/logo.png">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -19,12 +18,11 @@
         body {
             font-family: "Microsoft JhengHei", sans-serif;
             margin: 0; padding: 0;
-            padding-bottom: 110px !important; 
+            padding-bottom: 110px !important; /* 留空間給導航列 */
             overflow-y: auto !important; 
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
             min-height: 100vh;
-            box-sizing: border-box;
             background-color: #fdfcf0;
         }
 
@@ -55,29 +53,17 @@
     {% block content %}{% endblock %}
 
     <div class="fake-navbar">
-        <a href="/" class="nav-item {% if active_page == 'home' %}active{% endif %}">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_home.png" class="nav-icon"><span>首頁</span>
-        </a>
-        <a href="/map" class="nav-item {% if active_page == 'map' %}active{% endif %}">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_map.png" class="nav-icon"><span>地圖</span>
-        </a>
-        <a href="/upload" class="nav-center-btn">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_upload.png" class="nav-center-icon">
-        </a>
-        <a href="/gallery" class="nav-item {% if active_page == 'gallery' %}active{% endif %}">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_gallery.png" class="nav-icon"><span>圖庫</span>
-        </a>
-        <a href="/leaderboard" class="nav-item {% if active_page == 'leaderboard' %}active{% endif %}">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_leaderboard.png" class="nav-icon"><span>榜單</span>
-        </a>
+        <a href="/" class="nav-item {% if active_page == 'home' %}active{% endif %}"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_home.png" class="nav-icon"><span>首頁</span></a>
+        <a href="/map" class="nav-item {% if active_page == 'map' %}active{% endif %}"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_map.png" class="nav-icon"><span>地圖</span></a>
+        <a href="/upload" class="nav-center-btn"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_upload.png" class="nav-center-icon"></a>
+        <a href="/gallery" class="nav-item {% if active_page == 'gallery' %}active{% endif %}"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_gallery.png" class="nav-icon"><span>圖庫</span></a>
+        <a href="/leaderboard" class="nav-item {% if active_page == 'leaderboard' %}active{% endif %}"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_leaderboard.png" class="nav-icon"><span>榜單</span></a>
     </div>
 
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/static/service-worker.js')
-                    .then(reg => console.log('✅ PWA 註冊成功！', reg))
-                    .catch(err => console.log('❌ PWA 註冊失敗：', err));
+                navigator.serviceWorker.register('/static/service-worker.js').then(reg => console.log('✅ PWA OK')).catch(err => console.log('❌ PWA Fail'));
             });
         }
     </script>
