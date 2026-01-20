@@ -45,80 +45,13 @@
             transform: translateY(-35px); box-shadow: 0 8px 15px rgba(198, 40, 40, 0.3); overflow: hidden; text-decoration: none;
         }
         .nav-center-icon { height: 55px; width: auto; display: block; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2)); margin: 0; }
-
-        /* 🔥 PWA 平安符按鈕 (微風搖曳版) */
-        #pwa-install-btn {
-            display: none; /* 預設隱藏 */
-            position: fixed; 
-            bottom: 115px; /* 在導航列上方一點點 */
-            right: 15px; /* 貼齊右側 */
-            z-index: 2100; 
-            cursor: pointer;
-            /* ✨ 魔法關鍵：設定旋轉支點在「圖片的正上方中間」(繩結處) */
-            transform-origin: top center;
-            /* 3.5秒一次，像風鈴一樣來回擺動 */
-            animation: windChime 3.5s ease-in-out infinite;
-            /* 加一點陰影，增加立體感 */
-            filter: drop-shadow(2px 5px 5px rgba(0,0,0,0.2));
-        }
-
-        #pwa-install-btn img {
-            /* 🔥 關鍵修改：從 90px 改為 60px，瘦身成功！ */
-            width: 60px; 
-            height: auto;
-            transition: transform 0.2s; /* 點擊時的縮放過渡 */
-        }
-
-        /* 點擊時稍微縮小，增加手感 */
-        #pwa-install-btn:active {
-            animation: none; /* 點擊時暫停搖擺 */
-            transform: scale(0.95);
-        }
-
-        /* ✨ 微風搖曳動畫 Keyframes */
-        @keyframes windChime {
-            0% { transform: rotate(0deg); }
-            25% { transform: rotate(4deg); }  /* 向右飄一點 */
-            50% { transform: rotate(0deg); }  /* 回正 */
-            75% { transform: rotate(-4deg); } /* 向左飄一點 */
-            100% { transform: rotate(0deg); } /* 回正 */
-        }
-
-        /* 請神等待畫面 */
-        #loading-layer {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #fffbf0; z-index: 9999;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.5s ease-out;
-        }
-        .loading-god { width: 150px; animation: float 2s ease-in-out infinite; }
-        .loading-text { margin-top: 20px; color: #d32f2f; font-weight: bold; font-size: 1.1rem; text-align: center; line-height: 1.6; }
-        .loading-subtext { color: #8d6e63; font-size: 0.9rem; margin-top: 5px; }
-        .spinner { margin-top: 15px; width: 30px; height: 30px; border: 4px solid #f3f3f3; border-top: 4px solid #d32f2f; border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
-
     </style>
 
     {% block styles %}{% endblock %}
 </head>
 <body>
 
-    <div id="loading-layer">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1768525265/logo.png" class="loading-god">
-        <div class="loading-text">
-            土地公正在穿鞋子...<br>
-            <span style="font-size:0.9rem; color:#555;">(資料連線中，請稍候)</span>
-        </div>
-        <div class="spinner"></div>
-        <div class="loading-subtext" id="loading-hint">如果等太久，可能是土地公還在睡覺... 😴</div>
-    </div>
-
     {% block content %}{% endblock %}
-
-    <div id="pwa-install-btn" onclick="showInstallGuide()">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/install_amulet.png" alt="下載APP">
-    </div>
 
     <div class="fake-navbar">
         <a href="/" class="nav-item {% if active_page == 'home' %}active{% endif %}">
@@ -146,64 +79,6 @@
                     .catch(err => console.log('❌ PWA 註冊失敗：', err));
             });
         }
-
-        function checkInstallState() {
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-            if (!isStandalone) {
-                document.getElementById('pwa-install-btn').style.display = 'block';
-            }
-        }
-        
-        window.showInstallGuide = function() {
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-            if (isIOS) {
-                // iOS 教學
-                Swal.fire({
-                    title: '📲 安裝到 iPhone',
-                    html: `
-                        <div style="text-align:left; font-size:0.95rem; line-height:1.6; color:#555;">
-                            1. 點擊瀏覽器下方的 <b>分享按鈕</b> <i class="fas fa-share-square"></i><br>
-                            2. 往下滑找到 <b>加入主畫面</b> <i class="far fa-plus-square"></i><br>
-                            3. 點擊 <b>新增</b>，就能放在桌面囉！
-                        </div>
-                    `,
-                    imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1768525265/logo.png',
-                    imageWidth: 80,
-                    confirmButtonText: '好！'
-                });
-            } else {
-                // Android 教學
-                Swal.fire({
-                    title: '📲 安裝到手機',
-                    html: `
-                        <div style="text-align:left; font-size:0.95rem; line-height:1.6; color:#555;">
-                            1. 點擊瀏覽器右上角的 <b>選單</b> <i class="fas fa-ellipsis-v"></i><br>
-                            2. 找到 <b>加到主畫面</b> 或 <b>安裝應用程式</b><br>
-                            3. 確認後，就能像 APP 一樣使用囉！
-                        </div>
-                    `,
-                    imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1768525265/logo.png',
-                    imageWidth: 80,
-                    confirmButtonText: '好，我試試',
-                    confirmButtonColor: '#2e7d32'
-                });
-            }
-        }
-        checkInstallState();
-
-        window.addEventListener('load', function() {
-            var loader = document.getElementById('loading-layer');
-            var hint = document.getElementById('loading-hint');
-            setTimeout(function() {
-                loader.style.opacity = '0'; 
-                setTimeout(function() { loader.style.display = 'none'; }, 500); 
-            }, 800); 
-            setTimeout(function() {
-                if(loader.style.display !== 'none') {
-                    hint.innerHTML = "免費伺服器喚醒中...<br>第一次會比較久，請喝口茶🍵";
-                }
-            }, 5000);
-        });
     </script>
 
     {% block scripts %}{% endblock %}
