@@ -74,14 +74,14 @@
             text-align: center; padding: 12px; border-radius: 50px; text-decoration: none; font-weight: bold;
         }
 
-        /* 7. 🔥 偽裝切版導航列 (Custom Image Navbar) */
+        /* 7. 🔥 偽裝切版導航列 */
         .fake-navbar {
-            position: fixed; bottom: 0; left: 0; right: 0; height: 75px; /* 高度稍微加高一點 */
-            background: rgba(255,255,255,0.98); /* 不透明度高一點，質感較好 */
+            position: fixed; bottom: 0; left: 0; right: 0; height: 75px;
+            background: rgba(255,255,255,0.98); 
             display: flex; justify-content: space-around; align-items: center;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.08); /* 陰影更柔和 */
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
             z-index: 2000;
-            border-top-left-radius: 20px; border-top-right-radius: 20px; /* 圓角設計 */
+            border-top-left-radius: 20px; border-top-right-radius: 20px;
         }
         
         .nav-item {
@@ -90,25 +90,21 @@
             width: 20%; position: relative;
         }
 
-        /* 🔥 重點：自定義圖標樣式 */
         .nav-icon-img {
-            width: 28px; height: 28px; /* 圖片大小 */
+            width: 32px; height: 32px; /* 稍微調大一點，配合首頁圖標 */
             object-fit: contain;
             transition: transform 0.2s;
-            filter: grayscale(100%) opacity(0.6); /* 未選中時：灰色半透明 */
+            filter: grayscale(100%) opacity(0.6); 
         }
 
-        /* 選中狀態 */
         .nav-item.active .nav-icon-img {
-            transform: scale(1.15); /* 放大 */
-            filter: grayscale(0%) opacity(1); /* 恢復彩色 */
+            transform: scale(1.1);
+            filter: grayscale(0%) opacity(1);
         }
         .nav-item.active { color: #d32f2f; }
 
-        /* 中間那顆特大號按鈕 (搜神) */
-        .nav-fab-wrapper {
-            position: relative; top: -25px; /* 往上浮 */
-        }
+        /* 中間那顆特大號按鈕 */
+        .nav-fab-wrapper { position: relative; top: -25px; }
         .nav-fab-img {
             width: 65px; height: 65px; 
             border-radius: 50%; 
@@ -117,6 +113,7 @@
             box-shadow: 0 5px 15px rgba(211, 47, 47, 0.4);
             object-fit: contain;
             transition: transform 0.2s;
+            /* 保持原色，不套濾鏡 */
         }
         .nav-fab-wrapper:active .nav-fab-img { transform: scale(0.95); }
 
@@ -157,26 +154,26 @@
 
     <nav class="fake-navbar">
         <a href="/" class="nav-item">
-            <img src="https://cdn-icons-png.flaticon.com/512/25/25694.png" class="nav-icon-img" alt="首頁">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/god_cute.png" class="nav-icon-img" alt="首頁">
             <span>首頁</span>
         </a>
         
         <a href="/map" class="nav-item active">
-            <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" class="nav-icon-img" alt="地圖">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/icon_compass.png" class="nav-icon-img" alt="地圖">
             <span>地圖</span>
         </a>
         
         <a href="/report" class="nav-item nav-fab-wrapper">
-            <img src="https://cdn-icons-png.flaticon.com/512/1042/1042339.png" class="nav-fab-img" alt="搜神">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/icon_camera.png" class="nav-fab-img" alt="搜神">
         </a>
         
         <a href="/gallery" class="nav-item">
-            <img src="https://cdn-icons-png.flaticon.com/512/839/839184.png" class="nav-icon-img" alt="圖庫">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/icon_album.png" class="nav-icon-img" alt="圖庫">
             <span>圖庫</span>
         </a>
         
         <a href="/leaderboard" class="nav-item">
-            <img src="https://cdn-icons-png.flaticon.com/512/3112/3112946.png" class="nav-icon-img" alt="榜單">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/bm.png" class="nav-icon-img" alt="榜單">
             <span>榜單</span>
         </a>
     </nav>
@@ -227,8 +224,7 @@
 
         function renderMarkers(data) {
             markersCluster.clearLayers();
-            
-            // 🔥 使用 Q 版廟宇圖標 (記得換成你自己的)
+            // 使用 Q 版廟宇圖標 (記得換成你自己的)
             var icon = L.icon({
                 iconUrl: 'https://cdn-icons-png.flaticon.com/512/3442/3442632.png', 
                 iconSize: [40, 40], iconAnchor: [20, 40]
