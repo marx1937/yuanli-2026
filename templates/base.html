@@ -3,41 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>{% block title %}尋神情報站 v5.0{% endblock %}</title>
+    <title>{% block title %}尋神情報站{% endblock %}</title>
 
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <meta name="theme-color" content="#d32f2f">
+    <link rel="apple-touch-icon" href="https://res.cloudinary.com/diuoghid2/image/upload/v1768525265/logo.png">
+
     <style>
-        body {
-            font-family: "Microsoft JhengHei", sans-serif;
-            margin: 0; padding: 0;
-            padding-bottom: 110px !important;
-            overflow-y: auto !important;
+        /* 全域設定 */
+        body { 
+            background-color: #fdfcf0; /* 米黃色背景 */
+            min-height: 100vh;
+            font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
+            padding-bottom: 110px !important; /* 避開底部導航 */
             overflow-x: hidden;
-            background-color: #fdfcf0;
+            margin: 0;
             -webkit-tap-highlight-color: transparent;
         }
 
         /* 底部導航列 */
-        .fake-navbar {
+        .fake-navbar { 
             position: fixed; bottom: 0; width: 100%; 
             background: #fff; border-top: 1px solid #efebe9; 
             padding: 0 5px; height: 90px; 
             display: flex; justify-content: space-around; align-items: center; 
-            z-index: 2000;
+            z-index: 2000; box-shadow: 0 -5px 20px rgba(93, 64, 55, 0.05);
         }
-        .nav-item { text-align: center; color: #a1887f; text-decoration: none; font-size: 0.75rem; flex: 1; display: flex; flex-direction: column; align-items: center; }
-        .nav-icon { height: 42px; width: auto; margin-bottom: 3px; }
+        
+        .nav-item { 
+            text-align: center; color: #a1887f; text-decoration: none !important; 
+            font-size: 0.75rem; flex: 1; display: flex; flex-direction: column; align-items: center; 
+        }
+        .nav-item:hover { text-decoration: none; color: #8d6e63; }
+        
+        .nav-icon { height: 42px; width: auto; margin-bottom: 3px; transition: 0.3s; }
+        .nav-item.active .nav-icon { transform: scale(1.1); filter: drop-shadow(0 2px 2px rgba(211, 47, 47, 0.2)); }
         .nav-item.active span { color: #d32f2f; font-weight: bold; }
+
+        /* 中間大按鈕 */
         .nav-center-btn {
-            width: 80px; height: 80px; background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
-            border-radius: 50%; border: 6px solid #f9f7f2; display: flex; align-items: center; justify-content: center;
-            transform: translateY(-35px); box-shadow: 0 8px 15px rgba(198, 40, 40, 0.3);
+            width: 80px; height: 80px; 
+            background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+            border-radius: 50%; border: 6px solid #f9f7f2; 
+            display: flex; align-items: center; justify-content: center;
+            transform: translateY(-35px); 
+            box-shadow: 0 8px 15px rgba(198, 40, 40, 0.3);
+            text-decoration: none !important;
         }
-        .nav-center-icon { height: 55px; width: auto; }
+        .nav-center-icon { height: 55px; width: auto; display: block; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2)); }
+
+        {% block styles %}{% endblock %}
     </style>
-    {% block styles %}{% endblock %}
 </head>
 <body>
 
@@ -64,14 +85,11 @@
     <script>
         if(window.navigator && navigator.serviceWorker) {
             navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                for(let registration of registrations) {
-                    registration.unregister();
-                }
-                console.log('✅ 已清除所有 PWA 快取');
+                for(let registration of registrations) { registration.unregister(); }
             });
         }
     </script>
-
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>
