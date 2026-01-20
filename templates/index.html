@@ -148,16 +148,13 @@
 
 {% block scripts %}
 <script>
-    // 安裝按鈕顯示邏輯
     function checkInstallState() {
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-        // 如果不是 App 模式，就顯示按鈕
         if (!isStandalone) {
             document.getElementById('pwa-install-btn').style.display = 'block';
         }
     }
     
-    // 安裝教學彈窗
     window.showInstallGuide = function() {
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         if (isIOS) {
@@ -177,10 +174,8 @@
         }
     }
     
-    // 啟動檢查
     checkInstallState();
 
-    // 移除等待畫面 (讓首頁可以滑動)
     window.addEventListener('load', function() {
         var loader = document.getElementById('loading-layer');
         var hint = document.getElementById('loading-hint');
