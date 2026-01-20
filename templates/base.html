@@ -3,10 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>{% block title %}尋神情報站{% endblock %}</title>
-
-    <meta name="theme-color" content="#d32f2f">
-    <link rel="apple-touch-icon" href="https://res.cloudinary.com/diuoghid2/image/upload/v1768525265/logo.png">
+    <title>{% block title %}尋神情報站 v5.0{% endblock %}</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -18,9 +15,8 @@
             padding-bottom: 110px !important;
             overflow-y: auto !important;
             overflow-x: hidden;
+            background-color: #fdfcf0;
             -webkit-tap-highlight-color: transparent;
-            min-height: 100vh;
-            background-color: #fdfcf0; /* 米黃色背景 */
         }
 
         /* 底部導航列 */
@@ -29,11 +25,10 @@
             background: #fff; border-top: 1px solid #efebe9; 
             padding: 0 5px; height: 90px; 
             display: flex; justify-content: space-around; align-items: center; 
-            z-index: 2000; box-shadow: 0 -5px 20px rgba(93, 64, 55, 0.05);
+            z-index: 2000;
         }
         .nav-item { text-align: center; color: #a1887f; text-decoration: none; font-size: 0.75rem; flex: 1; display: flex; flex-direction: column; align-items: center; }
-        .nav-icon { height: 42px; width: auto; margin-bottom: 3px; transition: all 0.3s; }
-        .nav-item.active .nav-icon { transform: scale(1.1); filter: drop-shadow(0 2px 2px rgba(211, 47, 47, 0.2)); }
+        .nav-icon { height: 42px; width: auto; margin-bottom: 3px; }
         .nav-item.active span { color: #d32f2f; font-weight: bold; }
         .nav-center-btn {
             width: 80px; height: 80px; background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
@@ -42,7 +37,6 @@
         }
         .nav-center-icon { height: 55px; width: auto; }
     </style>
-
     {% block styles %}{% endblock %}
 </head>
 <body>
@@ -71,15 +65,10 @@
         if(window.navigator && navigator.serviceWorker) {
             navigator.serviceWorker.getRegistrations().then(function(registrations) {
                 for(let registration of registrations) {
-                    registration.unregister(); // 強制登出 Service Worker
-                    console.log("🧹 已清除舊的 PWA Service Worker");
+                    registration.unregister();
                 }
+                console.log('✅ 已清除所有 PWA 快取');
             });
-            // 強制重新整理一次以確保生效 (只在第一次執行)
-            if (!localStorage.getItem('pwa_cleared')) {
-                localStorage.setItem('pwa_cleared', 'true');
-                window.location.reload();
-            }
         }
     </script>
 
