@@ -58,7 +58,7 @@
             padding: 20px; z-index: 1100;
             box-shadow: 0 -5px 20px rgba(0,0,0,0.15);
             transition: bottom 0.3s ease-out;
-            padding-bottom: 90px;
+            padding-bottom: 110px; /* 🔥 避開加高的導航列 */
         }
         #info-card.show { bottom: 0; }
         
@@ -75,40 +75,52 @@
             text-align: center; padding: 12px; border-radius: 50px; text-decoration: none; font-weight: bold;
         }
 
-        /* 7. 偽裝切版導航列 */
+        /* 7. 🔥 完美復刻底部導航列 (樣式與 base.html 完全一致) */
         .fake-navbar {
-            position: fixed; bottom: 0; left: 0; right: 0; height: 75px;
-            background: rgba(255,255,255,0.98); 
-            display: flex; justify-content: space-around; align-items: center;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
-            z-index: 2000;
-            border-top-left-radius: 20px; border-top-right-radius: 20px;
+            position: fixed; bottom: 0; width: 100%; 
+            background: #fff; border-top: 1px solid #efebe9; 
+            padding: 0 5px; height: 90px; 
+            display: flex; justify-content: space-around; align-items: center; 
+            z-index: 2000; box-shadow: 0 -5px 20px rgba(93, 64, 55, 0.05);
         }
-        .nav-item {
-            text-decoration: none; color: #888; text-align: center; font-size: 0.7rem; font-weight: bold;
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
-            width: 20%; position: relative;
+        
+        .nav-item { 
+            text-align: center; color: #a1887f; text-decoration: none; 
+            font-size: 0.75rem; flex: 1; display: flex; flex-direction: column; align-items: center; 
         }
-        .nav-icon-img {
-            width: 32px; height: 32px; object-fit: contain;
-            transition: transform 0.2s; filter: grayscale(100%) opacity(0.6); 
-        }
-        .nav-item.active .nav-icon-img { transform: scale(1.1); filter: grayscale(0%) opacity(1); }
-        .nav-item.active { color: #d32f2f; }
-        .nav-fab-wrapper { position: relative; top: -25px; }
-        .nav-fab-img {
-            width: 65px; height: 65px; border-radius: 50%; background: #fff;
-            padding: 5px; box-shadow: 0 5px 15px rgba(211, 47, 47, 0.4);
-            object-fit: contain; transition: transform 0.2s;
-        }
-        .nav-fab-wrapper:active .nav-fab-img { transform: scale(0.95); }
 
-        /* 8. 小幫手彈窗樣式 */
+        .nav-icon {
+            height: 42px; width: auto; margin-bottom: 3px;
+            transition: all 0.3s;
+        }
+        
+        /* 選中狀態 */
+        .nav-item.active .nav-icon {
+            transform: scale(1.1);
+            filter: drop-shadow(0 2px 2px rgba(211, 47, 47, 0.2));
+        }
+        .nav-item.active span { color: #d32f2f; font-weight: bold; }
+
+        /* 中間大按鈕 */
+        .nav-center-btn {
+            width: 80px; height: 80px;
+            background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+            border-radius: 50%; border: 6px solid #f9f7f2;
+            display: flex; align-items: center; justify-content: center;
+            transform: translateY(-35px);
+            box-shadow: 0 8px 15px rgba(198, 40, 40, 0.3);
+            overflow: hidden; text-decoration: none;
+        }
+        .nav-center-icon {
+            height: 55px; width: auto; display: block;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+            margin: 0;
+        }
+
+        /* 小幫手樣式 */
         .guide-list { text-align: left; margin: 20px 0; font-size: 1rem; line-height: 2; color: #555; }
         .guide-item i { width: 25px; text-align: center; color: #d32f2f; margin-right: 10px; }
         .guide-img { width: 150px; margin-bottom: 10px; }
-
-        /* SweetAlert 按鈕樣式 */
         .swal2-actions { gap: 10px; width: 100%; justify-content: center; }
         .debug-btn { width: 100% !important; margin: 5px 0 !important; }
 
@@ -124,9 +136,7 @@
         <div class="tool-btn" onclick="map.zoomIn()"><i class="fas fa-plus"></i></div>
         <div class="tool-btn" onclick="map.zoomOut()"><i class="fas fa-minus"></i></div>
         <div class="tool-btn" onclick="locateUser()" id="btn-gps"><i class="fas fa-crosshairs"></i></div>
-        
         <div class="tool-btn" onclick="showGuide()" style="color:#2e7d32;"><i class="fas fa-question"></i></div>
-        
         <div class="tool-btn" onclick="openDebugMenu()" style="color:#d32f2f;"><i class="fas fa-cog"></i></div>
     </div>
 
@@ -151,27 +161,31 @@
         </a>
     </div>
 
-    <nav class="fake-navbar">
+    <div class="fake-navbar">
         <a href="/" class="nav-item">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/god_cute.png" class="nav-icon-img" alt="首頁">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_home.png" class="nav-icon" alt="首頁">
             <span>首頁</span>
         </a>
+        
         <a href="/map" class="nav-item active">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/icon_compass.png" class="nav-icon-img" alt="地圖">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_map.png" class="nav-icon" alt="地圖">
             <span>地圖</span>
         </a>
-        <a href="/report" class="nav-item nav-fab-wrapper">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/icon_camera.png" class="nav-fab-img" alt="搜神">
+        
+        <a href="/upload" class="nav-center-btn">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_upload.png" class="nav-center-icon" alt="上傳">
         </a>
+        
         <a href="/gallery" class="nav-item">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/icon_album.png" class="nav-icon-img" alt="圖庫">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_gallery.png" class="nav-icon" alt="圖庫">
             <span>圖庫</span>
         </a>
+        
         <a href="/leaderboard" class="nav-item">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/bm.png" class="nav-icon-img" alt="榜單">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_leaderboard.png" class="nav-icon" alt="榜單">
             <span>榜單</span>
         </a>
-    </nav>
+    </div>
 
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
@@ -193,48 +207,9 @@
         $(document).ready(function() {
             initMap();
             loadData();
-            // 🔥 網頁載入時，自動跳出小幫手
             showGuide();
         });
 
-        // 🔥 小幫手函式
-        window.showGuide = function() {
-            Swal.fire({
-                title: '<span style="color:#d32f2f;">歡迎來到尋神地圖</span>',
-                html: `
-                    <img src="https://res.cloudinary.com/diuoghid2/image/upload/god_cute.png" class="guide-img">
-                    <div class="guide-list">
-                        <div class="guide-item"><i class="fas fa-map-marker-alt"></i> 點擊圖釘：查看照片與導航</div>
-                        <div class="guide-item"><i class="fas fa-crosshairs"></i> 瞄準按鈕：尋找你的位置</div>
-                        <div class="guide-item"><i class="fas fa-camera"></i> 中間相機：去上傳新情報</div>
-                        <div class="guide-item"><i class="fas fa-cog"></i> 紅色齒輪：地圖資料更新</div>
-                    </div>
-                `,
-                confirmButtonText: '收到，出發尋神！',
-                confirmButtonColor: '#e64a19',
-                background: '#fff8e1',
-                backdrop: `rgba(0,0,0,0.6)`
-            });
-        }
-
-        // 偵錯模式函式
-        window.openDebugMenu = function() {
-            Swal.fire({
-                title: '🛠️ 偵錯模式',
-                html: `
-                    <p style="font-size:0.9rem; color:#666;">如果地圖不完整或資料沒更新</p>
-                    <button class="swal2-confirm swal2-styled debug-btn" style="background-color:#2e7d32;" onclick="forceReloadData()">
-                        <i class="fas fa-sync"></i> 重新載入 (Reload)
-                    </button>
-                    <button class="swal2-deny swal2-styled debug-btn" style="background-color:#c62828;" onclick="hardReset()">
-                        <i class="fas fa-trash"></i> 清除快取並重置 (Reset)
-                    </button>
-                `,
-                showConfirmButton: false, showCloseButton: true
-            });
-        }
-
-        // ... 以下為原有的地圖邏輯 ...
         function initMap() {
             map = L.map('map', { zoomControl: false }).setView([24.4429, 120.6558], 14);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -259,6 +234,7 @@
 
         function renderMarkers(data) {
             markersCluster.clearLayers();
+            // 自定義圖標 (請確認這個連結是否需要更換)
             var icon = L.icon({
                 iconUrl: 'https://cdn-icons-png.flaticon.com/512/3442/3442632.png', 
                 iconSize: [40, 40], iconAnchor: [20, 40]
@@ -337,9 +313,42 @@
             }
         }
 
+        window.showGuide = function() {
+            Swal.fire({
+                title: '<span style="color:#d32f2f;">歡迎來到尋神地圖</span>',
+                html: `
+                    <div class="guide-list">
+                        <div class="guide-item"><i class="fas fa-map-marker-alt"></i> 點擊圖釘：查看照片與導航</div>
+                        <div class="guide-item"><i class="fas fa-crosshairs"></i> 瞄準按鈕：尋找你的位置</div>
+                        <div class="guide-item"><i class="fas fa-camera"></i> 中間相機：去上傳新情報</div>
+                        <div class="guide-item"><i class="fas fa-cog"></i> 紅色齒輪：地圖資料更新</div>
+                    </div>
+                `,
+                confirmButtonText: '收到，出發尋神！',
+                confirmButtonColor: '#e64a19',
+                background: '#fff8e1',
+                backdrop: `rgba(0,0,0,0.6)`
+            });
+        }
+
+        window.openDebugMenu = function() {
+            Swal.fire({
+                title: '🛠️ 偵錯模式',
+                html: `
+                    <p style="font-size:0.9rem; color:#666;">如果地圖不完整或資料沒更新</p>
+                    <button class="swal2-confirm swal2-styled debug-btn" style="background-color:#2e7d32;" onclick="forceReloadData()">
+                        <i class="fas fa-sync"></i> 重新載入 (Reload)
+                    </button>
+                    <button class="swal2-deny swal2-styled debug-btn" style="background-color:#c62828;" onclick="hardReset()">
+                        <i class="fas fa-trash"></i> 清除快取並重置 (Reset)
+                    </button>
+                `,
+                showConfirmButton: false, showCloseButton: true
+            });
+        }
+
         window.forceReloadData = function() {
-            map.invalidateSize();
-            loadData();
+            map.invalidateSize(); loadData();
             Swal.fire({icon: 'success', title: '已重新載入', text: '資料與地圖已更新', timer: 1500, showConfirmButton: false});
         }
 
