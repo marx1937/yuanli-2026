@@ -54,19 +54,17 @@
             right: 15px; /* 貼齊右側 */
             z-index: 2100; 
             cursor: pointer;
-            
             /* ✨ 魔法關鍵：設定旋轉支點在「圖片的正上方中間」(繩結處) */
             transform-origin: top center;
-            
             /* 3.5秒一次，像風鈴一樣來回擺動 */
             animation: windChime 3.5s ease-in-out infinite;
-            
             /* 加一點陰影，增加立體感 */
             filter: drop-shadow(2px 5px 5px rgba(0,0,0,0.2));
         }
 
         #pwa-install-btn img {
-            width: 90px; /* 御守大小，夠大才看得到流蘇 */
+            /* 🔥 關鍵修改：從 90px 改為 60px，瘦身成功！ */
+            width: 60px; 
             height: auto;
             transition: transform 0.2s; /* 點擊時的縮放過渡 */
         }
@@ -159,6 +157,7 @@
         window.showInstallGuide = function() {
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             if (isIOS) {
+                // iOS 教學
                 Swal.fire({
                     title: '📲 安裝到 iPhone',
                     html: `
@@ -173,6 +172,7 @@
                     confirmButtonText: '好！'
                 });
             } else {
+                // Android 教學
                 Swal.fire({
                     title: '📲 安裝到手機',
                     html: `
