@@ -11,21 +11,14 @@
         padding-bottom: 100px;
     }
 
-    /* 頂部標題與吉祥物 */
-    .page-header { text-align: center; padding: 25px 0 10px 0; width: 100%; position: relative; }
+    /* 頂部標題 (移除吉祥物後，讓標題置中更清爽) */
+    .page-header { text-align: center; padding: 25px 0 15px 0; width: 100%; position: relative; }
     .header-capsule {
         background: white; padding: 8px 25px; border-radius: 50px;
         font-weight: bold; color: #5d4037; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         display: inline-flex; align-items: center; border: 1px solid rgba(255,255,255,0.8);
         font-size: 1.1rem;
     }
-    .helper-mascot {
-        position: absolute; top: -15px; right: 20px;
-        width: 70px; height: auto; z-index: 20;
-        filter: drop-shadow(0 5px 10px rgba(0,0,0,0.15));
-        animation: float-helper 3s ease-in-out infinite;
-    }
-    @keyframes float-helper { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
     /* 主表單卡片 */
     .form-card {
@@ -55,7 +48,7 @@
     }
     .upload-zone:active { background: #fff; border-color: #d32f2f; transform: scale(0.98); }
     
-    /* 🔥 針對新的 God Camera 圖示調整大小，讓它更顯眼 */
+    /* God Camera 圖示設定 */
     .upload-icon-img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; opacity: 0.9; }
     .upload-text { font-weight: bold; color: #8d6e63; font-size: 1.1rem; }
     
@@ -99,8 +92,7 @@
         <div class="header-capsule">
             <i class="fas fa-camera" style="color:#d32f2f; margin-right:8px;"></i> 尋神情報站
         </div>
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/god_cute.png" class="helper-mascot" alt="小幫手">
-    </div>
+        </div>
 
     <div class="form-card">
         
@@ -230,6 +222,7 @@
         if(!nickname) nickname = '熱心串友'; 
         var area = $('#area').val();
 
+        // 不雅字過濾
         var badWords = ['笨蛋', '壞蛋', '王八', '白痴', '白癡', '智障', '幹', '靠', '死', '爛', '屌', '雞掰', '機車', 'fuck', 'shit']; 
         for (var word of badWords) {
             if (nickname.toLowerCase().includes(word)) {
