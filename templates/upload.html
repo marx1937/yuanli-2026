@@ -19,14 +19,13 @@
         position: relative; 
     }
     
-    /* 新增：匾額圖片樣式 */
     .title-signboard {
-        width: 70%;           /* 寬度佔螢幕 70% */
-        max-width: 280px;     /* 最大不超過 280px */
+        width: 70%;           
+        max-width: 280px;     
         height: auto; 
         display: block; 
-        margin: 0 auto;       /* 置中 */
-        filter: drop-shadow(0 5px 5px rgba(93, 64, 55, 0.15)); /* 加一點陰影更有立體感 */
+        margin: 0 auto;       
+        filter: drop-shadow(0 5px 5px rgba(93, 64, 55, 0.15)); 
     }
 
     /* 主表單卡片 */
@@ -255,6 +254,7 @@
         $.ajax({
             url: '/upload', type: 'POST', data: formData, contentType: false, processData: false,
             success: function(response) {
+                // 語音照舊：土地公會保庇你喔！
                 var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公會保庇你喔！';
                 speakHappy(sayText); 
 
@@ -266,9 +266,10 @@
                         confirmButtonText: '收到，來去找下一座！', confirmButtonColor: '#ff9800'
                     }).then(() => { window.location.href = '/map'; });
                 } else {
+                    // 🔥 關鍵修正：文字也加上「會保庇你喔！」
                     Swal.fire({
                         title: '✅ 上傳成功！', 
-                        html: `感謝 <b>${area}</b> 的 <b>${nickname}</b>，<br>土地公收到囉！`, 
+                        html: `感謝 <b>${area}</b> 的 <b>${nickname}</b>，<br>土地公收到囉！<br><span style="color:#d32f2f; font-weight:bold;">會保庇你喔！</span>`, 
                         imageUrl: '/static/happy.jpg', imageWidth: '100%',
                         confirmButtonText: '太棒了！', confirmButtonColor: '#d32f2f'
                     }).then(() => { window.location.href = '/map'; });
