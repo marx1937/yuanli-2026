@@ -1,77 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Map My God - {% block title %}尋神情報站{% endblock %}</title>
+        <link rel="manifest" href="/static/manifest.json">
     
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <meta name="theme-color" content="#d32f2f">
 
-    <style>
-        /* 🔥 修改 1：背景色優化 */
-        /* 改用更乾淨的「米色/宣紙色」，去除原本混濁的漸層，讓前景更突出 */
-        body { 
-            background-color: #f9f7f2; 
-            background-image: radial-gradient(#ffe0b2 1px, transparent 1px);
-            background-size: 20px 20px; /* 加一點點點陣紋理增加質感 */
-            min-height: 100vh;
-            font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
-            padding-bottom: 100px;
-            overflow-x: hidden;
-            margin: 0;
-            color: #5d4037; /* 全域文字深棕色 */
-        }
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Map My God">
+    
+    <link rel="apple-touch-icon" href="https://res.cloudinary.com/diuoghid2/image/upload/v1768525265/logo.png">
 
-        /* --- 底部導覽列 --- */
-        .bottom-nav { 
-            position: fixed; bottom: 0; width: 100%; background: #fff; border-top: 1px solid #efebe9; 
-            padding: 0 5px; height: 90px; 
-            display: flex; justify-content: space-around; align-items: center; 
-            z-index: 999; box-shadow: 0 -5px 20px rgba(93, 64, 55, 0.05);
-        }
-        .nav-item { 
-            text-align: center; color: #a1887f; /* 預設顏色改為淺棕色 */
-            text-decoration: none; font-size: 0.75rem; 
-            flex: 1; display: flex; flex-direction: column; align-items: center; 
-        }
-        
-        /* 小圖示 */
-        .nav-icon {
-            height: 42px; width: auto; margin-bottom: 3px;
-            /* 拿掉灰階濾鏡，直接顯示圖片原色 (這樣你的手繪圖才好看) */
-            /* filter: grayscale(100%) sepia(20%) opacity(0.6); */
-            transition: all 0.3s;
-        }
-        
-        /* 選中狀態：放大並加強顏色 */
-        .nav-item.active .nav-icon {
-            transform: scale(1.1);
-            filter: drop-shadow(0 2px 2px rgba(211, 47, 47, 0.2));
-        }
-        .nav-item.active span { color: #d32f2f; font-weight: bold; }
-
-        /* 🔥 修改 2：中間大按鈕 (扁平化 + 朱紅色) */
-        .nav-center-btn {
-            width: 80px; height: 80px;
-            /* 改用純粹的「宮廟朱紅」漸層 */
-            background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
-            border-radius: 50%; border: 6px solid #f9f7f2; /* 邊框跟背景色一樣 */
-            display: flex; align-items: center; justify-content: center;
-            transform: translateY(-35px);
-            /* 陰影改柔和一點 */
-            box-shadow: 0 8px 15px rgba(198, 40, 40, 0.3);
-            overflow: hidden;
-        }
-
-        .nav-center-icon {
-            height: 55px; width: auto; display: block;
-            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
-            margin: 0;
-        }
-
-        {% block styles %}{% endblock %}
-    </style>
 </head>
 <body>
 
