@@ -13,15 +13,21 @@
     <link rel="apple-touch-icon" href="https://res.cloudinary.com/diuoghid2/image/upload/v1768525265/logo.png">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         body {
             font-family: "Microsoft JhengHei", sans-serif;
             margin: 0; padding: 0;
+            padding-bottom: 110px !important; 
+            overflow-y: auto !important; 
+            overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
+            min-height: 100vh;
+            box-sizing: border-box;
         }
 
-        /* 底部導航列樣式 (保命符) */
+        /* 底部導航列 */
         .fake-navbar {
             position: fixed; bottom: 0; width: 100%; 
             background: #fff; border-top: 1px solid #efebe9; 
@@ -39,13 +45,92 @@
             transform: translateY(-35px); box-shadow: 0 8px 15px rgba(198, 40, 40, 0.3); overflow: hidden; text-decoration: none;
         }
         .nav-center-icon { height: 55px; width: auto; display: block; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2)); margin: 0; }
+
+        /* PWA 安裝按鈕 */
+        #pwa-install-btn {
+            display: none; position: fixed; bottom: 110px; right: 15px;
+            background: #333; color: white; padding: 10px 20px; border-radius: 50px;
+            font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 1900; cursor: pointer; align-items: center; gap: 8px;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-10px);}
+            60% {transform: translateY(-5px);}
+        }
+
+        /* 🔥 新增：請神等待畫面 (Loading Screen) */
+        #loading-layer {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #fffbf0; /* 米黃色，溫暖不刺眼 */
+            z-index: 9999; /* 蓋在所有東西上面 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease-out; /* 淡出動畫 */
+        }
+        
+        .loading-god {
+            width: 150px;
+            animation: float 2s ease-in-out infinite;
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            color: #d32f2f;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .loading-subtext {
+            color: #8d6e63;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        /* 轉圈圈動畫 */
+        .spinner {
+            margin-top: 15px;
+            width: 30px; height: 30px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #d32f2f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+
     </style>
 
     {% block styles %}{% endblock %}
 </head>
 <body>
 
+    <div id="loading-layer">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1768525265/logo.png" class="loading-god">
+        
+        <div class="loading-text">
+            土地公正在穿鞋子...<br>
+            <span style="font-size:0.9rem; color:#555;">(資料連線中，請稍候)</span>
+        </div>
+        
+        <div class="spinner"></div>
+
+        <div class="loading-subtext" id="loading-hint">
+            如果等太久，可能是土地公還在睡覺... 😴
+        </div>
+    </div>
+
     {% block content %}{% endblock %}
+
+    <div id="pwa-install-btn" onclick="showInstallGuide()">
+        <i class="fas fa-download"></i> 下載 APP
+    </div>
 
     <div class="fake-navbar">
         <a href="/" class="nav-item {% if active_page == 'home' %}active{% endif %}">
@@ -66,6 +151,7 @@
     </div>
 
     <script>
+        // 1. PWA 註冊
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/static/service-worker.js')
@@ -73,6 +159,63 @@
                     .catch(err => console.log('❌ PWA 註冊失敗：', err));
             });
         }
+
+        // 2. 安裝按鈕顯示邏輯
+        function checkInstallState() {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            if (!isStandalone) {
+                document.getElementById('pwa-install-btn').style.display = 'flex';
+            }
+        }
+        
+        window.showInstallGuide = function() {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            if (isIOS) {
+                Swal.fire({
+                    title: '📲 安裝到 iPhone',
+                    html: `
+                        <div style="text-align:left; font-size:0.95rem; line-height:1.6; color:#555;">
+                            1. 點擊瀏覽器下方的 <b>分享按鈕</b> <i class="fas fa-share-square"></i><br>
+                            2. 往下滑找到 <b>加入主畫面</b> <i class="far fa-plus-square"></i><br>
+                            3. 點擊 <b>新增</b>，就完成囉！
+                        </div>
+                    `,
+                    imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1768525265/logo.png',
+                    imageWidth: 80,
+                    confirmButtonText: '收到！'
+                });
+            } else {
+                Swal.fire({
+                    title: '📲 安裝到手機',
+                    html: '點擊瀏覽器選單 ➡ 安裝應用程式',
+                    imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1768525265/logo.png',
+                    imageWidth: 80,
+                    confirmButtonText: '好'
+                });
+            }
+        }
+        checkInstallState();
+
+        // 🔥 3. 移除載入畫面 (當網頁載入完成後執行)
+        window.addEventListener('load', function() {
+            var loader = document.getElementById('loading-layer');
+            var hint = document.getElementById('loading-hint');
+            
+            // 延遲一點點消失，讓使用者看清楚「土地公穿鞋子」的可愛動畫，避免閃爍
+            setTimeout(function() {
+                loader.style.opacity = '0'; // 開始變透明
+                setTimeout(function() {
+                    loader.style.display = 'none'; // 完全移除
+                }, 500); // 等待淡出動畫結束
+            }, 800); // 至少顯示 0.8 秒
+
+            // 如果載入超過 5 秒還沒好，顯示安慰訊息
+            setTimeout(function() {
+                if(loader.style.display !== 'none') {
+                    hint.innerHTML = "免費伺服器喚醒中...<br>第一次會比較久，請喝口茶🍵";
+                }
+            }, 5000);
+        });
     </script>
 
     {% block scripts %}{% endblock %}
