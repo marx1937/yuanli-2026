@@ -1,58 +1,57 @@
 {% extends "base.html" %}
 {% set active_page = "map" %}
 
-{% block title %}地圖測試{% endblock %}
+{% block title %}尋神地圖 - 越獄版{% endblock %}
 
 {% block styles %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 
 <style>
-    /* 🔥 核彈級 CSS：強制清除所有背景圖案 */
-    html, body, .container, .main-content, div {
-        background-image: none !important;
-        background-color: #ffffff !important;
+    /* 1. 把所有可能擋住地圖的背景都變透明 */
+    html, body, .container, .main-content, .wrapper {
+        background: transparent !important;
+        background-color: rgba(255,255,255,0) !important;
     }
 
-    /* 確保地圖容器沒有任何邊距，並強制置頂 */
-    #map-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: 999; /* 層級設超高，強壓所有背景 */
-        background: #eee; /* 給個灰色底，證明他在這 */
+    /* 2. 地圖本體：全螢幕、固定在最底層 */
+    #map { 
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        width: 100vw; 
+        height: 100vh; 
+        z-index: -1; /* 設為 -1，讓它乖乖當桌布，不要擋到按鈕 */
+        display: block;
     }
 
-    #map {
-        width: 100%;
-        height: 100%;
-    }
-
-    /* 定位按鈕 */
+    /* 3. 定位按鈕：浮在右下角 */
     .btn-gps {
         position: fixed;
-        bottom: 100px;
+        bottom: 120px; /* 避開底部導航列 */
         right: 20px;
         width: 50px; height: 50px;
         background: white;
         border-radius: 50%;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         display: flex; align-items: center; justify-content: center;
-        font-size: 1.5rem; color: #333;
-        z-index: 1000; /* 比地圖更高 */
+        font-size: 1.5rem; color: #d32f2f;
+        z-index: 1000; /* 確保按鈕按得到 */
         cursor: pointer;
-        border: 2px solid #ccc;
+        border: 2px solid #fff;
     }
-    .btn-gps:active { background: #ddd; }
+    .btn-gps:active { transform: scale(0.9); }
+    
+    /* 為了確保底部導航列看得見，給它一點背景色 (如果原本沒有的話) */
+    nav, .bottom-nav {
+        background: rgba(255,255,255,0.9) !important;
+        backdrop-filter: blur(5px);
+    }
 </style>
 {% endblock %}
 
 {% block content %}
     
-    <div id="map-container">
-        <div id="map"></div>
-    </div>
+    <div id="map"></div>
 
     <div class="btn-gps" onclick="locateUser()">
         <i class="fas fa-crosshairs"></i>
@@ -67,28 +66,34 @@
     var map;
     var userMarker = null;
 
-    // 初始化地圖
+    // 🔥 越獄行動開始
     document.addEventListener("DOMContentLoaded", function() {
-        // 稍微延遲一下，確保畫面長好再渲染地圖
-        setTimeout(initMap, 100);
+        // 1. 找到地圖元素
+        var mapElement = document.getElementById('map');
+        
+        // 2. 把它從現在的位置「拔出來」，直接插入到 body 的最前面
+        // 這樣它就會脫離所有的 padding、margin 限制
+        document.body.prepend(mapElement);
+
+        // 3. 啟動地圖
+        initMap();
     });
 
     function initMap() {
-        console.log("初始化地圖...");
+        // 建立地圖
+        map = L.map('map', { zoomControl: false }).setView([24.4429, 120.6558], 14);
         
-        // 1. 建立地圖
-        map = L.map('map', { 
-            zoomControl: false, // 隱藏預設縮放鈕，保持畫面乾淨
-            attributionControl: false // 隱藏右下角版權宣告，保持乾淨
-        }).setView([24.4429, 120.6558], 14);
-        
-        // 2. 載入 OSM 圖層 (最快、最標準)
+        // 載入 OSM 圖層
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        // 3. 關鍵：重整地圖尺寸 (解決破圖問題)
-        map.invalidateSize();
+        // 🔥 關鍵：告訴地圖「你的大小改變了」，請重新繪製
+        // 延遲 500ms 確保搬家完成後再畫
+        setTimeout(function() {
+            map.invalidateSize();
+        }, 500);
     }
 
     // 定位功能
@@ -97,28 +102,14 @@
             navigator.geolocation.getCurrentPosition(pos => {
                 var lat = pos.coords.latitude;
                 var lng = pos.coords.longitude;
-
-                // 移除舊標記
                 if (userMarker) map.removeLayer(userMarker);
-
-                // 畫上藍色小圓點
+                
                 userMarker = L.circleMarker([lat, lng], {
-                    radius: 10,
-                    fillColor: "#2196f3",
-                    color: "white",
-                    weight: 3,
-                    opacity: 1,
-                    fillOpacity: 0.9
+                    radius: 10, fillColor: "#2196f3", color: "white", weight: 3, fillOpacity: 0.9
                 }).addTo(map);
 
-                // 飛過去
                 map.flyTo([lat, lng], 16);
-                
-            }, err => {
-                alert("無法抓取位置，請確認 GPS 已開啟");
-            });
-        } else {
-            alert("您的瀏覽器不支援定位");
+            }, err => { alert("定位失敗"); });
         }
     }
 </script>
