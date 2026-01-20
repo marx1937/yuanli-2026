@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>{% block title %}尋神情報站{% endblock %}</title>
-
+    <title>Map My God - {% block title %}尋神情報站{% endblock %}</title>
+    
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -15,18 +15,21 @@
     <link rel="apple-touch-icon" href="https://res.cloudinary.com/diuoghid2/image/upload/v1768525265/logo.png">
 
     <style>
-        /* 全域設定 */
+        /* 📜 魔法書規範：宣紙米背景 */
         body { 
-            background-color: #fdfcf0; /* 米黃色背景 */
+            background-color: #fdfcf0; 
+            background-image: radial-gradient(#d7ccc8 1.5px, transparent 1.5px); /* 淡淡的點陣紋理 */
+            background-size: 24px 24px;
             min-height: 100vh;
-            font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
+            font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif; /* 親切字體 */
             padding-bottom: 110px !important; /* 避開底部導航 */
             overflow-x: hidden;
             margin: 0;
+            color: #5d4037; /* 沈穩褐 */
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* 底部導航列 */
+        /* --- 底部導覽列 (偽裝戰術) --- */
         .fake-navbar { 
             position: fixed; bottom: 0; width: 100%; 
             background: #fff; border-top: 1px solid #efebe9; 
@@ -41,21 +44,33 @@
         }
         .nav-item:hover { text-decoration: none; color: #8d6e63; }
         
-        .nav-icon { height: 42px; width: auto; margin-bottom: 3px; transition: 0.3s; }
-        .nav-item.active .nav-icon { transform: scale(1.1); filter: drop-shadow(0 2px 2px rgba(211, 47, 47, 0.2)); }
+        .nav-icon { 
+            height: 42px; width: auto; margin-bottom: 3px; 
+            filter: grayscale(100%) sepia(20%) opacity(0.8); /* 復古濾鏡 */
+            transition: 0.3s; 
+        }
+        
+        /* 選中狀態：廟宇紅 */
+        .nav-item.active .nav-icon { 
+            transform: scale(1.1); filter: none; 
+            filter: drop-shadow(0 2px 2px rgba(211, 47, 47, 0.2)); 
+        }
         .nav-item.active span { color: #d32f2f; font-weight: bold; }
 
-        /* 中間大按鈕 */
+        /* 中間大按鈕 (紅色大相機位置) */
         .nav-center-btn {
             width: 80px; height: 80px; 
-            background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
-            border-radius: 50%; border: 6px solid #f9f7f2; 
+            background: linear-gradient(135deg, #e53935 0%, #c62828 100%); /* 廟宇紅漸層 */
+            border-radius: 50%; border: 6px solid #fdfcf0; /* 邊框同背景色 */
             display: flex; align-items: center; justify-content: center;
             transform: translateY(-35px); 
             box-shadow: 0 8px 15px rgba(198, 40, 40, 0.3);
             text-decoration: none !important;
         }
-        .nav-center-icon { height: 55px; width: auto; display: block; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2)); }
+        .nav-center-icon { 
+            height: 55px; width: auto; display: block; 
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2)); 
+        }
 
         {% block styles %}{% endblock %}
     </style>
@@ -66,26 +81,33 @@
 
     <div class="fake-navbar">
         <a href="/" class="nav-item {% if active_page == 'home' %}active{% endif %}">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_home.png" class="nav-icon"><span>首頁</span>
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_home.png" class="nav-icon" alt="首頁">
+            <span>首頁</span>
         </a>
         <a href="/map" class="nav-item {% if active_page == 'map' %}active{% endif %}">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_map.png" class="nav-icon"><span>地圖</span>
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_map.png" class="nav-icon" alt="地圖">
+            <span>地圖</span>
         </a>
         <a href="/upload" class="nav-center-btn">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_upload.png" class="nav-center-icon">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_upload.png" class="nav-center-icon" alt="上傳">
         </a>
         <a href="/gallery" class="nav-item {% if active_page == 'gallery' %}active{% endif %}">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_gallery.png" class="nav-icon"><span>圖庫</span>
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_gallery.png" class="nav-icon" alt="圖庫">
+            <span>圖庫</span>
         </a>
         <a href="/leaderboard" class="nav-item {% if active_page == 'leaderboard' %}active{% endif %}">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_leaderboard.png" class="nav-icon"><span>榜單</span>
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_leaderboard.png" class="nav-icon" alt="榜單">
+            <span>榜單</span>
         </a>
     </div>
 
     <script>
         if(window.navigator && navigator.serviceWorker) {
             navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                for(let registration of registrations) { registration.unregister(); }
+                for(let registration of registrations) { 
+                    registration.unregister(); 
+                    console.log("🧹 魔法書指令：已清除舊 PWA 快取");
+                }
             });
         }
     </script>
