@@ -1,118 +1,130 @@
-{% extends "base.html" %}
-{% set active_page = "map" %}
-
-{% block title %}尋神地圖 - 越獄版{% endblock %}
-
-{% block styles %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-
-<style>
-    /* 1. 把所有可能擋住地圖的背景都變透明 */
-    html, body, .container, .main-content, .wrapper {
-        background: transparent !important;
-        background-color: rgba(255,255,255,0) !important;
-        background-image: none !important; /* 殺掉點點圖 */
-    }
-
-    /* 2. 地圖本體：全螢幕、固定在最底層 */
-    #map { 
-        position: fixed; 
-        top: 0; 
-        left: 0; 
-        width: 100vw; 
-        height: 100vh; 
-        z-index: 0; /* 設為 0 */
-        display: block;
-    }
-
-    /* 3. 定位按鈕：浮在右下角 */
-    .btn-gps {
-        position: fixed;
-        bottom: 120px; /* 避開底部導航列 */
-        right: 20px;
-        width: 50px; height: 50px;
-        background: white;
-        border-radius: 50%;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1.5rem; color: #d32f2f;
-        z-index: 1000; /* 確保按鈕按得到 */
-        cursor: pointer;
-        border: 2px solid #fff;
-    }
-    .btn-gps:active { transform: scale(0.9); }
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>尋神地圖 - 苑裡鎮</title>
     
-    /* 為了確保底部導航列看得見，給它一點背景色 */
-    nav, .bottom-nav {
-        background: rgba(255,255,255,0.9) !important;
-        backdrop-filter: blur(5px);
-        z-index: 1001 !important;
-    }
-</style>
-{% endblock %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-{% block content %}
-    
+    <style>
+        /* 2. 暴力歸零：確保沒有任何邊距 */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden; /* 禁止滑動 */
+            background-color: #ffffff; /* 純白背景 */
+        }
+
+        /* 3. 地圖本體：絕對佔滿整個視窗 */
+        #map {
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        /* 4. 回首頁按鈕 (因為脫離了主版型，要自己加一個) */
+        .btn-home {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            text-decoration: none;
+            color: #d32f2f;
+            font-weight: bold;
+            font-family: "Microsoft JhengHei", sans-serif;
+            display: flex; align-items: center; gap: 5px;
+        }
+
+        /* 5. 定位按鈕 */
+        .btn-gps {
+            position: fixed;
+            bottom: 40px; /* 放低一點 */
+            right: 20px;
+            width: 50px; height: 50px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: #555;
+            z-index: 1000;
+            cursor: pointer;
+        }
+        .btn-gps:active { background: #f0f0f0; }
+    </style>
+</head>
+<body>
+
+    <a href="/" class="btn-home">
+        <i class="fas fa-chevron-left"></i> 回首頁
+    </a>
+
     <div id="map"></div>
 
     <div class="btn-gps" onclick="locateUser()">
         <i class="fas fa-crosshairs"></i>
     </div>
 
-{% endblock %}
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
-{% block scripts %}
-<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        var map;
+        var userMarker = null;
 
-<script>
-    var map;
-    var userMarker = null;
+        // 初始化地圖
+        document.addEventListener("DOMContentLoaded", function() {
+            initMap();
+        });
 
-    // 🔥 越獄行動開始
-    document.addEventListener("DOMContentLoaded", function() {
-        // 1. 找到地圖元素
-        var mapElement = document.getElementById('map');
-        
-        // 2. 把它從現在的位置「拔出來」，直接插入到 body 的最前面
-        // 這樣它就會脫離所有的 padding、margin 限制
-        document.body.prepend(mapElement);
+        function initMap() {
+            // 設定中心點
+            map = L.map('map', { zoomControl: false }).setView([24.4429, 120.6558], 14);
+            
+            // 載入 OSM 圖層 (最快、最乾淨)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
 
-        // 3. 啟動地圖
-        initMap();
-    });
-
-    function initMap() {
-        // 建立地圖
-        map = L.map('map', { zoomControl: false }).setView([24.4429, 120.6558], 14);
-        
-        // 載入 OSM 圖層
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
-
-        // 🔥 關鍵：告訴地圖「你的大小改變了」，請重新繪製
-        // 延遲 500ms 確保搬家完成後再畫
-        setTimeout(function() {
-            map.invalidateSize();
-        }, 500);
-    }
-
-    // 定位功能
-    function locateUser() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(pos => {
-                var lat = pos.coords.latitude;
-                var lng = pos.coords.longitude;
-                if (userMarker) map.removeLayer(userMarker);
-                
-                userMarker = L.circleMarker([lat, lng], {
-                    radius: 10, fillColor: "#2196f3", color: "white", weight: 3, fillOpacity: 0.9
-                }).addTo(map);
-
-                map.flyTo([lat, lng], 16);
-            }, err => { alert("定位失敗"); });
+            // 強制刷新尺寸，確保填滿
+            setTimeout(function() {
+                map.invalidateSize();
+            }, 500);
         }
-    }
-</script>
-{% endblock %}
+
+        // 定位功能
+        function locateUser() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    var lat = pos.coords.latitude;
+                    var lng = pos.coords.longitude;
+
+                    if (userMarker) map.removeLayer(userMarker);
+                    
+                    userMarker = L.circleMarker([lat, lng], {
+                        radius: 10,
+                        fillColor: "#2196f3",
+                        color: "white",
+                        weight: 3,
+                        opacity: 1,
+                        fillOpacity: 0.9
+                    }).addTo(map);
+
+                    map.flyTo([lat, lng], 16);
+                }, err => {
+                    alert("定位失敗，請確認 GPS 已開啟");
+                });
+            } else {
+                alert("瀏覽器不支援定位");
+            }
+        }
+    </script>
+</body>
+</html>
