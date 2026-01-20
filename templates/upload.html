@@ -162,7 +162,7 @@
 <script>
     var currentLat = null, currentLng = null;
     var isPhotoReady = false;
-    var isInsideYuanli = false; // 🔥 新增：是否在苑裡範圍內
+    var isInsideYuanli = false; 
 
     function speakHappy(text) {
         if ('speechSynthesis' in window) {
@@ -172,19 +172,12 @@
         }
     }
 
-    // 🔥 核心功能：檢查座標是否在苑裡鎮範圍內
-    // 苑裡大概範圍：Lat 24.35 ~ 24.48 / Lng 120.60 ~ 120.80 (設寬鬆一點避免邊界誤判)
+    // 檢查座標是否在苑裡鎮範圍內
     function checkGeofence(lat, lng) {
-        const minLat = 24.3500;
-        const maxLat = 24.4850;
-        const minLng = 120.6000;
-        const maxLng = 120.8000;
-
-        if (lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng) {
-            return true; // 在範圍內
-        } else {
-            return false; // 在範圍外 (例如大甲、台北)
-        }
+        // 苑裡寬鬆範圍 (避免邊界誤判)
+        const minLat = 24.3500; const maxLat = 24.4850;
+        const minLng = 120.6000; const maxLng = 120.8000;
+        return (lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng);
     }
 
     function startGPS() {
@@ -195,26 +188,37 @@
                     currentLat = position.coords.latitude; 
                     currentLng = position.coords.longitude;
                     
-                    // 🔥 執行圍欄檢查
                     isInsideYuanli = checkGeofence(currentLat, currentLng);
 
                     if (isInsideYuanli) {
-                        // 在苑裡 -> 綠燈通行
                         $('#lat').val(currentLat); $('#lng').val(currentLng);
                         $('#gpsStatus').html('<i class="fas fa-check-circle mr-2"></i> 定位完成 (精準)').css('color', '#2ecc71');
                         checkReady();
                     } else {
-                        // 不在苑裡 -> 紅燈警告
-                        $('#gpsStatus').html('<i class="fas fa-times-circle mr-2"></i> 超出活動範圍').css('color', '#e74c3c');
+                        // ❌ 不在苑裡 -> 跳出【躲貓貓彈窗】
+                        $('#gpsStatus').html('<i class="fas fa-times-circle mr-2"></i> 神明隱身中...').css('color', '#e74c3c');
+                        
                         Swal.fire({
-                            icon: 'warning',
-                            title: '哎呀！跑錯棚囉！',
-                            text: '偵測到您目前的位置似乎不在苑裡鎮。本活動僅限苑裡地區的神像登錄喔！',
-                            confirmButtonText: '好，我回苑裡再試',
-                            confirmButtonColor: '#8d6e63'
+                            // 🔥 請將那張躲貓貓圖上傳並命名為 god_hide_seek.jpg
+                            imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1/god_hide_seek.jpg',
+                            imageWidth: 220, // 稍微調大讓圖片細節清楚
+                            imageHeight: 'auto',
+                            imageAlt: '神明躲貓貓',
+                            
+                            title: '<span style="color:#d32f2f; font-weight:900;">喔喔！神明隱身中？</span>',
+                            html: `
+                                <div style="text-align: left; font-size: 1rem; line-height: 1.6; color: #555; padding: 0 10px;">
+                                    偵測到您目前的位置不在苑裡鎮。<br><br>
+                                    這裡的神明正在跟您玩 <b>躲貓貓</b>，記得要回到 <b>苑裡地區</b> 才能成功捕捉祂們的金身喔！
+                                </div>
+                            `,
+                            confirmButtonText: '好，我去苑裡找祂們',
+                            confirmButtonColor: '#8d6e63',
+                            background: '#fffbf0', // 米黃色底，更有溫度
+                            backdrop: `rgba(0,0,0,0.5)`
                         });
-                        // 鎖定按鈕
-                        $('#submitBtn').addClass('disabled-zone').text('🚫 僅限苑裡地區上傳');
+
+                        $('#submitBtn').addClass('disabled-zone').text('🚫 神明隱身中，無法上傳');
                     }
                 }, 
                 function(error) { 
@@ -242,15 +246,14 @@
     }
 
     function checkReady() {
-        // 如果不在苑裡，直接不准按
         if (!isInsideYuanli && currentLat !== null) {
-            $('#submitBtn').removeClass('ready').addClass('disabled-zone').text('🚫 僅限苑裡地區上傳');
+            $('#submitBtn').removeClass('ready').addClass('disabled-zone').text('🚫 神明隱身中，無法上傳');
             return;
         }
 
         let area = $('#area').val();
         let btn = $('#submitBtn');
-        btn.removeClass('disabled-zone'); // 移除禁用樣式
+        btn.removeClass('disabled-zone'); 
 
         if (currentLat && isPhotoReady && area) {
             btn.addClass('ready').html('<i class="fas fa-paper-plane"></i> 發送情報！歸檔！');
@@ -265,9 +268,8 @@
     $('#uploadForm').submit(function(e) {
         e.preventDefault();
         
-        // 二次防護：如果不在苑裡，禁止送出
         if (!isInsideYuanli) {
-            Swal.fire({ icon: 'error', title: '無法上傳', text: '請移動到苑裡鎮範圍內再試。' });
+            Swal.fire({ icon: 'error', title: '神明隱身中', text: '請移動到苑裡鎮範圍內再試。' });
             return;
         }
 
