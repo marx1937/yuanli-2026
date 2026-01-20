@@ -8,17 +8,24 @@
     .title-section { text-align: center; padding: 20px 0; }
     .main-title { font-size: 2.8rem; font-weight: 900; color: #5d4037; font-family: cursive; margin: 0; }
     .menu-container { padding: 10px 15px; display: flex; flex-direction: column; gap: 15px; }
-    .menu-card { background: #fff; border-radius: 20px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 2px solid #fff; text-decoration: none; }
+    
+    .menu-card { 
+        background: #fff; border-radius: 20px; padding: 15px 20px; 
+        display: flex; align-items: center; justify-content: space-between; 
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 2px solid #fff; 
+        text-decoration: none; 
+    }
     .card-map { border-color: #ffe0b2; background: linear-gradient(to right, #fffbf0, #fff); }
     .card-upload { background: linear-gradient(135deg, #d32f2f, #c62828); color: white; border: none; }
     .card-gallery { border-color: #ffccbc; }
     .card-rank { border-color: #c8e6c9; }
+    
     .card-text { flex: 1; margin-left: 15px; }
     .card-title { font-size: 1.2rem; font-weight: 800; display: block; }
     .card-desc { font-size: 0.85rem; opacity: 0.8; font-weight: normal; }
     .card-icon-img { width: 65px; height: 65px; object-fit: contain; }
 
-    /* 平安符按鈕 */
+    /* 平安符按鈕 (保留這個) */
     #pwa-install-btn {
         display: none; position: fixed; bottom: 115px; right: 15px; z-index: 2100;
         cursor: pointer; transform-origin: top center; 
@@ -31,35 +38,58 @@
 {% endblock %}
 
 {% block content %}
+
     <div id="pwa-install-btn" onclick="showInstallGuide()">
         <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/install_amulet.png" alt="下載APP">
     </div>
 
-    <div class="hero-section"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/banner_top.jpg" class="hero-img"></div>
+    <div class="hero-section">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/banner_top.jpg" class="hero-img">
+    </div>
+
     <div class="title-section">
         <h1 class="main-title">MAP MY GOD</h1>
-        <div style="margin-top:5px;"><span style="background:#fff; padding:5px 15px; border-radius:20px; color:#8d6e63; font-weight:bold; font-size:0.9rem; border:1px solid #eee;">老神在在 🎎 躲貓貓</span></div>
+        <div style="margin-top:5px;">
+            <span style="background:#fff; padding:5px 15px; border-radius:20px; color:#8d6e63; font-weight:bold; font-size:0.9rem; border:1px solid #eee;">
+                老神在在 🎎 躲貓貓
+            </span>
+        </div>
     </div>
 
     <div class="menu-container">
         <a href="/map" class="menu-card card-map">
             <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/icon_map_couple.png" class="card-icon-img">
-            <div class="card-text"><span class="card-title" style="color:#e65100;">搜尋方位</span><span class="card-desc">看看他們躲在哪</span></div>
+            <div class="card-text">
+                <span class="card-title" style="color:#e65100;">搜尋方位</span>
+                <span class="card-desc">看看他們躲在哪</span>
+            </div>
             <i class="fas fa-map-marked-alt" style="color:#ffe0b2; font-size:1.5rem;"></i>
         </a>
+
         <a href="/upload" class="menu-card card-upload">
             <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/icon_camera_couple.png" class="card-icon-img">
-            <div class="card-text"><span class="card-title">尋找神隊友</span><span class="card-desc" style="color:rgba(255,255,255,0.9);">趕快幫祂拍張照</span></div>
+            <div class="card-text">
+                <span class="card-title">尋找神隊友</span>
+                <span class="card-desc" style="color:rgba(255,255,255,0.9);">趕快幫祂拍張照</span>
+            </div>
             <i class="fas fa-chevron-right"></i>
         </a>
+
         <a href="/gallery" class="menu-card card-gallery">
             <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/icon_album_couple.png" class="card-icon-img">
-            <div class="card-text"><span class="card-title" style="color:#4e342e;">影像庫</span><span class="card-desc">尋神足跡紀錄</span></div>
+            <div class="card-text">
+                <span class="card-title" style="color:#4e342e;">影像庫</span>
+                <span class="card-desc">尋神足跡紀錄</span>
+            </div>
             <i class="fas fa-images" style="color:#ffccbc; font-size:1.5rem;"></i>
         </a>
+
         <a href="/leaderboard" class="menu-card card-rank">
             <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/icon_rank_boy.png" class="card-icon-img">
-            <div class="card-text"><span class="card-title" style="color:#2e7d32;">英雄榜</span><span class="card-desc">誰是尋神達人</span></div>
+            <div class="card-text">
+                <span class="card-title" style="color:#2e7d32;">英雄榜</span>
+                <span class="card-desc">誰是尋神達人</span>
+            </div>
             <i class="fas fa-trophy" style="color:#c8e6c9; font-size:1.5rem;"></i>
         </a>
     </div>
@@ -68,10 +98,15 @@
 {% block scripts %}
 <script>
     function checkInstallState() {
+        // 簡單判斷：如果不是 APP 模式，就顯示御守
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-        if (!isStandalone) document.getElementById('pwa-install-btn').style.display = 'block';
+        if (!isStandalone) {
+            document.getElementById('pwa-install-btn').style.display = 'block';
+        }
     }
+    
     window.showInstallGuide = function() {
+        // 彈窗教學
         Swal.fire({ 
             title: '📲 下載到桌面', 
             html: '點擊瀏覽器選單 ➡ <b>加入主畫面</b> 或 <b>安裝應用程式</b>', 
@@ -79,6 +114,7 @@
             imageWidth: 80, confirmButtonText: '好' 
         });
     }
+    
     checkInstallState();
 </script>
 {% endblock %}
