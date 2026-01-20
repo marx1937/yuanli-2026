@@ -11,6 +11,7 @@
     html, body, .container, .main-content, .wrapper {
         background: transparent !important;
         background-color: rgba(255,255,255,0) !important;
+        background-image: none !important; /* 殺掉點點圖 */
     }
 
     /* 2. 地圖本體：全螢幕、固定在最底層 */
@@ -20,7 +21,7 @@
         left: 0; 
         width: 100vw; 
         height: 100vh; 
-        z-index: -1; /* 設為 -1，讓它乖乖當桌布，不要擋到按鈕 */
+        z-index: 0; /* 設為 0 */
         display: block;
     }
 
@@ -41,10 +42,11 @@
     }
     .btn-gps:active { transform: scale(0.9); }
     
-    /* 為了確保底部導航列看得見，給它一點背景色 (如果原本沒有的話) */
+    /* 為了確保底部導航列看得見，給它一點背景色 */
     nav, .bottom-nav {
         background: rgba(255,255,255,0.9) !important;
         backdrop-filter: blur(5px);
+        z-index: 1001 !important;
     }
 </style>
 {% endblock %}
