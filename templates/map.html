@@ -18,7 +18,7 @@
         /* 地圖全螢幕 */
         #map { width: 100vw; height: 100vh; z-index: 1; }
 
-        /* --- 🔥 CSS 煉金術：純代碼畫出「立體紅色計數圈」 --- */
+        /* --- CSS 聚合器樣式 --- */
         .marker-cluster-custom {
             background: radial-gradient(circle at 30% 30%, #fff9c4, #fbc02d);
             border: 3px solid #c62828;
@@ -105,9 +105,28 @@
         }
         .nav-center-icon { height: 55px; width: auto; display: block; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2)); margin: 0; }
 
-        /* SweetAlert 樣式 */
+        /* SweetAlert & 小幫手樣式修正 */
         .swal2-actions { gap: 10px; width: 100%; justify-content: center; }
         .debug-btn { width: 100% !important; margin: 5px 0 !important; }
+
+        /* 🔥 新增：小幫手清單的 Flex 排版 */
+        .guide-row {
+            display: flex; 
+            align-items: center; 
+            margin-bottom: 12px;
+            text-align: left;
+        }
+        .guide-icon-box {
+            width: 35px; /* 固定圖示寬度 */
+            flex-shrink: 0; /* 禁止壓縮 */
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        .guide-text-box {
+            flex: 1; /* 佔滿剩餘空間 */
+            color: #555;
+            line-height: 1.4;
+        }
 
     </style>
 </head>
@@ -182,7 +201,6 @@
                 maxZoom: 19, attribution: '© OpenStreetMap'
             }).addTo(map);
 
-            // 自定義 CSS 立體聚合器
             markersCluster = L.markerClusterGroup({ 
                 showCoverageOnHover: false,
                 iconCreateFunction: function(cluster) {
@@ -213,7 +231,6 @@
 
         function renderMarkers(data) {
             markersCluster.clearLayers();
-            // 宮廟圖標
             var templeIcon = L.icon({
                 iconUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1/marker_temple.png', 
                 iconSize: [48, 48], iconAnchor: [24, 48], popupAnchor: [0, -45]
@@ -239,7 +256,6 @@
                     let lat = pos.coords.latitude, lng = pos.coords.longitude;
                     if (userMarker) map.removeLayer(userMarker);
                     
-                    // 金腳印圖標
                     var footprintIcon = L.icon({
                         iconUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1/marker_footprint.png', 
                         iconSize: [40, 40], iconAnchor: [20, 20]
@@ -251,34 +267,38 @@
             }
         }
 
-        // 🔥 更新後的小幫手：使用「看地圖的金童玉女」
+        // 🔥 更新後的小幫手：排版優化 (使用 Flexbox 解決斷行醜問題)
         window.showGuide = function() {
             Swal.fire({
-                // 使用你指定的這張可愛圖片
                 imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1768546635/guide_couple.png',
-                imageWidth: 140, // 稍微放大一點，讓可愛細節更清楚
+                imageWidth: 140, 
                 imageHeight: 'auto',
                 imageAlt: '尋神小幫手',
                 
                 title: '<span style="color:#d32f2f; font-weight:900;">歡迎來到尋神地圖</span>',
                 html: `
-                    <div class="guide-list" style="text-align:left; margin:10px 20px;">
-                        <div class="guide-item" style="margin-bottom:8px;">
-                            <i class="fas fa-map-marker-alt" style="color:#d32f2f; width:25px;"></i> 
-                            <span style="color:#555; font-weight:bold;">點擊圖釘：</span>看照片與導航
+                    <div style="margin:10px 10px;">
+                        
+                        <div class="guide-row">
+                            <div class="guide-icon-box"><i class="fas fa-map-marker-alt" style="color:#d32f2f;"></i></div>
+                            <div class="guide-text-box"><span style="font-weight:bold; color:#333;">點擊圖釘：</span>看照片與導航</div>
                         </div>
-                        <div class="guide-item" style="margin-bottom:8px;">
-                            <i class="fas fa-crosshairs" style="color:#2e7d32; width:25px;"></i> 
-                            <span style="color:#555; font-weight:bold;">瞄準按鈕：</span>尋找你的位置
+
+                        <div class="guide-row">
+                            <div class="guide-icon-box"><i class="fas fa-crosshairs" style="color:#2e7d32;"></i></div>
+                            <div class="guide-text-box"><span style="font-weight:bold; color:#333;">瞄準按鈕：</span>尋找你的位置</div>
                         </div>
-                        <div class="guide-item" style="margin-bottom:8px;">
-                            <i class="fas fa-camera" style="color:#e64a19; width:25px;"></i> 
-                            <span style="color:#555; font-weight:bold;">中間相機：</span>上傳神隊友情報
+
+                        <div class="guide-row">
+                            <div class="guide-icon-box"><i class="fas fa-camera" style="color:#e64a19;"></i></div>
+                            <div class="guide-text-box"><span style="font-weight:bold; color:#333;">中間相機：</span>上傳神隊友情報</div>
                         </div>
-                        <div class="guide-item">
-                            <i class="fas fa-cog" style="color:#c62828; width:25px;"></i> 
-                            <span style="color:#555; font-weight:bold;">紅色齒輪：</span>地圖資料更新
+
+                        <div class="guide-row">
+                            <div class="guide-icon-box"><i class="fas fa-cog" style="color:#c62828;"></i></div>
+                            <div class="guide-text-box"><span style="font-weight:bold; color:#333;">紅色齒輪：</span>地圖資料更新</div>
                         </div>
+
                     </div>
                 `,
                 confirmButtonText: '收到，出發尋神！',
@@ -292,7 +312,6 @@
                 }
             });
             
-            // 浮動動畫
             if (!document.getElementById('float-style')) {
                 const style = document.createElement('style');
                 style.id = 'float-style';
@@ -301,7 +320,6 @@
             }
         }
 
-        // 輔助函式...
         function showCard(item) {
             let name = item.nickname ? item.nickname.split("#")[0] : "熱心串友";
             let v = (item.nickname && item.nickname.includes("#")) ? item.nickname.split("#")[1] : (item.area || "其他");
