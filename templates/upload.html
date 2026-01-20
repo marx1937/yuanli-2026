@@ -3,7 +3,7 @@
 
 {% block styles %}
 <style>
-    /* 全局背景 */
+    /* 全局背景：延續主視覺 */
     body {
         background-color: #fdfcf0;
         background-image: radial-gradient(#d7ccc8 1.5px, transparent 1.5px);
@@ -11,7 +11,7 @@
         padding-bottom: 100px;
     }
 
-    /* 頂部標題與吉祥物 */
+    /* 1. 頂部標題與吉祥物 */
     .page-header { text-align: center; padding: 25px 0 10px 0; width: 100%; position: relative; }
     .header-capsule {
         background: white; padding: 8px 25px; border-radius: 50px;
@@ -19,6 +19,7 @@
         display: inline-flex; align-items: center; border: 1px solid rgba(255,255,255,0.8);
         font-size: 1.1rem;
     }
+    /* 小幫手掛在標題旁邊 */
     .helper-mascot {
         position: absolute; top: -15px; right: 20px;
         width: 90px; height: auto; z-index: 20;
@@ -27,7 +28,7 @@
     }
     @keyframes float-helper { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
-    /* 主表單卡片 */
+    /* 2. 主表單卡片 */
     .form-card {
         background: rgba(255, 255, 255, 0.95); width: 92%; max-width: 500px;
         padding: 25px; border-radius: 30px;
@@ -36,7 +37,7 @@
         border: 2px solid #fff;
     }
 
-    /* GPS 狀態 Pill */
+    /* GPS 狀態顯示條 */
     .gps-pill {
         background: #fff8e1; padding: 8px 15px; border-radius: 50px;
         font-size: 0.9rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
@@ -45,7 +46,7 @@
         margin-bottom: 20px; width: 100%; cursor: pointer;
     }
     
-    /* 相機觸發區 */
+    /* 3. 相機觸發區 */
     .upload-zone {
         border: 2px dashed #d7ccc8; border-radius: 20px;
         min-height: 220px;
@@ -68,7 +69,7 @@
         display: none;
     }
 
-    /* 輸入框 */
+    /* 輸入框美化 */
     .form-group { margin-bottom: 15px; text-align: left; }
     .form-label { font-weight: bold; color: #5d4037; margin-bottom: 5px; font-size: 0.95rem; display: block;}
     .custom-input {
@@ -78,7 +79,7 @@
     .custom-input:focus { border-color: #d32f2f; outline: none; background: white; }
     .custom-input::placeholder { color: #ccc; }
 
-    /* 提交按鈕 */
+    /* 4. 提交按鈕 */
     .btn-submit {
         background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
         border: none; border-radius: 50px; padding: 15px; margin-top: 15px;
@@ -166,7 +167,7 @@
     var currentLat = null, currentLng = null;
     var isPhotoReady = false;
 
-    // 語音函式
+    // 語音播放
     function speakHappy(text) {
         if ('speechSynthesis' in window) {
             var msg = new SpeechSynthesisUtterance();
@@ -175,7 +176,7 @@
         }
     }
 
-    // 啟動 GPS
+    // GPS 定位邏輯
     function startGPS() {
         $('#gpsStatus').html('<i class="fas fa-satellite-dish fa-spin mr-2"></i> 定位中...');
         if (navigator.geolocation) {
@@ -197,7 +198,7 @@
         }
     }
 
-    // 預覽圖片
+    // 圖片預覽
     function previewImage(input) {
         if (input.files && input.files[0]) {
             var reader = new FileReader();
@@ -212,7 +213,7 @@
         }
     }
 
-    // 檢查表單是否完成
+    // 檢查是否可以送出
     function checkReady() {
         let area = $('#area').val();
         let btn = $('#submitBtn');
@@ -234,7 +235,7 @@
         if(!nickname) nickname = '熱心串友'; 
         var area = $('#area').val();
 
-        // 1. 不雅字過濾 -> 顯示生氣土地公 (請確保 static 資料夾有 377.jpg)
+        // 1. 不雅字過濾
         var badWords = ['笨蛋', '壞蛋', '王八', '白痴', '白癡', '智障', '幹', '靠', '死', '爛', '屌', '雞掰', '機車', 'fuck', 'shit']; 
         for (var word of badWords) {
             if (nickname.toLowerCase().includes(word)) {
@@ -261,12 +262,11 @@
         $.ajax({
             url: '/upload', type: 'POST', data: formData, contentType: false, processData: false,
             success: function(response) {
-                // 語音
                 var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公會保庇你喔！';
                 speakHappy(sayText); 
 
                 if (response.status === 'duplicate') {
-                    // 2. 重複資料 -> 顯示排隊審核圖 (請確保 static 資料夾有 pada.jpg)
+                    // 2. 重複資料
                     Swal.fire({
                         imageUrl: '/static/pada.jpg', imageWidth: '100%', 
                         title: '📋 資料已送交審核',
@@ -274,7 +274,7 @@
                         confirmButtonText: '收到，來去找下一座！', confirmButtonColor: '#ff9800'
                     }).then(() => { window.location.href = '/map'; });
                 } else {
-                    // 3. 成功 -> 顯示慶祝圖 (請確保 static 資料夾有 happy.jpg)
+                    // 3. 上傳成功
                     Swal.fire({
                         title: '✅ 上傳成功！', 
                         html: `感謝 <b>${area}</b> 的 <b>${nickname}</b>，土地公收到囉！`, 
