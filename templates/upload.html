@@ -3,7 +3,7 @@
 
 {% block styles %}
 <style>
-    /* 全局背景：延續主視覺 */
+    /* 全局背景 */
     body {
         background-color: #fdfcf0;
         background-image: radial-gradient(#d7ccc8 1.5px, transparent 1.5px);
@@ -11,7 +11,7 @@
         padding-bottom: 100px;
     }
 
-    /* 1. 頂部標題與吉祥物 */
+    /* 頂部標題與吉祥物 */
     .page-header { text-align: center; padding: 25px 0 10px 0; width: 100%; position: relative; }
     .header-capsule {
         background: white; padding: 8px 25px; border-radius: 50px;
@@ -19,16 +19,15 @@
         display: inline-flex; align-items: center; border: 1px solid rgba(255,255,255,0.8);
         font-size: 1.1rem;
     }
-    /* 小幫手掛在標題旁邊 */
     .helper-mascot {
         position: absolute; top: -15px; right: 20px;
-        width: 90px; height: auto; z-index: 20;
+        width: 70px; height: auto; z-index: 20;
         filter: drop-shadow(0 5px 10px rgba(0,0,0,0.15));
         animation: float-helper 3s ease-in-out infinite;
     }
     @keyframes float-helper { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
-    /* 2. 主表單卡片 */
+    /* 主表單卡片 */
     .form-card {
         background: rgba(255, 255, 255, 0.95); width: 92%; max-width: 500px;
         padding: 25px; border-radius: 30px;
@@ -37,7 +36,7 @@
         border: 2px solid #fff;
     }
 
-    /* GPS 狀態顯示條 */
+    /* GPS 狀態 Pill */
     .gps-pill {
         background: #fff8e1; padding: 8px 15px; border-radius: 50px;
         font-size: 0.9rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
@@ -46,7 +45,7 @@
         margin-bottom: 20px; width: 100%; cursor: pointer;
     }
     
-    /* 3. 相機觸發區 */
+    /* 相機觸發區 */
     .upload-zone {
         border: 2px dashed #d7ccc8; border-radius: 20px;
         min-height: 220px;
@@ -56,7 +55,8 @@
     }
     .upload-zone:active { background: #fff; border-color: #d32f2f; transform: scale(0.98); }
     
-    .upload-icon-img { width: 80px; height: 80px; object-fit: contain; margin-bottom: 10px; opacity: 0.8; }
+    /* 🔥 針對新的 God Camera 圖示調整大小，讓它更顯眼 */
+    .upload-icon-img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; opacity: 0.9; }
     .upload-text { font-weight: bold; color: #8d6e63; font-size: 1.1rem; }
     
     #preview { 
@@ -69,7 +69,7 @@
         display: none;
     }
 
-    /* 輸入框美化 */
+    /* 輸入框 */
     .form-group { margin-bottom: 15px; text-align: left; }
     .form-label { font-weight: bold; color: #5d4037; margin-bottom: 5px; font-size: 0.95rem; display: block;}
     .custom-input {
@@ -79,7 +79,7 @@
     .custom-input:focus { border-color: #d32f2f; outline: none; background: white; }
     .custom-input::placeholder { color: #ccc; }
 
-    /* 4. 提交按鈕 */
+    /* 提交按鈕 */
     .btn-submit {
         background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
         border: none; border-radius: 50px; padding: 15px; margin-top: 15px;
@@ -99,7 +99,7 @@
         <div class="header-capsule">
             <i class="fas fa-camera" style="color:#d32f2f; margin-right:8px;"></i> 尋神情報站
         </div>
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/bm.png" class="helper-mascot" alt="小幫手">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/god_cute.png" class="helper-mascot" alt="小幫手">
     </div>
 
     <div class="form-card">
@@ -115,7 +115,7 @@
             <div class="form-group text-center">
                 <label for="photo" class="upload-zone" id="uploadLabel">
                     <div id="uploadPlaceholder">
-                        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/yuanli_ui/icon_camera.png" class="upload-icon-img">
+                        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1768691403/god_camera.png" class="upload-icon-img">
                         <div class="upload-text">📸 捕捉神隊友金身</div>
                         <small style="color:#aaa;">點擊開啟相機</small>
                     </div>
@@ -167,7 +167,6 @@
     var currentLat = null, currentLng = null;
     var isPhotoReady = false;
 
-    // 語音播放
     function speakHappy(text) {
         if ('speechSynthesis' in window) {
             var msg = new SpeechSynthesisUtterance();
@@ -176,7 +175,6 @@
         }
     }
 
-    // GPS 定位邏輯
     function startGPS() {
         $('#gpsStatus').html('<i class="fas fa-satellite-dish fa-spin mr-2"></i> 定位中...');
         if (navigator.geolocation) {
@@ -198,7 +196,6 @@
         }
     }
 
-    // 圖片預覽
     function previewImage(input) {
         if (input.files && input.files[0]) {
             var reader = new FileReader();
@@ -213,7 +210,6 @@
         }
     }
 
-    // 檢查是否可以送出
     function checkReady() {
         let area = $('#area').val();
         let btn = $('#submitBtn');
@@ -227,7 +223,6 @@
         }
     }
 
-    // 表單送出
     $('#uploadForm').submit(function(e) {
         e.preventDefault();
         
@@ -235,12 +230,11 @@
         if(!nickname) nickname = '熱心串友'; 
         var area = $('#area').val();
 
-        // 1. 不雅字過濾
         var badWords = ['笨蛋', '壞蛋', '王八', '白痴', '白癡', '智障', '幹', '靠', '死', '爛', '屌', '雞掰', '機車', 'fuck', 'shit']; 
         for (var word of badWords) {
             if (nickname.toLowerCase().includes(word)) {
                 Swal.fire({
-                    imageUrl: '/static/377.jpg', // 生氣土地公
+                    imageUrl: '/static/377.jpg', 
                     imageWidth: '100%', imageHeight: 'auto',
                     title: '暱稱不太好聽喔...', 
                     text: '請使用優雅一點的名字，土地公才聽得懂！',
@@ -266,7 +260,6 @@
                 speakHappy(sayText); 
 
                 if (response.status === 'duplicate') {
-                    // 2. 重複資料
                     Swal.fire({
                         imageUrl: '/static/pada.jpg', imageWidth: '100%', 
                         title: '📋 資料已送交審核',
@@ -274,7 +267,6 @@
                         confirmButtonText: '收到，來去找下一座！', confirmButtonColor: '#ff9800'
                     }).then(() => { window.location.href = '/map'; });
                 } else {
-                    // 3. 上傳成功
                     Swal.fire({
                         title: '✅ 上傳成功！', 
                         html: `感謝 <b>${area}</b> 的 <b>${nickname}</b>，土地公收到囉！`, 
