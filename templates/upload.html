@@ -3,7 +3,7 @@
 
 {% block styles %}
 <style>
-    /* 修復跑版的關鍵：把 margin 歸零 */
+    /* 全局背景修正 */
     body {
         background-color: #fdfcf0;
         background-image: radial-gradient(#d7ccc8 1.5px, transparent 1.5px);
@@ -11,19 +11,18 @@
         margin: 0; 
     }
 
-    /* 確保所有內容都置中 */
-    .page-header { text-align: center; padding: 20px 0 10px 0; width: 100%; }
+    .page-header { text-align: center; padding: 20px 0 10px 0; width: 100%; position: relative; }
     .title-signboard { width: 70%; max-width: 280px; height: auto; display: block; margin: 0 auto; filter: drop-shadow(0 5px 5px rgba(93, 64, 55, 0.15)); }
 
+    /* 表單卡片置中 */
     .form-card {
         background: rgba(255, 255, 255, 0.95); width: 92%; max-width: 500px;
         padding: 25px; border-radius: 30px;
         box-shadow: 0 10px 30px rgba(93, 64, 55, 0.1);
-        margin: 10px auto; /* 上下10px，左右自動置中 */
+        margin: 10px auto; /* 關鍵置中 */
         border: 2px solid #fff;
     }
 
-    /* 其他樣式保持不變 */
     .gps-pill { background: #fff8e1; padding: 8px 15px; border-radius: 50px; font-size: 0.9rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; border: 1px solid #ffe0b2; color: #f57c00; margin-bottom: 20px; width: 100%; cursor: pointer; }
     .upload-zone { border: 2px dashed #d7ccc8; border-radius: 20px; min-height: 220px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #fafafa; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
     .upload-zone:active { background: #fff; border-color: #d32f2f; transform: scale(0.98); }
