@@ -6,123 +6,289 @@
     <title>尋神地圖 - 苑裡鎮</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <style>
-        /* 2. 暴力歸零：確保沒有任何邊距 */
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            overflow: hidden; /* 禁止滑動 */
-            background-color: #ffffff; /* 純白背景 */
-        }
+        /* 2. 基礎設定：全螢幕無邊距 */
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background: #fff; font-family: "Microsoft JhengHei", sans-serif; }
 
-        /* 3. 地圖本體：絕對佔滿整個視窗 */
-        #map {
-            width: 100vw;
-            height: 100vh;
-            z-index: 1;
-        }
+        /* 3. 地圖層級設定 */
+        #map { width: 100vw; height: 100vh; z-index: 1; }
 
-        /* 4. 回首頁按鈕 (因為脫離了主版型，要自己加一個) */
-        .btn-home {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-            background: white;
-            padding: 10px 15px;
-            border-radius: 50px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            text-decoration: none;
-            color: #d32f2f;
-            font-weight: bold;
-            font-family: "Microsoft JhengHei", sans-serif;
-            display: flex; align-items: center; gap: 5px;
+        /* 4. 頂部篩選列 */
+        .map-filter-container {
+            position: fixed; top: 15px; left: 0; right: 0; z-index: 1000;
+            padding: 10px 15px; white-space: nowrap; overflow-x: auto;
+            display: flex; gap: 8px;
+            -webkit-overflow-scrolling: touch; scrollbar-width: none;
         }
+        .map-filter-container::-webkit-scrollbar { display: none; }
 
-        /* 5. 定位按鈕 */
-        .btn-gps {
-            position: fixed;
-            bottom: 40px; /* 放低一點 */
-            right: 20px;
-            width: 50px; height: 50px;
-            background: white;
-            border-radius: 50%;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        .filter-chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: rgba(255, 255, 255, 0.95); color: #555; 
+            padding: 8px 16px; border-radius: 50px; font-size: 0.9rem; font-weight: bold;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15); border: 1px solid #fff; 
+            cursor: pointer; transition: 0.2s;
+        }
+        .filter-chip span { background: #eee; color: #888; font-size: 0.75rem; padding: 2px 6px; border-radius: 10px; min-width: 15px; text-align: center; }
+        .filter-chip.active { background: #d32f2f; color: white; transform: scale(1.05); }
+        .filter-chip.active span { background: #fff; color: #d32f2f; }
+
+        /* 5. 右側工具列 */
+        .right-toolbar {
+            position: fixed; right: 15px; top: 50%; transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 15px; z-index: 1000;
+        }
+        .tool-btn {
+            width: 45px; height: 45px; background: white; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; color: #555;
-            z-index: 1000;
-            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer;
+            color: #555; font-size: 1.2rem; transition: 0.2s;
         }
-        .btn-gps:active { background: #f0f0f0; }
+        .tool-btn:active { transform: scale(0.9); background: #f5f5f5; }
+
+        /* 6. 底部滑出卡片 */
+        #info-card {
+            position: fixed; bottom: -100%; left: 0; right: 0;
+            background: white; border-top-left-radius: 20px; border-top-right-radius: 20px;
+            padding: 20px; z-index: 1100;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.15);
+            transition: bottom 0.3s ease-out;
+            padding-bottom: 90px; /* 避開底部導航 */
+        }
+        #info-card.show { bottom: 0; }
+        
+        .card-header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .card-title { font-size: 1.3rem; font-weight: 800; color: #333; }
+        .card-badge { background: #ffebee; color: #d32f2f; padding: 3px 10px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; }
+        .card-content { display: flex; gap: 15px; }
+        .card-img { width: 100px; height: 100px; object-fit: cover; border-radius: 10px; background: #eee; }
+        .card-details { flex: 1; font-size: 0.9rem; color: #666; }
+        .detail-row { margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+        .btn-nav {
+            display: block; width: 100%; margin-top: 15px;
+            background: linear-gradient(135deg, #2e7d32, #1b5e20); color: white;
+            text-align: center; padding: 12px; border-radius: 50px; text-decoration: none; font-weight: bold;
+        }
+
+        /* 7. 🔥 偽裝的底部導航列 (模擬 base.html) */
+        .fake-navbar {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 70px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            display: flex; justify-content: space-around; align-items: center;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            z-index: 2000; /* 最高層級 */
+            border-top: 1px solid #eee;
+        }
+        .nav-item {
+            text-decoration: none; color: #999; text-align: center; font-size: 0.75rem;
+            display: flex; flex-direction: column; align-items: center; gap: 3px;
+            width: 25%;
+        }
+        .nav-item i { font-size: 1.4rem; transition: 0.2s; }
+        .nav-item.active { color: #d32f2f; font-weight: bold; }
+        .nav-item.active i { transform: translateY(-2px); }
+        
+        /* 中間那顆上傳按鈕 */
+        .nav-fab {
+            width: 55px; height: 55px; background: #d32f2f; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 1.5rem; margin-top: -35px;
+            box-shadow: 0 4px 10px rgba(211, 47, 47, 0.4);
+            border: 4px solid white;
+        }
     </style>
 </head>
 <body>
 
-    <a href="/" class="btn-home">
-        <i class="fas fa-chevron-left"></i> 回首頁
-    </a>
+    <div class="map-filter-container" id="filter-scroll"></div>
 
     <div id="map"></div>
 
-    <div class="btn-gps" onclick="locateUser()">
-        <i class="fas fa-crosshairs"></i>
+    <div class="right-toolbar">
+        <div class="tool-btn" onclick="map.zoomIn()"><i class="fas fa-plus"></i></div>
+        <div class="tool-btn" onclick="map.zoomOut()"><i class="fas fa-minus"></i></div>
+        <div class="tool-btn" onclick="locateUser()" id="btn-gps"><i class="fas fa-crosshairs"></i></div>
     </div>
 
+    <div id="info-card">
+        <div class="card-header-row">
+            <div>
+                <span class="card-badge" id="card-village">里別</span>
+                <div class="card-title" id="card-name">載入中...</div>
+            </div>
+            <div style="font-size:1.5rem; color:#999;" onclick="closeCard()"><i class="fas fa-times"></i></div>
+        </div>
+        <div class="card-content">
+            <img id="card-img" src="" onclick="window.location.href='/gallery'">
+            <div class="card-details">
+                <div class="detail-row"><i class="fas fa-user-circle"></i> <span id="card-user"></span></div>
+                <div class="detail-row"><i class="fas fa-clock"></i> <span id="card-time"></span></div>
+                <div class="detail-row"><i class="fas fa-sticky-note"></i> <span id="card-note"></span></div>
+            </div>
+        </div>
+        <a href="#" id="btn-google-nav" target="_blank" class="btn-nav">
+            <i class="fas fa-location-arrow"></i> Google 導航出發
+        </a>
+    </div>
+
+    <nav class="fake-navbar">
+        <a href="/" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>首頁</span>
+        </a>
+        <a href="/map" class="nav-item active">
+            <i class="fas fa-map-marked-alt"></i>
+            <span>地圖</span>
+        </a>
+        <a href="/report" class="nav-item">
+            <div class="nav-fab"><i class="fas fa-camera"></i></div>
+            <span style="margin-top:5px;">搜神</span>
+        </a>
+        <a href="/gallery" class="nav-item">
+            <i class="fas fa-images"></i>
+            <span>圖庫</span>
+        </a>
+        <a href="/leaderboard" class="nav-item">
+            <i class="fas fa-trophy"></i>
+            <span>榜單</span>
+        </a>
+    </nav>
+
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 
     <script>
         var map;
+        var markersCluster;
+        var allMarkers = [];
+        var villageCounts = {};
         var userMarker = null;
 
-        // 初始化地圖
-        document.addEventListener("DOMContentLoaded", function() {
+        const ALL_VILLAGES = [
+            "苑東里", "苑南里", "苑北里", "苑港里", "西平里", "西勢里", "海岸里", "房裡里", "客庄里", "中正里", 
+            "新復里", "山柑里", "社苓里", "田心里", "舊社里", "山腳里", "福田里", "泰田里", "玉田里", "南勢里", 
+            "石鎮里", "蕉埔里", "上館里", "水坡里", "苑坑里", "出水里"
+        ];
+
+        $(document).ready(function() {
             initMap();
+            loadData();
         });
 
         function initMap() {
-            // 設定中心點
+            // 初始化地圖 (苑裡中心)
             map = L.map('map', { zoomControl: false }).setView([24.4429, 120.6558], 14);
             
-            // 載入 OSM 圖層 (最快、最乾淨)
+            // OSM 標準圖層
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '© OpenStreetMap'
+                maxZoom: 19, attribution: '© OpenStreetMap'
             }).addTo(map);
 
-            // 強制刷新尺寸，確保填滿
-            setTimeout(function() {
-                map.invalidateSize();
-            }, 500);
+            markersCluster = L.markerClusterGroup({ showCoverageOnHover: false });
+            map.addLayer(markersCluster);
+            
+            map.on('click', closeCard);
+            
+            // 確保滿版
+            setTimeout(() => map.invalidateSize(), 500);
         }
 
-        // 定位功能
+        function loadData() {
+            let t = new Date().getTime();
+            fetch('/api/locations?t=' + t).then(r => r.json()).then(data => {
+                allMarkers = data;
+                calculateCounts(data);
+                renderFilterChips();
+                renderMarkers(data);
+            });
+        }
+
+        function renderMarkers(data) {
+            markersCluster.clearLayers();
+            var icon = L.icon({
+                iconUrl: 'https://cdn-icons-png.flaticon.com/512/3710/3710266.png', 
+                iconSize: [40, 40], iconAnchor: [20, 40]
+            });
+
+            data.forEach(item => {
+                if (item.lat && item.lng) {
+                    let m = L.marker([item.lat, item.lng], { icon: icon });
+                    m.on('click', (e) => {
+                        L.DomEvent.stopPropagation(e);
+                        showCard(item);
+                        map.flyTo([item.lat, item.lng], 16);
+                    });
+                    markersCluster.addLayer(m);
+                }
+            });
+        }
+
+        function showCard(item) {
+            let name = item.nickname ? item.nickname.split("#")[0] : "熱心串友";
+            let v = (item.nickname && item.nickname.includes("#")) ? item.nickname.split("#")[1] : (item.area || "其他");
+            let img = item.image_url.replace('/upload/', '/upload/w_200,h_200,c_fill,q_auto/');
+            
+            $('#card-village').text(v);
+            $('#card-name').text(name);
+            $('#card-user').text(name);
+            $('#card-time').text(item.timestamp ? item.timestamp.substring(0,10) : '');
+            $('#card-note').text(item.note || '無備註');
+            $('#card-img').attr('src', img);
+            $('#btn-google-nav').attr('href', `https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}`);
+            $('#info-card').addClass('show');
+        }
+
+        function closeCard() { $('#info-card').removeClass('show'); }
+
         function locateUser() {
+            $('#btn-gps').css('color', '#d32f2f');
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(pos => {
-                    var lat = pos.coords.latitude;
-                    var lng = pos.coords.longitude;
-
+                    let lat = pos.coords.latitude, lng = pos.coords.longitude;
                     if (userMarker) map.removeLayer(userMarker);
-                    
-                    userMarker = L.circleMarker([lat, lng], {
-                        radius: 10,
-                        fillColor: "#2196f3",
-                        color: "white",
-                        weight: 3,
-                        opacity: 1,
-                        fillOpacity: 0.9
-                    }).addTo(map);
-
-                    map.flyTo([lat, lng], 16);
-                }, err => {
-                    alert("定位失敗，請確認 GPS 已開啟");
+                    userMarker = L.circleMarker([lat, lng], { radius: 8, fillColor: "#2196f3", color: "#fff", weight: 3, fillOpacity: 0.9 }).addTo(map);
+                    map.flyTo([lat, lng], 17); // 飛近一點
                 });
-            } else {
-                alert("瀏覽器不支援定位");
+            }
+        }
+
+        function calculateCounts(data) {
+            ALL_VILLAGES.forEach(v => villageCounts[v] = 0);
+            data.forEach(i => {
+                let v = (i.nickname && i.nickname.includes("#")) ? i.nickname.split("#")[1] : (i.area || "其他");
+                if (villageCounts[v] !== undefined) villageCounts[v]++;
+            });
+        }
+
+        function renderFilterChips() {
+            let html = `<div class="filter-chip active" onclick="filterMap('全部', this)">全覽 <span>${allMarkers.length}</span></div>`;
+            ALL_VILLAGES.forEach(v => {
+                html += `<div class="filter-chip" onclick="filterMap('${v}', this)">${v} <span>${villageCounts[v]||0}</span></div>`;
+            });
+            $('#filter-scroll').html(html);
+        }
+
+        window.filterMap = function(v, btn) {
+            $('.filter-chip').removeClass('active');
+            $(btn).addClass('active');
+            closeCard();
+            
+            let d = (v === '全部') ? allMarkers : allMarkers.filter(i => {
+                let check = (i.nickname && i.nickname.includes("#")) ? i.nickname.split("#")[1] : (i.area || "其他");
+                return check === v;
+            });
+            renderMarkers(d);
+            
+            map.invalidateSize();
+            if (d.length > 0) {
+                let group = L.featureGroup(d.map(i => L.marker([i.lat, i.lng])));
+                map.fitBounds(group.getBounds().pad(0.2));
             }
         }
     </script>
