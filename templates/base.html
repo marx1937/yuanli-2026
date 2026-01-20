@@ -3,26 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>{% block title %}尋神情報站 v3.0{% endblock %}</title>
+    <title>{% block title %}尋神情報站 v4.0{% endblock %}</title>
 
     <link rel="manifest" href="/static/manifest.json">
     <meta name="theme-color" content="#d32f2f">
     <link rel="apple-touch-icon" href="https://res.cloudinary.com/diuoghid2/image/upload/v1768525265/logo.png">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-        /* 基礎設定 */
         body {
             font-family: "Microsoft JhengHei", sans-serif;
             margin: 0; padding: 0;
             padding-bottom: 110px !important;
-            overflow-y: auto !important; /* 強制開啟捲動 */
+            overflow-y: auto !important; /* 強制可滑動 */
             overflow-x: hidden;
-            background-color: #fdfcf0;
             -webkit-tap-highlight-color: transparent;
+            min-height: 100vh;
+            background-color: #fdfcf0;
         }
-        /* 導航列 */
+
         .fake-navbar {
             position: fixed; bottom: 0; width: 100%; 
             background: #fff; border-top: 1px solid #efebe9; 
@@ -43,24 +44,35 @@
     {% block styles %}{% endblock %}
 </head>
 <body>
-    
+
     {% block content %}{% endblock %}
 
     <div class="fake-navbar">
-        <a href="/" class="nav-item {% if active_page == 'home' %}active{% endif %}"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_home.png" class="nav-icon"><span>首頁</span></a>
-        <a href="/map" class="nav-item {% if active_page == 'map' %}active{% endif %}"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_map.png" class="nav-icon"><span>地圖</span></a>
-        <a href="/upload" class="nav-center-btn"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_upload.png" class="nav-center-icon"></a>
-        <a href="/gallery" class="nav-item {% if active_page == 'gallery' %}active{% endif %}"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_gallery.png" class="nav-icon"><span>圖庫</span></a>
-        <a href="/leaderboard" class="nav-item {% if active_page == 'leaderboard' %}active{% endif %}"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_leaderboard.png" class="nav-icon"><span>榜單</span></a>
+        <a href="/" class="nav-item {% if active_page == 'home' %}active{% endif %}">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_home.png" class="nav-icon"><span>首頁</span>
+        </a>
+        <a href="/map" class="nav-item {% if active_page == 'map' %}active{% endif %}">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_map.png" class="nav-icon"><span>地圖</span>
+        </a>
+        <a href="/upload" class="nav-center-btn">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_upload.png" class="nav-center-icon">
+        </a>
+        <a href="/gallery" class="nav-item {% if active_page == 'gallery' %}active{% endif %}">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_gallery.png" class="nav-icon"><span>圖庫</span>
+        </a>
+        <a href="/leaderboard" class="nav-item {% if active_page == 'leaderboard' %}active{% endif %}">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_leaderboard.png" class="nav-icon"><span>榜單</span>
+        </a>
     </div>
 
     <script>
-        // 如果有舊的 Service Worker，殺掉它！
         if(window.navigator && navigator.serviceWorker) {
             navigator.serviceWorker.getRegistrations().then(function(registrations) {
                 for(let registration of registrations) {
+                    // 強制登出所有 PWA 快取，讓網站變回普通網站
                     registration.unregister();
                 }
+                console.log('✅ 已清除所有 PWA 快取，確保畫面正常');
             });
         }
     </script>
