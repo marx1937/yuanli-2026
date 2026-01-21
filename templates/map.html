@@ -19,19 +19,29 @@
         /* 地圖全螢幕 */
         #map { width: 100vw; height: 100vh; z-index: 1; }
 
-        /* 2. 🔥🔥 UX 關鍵修正：強力抬高導引彈窗，防止誤觸 🔥🔥 */
+        /* 2. 🔥🔥 UX 修正：彈窗防誤觸 + 廟公風美化 🔥🔥 */
         .swal2-container {
-            z-index: 3000 !important; /* 確保在最上層 */
+            z-index: 3000 !important;
             padding-bottom: 20px !important;
         }
         .swal2-popup {
-            margin-bottom: 150px !important; /* 👈 關鍵：往上推 150px，遠離紅色大按鈕 */
-            border-radius: 25px !important;
-            border: 2px solid #ffca28 !important; /* 招財金邊框 */
+            margin-bottom: 150px !important; /* 防誤觸：往上推 */
+            border-radius: 20px !important;
+            border: 3px solid #8d6e63 !important; /* 改成木紋褐色的邊框，像告示牌 */
+            background: #fffbf0 url('https://www.transparenttextures.com/patterns/cream-paper.png') !important; /* 宣紙質感 */
             max-width: 90% !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
         }
-        .swal2-title { color: #d32f2f !important; font-weight: 900 !important; }
-        .swal2-actions { margin-bottom: 10px !important; }
+        .swal2-title { color: #5d4037 !important; font-weight: 900 !important; }
+        .swal2-html-container { color: #5d4037 !important; font-weight: 500; }
+        .swal2-close { 
+            color: #c62828 !important; /* 紅色關閉鈕 */
+            border: 2px solid #c62828 !important;
+            border-radius: 50% !important;
+            font-size: 1.2rem !important;
+            margin: 5px !important;
+        }
+        .swal2-close:focus { box-shadow: none !important; }
 
         /* 3. 聚合器樣式 */
         .marker-cluster-custom {
@@ -95,8 +105,6 @@
         .card-img { width: 100px; height: 100px; object-fit: cover; border-radius: 10px; background: #eee; }
         .card-details { flex: 1; font-size: 0.9rem; color: #666; }
         .detail-row { margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
-        
-        /* 導航按鈕樣式修正 */
         .btn-nav {
             display: block; width: 100%; margin-top: 15px;
             background: linear-gradient(135deg, #2e7d32, #1b5e20); color: white;
@@ -123,7 +131,24 @@
         }
         .nav-center-icon { height: 55px; width: auto; display: block; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2)); margin: 0; }
 
-        /* 小幫手列表樣式 */
+        /* 🌟 廟公維修風 - 專屬按鈕樣式 */
+        .btn-jade {
+            background: linear-gradient(135deg, #66bb6a, #2e7d32);
+            color: white; border: none; padding: 12px 20px;
+            border-radius: 50px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%; margin-bottom: 10px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-cinnabar {
+            background: linear-gradient(135deg, #ef5350, #c62828);
+            color: white; border: none; padding: 12px 20px;
+            border-radius: 50px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-jade:active, .btn-cinnabar:active { transform: scale(0.98); }
+
+        /* 小幫手樣式 */
         .guide-row { display: flex; align-items: center; margin-bottom: 12px; text-align: left; }
         .guide-icon-box { width: 35px; flex-shrink: 0; text-align: center; font-size: 1.1rem; }
         .guide-text-box { flex: 1; color: #555; line-height: 1.4; }
@@ -192,7 +217,6 @@
         $(document).ready(function() {
             initMap();
             loadData();
-            // 每次進入都跳出小幫手，確認位置
             if(!localStorage.getItem('map_guided_v3')) {
                 showGuide();
                 localStorage.setItem('map_guided_v3', 'true');
@@ -201,9 +225,7 @@
 
         function initMap() {
             map = L.map('map', { zoomControl: false }).setView([24.4429, 120.6558], 14);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19, attribution: '© OpenStreetMap'
-            }).addTo(map);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
 
             markersCluster = L.markerClusterGroup({ 
                 showCoverageOnHover: false,
@@ -217,7 +239,6 @@
                     });
                 }
             });
-            
             map.addLayer(markersCluster);
             map.on('click', closeCard);
             setTimeout(() => map.invalidateSize(), 500);
@@ -259,12 +280,7 @@
                 navigator.geolocation.getCurrentPosition(pos => {
                     let lat = pos.coords.latitude, lng = pos.coords.longitude;
                     if (userMarker) map.removeLayer(userMarker);
-                    
-                    var footprintIcon = L.icon({
-                        iconUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1/marker_footprint.png', 
-                        iconSize: [40, 40], iconAnchor: [20, 20]
-                    });
-
+                    var footprintIcon = L.icon({ iconUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1/marker_footprint.png', iconSize: [40, 40], iconAnchor: [20, 20] });
                     userMarker = L.marker([lat, lng], { icon: footprintIcon }).addTo(map);
                     map.flyTo([lat, lng], 17);
                 });
@@ -274,68 +290,59 @@
         window.showGuide = function() {
             Swal.fire({
                 imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1768546635/guide_couple.png',
-                imageWidth: 140, 
-                imageHeight: 'auto',
-                imageAlt: '尋神小幫手',
-                
+                imageWidth: 140, imageHeight: 'auto', imageAlt: '尋神小幫手',
                 title: '<span style="color:#d32f2f; font-weight:900;">歡迎來到尋神地圖</span>',
                 html: `
                     <div style="margin:10px 10px;">
-                        <div class="guide-row">
-                            <div class="guide-icon-box"><i class="fas fa-map-marker-alt" style="color:#d32f2f;"></i></div>
-                            <div class="guide-text-box"><span style="font-weight:bold; color:#333;">點擊圖釘：</span>看照片與導航</div>
-                        </div>
-                        <div class="guide-row">
-                            <div class="guide-icon-box"><i class="fas fa-crosshairs" style="color:#2e7d32;"></i></div>
-                            <div class="guide-text-box"><span style="font-weight:bold; color:#333;">瞄準按鈕：</span>尋找你的位置</div>
-                        </div>
-                        <div class="guide-row">
-                            <div class="guide-icon-box"><i class="fas fa-camera" style="color:#e64a19;"></i></div>
-                            <div class="guide-text-box"><span style="font-weight:bold; color:#333;">中間相機：</span>上傳神隊友情報</div>
-                        </div>
-                        <div class="guide-row">
-                            <div class="guide-icon-box"><i class="fas fa-cog" style="color:#c62828;"></i></div>
-                            <div class="guide-text-box"><span style="font-weight:bold; color:#333;">紅色齒輪：</span>地圖資料更新</div>
-                        </div>
+                        <div class="guide-row"><div class="guide-icon-box"><i class="fas fa-map-marker-alt" style="color:#d32f2f;"></i></div><div class="guide-text-box"><span style="font-weight:bold; color:#333;">點擊圖釘：</span>看照片與導航</div></div>
+                        <div class="guide-row"><div class="guide-icon-box"><i class="fas fa-crosshairs" style="color:#2e7d32;"></i></div><div class="guide-text-box"><span style="font-weight:bold; color:#333;">瞄準按鈕：</span>尋找你的位置</div></div>
+                        <div class="guide-row"><div class="guide-icon-box"><i class="fas fa-camera" style="color:#e64a19;"></i></div><div class="guide-text-box"><span style="font-weight:bold; color:#333;">中間相機：</span>上傳神隊友情報</div></div>
+                        <div class="guide-row"><div class="guide-icon-box"><i class="fas fa-cog" style="color:#c62828;"></i></div><div class="guide-text-box"><span style="font-weight:bold; color:#333;">紅色齒輪：</span>地圖資料更新</div></div>
                     </div>
                 `,
-                confirmButtonText: '收到，出發尋神！',
-                confirmButtonColor: '#e64a19',
-                background: '#fffbf0', 
-                backdrop: `rgba(0,0,0,0.5)`,
-                didOpen: () => {
-                    const img = Swal.getImage();
-                    if(img) {
-                        img.style.filter = "drop-shadow(0 5px 10px rgba(0,0,0,0.1))";
-                        img.style.animation = "float 3s ease-in-out infinite";
-                    }
-                }
+                confirmButtonText: '收到，出發尋神！', confirmButtonColor: '#e64a19', background: '#fffbf0', backdrop: `rgba(0,0,0,0.5)`,
+                didOpen: () => { const img = Swal.getImage(); if(img) { img.style.filter = "drop-shadow(0 5px 10px rgba(0,0,0,0.1))"; img.style.animation = "float 3s ease-in-out infinite"; } }
             });
-            
-            if (!document.getElementById('float-style')) {
-                const style = document.createElement('style');
-                style.id = 'float-style';
-                style.innerHTML = `@keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }`;
-                document.head.appendChild(style);
-            }
+            if (!document.getElementById('float-style')) { const style = document.createElement('style'); style.id = 'float-style'; style.innerHTML = `@keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }`; document.head.appendChild(style); }
         }
 
-        // 🟢 這裡就是修正的部分：Google 導航連結格式修正 🟢
+        // 🌟 廟公維修風：偵錯選單 🌟
+        window.openDebugMenu = function() { 
+            Swal.fire({ 
+                title: '<i class="fas fa-compass fa-spin"></i> 尋神羅盤維修', 
+                html: `
+                    <p style="font-size:0.95rem; color:#666; text-align:left; line-height:1.6;">
+                        哎呀！是不是覺得神明都不理你？可能是你的『尋神羅盤』卡到陰... 啊不是，是訊號卡住了啦！<br>
+                        <br>請嘗試以下方法排除：
+                    </p>
+                    <button class="btn-jade" onclick="forceReloadData()">
+                        <i class="fas fa-sync-alt"></i> 重新感應方位 (Reload)
+                    </button>
+                    <button class="btn-cinnabar" onclick="hardReset()">
+                        <i class="fas fa-broom"></i> 淨化磁場 (清除快取)
+                    </button>
+                `, 
+                showConfirmButton: false, 
+                showCloseButton: true 
+            }); 
+        }
+
+        window.forceReloadData = function() { map.invalidateSize(); loadData(); Swal.fire({icon: 'success', title: '感應完成', text: '地圖磁場已更新！', timer: 1500, showConfirmButton: false}); }
+        window.hardReset = function() { 
+            if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => caches.delete(name)); }); } 
+            localStorage.clear();
+            window.location.reload(true); 
+        }
+
         function showCard(item) {
             let name = item.nickname ? item.nickname.split("#")[0] : "熱心串友";
             let v = (item.nickname && item.nickname.includes("#")) ? item.nickname.split("#")[1] : (item.area || "其他");
             let img = item.image_url.replace('/upload/', '/upload/w_200,h_200,c_fill,q_auto/');
-            
-            $('#card-village').text(v); 
-            $('#card-name').text(name); 
-            $('#card-user').text(name);
+            $('#card-village').text(v); $('#card-name').text(name); $('#card-user').text(name);
             $('#card-time').text(item.timestamp ? item.timestamp.substring(0,10) : '');
-            $('#card-note').text(item.note || '無備註'); 
-            $('#card-img').attr('src', img);
-            
-            // ✅ 正確的 Google Maps 連結寫法，使用樣板字面值 (Backticks)
-            $('#btn-google-nav').attr('href', `https://www.google.com/maps?q=${item.lat},${item.lng}`);
-            
+            $('#card-note').text(item.note || '無備註'); $('#card-img').attr('src', img);
+            // 修復 Google 導航連結
+            $('#btn-google-nav').attr('href', `https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}`);
             $('#info-card').addClass('show');
         }
 
@@ -343,9 +350,6 @@
         function calculateCounts(data) { ALL_VILLAGES.forEach(v => villageCounts[v] = 0); data.forEach(i => { let v = (i.nickname && i.nickname.includes("#")) ? i.nickname.split("#")[1] : (i.area || "其他"); if (villageCounts[v] !== undefined) villageCounts[v]++; }); }
         function renderFilterChips() { let html = `<div class="filter-chip active" onclick="filterMap('全部', this)">全覽 <span>${allMarkers.length}</span></div>`; ALL_VILLAGES.forEach(v => { html += `<div class="filter-chip" onclick="filterMap('${v}', this)">${v} <span>${villageCounts[v]||0}</span></div>`; }); $('#filter-scroll').html(html); }
         window.filterMap = function(v, btn) { $('.filter-chip').removeClass('active'); $(btn).addClass('active'); closeCard(); let d = (v === '全部') ? allMarkers : allMarkers.filter(i => { let check = (i.nickname && i.nickname.includes("#")) ? i.nickname.split("#")[1] : (i.area || "其他"); return check === v; }); renderMarkers(d); map.invalidateSize(); if (d.length > 0) { let group = L.featureGroup(d.map(i => L.marker([i.lat, i.lng]))); map.fitBounds(group.getBounds().pad(0.2)); } }
-        window.openDebugMenu = function() { Swal.fire({ title: '🛠️ 偵錯模式', html: `<p style="font-size:0.9rem; color:#666;">如果地圖不完整或資料沒更新</p><button class="swal2-confirm swal2-styled debug-btn" style="background-color:#2e7d32;" onclick="forceReloadData()"><i class="fas fa-sync"></i> 重新載入 (Reload)</button><button class="swal2-deny swal2-styled debug-btn" style="background-color:#c62828;" onclick="hardReset()"><i class="fas fa-trash"></i> 清除快取並重置 (Reset)</button>`, showConfirmButton: false, showCloseButton: true }); }
-        window.forceReloadData = function() { map.invalidateSize(); loadData(); Swal.fire({icon: 'success', title: '已重新載入', text: '資料與地圖已更新', timer: 1500, showConfirmButton: false}); }
-        window.hardReset = function() { if ('caches' in window) { caches.keys().then((names) => { names.forEach(name => caches.delete(name)); }); } window.location.reload(true); }
     </script>
 </body>
 </html>
