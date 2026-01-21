@@ -5,7 +5,7 @@
 
 {% block styles %}
 <style>
-    /* --- 1. 頂部 Hero 區 (Q版小神像) --- */
+    /* --- 1. 頂部 Hero 區 --- */
     .hero-section { position: relative; margin-bottom: 15px; width: 100%; }
     .hero-banner {
         width: 100%; height: auto; display: block;
@@ -35,16 +35,16 @@
         box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
 
-    /* --- 2. 報馬仔跑馬燈 (動態輪播) --- */
+    /* --- 2. 報馬仔跑馬燈 --- */
     .news-ticker-container {
         width: 92%; max-width: 400px; 
         margin: 20px auto 25px auto; 
-        background: #fff8e1; /* 宣紙米變體 */
+        background: #fff8e1; 
         border-radius: 15px; 
         box-shadow: 0 4px 10px rgba(93, 64, 55, 0.08); 
         padding: 10px 15px;
         display: flex; align-items: center;
-        border: 2px solid #ffe082; /* 招財金邊框 */
+        border: 2px solid #ffe082; 
         position: relative; z-index: 20;
         text-decoration: none !important;
         overflow: hidden; 
@@ -72,7 +72,7 @@
         100% { transform: translateX(-150%); } 
     }
 
-    /* --- 3. 按鈕區 (有儀式感的卡片) --- */
+    /* --- 3. 按鈕區 --- */
     .menu-btn {
         display: block; width: 92%; max-width: 400px;
         margin: 0 auto 20px auto; 
@@ -90,7 +90,7 @@
     }
     .btn-text-group { text-align: left; flex: 1; }
     
-    /* 🔴 主按鈕：尋找神隊友 (廟宇紅) */
+    /* 🔴 主按鈕 */
     .btn-primary-action {
         background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); 
         height: 110px; color: white; border: 2px solid rgba(255,255,255,0.2);
@@ -101,7 +101,7 @@
         height: 80px; width: auto; margin-right: 15px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2));
     }
 
-    /* ⚪ 次級按鈕：地圖、圖庫 (宣紙米 + 招財金邊框) */
+    /* ⚪ 次級按鈕 */
     .btn-secondary-action { background: #fff; border: 2px solid #ffe082; height: 90px; }
     .btn-secondary-action .btn-main-text { color: #5d4037; font-size: 1.4rem; font-weight: bold; }
     .btn-secondary-action .btn-sub-text { color: #8d6e63; font-size: 0.85rem; }
@@ -110,7 +110,6 @@
     .bg-map { background: linear-gradient(to right, #fff 30%, #fff8e1 100%); }
     .bg-gallery { background: linear-gradient(to right, #fff 30%, #fff3e0 100%); }
 
-    /* ✨ Lucky Badge (招財金) */
     .lucky-badge {
         position: absolute; top: 12px; right: 15px;
         background: #ffca28; color: #b71c1c; 
@@ -124,12 +123,13 @@
         60% {transform: rotate(15deg) translateY(-3px);}
     }
 
-    /* --- 4. 底部區 --- */
+    /* --- 4. 底部區 (含鎖頭與私訊) --- */
     .footer-area {
         text-align: center; margin-top: 30px; margin-bottom: 40px;
         display: flex; flex-direction: column; align-items: center; gap: 10px;
     }
 
+    /* 💬 私訊小編按鈕 */
     .btn-messenger {
         display: inline-flex; align-items: center; justify-content: center;
         background: #fff; 
@@ -141,16 +141,33 @@
         font-size: 0.95rem;
         transition: 0.2s;
     }
-    .footer-copyright-row { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 5px; }
-    .footer-fb-link { color: #8d6e63; font-weight: bold; text-decoration: none; font-size: 0.9rem; }
+    
+    .footer-copyright-row { 
+        display: flex; align-items: center; justify-content: center; 
+        gap: 5px; margin-top: 5px; font-size: 0.9rem;
+    }
+    
+    /* 🔗 粉絲團連結 */
+    .footer-fb-link { 
+        color: #8d6e63; font-weight: bold; text-decoration: none; 
+    }
     .footer-fb-link:hover { color: #d32f2f; }
+
+    /* 🔒 隱藏版管理員鎖頭 (超級低調) */
+    .admin-lock {
+        color: #e0e0e0; /* 預設淡灰色，幾乎看不見 */
+        font-size: 0.8rem; 
+        text-decoration: none;
+        margin-left: 2px;
+        transition: color 0.3s;
+    }
+    .admin-lock:hover { color: #8d6e63; /* 滑鼠經過變色 */ }
 </style>
 {% endblock %}
 
 {% block content %}
     <div class="hero-section">
         <img src="{{ cdn_base }}/top.png" class="hero-banner" alt="Banner">
-        
         <div class="hero-text-container">
             <img src="{{ cdn_base }}/toptext.png" class="app-logo-img" alt="MAP MY GOD">
             <div class="sub-title-badge">
@@ -163,7 +180,6 @@
     
     <a href="/leaderboard" class="news-ticker-container">
         <img src="{{ cdn_base }}/bm.png" class="bao-ma-zai-img" alt="報馬仔">
-        
         <div class="ticker-content">
             <div class="ticker-text active" id="ticker-msg">🔔 報馬仔連線中... 正在搜尋神蹟...</div>
         </div>
@@ -210,8 +226,13 @@
         </a>
 
         <div class="footer-copyright-row">
+            <span>2026</span>
             <a href="https://www.facebook.com/Yuanli.Together.Club" target="_blank" class="footer-fb-link">
-                2026 苑裡串起來 ©
+                苑裡串起來
+            </a>
+            <span>©</span>
+            <a href="/admin" class="admin-lock" title="管理員登入">
+                <i class="fas fa-lock"></i>
             </a>
         </div>
     </div>
@@ -219,7 +240,7 @@
 
 {% block scripts %}
 <script>
-    // 跑馬仔連線程式
+    // 🔥 超能力跑馬燈邏輯：智慧地點判斷
     let realMsgs = ["🔔 報——！歡迎來到尋神情報站！", "💡 報馬仔提醒：發現神隊友請上傳！"];
     
     fetch('/api/locations')
@@ -228,12 +249,30 @@
         if(d && d.length > 0) {
             realMsgs = []; 
             d.slice().reverse().slice(0, 5).forEach(i => {
-                let n = i.nickname || i.name || "熱心鄉親";
-                let place = i.description || i.title || i.location || "苑裡某處";
-                place = place.replace(/[\[\]]/g, ' ');
+                // 1. 處理名字 (去除 #里別)
+                let rawName = i.nickname || i.name || "熱心鄉親";
+                let name = rawName.split('#')[0]; 
 
-                // 魔法書格式：顯示搜尋神蹟
-                realMsgs.push(`🙏 感恩！${n} 於 [${place.trim()}] 成功尋獲神隊友！`);
+                // 2. 智慧地點判斷 (依照優先順序)
+                let place = "苑裡某處"; // 預設值
+                
+                if (rawName.includes('#')) {
+                    // 優先 1：如果暱稱裡藏有「特洛伊木馬」(#里別)
+                    place = rawName.split('#')[1]; 
+                } else if (i.area && i.area !== "其他" && i.area !== "nan") {
+                    // 優先 2：如果有 CSV 的里別欄位 (area)
+                    place = i.area; 
+                } else if (i.description && i.description !== "nan") {
+                    // 優先 3：如果有描述欄位
+                    place = i.description.replace(/[\[\]]/g, ' '); 
+                } else if (i.lat && i.lng) {
+                    // 優先 4：如果有 GPS 但沒地名，就顯示座標附近 (選用)
+                    // place = "座標 (" + i.lat.toFixed(2) + ", " + i.lng.toFixed(2) + ") 附近";
+                    // 還是保持神祕感好了
+                    place = "苑裡田野間";
+                }
+
+                realMsgs.push(`🙏 感恩！${name} 於 [${place.trim()}] 成功尋獲神隊友！`);
             });
             
             realMsgs.push(`🚩 目前戰報：全苑裡已尋獲 ${d.length} 尊！`);
