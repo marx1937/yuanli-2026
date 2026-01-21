@@ -1,216 +1,399 @@
 {% extends "base.html" %}
 {% set active_page = "leaderboard" %}
 
+{% block title %}尋神風雲榜 - 美學覺醒版{% endblock %}
+
 {% block styles %}
 <style>
-    /* 背景設定：米色宣紙質感 */
+    /* 1. 基礎設定 */
     body {
         background-color: #fdfcf0;
-        background-image: radial-gradient(#d7ccc8 1.5px, transparent 1.5px);
-        background-size: 24px 24px;
-        min-height: 100vh;
+        background-image: 
+            linear-gradient(to right, rgba(215, 204, 200, 0.1) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(215, 204, 200, 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+        padding-bottom: 80px;
     }
 
-    .page-header {
-        text-align: center; margin-top: 25px; margin-bottom: 20px;
+    /* 2. 看板區 */
+    .rank-header {
+        text-align: center; padding: 25px 0 15px 0;
+        position: relative; margin-bottom: 10px;
     }
     
-    .header-title {
-        background: #d32f2f; color: #fff; 
-        display: inline-block; padding: 8px 25px; 
-        border-radius: 50px; font-weight: bold; font-size: 1.2rem;
-        box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3);
-        border: 2px solid #b71c1c;
+    .rank-banner-img {
+        width: 90%; max-width: 360px; height: auto;
+        min-height: 120px;
+        filter: drop-shadow(0 10px 15px rgba(93, 64, 55, 0.2));
+        animation: float-title 3s ease-in-out infinite;
     }
+    @keyframes float-title { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
-    /* --- 前三名英雄台 --- */
-    .top-heroes-container {
+    /* 🔥 香蕉美學 1: 浮動切換按鈕 (Glassmorphism) */
+    .tab-container {
+        display: flex; justify-content: center; gap: 8px;
+        margin: 10px auto 25px auto; width: 88%; max-width: 380px;
+        background: rgba(255, 255, 255, 0.6); /* 半透明 */
+        backdrop-filter: blur(10px); /* 毛玻璃特效 */
+        padding: 6px; border-radius: 50px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+    .tab-btn {
+        flex: 1; padding: 10px 0; border-radius: 40px;
+        text-align: center; font-weight: bold; color: #8d6e63;
+        cursor: pointer; transition: all 0.3s; font-size: 0.95rem;
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    /* 選中狀態：紅色柔光氣場 */
+    .tab-btn.active {
+        background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+        color: white; 
+        box-shadow: 0 4px 15px rgba(211, 47, 47, 0.4);
+        transform: scale(1.02);
+    }
+    
+    /* 說明按鈕：浮動膠囊 */
+    .rules-toggle-btn {
+        background: white; color: #d32f2f; border: none;
+        padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; font-weight: bold;
+        display: inline-flex; align-items: center; cursor: pointer;
+        box-shadow: 0 4px 12px rgba(211, 47, 47, 0.15);
+        margin-bottom: 10px; transition: 0.2s;
+    }
+    .rules-toggle-btn:active { transform: scale(0.95); }
+
+    .rules-card {
+        background: rgba(255, 255, 255, 0.95); width: 90%; max-width: 450px; 
+        margin: 0 auto 30px auto; border-radius: 25px; padding: 25px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        display: none;
+    }
+    .rule-row { display: flex; align-items: center; margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
+    .rule-row:last-child { border-bottom: none; margin-bottom: 0; }
+    .rule-icon { font-size: 1.8rem; width: 50px; text-align: center; margin-right: 10px; }
+    .rule-content { flex: 1; text-align: left; }
+    .rule-title { font-weight: bold; color: #5d4037; font-size: 1rem; }
+    .rule-desc { font-size: 0.85rem; color: #888; }
+    .rule-badge { background: #fff3e0; padding: 4px 12px; border-radius: 10px; font-size: 0.85rem; color: #e65100; font-weight: bold; }
+
+    /* 3. 頒獎台 */
+    .podium-container {
         display: flex; justify-content: center; align-items: flex-end;
-        margin-bottom: 30px; gap: 10px; padding: 0 10px;
+        gap: 8px; margin-bottom: 30px; padding: 0 10px; height: 240px;
     }
-
-    .hero-card {
-        background: white; border-radius: 15px;
-        text-align: center; padding: 10px 5px;
-        box-shadow: 0 5px 15px rgba(93, 64, 55, 0.1);
-        display: flex; flex-direction: column; align-items: center;
-        position: relative; border: 2px solid #fff;
+    .podium-item {
+        display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+        position: relative; transition: transform 0.3s;
     }
+    .rank-1 { width: 110px; z-index: 3; }
+    .rank-2 { width: 90px; z-index: 2; }
+    .rank-3 { width: 90px; z-index: 1; }
 
-    /* 冠軍特別大 */
-    .hero-card.rank-1 { width: 38%; z-index: 10; padding-top: 25px; border-color: #ffd700; transform: translateY(-10px); }
-    .hero-card.rank-2 { width: 30%; border-color: #c0c0c0; }
-    .hero-card.rank-3 { width: 30%; border-color: #cd7f32; }
+    /* 🔥 香蕉美學 2: 頭像光暈 (Breathing Avatar) */
+    .rank-avatar {
+        width: 60px; height: 60px; background: white; border-radius: 50%;
+        border: 4px solid #fff; 
+        margin-bottom: -15px; z-index: 5; position: relative;
+        display: flex; justify-content: center; align-items: center;
+        font-size: 1.5rem; overflow: hidden; color: #5d4037;
+        transition: transform 0.3s;
+    }
+    /* 金銀銅光暈特效 */
+    .rank-1 .rank-avatar { 
+        width: 80px; height: 80px; border-color: #fff; font-size: 2rem; 
+        box-shadow: 0 0 20px rgba(255, 193, 7, 0.5); /* 金色光暈 */
+    }
+    .rank-2 .rank-avatar { 
+        border-color: #fff; 
+        box-shadow: 0 0 15px rgba(189, 189, 189, 0.5); /* 銀色光暈 */
+    }
+    .rank-3 .rank-avatar { 
+        border-color: #fff; 
+        box-shadow: 0 0 15px rgba(255, 112, 67, 0.4); /* 銅色光暈 */
+    }
 
     .crown-icon {
-        position: absolute; top: -20px; font-size: 2rem; 
-        color: #ffd700; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
-        animation: float 3s ease-in-out infinite;
+        position: absolute; top: -45px; font-size: 40px;
+        animation: spin-crown 3s infinite linear;
+        filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.6));
     }
+    @keyframes spin-crown { 0% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } 100% { transform: rotate(-5deg); } }
 
-    .hero-avatar {
-        border-radius: 50%; border: 3px solid #eee; margin-bottom: 5px; background: #eee;
+    .podium-block {
+        width: 100%; border-radius: 20px 20px 0 0;
+        display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+        padding-top: 25px; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
-    .rank-1 .hero-avatar { width: 70px; height: 70px; border-color: #ffd700; }
-    .rank-2 .hero-avatar { width: 55px; height: 55px; border-color: #c0c0c0; }
-    .rank-3 .hero-avatar { width: 55px; height: 55px; border-color: #cd7f32; }
+    .rank-1 .podium-block { height: 130px; background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%); }
+    .rank-2 .podium-block { height: 100px; background: linear-gradient(135deg, #bdbdbd 0%, #9e9e9e 100%); }
+    .rank-3 .podium-block { height: 80px; background: linear-gradient(135deg, #ff8a65 0%, #d84315 100%); }
 
-    .hero-name { font-weight: bold; color: #5d4037; font-size: 0.95rem; margin-bottom: 2px; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .hero-count { font-weight: 900; color: #d32f2f; font-size: 1.1rem; }
-    .hero-count small { font-size: 0.7rem; color: #8d6e63; font-weight: normal; }
+    .rank-name { font-weight: bold; font-size: 1rem; margin-bottom: 2px; text-align: center; padding: 0 5px; line-height: 1.1; }
+    .rank-sub { font-size: 0.75rem; opacity: 0.95; margin-bottom: 3px; font-weight: normal; }
+    .count-badge { background: rgba(0,0,0,0.15); padding: 2px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; backdrop-filter: blur(2px); }
 
-    /* --- 列表區 (4-50名) --- */
-    .leaderboard-list {
-        width: 92%; max-width: 500px; margin: 0 auto; padding-bottom: 40px;
+    /* 4. 列表樣式 (浮動卡片) */
+    .list-container {
+        width: 90%; max-width: 500px; margin: 0 auto;
+        background: white; border-radius: 25px;
+        padding: 10px; 
+        box-shadow: 0 15px 40px rgba(93, 64, 55, 0.08);
+        min-height: 200px; border: none;
     }
-
-    .rank-item {
-        display: flex; align-items: center;
-        background: rgba(255,255,255,0.9);
-        margin-bottom: 10px; padding: 12px 15px;
-        border-radius: 15px;
-        border: 1px solid rgba(255,255,255,0.5);
-        box-shadow: 0 2px 5px rgba(93, 64, 55, 0.05);
-        transition: transform 0.1s;
+    .list-item {
+        display: flex; align-items: center; padding: 15px;
+        border-bottom: 1px solid #f5f5f5;
+        transition: background 0.2s; border-radius: 15px;
     }
-    .rank-item:active { transform: scale(0.98); background: #fff; }
-
-    .rank-num { font-weight: bold; color: #8d6e63; width: 35px; font-size: 1.1rem; text-align: center;}
-    .list-avatar { width: 42px; height: 42px; border-radius: 50%; margin-right: 15px; border: 2px solid #ffe082; background: #eee; }
-    .list-info { flex: 1; }
-    .list-name { font-weight: bold; color: #5d4037; font-size: 1rem; }
-    .list-title { font-size: 0.75rem; color: #a1887f; }
-    .list-score { font-weight: bold; color: #d32f2f; font-size: 1.2rem; }
-
-    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    .list-item:last-child { border-bottom: none; }
+    .list-item:active { background: #fafafa; }
     
-    /* 載入中動畫 */
-    .loading-spinner { text-align: center; color: #8d6e63; margin-top: 50px; font-weight: bold; }
+    .list-rank {
+        width: 28px; height: 28px; background: #8d6e63; color: white;
+        border-radius: 50%; display: flex; justify-content: center; align-items: center;
+        font-weight: bold; font-size: 0.8rem; margin-right: 12px; flex-shrink: 0;
+        box-shadow: 0 2px 5px rgba(141, 110, 99, 0.3);
+    }
+    .list-info { flex: 1; text-align: left; }
+    .list-name { font-weight: bold; color: #5d4037; font-size: 1.1rem; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+    .list-sub { font-size: 0.85rem; color: #999; margin-top: 2px; }
+    
+    .lvl-tag { font-size: 0.75rem; padding: 2px 8px; border-radius: 8px; font-weight: normal; border: 1px solid #eee; }
+    .lvl-1 { background: #f1f8e9; color: #558b2f; }
+    .lvl-2 { background: #e3f2fd; color: #1565c0; }
+    .lvl-3 { background: #fff3e0; color: #ef6c00; }
+    .lvl-max { background: #ffebee; color: #c62828; font-weight: bold; box-shadow: 0 2px 5px rgba(198, 40, 40, 0.15); border: none; }
+
+    .list-bar-bg { width: 100%; height: 6px; background: #f5f5f5; border-radius: 10px; margin-top: 6px; overflow: hidden; }
+    .list-bar-fill { height: 100%; background: linear-gradient(90deg, #ef5350, #d32f2f); border-radius: 10px; }
+    .list-count { font-weight: bold; color: #d32f2f; font-size: 1.2rem; margin-left: 10px; min-width: 30px; text-align: right; }
+
+    #loading-box { text-align: center; padding: 50px; color: #aaa; }
+    .tab-content { display: none; animation: fadeIn 0.4s ease-out; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 {% endblock %}
 
 {% block content %}
-    <div class="page-header">
-        <div class="header-title">
-            <i class="fas fa-trophy" style="color:#ffca28; margin-right:5px;"></i> 尋神英雄榜
-        </div>
-        <div style="color: #8d6e63; font-size: 0.9rem; margin-top: 5px;">累積尋獲數 Top 50</div>
+
+    <div class="rank-header">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/leaderboard_top.png" 
+             class="rank-banner-img" 
+             alt="尋神英雄榜">
     </div>
 
-    <div id="loading" class="loading-spinner">
-        <i class="fas fa-circle-notch fa-spin fa-2x"></i><br><br>正在結算戰績...
-    </div>
-
-    <div id="top-heroes" class="top-heroes-container" style="display: none;">
-        <div class="hero-card rank-2">
-            <img id="top2-img" class="hero-avatar" src="">
-            <div id="top2-name" class="hero-name">--</div>
-            <div class="hero-count"><span id="top2-score">0</span><small>尊</small></div>
-            <div style="font-size:1.5rem; margin-top:-5px;">🥈</div>
+    <div class="tab-container">
+        <div class="tab-btn active" onclick="switchTab('village')">
+            <i class="fas fa-flag"></i> 全里爭霸
         </div>
-
-        <div class="hero-card rank-1">
-            <i class="fas fa-crown crown-icon"></i>
-            <img id="top1-img" class="hero-avatar" src="">
-            <div id="top1-name" class="hero-name">--</div>
-            <div class="hero-count"><span id="top1-score">0</span><small>尊</small></div>
-            <div style="font-size:1.5rem; margin-top:-5px;">🥇</div>
-        </div>
-
-        <div class="hero-card rank-3">
-            <img id="top3-img" class="hero-avatar" src="">
-            <div id="top3-name" class="hero-name">--</div>
-            <div class="hero-count"><span id="top3-score">0</span><small>尊</small></div>
-            <div style="font-size:1.5rem; margin-top:-5px;">🥉</div>
+        <div class="tab-btn" onclick="switchTab('personal')">
+            <i class="fas fa-user-ninja"></i> 個人英雄
         </div>
     </div>
 
-    <div id="leaderboard-list" class="leaderboard-list">
+    <div style="text-align:center; margin-bottom:20px;">
+        <div class="rules-toggle-btn" onclick="$('.rules-card').slideToggle();">
+            <i class="fas fa-info-circle" style="margin-right:5px;"></i> 查看等級說明
         </div>
+    </div>
+
+    <div class="rules-card">
+        <h4 style="margin-top:0; color:#d32f2f; text-align:center; border-bottom:1px solid #ffe0b2; padding-bottom:10px; margin-bottom:15px;">📊 尋神等級說明</h4>
+        <div class="rule-row"><div class="rule-icon">🌱</div><div class="rule-content"><div class="rule-title">尋神小萌新</div><div class="rule-desc">累積 1~4 尊 | 初入江湖</div></div><div class="rule-badge">Lv.1</div></div>
+        <div class="rule-row"><div class="rule-icon">🛡️</div><div class="rule-content"><div class="rule-title">熱血護衛隊</div><div class="rule-desc">累積 5~9 尊 | 熟門熟路</div></div><div class="rule-badge">Lv.2</div></div>
+        <div class="rule-row"><div class="rule-icon">🏮</div><div class="rule-content"><div class="rule-title">虔誠爐主</div><div class="rule-desc">累積 10~19 尊 | 神明點讚</div></div><div class="rule-badge">Lv.3</div></div>
+        <div class="rule-row"><div class="rule-icon">😇</div><div class="rule-content"><div class="rule-title">在世土地公</div><div class="rule-desc">累積 20 尊以上 | 苑裡萬事通</div></div><div class="rule-badge">MAX</div></div>
+    </div>
+
+    <div id="loading-box">
+        <i class="fas fa-spinner fa-spin fa-2x"></i><br><br>正在計算雙榜戰績...
+    </div>
+
+    <div id="tab-village" class="tab-content active">
+        <div class="podium-container" id="podium-village"></div>
+        <div class="list-container" id="list-village"></div>
+    </div>
+
+    <div id="tab-personal" class="tab-content">
+        <div class="podium-container" id="podium-personal"></div>
+        <div class="list-container" id="list-personal"></div>
+    </div>
+
+    <div style="height:30px;"></div>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
-    // 🔥 英雄榜核心邏輯：支援特洛伊木馬格式 (暱稱#里別)
-    fetch('/api/locations')
+    // 預先定義苑裡 25 里，方便排序
+    const ALL_VILLAGES = [
+        "苑東里", "苑南里", "苑北里", "中正里", "客庄里", "房裡里", "新復里", "西勢里", "海岸里", "出水里", 
+        "山東里", "苑坑里", "水坡里", "山柑里", "社苓里", "田心里", "玉田里", "泰田里", "上館里", "南勢里", 
+        "山腳里", "舊社里", "石鎮里", "蕉埔里", "西平里"
+    ];
+
+    let villageData = [];
+    let personalData = [];
+
+    // 切換頁籤 (Tab Switch)
+    window.switchTab = function(type) {
+        $('.tab-btn').removeClass('active');
+        $('.tab-content').removeClass('active');
+        
+        if (type === 'village') {
+            $('.tab-btn:first-child').addClass('active');
+            $('#tab-village').addClass('active');
+        } else {
+            $('.tab-btn:last-child').addClass('active');
+            $('#tab-personal').addClass('active');
+        }
+    };
+
+    // 取得資料 (API)
+    fetch('/api/locations?t=' + new Date().getTime())
     .then(r => r.json())
     .then(data => {
-        // 1. 資料清洗與歸戶 (Normalization)
-        let userCounts = {};
-        
-        data.forEach(item => {
-            // 抓取名字，相容舊資料
-            let rawName = item.nickname || item.name || "熱心鄉親";
-            
-            // ✂️ 關鍵：切除 # 後面的里別
-            let cleanName = rawName.split('#')[0].trim();
-            
-            // 排除無效名字
-            if (cleanName === "nan" || cleanName === "") cleanName = "熱心鄉親";
+        let vCounts = {};
+        ALL_VILLAGES.forEach(v => vCounts[v] = 0);
+        let pCounts = {}; 
 
-            // 累加積分
-            if (userCounts[cleanName]) {
-                userCounts[cleanName]++;
+        data.forEach(item => {
+            let rawName = item.nickname || item.name || '';
+            let displayName = rawName;
+            let assignedVillage = null;
+
+            // 🔥 特洛伊木馬解碼 (Trojan Decoder)
+            if (rawName.indexOf('#') > -1) {
+                let parts = rawName.split('#');
+                displayName = parts[0]; // 暱稱
+                let vName = parts[1];   // 里別
+                if (ALL_VILLAGES.includes(vName)) assignedVillage = vName;
             } else {
-                userCounts[cleanName] = 1;
+                // 舊資料相容：從欄位嘗試抓取里別
+                let soup = (item.area || "") + " " + (item.address || "") + " " + (item.description || "");
+                let matches = soup.match(/[\u4e00-\u9fa5]{2,3}里/g);
+                if (matches) {
+                    let validLi = matches.find(term => ALL_VILLAGES.includes(term));
+                    if (validLi) assignedVillage = validLi;
+                }
+            }
+
+            // 1. 歸戶到 [里]
+            if (assignedVillage) vCounts[assignedVillage]++;
+
+            // 2. 歸戶到 [人]
+            if (displayName && displayName !== '熱心鄉親' && displayName !== '善心人士') {
+                let key = rawName; // 這裡我們用原始名 (含#) 做 key 也可以，或是用 cleanName
+                // 為了正確合併積分，這裡建議用 cleanName (displayName)
+                // 但如果怕重名，可以考慮結合里別。這裡暫時用 displayName 合併：
+                let mergeKey = displayName; 
+                
+                if (!pCounts[mergeKey]) pCounts[mergeKey] = { name: displayName, village: assignedVillage || '未知', count: 0 };
+                pCounts[mergeKey].count++;
             }
         });
 
-        // 2. 轉陣列並排序 (Sort)
-        let sortedUsers = Object.keys(userCounts).map(key => {
-            return { name: key, count: userCounts[key] };
-        }).sort((a, b) => b.count - a.count);
+        // 排序
+        villageData = Object.keys(vCounts).map(key => ({ name: key, count: vCounts[key] })).sort((a, b) => b.count - a.count);
+        personalData = Object.values(pCounts).sort((a, b) => b.count - a.count);
 
-        // 3. 移除 Loading，顯示介面
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('top-heroes').style.display = 'flex';
+        // 渲染
+        renderPodium('village', villageData);
+        renderList('village', villageData);
+        renderPodium('personal', personalData);
+        renderList('personal', personalData);
 
-        // 4. 渲染前三名 (Top 3)
-        // 為了避免資料少於 3 人報錯，加個簡易防呆
-        if (sortedUsers[0]) updateHero(1, sortedUsers[0]);
-        if (sortedUsers[1]) updateHero(2, sortedUsers[1]);
-        if (sortedUsers[2]) updateHero(3, sortedUsers[2]);
+        $('#loading-box').hide();
+    })
+    .catch(e => { $('#loading-box').html('❌ 資料讀取失敗'); console.error(e); });
 
-        // 5. 渲染列表 (Rank 4 ~ 50)
-        let listContainer = document.getElementById('leaderboard-list');
-        listContainer.innerHTML = ""; // 清空
+    // 渲染頒獎台 (前三名)
+    function renderPodium(type, data) {
+        let container = $(`#podium-${type}`);
+        let html = '';
+        
+        let d2 = data[1] || { name: '從缺', count: '-' };
+        html += `
+            <div class="podium-item rank-2">
+                <div class="rank-avatar">🥈</div>
+                <div class="podium-block">
+                    <div class="rank-name">${d2.name}</div>
+                    ${type==='personal' && d2.count!=='-' ? `<div class="rank-sub">${d2.village}</div>` : ''}
+                    <div class="count-badge">${d2.count} ${d2.count!=='-'?'尊':''}</div>
+                </div>
+            </div>`;
+            
+        let d1 = data[0] || { name: '從缺', count: '-' };
+        html += `
+            <div class="podium-item rank-1">
+                <div class="crown-icon">👑</div>
+                <div class="rank-avatar">🥇</div>
+                <div class="podium-block">
+                    <div class="rank-name">${d1.name}</div>
+                    ${type==='personal' && d1.count!=='-' ? `<div class="rank-sub">${d1.village}</div>` : ''}
+                    <div class="count-badge">${d1.count} ${d1.count!=='-'?'尊':''}</div>
+                </div>
+            </div>`;
 
-        // 只取第 4 名到第 53 名 (index 3 ~ 52)
-        sortedUsers.slice(3, 53).forEach((user, index) => {
-            let rank = index + 4;
-            // DiceBear 頭像種子碼需 encode，支援中文
-            let avatarUrl = `https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=${encodeURIComponent(user.name)}`;
+        let d3 = data[2] || { name: '從缺', count: '-' };
+        html += `
+            <div class="podium-item rank-3">
+                <div class="rank-avatar">🥉</div>
+                <div class="podium-block">
+                    <div class="rank-name">${d3.name}</div>
+                    ${type==='personal' && d3.count!=='-' ? `<div class="rank-sub">${d3.village}</div>` : ''}
+                    <div class="count-badge">${d3.count} ${d3.count!=='-'?'尊':''}</div>
+                </div>
+            </div>`;
+            
+        container.html(html);
+    }
 
-            let html = `
-                <div class="rank-item">
-                    <div class="rank-num">${rank}</div>
-                    <img src="${avatarUrl}" class="list-avatar" alt="avatar">
+    // 渲染列表 (4名以後)
+    function renderList(type, data) {
+        let container = $(`#list-${type}`);
+        let html = '';
+        let maxCount = data[0] ? data[0].count : 1;
+
+        for (let i = 3; i < data.length; i++) {
+            let item = data[i];
+            if (item.count === 0 && type === 'personal') continue; // 排除0分的人
+
+            let percent = (item.count / maxCount) * 100;
+            
+            // 遊戲化等級標籤
+            let levelTag = '';
+            if (type === 'personal') {
+                if (item.count >= 20) levelTag = '<span class="lvl-tag lvl-max">在世土地公</span>';
+                else if (item.count >= 10) levelTag = '<span class="lvl-tag lvl-3">虔誠爐主</span>';
+                else if (item.count >= 5) levelTag = '<span class="lvl-tag lvl-2">熱血護衛隊</span>';
+                else levelTag = '<span class="lvl-tag lvl-1">尋神小萌新</span>';
+            } else {
+                if (item.count >= 10) levelTag = '<span class="lvl-tag lvl-max">🔥 熱區</span>';
+            }
+
+            html += `
+                <div class="list-item">
+                    <div class="list-rank">${i + 1}</div>
                     <div class="list-info">
-                        <div class="list-name">${user.name}</div>
-                        <div class="list-title">尋神獵人</div>
+                        <div class="list-name">
+                            ${item.name} ${levelTag}
+                        </div>
+                        ${type==='personal' ? `<div class="list-sub">${item.village}</div>` : ''}
+                        <div class="list-bar-bg">
+                            <div class="list-bar-fill" style="width: ${percent}%;"></div>
+                        </div>
                     </div>
-                    <div class="list-score">${user.count} <small style="font-size:0.8rem; font-weight:normal;">尊</small></div>
+                    <div class="list-count">${item.count}</div>
                 </div>
             `;
-            listContainer.innerHTML += html;
-        });
-    })
-    .catch(err => {
-        console.error("Leaderboard Error:", err);
-        document.getElementById('loading').innerHTML = "⚠️ 讀取失敗，請重新整理";
-    });
-
-    // 輔助函式：更新前三名 DOM
-    function updateHero(rank, user) {
-        let avatarUrl = `https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=${encodeURIComponent(user.name)}`;
+        }
         
-        let imgEl = document.getElementById(`top${rank}-img`);
-        let nameEl = document.getElementById(`top${rank}-name`);
-        let scoreEl = document.getElementById(`top${rank}-score`);
-
-        if (imgEl) imgEl.src = avatarUrl;
-        if (nameEl) nameEl.innerText = user.name;
-        if (scoreEl) scoreEl.innerText = user.count;
+        if(html === '') html = '<div style="text-align:center;color:#ccc;padding:20px;">等待英雄出現...</div>';
+        container.html(html);
     }
 </script>
 {% endblock %}
