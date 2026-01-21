@@ -240,7 +240,34 @@
 
 {% block scripts %}
 <script>
-    // 🔥 超能力跑馬燈邏輯：優先抓取「里別」欄位
+    // --- 🛑 修正一：FB/LINE 瀏覽器阻擋器 (防止 GPS 失效) ---
+    function detectInAppBrowser() {
+        var ua = navigator.userAgent || navigator.vendor || window.opera;
+        var isInstagram = (ua.indexOf('Instagram') > -1);
+        var isFacebook = (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1);
+        var isLine = (ua.indexOf("Line") > -1);
+
+        if (isInstagram || isFacebook || isLine) {
+            Swal.fire({
+                title: '⚠️ 建議切換瀏覽器',
+                html: `
+                    <div style="text-align: left; font-size: 1rem; color: #5d4037;">
+                        <p>偵測到您正在使用 <b>Line</b> 或 <b>臉書</b> 瀏覽器。</p>
+                        <p>這會導致 <b>GPS 定位失敗</b>！<br>請點選右上角 <b>( ... )</b> 或 <b>分享圖示</b>，<br>並選擇 <b>「在 Chrome 開啟」</b> 或 <b>「在 Safari 開啟」</b>。</p>
+                    </div>
+                `,
+                icon: 'warning',
+                background: '#fdfcf0', 
+                confirmButtonText: '我知道了',
+                confirmButtonColor: '#d32f2f',
+                allowOutsideClick: false,
+                backdrop: `rgba(0,0,0,0.8)`
+            });
+        }
+    }
+    window.addEventListener('load', detectInAppBrowser);
+
+    // --- 🔧 修正二：跑馬燈邏輯 (優先抓地址/里別，解決「苑裡某處」) ---
     let realMsgs = ["🔔 報——！歡迎來到尋神情報站！", "💡 報馬仔提醒：發現神隊友請上傳！"];
     
     fetch('/api/locations')
@@ -248,26 +275,31 @@
     .then(d => {
         if(d && d.length > 0) {
             realMsgs = []; 
+            // 取最新 5 筆
             d.slice().reverse().slice(0, 5).forEach(i => {
-                // 1. 處理名字 (去除 #里別)
                 let rawName = i.nickname || i.name || "熱心鄉親";
                 let name = rawName.split('#')[0]; 
 
-                // 2. 智慧地點判斷
-                let place = "苑裡某處"; // 預設值
+                // 智慧地點判斷
+                let place = "苑裡某處"; 
                 
-                // 優先順序：1. CSV 的「里別」欄位  2. 暱稱裡的 #里別  3. 描述
+                // (1) 優先：里別欄位
                 if (i['里別'] && i['里別'] !== "nan" && i['里別'].trim() !== "") {
                      place = i['里別'];
+                // (2) 次優先：地址 (若有「里」字則截斷)
+                } else if (i.address && i.address !== "nan" && i.address.length > 0) {
+                    place = i.address.includes("里") ? i.address.substring(0, i.address.indexOf("里")+1) : i.address;
+                } else if (i['地址'] && i['地址'] !== "nan") {
+                    place = i['地址'];
+                // (3) 再次之：暱稱帶有 #
                 } else if (rawName.includes('#')) {
                     place = rawName.split('#')[1]; 
+                // (4) 其他區域/描述
                 } else if (i.area && i.area !== "其他" && i.area !== "nan") {
                     place = i.area; 
                 } else if (i.description && i.description !== "nan") {
                     place = i.description.replace(/[\[\]]/g, ' '); 
-                } else if (i.lat && i.lng) {
-                     place = "苑裡田野間";
-                }
+                } 
 
                 realMsgs.push(`🙏 感恩！${name} 於 [${place.trim()}] 成功尋獲神隊友！`);
             });
@@ -280,6 +312,7 @@
     })
     .catch(e => console.log("Ticker Error:", e));
 
+    // 輪播動畫
     let idx = 0;
     let el = document.getElementById('ticker-msg');
     setInterval(() => {
