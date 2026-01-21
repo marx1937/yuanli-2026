@@ -238,11 +238,12 @@
     </div>
 {% endblock %}
 
-{% block scripts %}
+    {% block scripts %}
 <script>
     // --- 🛑 修正一：FB/LINE 瀏覽器阻擋器 (防止 GPS 失效) ---
     function detectInAppBrowser() {
         var ua = navigator.userAgent || navigator.vendor || window.opera;
+        // 偵測 Line, Facebook (FBAN/FBAV), Instagram
         var isInstagram = (ua.indexOf('Instagram') > -1);
         var isFacebook = (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1);
         var isLine = (ua.indexOf("Line") > -1);
@@ -267,7 +268,7 @@
     }
     window.addEventListener('load', detectInAppBrowser);
 
-    // --- 🔧 修正二：跑馬燈邏輯 (優先抓地址/里別，解決「苑裡某處」) ---
+    // --- 🔧 修正二：跑馬燈邏輯 (含座標判斷，解決「苑裡某處」) ---
     let realMsgs = ["🔔 報——！歡迎來到尋神情報站！", "💡 報馬仔提醒：發現神隊友請上傳！"];
     
     fetch('/api/locations')
@@ -281,25 +282,32 @@
                 let name = rawName.split('#')[0]; 
 
                 // 智慧地點判斷
-                let place = "苑裡某處"; 
+                let place = "苑裡某處"; // 最終保底
                 
                 // (1) 優先：里別欄位
                 if (i['里別'] && i['里別'] !== "nan" && i['里別'].trim() !== "") {
                      place = i['里別'];
+                
                 // (2) 次優先：地址 (若有「里」字則截斷)
                 } else if (i.address && i.address !== "nan" && i.address.length > 0) {
                     place = i.address.includes("里") ? i.address.substring(0, i.address.indexOf("里")+1) : i.address;
                 } else if (i['地址'] && i['地址'] !== "nan") {
                     place = i['地址'];
+                
                 // (3) 再次之：暱稱帶有 #
                 } else if (rawName.includes('#')) {
                     place = rawName.split('#')[1]; 
-                // (4) 其他區域/描述
+                
+                // (4) 區域/描述
                 } else if (i.area && i.area !== "其他" && i.area !== "nan") {
                     place = i.area; 
                 } else if (i.description && i.description !== "nan") {
                     place = i.description.replace(/[\[\]]/g, ' '); 
-                } 
+                
+                // 🔥 (5) 新增：座標判斷 (如果前面文字都沒抓到，但有座標)
+                } else if ( (i.lat && i.lat !== "nan") || (i.latitude && i.latitude !== "nan") ) {
+                    place = "苑裡田野間";
+                }
 
                 realMsgs.push(`🙏 感恩！${name} 於 [${place.trim()}] 成功尋獲神隊友！`);
             });
