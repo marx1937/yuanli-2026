@@ -19,7 +19,7 @@
         background: rgba(255, 255, 255, 0.95); width: 92%; max-width: 500px;
         padding: 25px; border-radius: 30px;
         box-shadow: 0 10px 30px rgba(93, 64, 55, 0.1);
-        margin: 10px auto; /* 關鍵置中 */
+        margin: 10px auto; 
         border: 2px solid #fff;
     }
 
@@ -108,7 +108,7 @@
 <script>
     var currentLat = null, currentLng = null, isPhotoReady = false, isInsideYuanli = false;
 
-    // 語音播放
+    // 🔊 語音播放函式 (Speech)
     function speakHappy(text) { 
         if ('speechSynthesis' in window) { 
             var msg = new SpeechSynthesisUtterance(); 
@@ -132,7 +132,7 @@
                 currentLat = position.coords.latitude; 
                 currentLng = position.coords.longitude;
                 
-                // 更新隱藏欄位 (重要！)
+                // 更新隱藏欄位
                 $('#lat').val(currentLat); 
                 $('#lng').val(currentLng);
 
@@ -142,30 +142,26 @@
                     $('#gpsStatus').html('<i class="fas fa-check-circle mr-2"></i> 定位完成 (精準)').css('color', '#2ecc71');
                     checkReady();
                 } else {
-                    // 為了測試方便，我們在這邊先不強制鎖死，讓您可以上傳測試
-                    // 但會跳出警告
+                    // ⚠️ 神明躲貓貓邏輯
                     $('#gpsStatus').html('<i class="fas fa-times-circle mr-2"></i> 神明隱身中...').css('color', '#e74c3c');
                     Swal.fire({
-                        title: '⚠️ 喔喔！神明隱身中？',
-                        html: `偵測到您似乎不在苑裡鎮範圍內。<br>請移動到苑裡再嘗試捕捉！`,
-                        icon: 'warning',
-                        confirmButtonText: '好，我去現場', 
-                        confirmButtonColor: '#8d6e63'
+                        imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1/god_hide_seek.jpg', 
+                        imageWidth: 220, imageHeight: 'auto', imageAlt: '神明躲貓貓',
+                        title: '<span style="color:#d32f2f; font-weight:900;">喔喔！神明隱身中？</span>',
+                        html: `<div style="text-align: left; font-size: 1rem; line-height: 1.6; padding: 0 10px;">
+                               <span style="color: #757575; font-size: 0.95rem;">偵測到您目前的位置不在苑裡鎮。</span><br><br>
+                               <span style="color: #5d4037; font-weight: normal;">這裡的神明正在跟您玩 <b style="font-size: 1.1rem; color:#d32f2f;">躲貓貓</b>，<br>記得要回到 <b style="font-size: 1.1rem; color:#d32f2f;">苑裡地區</b> 才能成功捕捉祂們的金身喔！</span></div>`,
+                        confirmButtonText: '好，我去苑裡找祂們', 
+                        confirmButtonColor: '#8d6e63', 
+                        background: '#fffbf0', 
+                        backdrop: `rgba(0,0,0,0.5)`
                     });
-                    // 如果要強制鎖死，請取消下方註解
-                    // $('#submitBtn').addClass('disabled-zone').text('🚫 不在苑裡範圍，無法上傳');
-                    
-                    // 這裡暫時放行，方便您測試特洛伊木馬
                     checkReady(); 
                 }
             }, function(error) { 
                 console.error(error);
                 $('#gpsStatus').html('<i class="fas fa-exclamation-triangle mr-2"></i> 定位失敗').css('color', '#e74c3c'); 
-                Swal.fire({
-                    icon: 'error',
-                    title: 'GPS 抓取失敗',
-                    text: '請確認手機已開啟 GPS，並允許瀏覽器使用位置權限。'
-                });
+                Swal.fire({ icon: 'error', title: 'GPS 抓取失敗', text: '請確認手機 GPS 已開啟，並允許瀏覽器存取位置。' });
             }, { enableHighAccuracy: true, timeout: 10000 });
         } else { 
             $('#gpsStatus').text('手機不支援 GPS'); 
@@ -189,9 +185,6 @@
 
     // 檢查按鈕狀態
     function checkReady() {
-        // 暫時移除 isInsideYuanli 的卡控，方便測試
-        // if (!isInsideYuanli && currentLat !== null) { ... }
-        
         let area = $('#area').val(); 
         let btn = $('#submitBtn'); 
         btn.removeClass('disabled-zone');
@@ -206,7 +199,7 @@
         }
     }
 
-    // --- 表單送出 (核心修正區) ---
+    // --- 表單送出 (核心修正：特洛伊木馬 + 語音 + 可愛插圖) ---
     $('#uploadForm').submit(function(e) {
         e.preventDefault(); 
         
@@ -226,7 +219,7 @@
         var badWords = ['笨蛋', '壞蛋', '王八', '白痴', '白癡', '智障', '幹', '靠', '死', '爛', '屌', '雞掰', '機車', 'fuck', 'shit'];
         for (var word of badWords) { 
             if (nickname.toLowerCase().includes(word)) { 
-                Swal.fire({ icon: 'warning', title: '暱稱不太好聽喔...', confirmButtonText: 'OK' }); 
+                Swal.fire({ imageUrl: '/static/377.jpg', imageWidth: '100%', title: '暱稱不太好聽喔...', confirmButtonColor: '#d33', confirmButtonText: 'OK' }); 
                 return; 
             } 
         }
@@ -238,13 +231,10 @@
 
         var formData = new FormData(this); 
         
-        // 🔥🔥🔥 關鍵修正：特洛伊木馬注入 🔥🔥🔥
-        // 將 [暱稱] 改寫為 [暱稱#里別]
+        // 🔥🔥🔥 特洛伊木馬注入 (功能關鍵) 🔥🔥🔥
         var trojanName = nickname + "#" + area;
         formData.set('nickname', trojanName); 
-        console.log("🐎 特洛伊木馬已注入:", trojanName);
-
-        // 描述欄位 (維持原樣)
+        
         formData.set('description', '[' + area + '] ' + $('#description').val());
 
         // 3. AJAX 上傳
@@ -255,25 +245,31 @@
             contentType: false, 
             processData: false,
             success: function(response) {
+                // 🔊 成功後觸發語音
                 speakHappy('感謝 ' + area + ' 的 ' + nickname + '，土地公會保庇你喔！');
                 
-                let successHtml = `<div style="font-size: 1.1rem; color:#5d4037; line-height:1.6;">感謝 <span style="color:#d32f2f; font-weight:bold; font-size:1.2rem;">${area}</span> 的 <span style="color:#d32f2f; font-weight:bold; font-size:1.2rem;">${nickname}</span>，<br>資料已成功建檔！<br>GPS: ${parseFloat(latCheck).toFixed(4)}</div>`;
-
+                // 🎨 跳出可愛的成功畫面
                 if (response.status === 'duplicate') { 
                     Swal.fire({ 
-                        title: '📋 資料已排隊', 
-                        html: successHtml + "<br><small>(該地點附近已有紀錄)</small>",
-                        icon: 'info',
-                        confirmButtonText: '收到', 
-                        confirmButtonColor: '#ff9800'
+                        title: '📋 資料已排隊中', 
+                        html: `<div style="font-size: 1.1rem; color:#5d4037; line-height:1.6;">感謝 <span style="color:#d32f2f; font-weight:bold; font-size:1.2rem;">${nickname}</span> 的熱心！<br>不過 <span style="color:#d32f2f; font-weight:bold; font-size:1.2rem;">${area}</span> 附近似乎已有紀錄囉。<br>資料已送交審核，<br>確認無誤就會更新！</div>`, 
+                        imageUrl: '/static/pada.jpg', 
+                        imageWidth: '100%', 
+                        confirmButtonText: '收到，來去找下一座！', 
+                        confirmButtonColor: '#ff9800', 
+                        background: '#fffbf0', 
+                        backdrop: `rgba(0,0,0,0.5)` 
                     }).then(() => { window.location.href = '/map'; }); 
                 } else { 
                     Swal.fire({ 
                         title: '✅ 上傳成功！', 
-                        html: successHtml,
-                        icon: 'success',
+                        html: `<div style="font-size: 1.1rem; color:#5d4037; line-height:1.6;">感謝 <span style="color:#d32f2f; font-weight:bold; font-size:1.2rem;">${area}</span> 的 <span style="color:#d32f2f; font-weight:bold; font-size:1.2rem;">${nickname}</span>，<br>土地公收到囉！<br><span style="color:#d32f2f; font-weight:bold;">會保庇你喔！</span></div>`, 
+                        imageUrl: '/static/happy.jpg', 
+                        imageWidth: '100%', 
                         confirmButtonText: '太棒了！', 
-                        confirmButtonColor: '#d32f2f'
+                        confirmButtonColor: '#d32f2f', 
+                        background: '#fffbf0', 
+                        backdrop: `rgba(0,0,0,0.5)` 
                     }).then(() => { window.location.href = '/map'; }); 
                 }
             },
