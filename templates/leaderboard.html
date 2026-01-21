@@ -22,7 +22,7 @@
             font-family: "Microsoft JhengHei", sans-serif;
         }
 
-        /* 2. 看板區 (已換新圖) */
+        /* 2. 看板區 */
         .rank-header {
             text-align: center; padding: 25px 0 10px 0;
             position: relative; margin-bottom: 15px;
@@ -79,9 +79,12 @@
             object-fit: cover;
         }
         
-        /* 👑 皇冠樣式 */
-        .p-crown {
-            position: absolute; top: -35px; width: 40px; 
+        /* 🔥 免圖檔黃金皇冠 (FontAwesome) */
+        .p-crown-icon {
+            position: absolute; top: -42px; 
+            font-size: 40px; color: #ffca28; /* 黃金色 */
+            /* 加上文字陰影做出立體感 */
+            text-shadow: 2px 2px 0px #bf360c, -1px -1px 0 #fff;
             animation: bounce 2s infinite; z-index: 6;
         }
         @keyframes bounce { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-5px);} }
@@ -211,16 +214,12 @@
             }
         }
 
-        // 🔥 防止破圖 + 中性風格 🔥
+        // 🔥 防止破圖 + 中性風格
         function getAvatar(seed, isUser) {
-            // 對中文名字進行編碼
             let encodedSeed = encodeURIComponent(seed);
-
             if(!isUser) {
-                // 里別
                 return `https://ui-avatars.com/api/?name=${encodedSeed}&background=random&color=fff&size=128`;
             }
-            // 使用 DiceBear v9 Adventurer Neutral (中性冒險家)
             return `https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${encodedSeed}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
         }
 
@@ -265,7 +264,6 @@
             let img2 = isUser ? getAvatar(p2.name, true) : `https://res.cloudinary.com/diuoghid2/image/upload/v1/badge_silver.png`;
             let img3 = isUser ? getAvatar(p3.name, true) : `https://res.cloudinary.com/diuoghid2/image/upload/v1/badge_bronze.png`;
 
-            // 安全氣囊 (onerror)
             let err = `onerror="this.src='${DEFAULT_AVATAR}'"`;
 
             let html = `
@@ -277,7 +275,7 @@
                     </div>
                 </div>
                 <div class="podium-col p-1">
-                    <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/crown.png" class="p-crown">
+                    <i class="fas fa-crown p-crown-icon"></i>
                     <img src="${img1}" class="p-avatar" ${err}>
                     <div class="p-base">
                         <div class="p-name">${p1.name}</div>
@@ -297,7 +295,6 @@
 
         function renderList(data, isUser=false) {
             let html = '';
-            
             data.forEach((item, idx) => {
                 if (item.count === 0) return;
                 
