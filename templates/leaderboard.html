@@ -1,352 +1,90 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>尋神風雲榜 - 苑裡鎮</title>
-    
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{% block scripts %}
+<script>
+    // --- 🏆 英雄榜核心演算法 ---
 
-    <style>
-        /* 1. 基礎設定 */
-        body {
-            background-color: #fdfcf0;
-            background-image: 
-                linear-gradient(to right, rgba(215, 204, 200, 0.1) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(215, 204, 200, 0.1) 1px, transparent 1px);
-            background-size: 20px 20px;
-            padding-bottom: 110px;
-            margin: 0;
-            font-family: "Microsoft JhengHei", sans-serif;
-        }
-
-        /* 2. 看板區 */
-        .rank-header {
-            text-align: center; padding: 25px 0 10px 0;
-            position: relative; margin-bottom: 15px;
-        }
-        .rank-banner-img {
-            width: 90%; max-width: 320px; height: auto;
-            filter: drop-shadow(0 8px 10px rgba(93, 64, 55, 0.15));
-            animation: float-title 3s ease-in-out infinite;
-        }
-        @keyframes float-title { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-
-        /* 3. 切換按鈕 */
-        .tab-container {
-            display: flex; justify-content: center; gap: 15px; margin-bottom: 20px;
-        }
-        .rank-tab {
-            padding: 8px 25px; border-radius: 50px; font-weight: bold; border: none;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; transition: 0.2s;
-            font-size: 0.95rem; display: flex; align-items: center; gap: 6px;
-        }
-        .rank-tab.active {
-            background: linear-gradient(135deg, #d32f2f, #b71c1c); color: white; transform: scale(1.05);
-        }
-        .rank-tab.inactive {
-            background: #fff; color: #8d6e63; border: 1px solid #efebe9;
-        }
-
-        /* 4. 說明按鈕 (卷軸風) */
-        .info-bar { text-align: center; margin-bottom: 25px; }
-        .info-scroll-btn {
-            background: #fff8e1; color: #d84315;
-            border: 2px solid #ffe082;
-            padding: 6px 18px; border-radius: 8px;
-            font-size: 0.9rem; font-weight: bold; text-decoration: none;
-            display: inline-flex; align-items: center; gap: 6px;
-            box-shadow: 0 3px 0 #ffca28;
-            transition: 0.1s;
-        }
-        .info-scroll-btn:active { transform: translateY(3px); box-shadow: none; }
-
-        /* 5. 獎台區 */
-        .podium-section {
-            display: flex; align-items: flex-end; justify-content: center;
-            height: 230px; margin-bottom: 20px; gap: 8px; padding: 0 10px;
-        }
-        .podium-col {
-            display: flex; flex-direction: column; align-items: center; position: relative;
-        }
+    fetch('/api/locations')
+    .then(r => r.json())
+    .then(data => {
+        // 1. 資料歸戶 (Aggregation) - 解決「特洛伊木馬」導致的名字分身問題
+        let userCounts = {};
         
-        .p-avatar {
-            width: 70px; height: 70px; border-radius: 50%; 
-            border: 4px solid #fff; z-index: 5; background: #fff;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: -15px;
-            object-fit: cover;
-        }
-        
-        /* 🔥 免圖檔黃金皇冠 (FontAwesome) */
-        .p-crown-icon {
-            position: absolute; top: -42px; 
-            font-size: 40px; color: #ffca28; /* 黃金色 */
-            /* 加上文字陰影做出立體感 */
-            text-shadow: 2px 2px 0px #bf360c, -1px -1px 0 #fff;
-            animation: bounce 2s infinite; z-index: 6;
-        }
-        @keyframes bounce { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-5px);} }
+        data.forEach(item => {
+            // (A) 取得原始暱稱 (相容舊資料 nan/null)
+            let rawName = item.nickname || item.name || "熱心鄉親";
+            
+            // (B) 清洗名字：移除 # 後面的里別資訊
+            // 舊資料 "王小明" -> "王小明"
+            // 新資料 "王小明#客庄里" -> "王小明" (這樣積分才會加在一起！)
+            let cleanName = rawName.split('#')[0].trim();
+            
+            // (C) 排除無效名字 (如 nan)
+            if(cleanName.toLowerCase() === 'nan' || cleanName === "") {
+                cleanName = "熱心鄉親";
+            }
 
-        .p-base {
-            width: 90px; text-align: center; color: white;
-            border-radius: 15px 15px 0 0; padding-top: 20px;
-            display: flex; flex-direction: column; justify-content: flex-start;
-            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
-        }
-        .p-1 .p-avatar { width: 90px; height: 90px; border-color: #ffd700; margin-bottom: -20px;}
-        .p-1 .p-base { height: 130px; background: linear-gradient(to bottom, #ffca28, #ff6f00); width: 110px; z-index: 3;}
-        .p-2 .p-base { height: 100px; background: linear-gradient(to bottom, #cfd8dc, #90a4ae); z-index: 2;}
-        .p-3 .p-base { height: 80px;  background: linear-gradient(to bottom, #d7ccc8, #8d6e63); z-index: 2;}
-
-        .p-name { font-weight: bold; font-size: 1rem; margin-bottom: 2px; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-        .p-score { font-size: 0.8rem; opacity: 0.9; background: rgba(0,0,0,0.1); padding: 2px 8px; border-radius: 10px; display: inline-block;}
-
-        /* 6. 列表區 */
-        .list-container { max-width: 600px; margin: 0 auto; padding: 0 15px; }
-        .list-item {
-            background: white; border-radius: 15px; padding: 12px 15px;
-            display: flex; align-items: center; margin-bottom: 12px;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.05); border: 1px solid #fff;
-        }
-        .list-rank { width: 30px; font-size: 1.1rem; font-weight: 900; color: #a1887f; text-align: center; }
-        .list-avatar {
-            width: 50px; height: 50px; border-radius: 50%; margin: 0 15px;
-            background: #f5f5f5; border: 2px solid #eee; object-fit: cover;
-        }
-        .list-info { flex: 1; overflow: hidden; }
-        .list-name { font-weight: bold; color: #4e342e; font-size: 1.05rem; display: flex; align-items: center; gap: 5px;}
-        .list-sub { font-size: 0.85rem; color: #9e9e9e; margin-top: 2px; }
-        
-        .list-bar-bg { height: 6px; width: 100%; background: #efebe9; border-radius: 3px; margin-top: 6px; overflow: hidden; }
-        .list-bar-fill { height: 100%; background: linear-gradient(90deg, #ffca28, #ff6f00); border-radius: 3px; }
-        .list-count { font-size: 1.2rem; font-weight: 900; color: #d32f2f; margin-left: 10px; min-width: 40px; text-align: right; }
-
-        /* 等級標籤 (木牌質感) */
-        .lvl-tag {
-            font-size: 0.7rem; padding: 2px 8px; border-radius: 4px;
-            font-weight: normal; color: #5d4037; border: 1px solid #8d6e63;
-            background-color: #efebe9; display: inline-block; transform: scale(0.9);
-        }
-        .lvl-max { background: #d32f2f; color: #fff; border-color: #b71c1c; }
-        .lvl-3 { background: #ffca28; color: #5d4037; border-color: #ff8f00; }
-
-        /* 底部導航 */
-        .fake-navbar { 
-            position: fixed; bottom: 0; width: 100%; 
-            background: #fff; border-top: 1px solid #efebe9; 
-            padding: 0 5px; height: 90px; 
-            display: flex; justify-content: space-around; align-items: center; 
-            z-index: 2000; box-shadow: 0 -5px 20px rgba(93, 64, 55, 0.05);
-        }
-        .nav-item { text-align: center; color: #a1887f; text-decoration: none !important; font-size: 0.75rem; flex: 1; display: flex; flex-direction: column; align-items: center; }
-        .nav-icon { height: 42px; width: auto; margin-bottom: 3px; filter: grayscale(100%) sepia(20%) opacity(0.8); transition: 0.3s; }
-        .nav-item.active .nav-icon { transform: scale(1.1); filter: none; filter: drop-shadow(0 2px 2px rgba(211, 47, 47, 0.2)); }
-        .nav-item.active span { color: #d32f2f; font-weight: bold; }
-        .nav-center-btn {
-            width: 80px; height: 80px; background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
-            border-radius: 50%; border: 6px solid #fdfcf0; display: flex; align-items: center; justify-content: center;
-            transform: translateY(-35px); box-shadow: 0 8px 15px rgba(198, 40, 40, 0.3);
-        }
-        .nav-center-icon { height: 55px; width: auto; display: block; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2)); }
-    </style>
-</head>
-<body>
-
-    <div class="rank-header">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1768742671/leaderboard_top.png" class="rank-banner-img">
-    </div>
-
-    <div class="tab-container">
-        <button class="rank-tab active" onclick="switchTab('village')"><i class="fas fa-map-marked-alt"></i> 全里爭霸</button>
-        <button class="rank-tab inactive" onclick="switchTab('user')"><i class="fas fa-user-ninja"></i> 個人英雄</button>
-    </div>
-
-    <div class="info-bar">
-        <a href="#" class="info-scroll-btn" onclick="showLevelInfo()">
-            <i class="fas fa-scroll"></i> 參閱英雄榜文 (等級說明)
-        </a>
-    </div>
-
-    <div class="podium-section" id="podium-area">
-        <div style="color:#a1887f;">正在計算功德值...</div>
-    </div>
-
-    <div class="list-container" id="list-area"></div>
-
-    <div class="fake-navbar">
-        <a href="/" class="nav-item"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_home.png" class="nav-icon"><span>首頁</span></a>
-        <a href="/map" class="nav-item"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_map.png" class="nav-icon"><span>地圖</span></a>
-        <a href="/upload" class="nav-center-btn"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_upload.png" class="nav-center-icon"></a>
-        <a href="/gallery" class="nav-item"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_gallery.png" class="nav-icon"><span>圖庫</span></a>
-        <a href="/leaderboard" class="nav-item active"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_leaderboard.png" class="nav-icon"><span>榜單</span></a>
-    </div>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script>
-        const ALL_VILLAGES = [
-            "苑東里", "苑南里", "苑北里", "苑港里", "西平里", "西勢里", "海岸里", "房裡里", "客庄里", "中正里", 
-            "新復里", "山柑里", "社苓里", "田心里", "舊社里", "山腳里", "福田里", "泰田里", "玉田里", "南勢里", 
-            "石鎮里", "蕉埔里", "上館里", "水坡里", "苑坑里", "出水里"
-        ];
-
-        let currentTab = 'village';
-        let rawData = [];
-
-        // 預設頭像
-        const DEFAULT_AVATAR = "https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_home.png";
-
-        fetch('/api/locations').then(r => r.json()).then(data => {
-            rawData = data;
-            renderVillageRank();
+            // (D) 累加積分
+            if (userCounts[cleanName]) {
+                userCounts[cleanName]++;
+            } else {
+                userCounts[cleanName] = 1;
+            }
         });
 
-        function switchTab(tab) {
-            currentTab = tab;
-            $('.rank-tab').removeClass('active').addClass('inactive');
-            if(tab === 'village') {
-                $('.rank-tab:first').addClass('active').removeClass('inactive');
-                renderVillageRank();
-            } else {
-                $('.rank-tab:last').addClass('active').removeClass('inactive');
-                renderUserRank();
-            }
-        }
+        // 2. 轉換為陣列並排序 (Sorting)
+        let sortedUsers = Object.keys(userCounts).map(key => {
+            return { name: key, count: userCounts[key] };
+        }).sort((a, b) => b.count - a.count); // 由高到低排序
 
-        // 🔥 防止破圖 + 中性風格
-        function getAvatar(seed, isUser) {
-            let encodedSeed = encodeURIComponent(seed);
-            if(!isUser) {
-                return `https://ui-avatars.com/api/?name=${encodedSeed}&background=random&color=fff&size=128`;
-            }
-            return `https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${encodedSeed}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
-        }
+        // 3. 渲染前三名 (Top 3 Heroes)
+        // 確保 HTML 中有對應的 ID: #top1-name, #top1-count, #top1-avatar ...
+        if (sortedUsers.length > 0) renderTopHero(1, sortedUsers[0]);
+        if (sortedUsers.length > 1) renderTopHero(2, sortedUsers[1]);
+        if (sortedUsers.length > 2) renderTopHero(3, sortedUsers[2]);
 
-        function renderVillageRank() {
-            let counts = {};
-            ALL_VILLAGES.forEach(v => counts[v] = 0);
-            rawData.forEach(i => {
-                let v = "其他";
-                if (i['里別'] && i['里別'] !== "nan") v = i['里別'];
-                else if (i.nickname && i.nickname.includes("#")) v = i.nickname.split("#")[1];
-                else if (i.area) v = i.area;
-                if(counts[v] !== undefined) counts[v]++;
-            });
+        // 4. 渲染列表 (Rank 4 ~ 50) - 依照 v7.0 鐵律限制數量
+        let listContainer = document.getElementById('leaderboard-list');
+        listContainer.innerHTML = ""; // 清空
 
-            let sorted = Object.keys(counts).map(k => ({name: k, count: counts[k]}))
-                                          .sort((a,b) => b.count - a.count);
-            renderPodium(sorted);
-            renderList(sorted.slice(3, 53)); // Top 50
-        }
-
-        function renderUserRank() {
-            let counts = {};
-            rawData.forEach(i => {
-                let name = i.nickname ? i.nickname.split("#")[0] : "熱心串友";
-                if(!counts[name]) counts[name] = 0;
-                counts[name]++;
-            });
-
-            let sorted = Object.keys(counts).map(k => ({name: k, count: counts[k]}))
-                                          .sort((a,b) => b.count - a.count);
+        // 取第 4 名到第 53 名 (index 3 ~ 52)
+        sortedUsers.slice(3, 53).forEach((user, index) => {
+            let rank = index + 4; // 實際排名
             
-            renderPodium(sorted, true);
-            renderList(sorted.slice(3, 53), true); // Top 50
-        }
-
-        function renderPodium(data, isUser=false) {
-            let p1 = data[0] || {name:'虛位以待', count:0};
-            let p2 = data[1] || {name:'虛位以待', count:0};
-            let p3 = data[2] || {name:'虛位以待', count:0};
-
-            let img1 = isUser ? getAvatar(p1.name, true) : `https://res.cloudinary.com/diuoghid2/image/upload/v1/badge_gold.png`;
-            let img2 = isUser ? getAvatar(p2.name, true) : `https://res.cloudinary.com/diuoghid2/image/upload/v1/badge_silver.png`;
-            let img3 = isUser ? getAvatar(p3.name, true) : `https://res.cloudinary.com/diuoghid2/image/upload/v1/badge_bronze.png`;
-
-            let err = `onerror="this.src='${DEFAULT_AVATAR}'"`;
+            // 生成 DiceBear 頭像 (使用清洗後的純名，避免破圖)
+            let avatarUrl = `https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=${encodeURIComponent(user.name)}`;
 
             let html = `
-                <div class="podium-col p-2">
-                    <img src="${img2}" class="p-avatar" ${err}>
-                    <div class="p-base">
-                        <div class="p-name">${p2.name}</div>
-                        <div class="p-score">${p2.count} 尊</div>
+                <div class="rank-item" style="display: flex; align-items: center; background: white; margin-bottom: 10px; padding: 10px 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                    <div style="font-weight: bold; color: #8d6e63; width: 30px; font-size: 1.1rem;">${rank}</div>
+                    <img src="${avatarUrl}" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 15px; border: 2px solid #ffe082;">
+                    <div style="flex: 1;">
+                        <div style="font-weight: bold; color: #5d4037;">${user.name}</div>
+                        <div style="font-size: 0.8rem; color: #a1887f;">尋神獵人</div>
                     </div>
-                </div>
-                <div class="podium-col p-1">
-                    <i class="fas fa-crown p-crown-icon"></i>
-                    <img src="${img1}" class="p-avatar" ${err}>
-                    <div class="p-base">
-                        <div class="p-name">${p1.name}</div>
-                        <div class="p-score">${p1.count} 尊</div>
-                    </div>
-                </div>
-                <div class="podium-col p-3">
-                    <img src="${img3}" class="p-avatar" ${err}>
-                    <div class="p-base">
-                        <div class="p-name">${p3.name}</div>
-                        <div class="p-score">${p3.count} 尊</div>
+                    <div style="font-weight: bold; color: #d32f2f; font-size: 1.2rem;">
+                        ${user.count} <span style="font-size:0.8rem; color:#8d6e63;">尊</span>
                     </div>
                 </div>
             `;
-            $('#podium-area').html(html);
-        }
+            listContainer.innerHTML += html;
+        });
+    })
+    .catch(err => console.error("Leaderboard Error:", err));
 
-        function renderList(data, isUser=false) {
-            let html = '';
-            data.forEach((item, idx) => {
-                if (item.count === 0) return;
-                
-                let img = getAvatar(item.name, isUser);
-                let percent = Math.min((item.count / 20) * 100, 100);
-                let err = `onerror="this.src='${DEFAULT_AVATAR}'"`;
-
-                let levelTag = '';
-                if (isUser) {
-                    if (item.count >= 20) levelTag = '<span class="lvl-tag lvl-max">在世土地公</span>';
-                    else if (item.count >= 10) levelTag = '<span class="lvl-tag lvl-3">虔誠爐主</span>';
-                    else levelTag = ''; 
-                }
-
-                html += `
-                    <div class="list-item">
-                        <div class="list-rank">${idx+4}</div>
-                        <img src="${img}" class="list-avatar" ${err}>
-                        <div class="list-info">
-                            <div class="list-name">${item.name} ${levelTag}</div>
-                            ${isUser ? '<div class="list-sub">持續累積功德中...</div>' : ''}
-                            <div class="list-bar-bg">
-                                <div class="list-bar-fill" style="width: ${percent}%;"></div>
-                            </div>
-                        </div>
-                        <div class="list-count">${item.count}</div>
-                    </div>
-                `;
-            });
+    // 渲染前三名的輔助函式
+    function renderTopHero(rank, user) {
+        try {
+            // 這裡假設您的 HTML 有這些 ID，如果沒有請告知，我幫您補 HTML 結構
+            document.getElementById(`top${rank}-name`).innerText = user.name;
+            document.getElementById(`top${rank}-count`).innerText = user.count;
             
-            if(html === '') html = '<div style="text-align:center; color:#999; padding:30px;">期待更多英雄上榜！</div>';
-            $('#list-area').html(html);
+            // 頭像處理
+            let imgEl = document.getElementById(`top${rank}-avatar`);
+            if(imgEl) {
+                imgEl.src = `https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=${encodeURIComponent(user.name)}`;
+            }
+        } catch(e) {
+            console.log(`Rank ${rank} render skipped (elements not found).`);
         }
-
-        function showLevelInfo() {
-            Swal.fire({
-                title: '📜 英雄榜文',
-                html: `
-                    <div style="text-align:left; font-size:0.9rem; line-height:1.8;">
-                        <p>累積上傳數量，可獲得鄉民封號：</p>
-                        <span class="lvl-tag">尋神小萌新</span>：1~4 尊<br>
-                        <span class="lvl-tag">熱血護衛隊</span>：5~9 尊<br>
-                        <span class="lvl-tag lvl-3">虔誠爐主</span>：10~19 尊<br>
-                        <span class="lvl-tag lvl-max">在世土地公</span>：20 尊以上<br>
-                        <br>
-                        <small style="color:#888;">* 系統每 10 分鐘更新一次榜單</small>
-                    </div>
-                `,
-                confirmButtonText: '收到，繼續尋神！',
-                confirmButtonColor: '#d32f2f'
-            });
-        }
-    </script>
-</body>
-</html>
+    }
+</script>
+{% endblock %}
