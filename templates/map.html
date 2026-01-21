@@ -112,7 +112,7 @@
         }
         .btn-nav:hover { color: white; text-decoration: none; filter: brightness(1.1); }
 
-        /* 7. 偽裝導航列 */
+        /* 7. 偽裝導航列 (視覺修正：讓非選中項目變灰) */
         .fake-navbar {
             position: fixed; bottom: 0; width: 100%; 
             background: #fff; border-top: 1px solid #efebe9; 
@@ -120,10 +120,26 @@
             display: flex; justify-content: space-around; align-items: center; 
             z-index: 2000; box-shadow: 0 -5px 20px rgba(93, 64, 55, 0.05);
         }
-        .nav-item { text-align: center; color: #a1887f; text-decoration: none; font-size: 0.75rem; flex: 1; display: flex; flex-direction: column; align-items: center; }
-        .nav-icon { height: 42px; width: auto; margin-bottom: 3px; transition: all 0.3s; }
-        .nav-item.active .nav-icon { transform: scale(1.1); filter: drop-shadow(0 2px 2px rgba(211, 47, 47, 0.2)); }
+        
+        .nav-item { 
+            text-align: center; color: #a1887f; text-decoration: none; 
+            font-size: 0.75rem; flex: 1; display: flex; flex-direction: column; align-items: center; 
+        }
+        
+        /* 🔥 關鍵 CSS：預設變灰，選中變彩 */
+        .nav-icon { 
+            height: 42px; width: auto; margin-bottom: 3px; 
+            filter: grayscale(100%) sepia(20%) opacity(0.8); /* 預設灰色復古感 */
+            transition: all 0.3s; 
+        }
+        
+        .nav-item.active .nav-icon { 
+            transform: scale(1.1); 
+            filter: none; /* 還原彩色 */
+            filter: drop-shadow(0 2px 2px rgba(211, 47, 47, 0.2)); 
+        }
         .nav-item.active span { color: #d32f2f; font-weight: bold; }
+
         .nav-center-btn {
             width: 80px; height: 80px; background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
             border-radius: 50%; border: 6px solid #f9f7f2; display: flex; align-items: center; justify-content: center;
@@ -190,11 +206,21 @@
     </div>
 
     <div class="fake-navbar">
-        <a href="/" class="nav-item"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_home.png" class="nav-icon"><span>首頁</span></a>
-        <a href="/map" class="nav-item active"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_map.png" class="nav-icon"><span>地圖</span></a>
-        <a href="/upload" class="nav-center-btn"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_upload.png" class="nav-center-icon"></a>
-        <a href="/gallery" class="nav-item"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_gallery.png" class="nav-icon"><span>圖庫</span></a>
-        <a href="/leaderboard" class="nav-item"><img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_leaderboard.png" class="nav-icon"><span>榜單</span></a>
+        <a href="/" class="nav-item">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_home.png" class="nav-icon"><span>首頁</span>
+        </a>
+        <a href="/map" class="nav-item active">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_map.png" class="nav-icon"><span>地圖</span>
+        </a>
+        <a href="/upload" class="nav-center-btn">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_upload.png" class="nav-center-icon">
+        </a>
+        <a href="/gallery" class="nav-item">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_gallery.png" class="nav-icon"><span>圖庫</span>
+        </a>
+        <a href="/leaderboard" class="nav-item">
+            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_leaderboard.png" class="nav-icon"><span>榜單</span>
+        </a>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
