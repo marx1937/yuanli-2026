@@ -1,28 +1,154 @@
+{% extends "base.html" %}
+{% set active_page = "leaderboard" %}
+
+{% block styles %}
+<style>
+    /* 背景設定：米色宣紙質感 */
+    body {
+        background-color: #fdfcf0;
+        background-image: radial-gradient(#d7ccc8 1.5px, transparent 1.5px);
+        background-size: 24px 24px;
+        min-height: 100vh;
+    }
+
+    .page-header {
+        text-align: center; margin-top: 25px; margin-bottom: 20px;
+    }
+    
+    .header-title {
+        background: #d32f2f; color: #fff; 
+        display: inline-block; padding: 8px 25px; 
+        border-radius: 50px; font-weight: bold; font-size: 1.2rem;
+        box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3);
+        border: 2px solid #b71c1c;
+    }
+
+    /* --- 前三名英雄台 --- */
+    .top-heroes-container {
+        display: flex; justify-content: center; align-items: flex-end;
+        margin-bottom: 30px; gap: 10px; padding: 0 10px;
+    }
+
+    .hero-card {
+        background: white; border-radius: 15px;
+        text-align: center; padding: 10px 5px;
+        box-shadow: 0 5px 15px rgba(93, 64, 55, 0.1);
+        display: flex; flex-direction: column; align-items: center;
+        position: relative; border: 2px solid #fff;
+    }
+
+    /* 冠軍特別大 */
+    .hero-card.rank-1 { width: 38%; z-index: 10; padding-top: 25px; border-color: #ffd700; transform: translateY(-10px); }
+    .hero-card.rank-2 { width: 30%; border-color: #c0c0c0; }
+    .hero-card.rank-3 { width: 30%; border-color: #cd7f32; }
+
+    .crown-icon {
+        position: absolute; top: -20px; font-size: 2rem; 
+        color: #ffd700; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .hero-avatar {
+        border-radius: 50%; border: 3px solid #eee; margin-bottom: 5px; background: #eee;
+    }
+    .rank-1 .hero-avatar { width: 70px; height: 70px; border-color: #ffd700; }
+    .rank-2 .hero-avatar { width: 55px; height: 55px; border-color: #c0c0c0; }
+    .rank-3 .hero-avatar { width: 55px; height: 55px; border-color: #cd7f32; }
+
+    .hero-name { font-weight: bold; color: #5d4037; font-size: 0.95rem; margin-bottom: 2px; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .hero-count { font-weight: 900; color: #d32f2f; font-size: 1.1rem; }
+    .hero-count small { font-size: 0.7rem; color: #8d6e63; font-weight: normal; }
+
+    /* --- 列表區 (4-50名) --- */
+    .leaderboard-list {
+        width: 92%; max-width: 500px; margin: 0 auto; padding-bottom: 40px;
+    }
+
+    .rank-item {
+        display: flex; align-items: center;
+        background: rgba(255,255,255,0.9);
+        margin-bottom: 10px; padding: 12px 15px;
+        border-radius: 15px;
+        border: 1px solid rgba(255,255,255,0.5);
+        box-shadow: 0 2px 5px rgba(93, 64, 55, 0.05);
+        transition: transform 0.1s;
+    }
+    .rank-item:active { transform: scale(0.98); background: #fff; }
+
+    .rank-num { font-weight: bold; color: #8d6e63; width: 35px; font-size: 1.1rem; text-align: center;}
+    .list-avatar { width: 42px; height: 42px; border-radius: 50%; margin-right: 15px; border: 2px solid #ffe082; background: #eee; }
+    .list-info { flex: 1; }
+    .list-name { font-weight: bold; color: #5d4037; font-size: 1rem; }
+    .list-title { font-size: 0.75rem; color: #a1887f; }
+    .list-score { font-weight: bold; color: #d32f2f; font-size: 1.2rem; }
+
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    
+    /* 載入中動畫 */
+    .loading-spinner { text-align: center; color: #8d6e63; margin-top: 50px; font-weight: bold; }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <div class="header-title">
+            <i class="fas fa-trophy" style="color:#ffca28; margin-right:5px;"></i> 尋神英雄榜
+        </div>
+        <div style="color: #8d6e63; font-size: 0.9rem; margin-top: 5px;">累積尋獲數 Top 50</div>
+    </div>
+
+    <div id="loading" class="loading-spinner">
+        <i class="fas fa-circle-notch fa-spin fa-2x"></i><br><br>正在結算戰績...
+    </div>
+
+    <div id="top-heroes" class="top-heroes-container" style="display: none;">
+        <div class="hero-card rank-2">
+            <img id="top2-img" class="hero-avatar" src="">
+            <div id="top2-name" class="hero-name">--</div>
+            <div class="hero-count"><span id="top2-score">0</span><small>尊</small></div>
+            <div style="font-size:1.5rem; margin-top:-5px;">🥈</div>
+        </div>
+
+        <div class="hero-card rank-1">
+            <i class="fas fa-crown crown-icon"></i>
+            <img id="top1-img" class="hero-avatar" src="">
+            <div id="top1-name" class="hero-name">--</div>
+            <div class="hero-count"><span id="top1-score">0</span><small>尊</small></div>
+            <div style="font-size:1.5rem; margin-top:-5px;">🥇</div>
+        </div>
+
+        <div class="hero-card rank-3">
+            <img id="top3-img" class="hero-avatar" src="">
+            <div id="top3-name" class="hero-name">--</div>
+            <div class="hero-count"><span id="top3-score">0</span><small>尊</small></div>
+            <div style="font-size:1.5rem; margin-top:-5px;">🥉</div>
+        </div>
+    </div>
+
+    <div id="leaderboard-list" class="leaderboard-list">
+        </div>
+{% endblock %}
+
 {% block scripts %}
 <script>
-    // --- 🏆 英雄榜核心演算法 ---
-
+    // 🔥 英雄榜核心邏輯：支援特洛伊木馬格式 (暱稱#里別)
     fetch('/api/locations')
     .then(r => r.json())
     .then(data => {
-        // 1. 資料歸戶 (Aggregation) - 解決「特洛伊木馬」導致的名字分身問題
+        // 1. 資料清洗與歸戶 (Normalization)
         let userCounts = {};
         
         data.forEach(item => {
-            // (A) 取得原始暱稱 (相容舊資料 nan/null)
+            // 抓取名字，相容舊資料
             let rawName = item.nickname || item.name || "熱心鄉親";
             
-            // (B) 清洗名字：移除 # 後面的里別資訊
-            // 舊資料 "王小明" -> "王小明"
-            // 新資料 "王小明#客庄里" -> "王小明" (這樣積分才會加在一起！)
+            // ✂️ 關鍵：切除 # 後面的里別
             let cleanName = rawName.split('#')[0].trim();
             
-            // (C) 排除無效名字 (如 nan)
-            if(cleanName.toLowerCase() === 'nan' || cleanName === "") {
-                cleanName = "熱心鄉親";
-            }
+            // 排除無效名字
+            if (cleanName === "nan" || cleanName === "") cleanName = "熱心鄉親";
 
-            // (D) 累加積分
+            // 累加積分
             if (userCounts[cleanName]) {
                 userCounts[cleanName]++;
             } else {
@@ -30,61 +156,61 @@
             }
         });
 
-        // 2. 轉換為陣列並排序 (Sorting)
+        // 2. 轉陣列並排序 (Sort)
         let sortedUsers = Object.keys(userCounts).map(key => {
             return { name: key, count: userCounts[key] };
-        }).sort((a, b) => b.count - a.count); // 由高到低排序
+        }).sort((a, b) => b.count - a.count);
 
-        // 3. 渲染前三名 (Top 3 Heroes)
-        // 確保 HTML 中有對應的 ID: #top1-name, #top1-count, #top1-avatar ...
-        if (sortedUsers.length > 0) renderTopHero(1, sortedUsers[0]);
-        if (sortedUsers.length > 1) renderTopHero(2, sortedUsers[1]);
-        if (sortedUsers.length > 2) renderTopHero(3, sortedUsers[2]);
+        // 3. 移除 Loading，顯示介面
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('top-heroes').style.display = 'flex';
 
-        // 4. 渲染列表 (Rank 4 ~ 50) - 依照 v7.0 鐵律限制數量
+        // 4. 渲染前三名 (Top 3)
+        // 為了避免資料少於 3 人報錯，加個簡易防呆
+        if (sortedUsers[0]) updateHero(1, sortedUsers[0]);
+        if (sortedUsers[1]) updateHero(2, sortedUsers[1]);
+        if (sortedUsers[2]) updateHero(3, sortedUsers[2]);
+
+        // 5. 渲染列表 (Rank 4 ~ 50)
         let listContainer = document.getElementById('leaderboard-list');
         listContainer.innerHTML = ""; // 清空
 
-        // 取第 4 名到第 53 名 (index 3 ~ 52)
+        // 只取第 4 名到第 53 名 (index 3 ~ 52)
         sortedUsers.slice(3, 53).forEach((user, index) => {
-            let rank = index + 4; // 實際排名
-            
-            // 生成 DiceBear 頭像 (使用清洗後的純名，避免破圖)
+            let rank = index + 4;
+            // DiceBear 頭像種子碼需 encode，支援中文
             let avatarUrl = `https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=${encodeURIComponent(user.name)}`;
 
             let html = `
-                <div class="rank-item" style="display: flex; align-items: center; background: white; margin-bottom: 10px; padding: 10px 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                    <div style="font-weight: bold; color: #8d6e63; width: 30px; font-size: 1.1rem;">${rank}</div>
-                    <img src="${avatarUrl}" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 15px; border: 2px solid #ffe082;">
-                    <div style="flex: 1;">
-                        <div style="font-weight: bold; color: #5d4037;">${user.name}</div>
-                        <div style="font-size: 0.8rem; color: #a1887f;">尋神獵人</div>
+                <div class="rank-item">
+                    <div class="rank-num">${rank}</div>
+                    <img src="${avatarUrl}" class="list-avatar" alt="avatar">
+                    <div class="list-info">
+                        <div class="list-name">${user.name}</div>
+                        <div class="list-title">尋神獵人</div>
                     </div>
-                    <div style="font-weight: bold; color: #d32f2f; font-size: 1.2rem;">
-                        ${user.count} <span style="font-size:0.8rem; color:#8d6e63;">尊</span>
-                    </div>
+                    <div class="list-score">${user.count} <small style="font-size:0.8rem; font-weight:normal;">尊</small></div>
                 </div>
             `;
             listContainer.innerHTML += html;
         });
     })
-    .catch(err => console.error("Leaderboard Error:", err));
+    .catch(err => {
+        console.error("Leaderboard Error:", err);
+        document.getElementById('loading').innerHTML = "⚠️ 讀取失敗，請重新整理";
+    });
 
-    // 渲染前三名的輔助函式
-    function renderTopHero(rank, user) {
-        try {
-            // 這裡假設您的 HTML 有這些 ID，如果沒有請告知，我幫您補 HTML 結構
-            document.getElementById(`top${rank}-name`).innerText = user.name;
-            document.getElementById(`top${rank}-count`).innerText = user.count;
-            
-            // 頭像處理
-            let imgEl = document.getElementById(`top${rank}-avatar`);
-            if(imgEl) {
-                imgEl.src = `https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=${encodeURIComponent(user.name)}`;
-            }
-        } catch(e) {
-            console.log(`Rank ${rank} render skipped (elements not found).`);
-        }
+    // 輔助函式：更新前三名 DOM
+    function updateHero(rank, user) {
+        let avatarUrl = `https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=${encodeURIComponent(user.name)}`;
+        
+        let imgEl = document.getElementById(`top${rank}-img`);
+        let nameEl = document.getElementById(`top${rank}-name`);
+        let scoreEl = document.getElementById(`top${rank}-score`);
+
+        if (imgEl) imgEl.src = avatarUrl;
+        if (nameEl) nameEl.innerText = user.name;
+        if (scoreEl) scoreEl.innerText = user.count;
     }
 </script>
 {% endblock %}
