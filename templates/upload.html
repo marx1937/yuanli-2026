@@ -3,7 +3,7 @@
 
 {% block styles %}
 <style>
-    /* 1. 全局背景 (還原你原本的點陣背景) */
+    /* 1. 100% 還原你的背景設定 */
     body {
         background-color: #fdfcf0;
         background-image: radial-gradient(#d7ccc8 1.5px, transparent 1.5px);
@@ -12,7 +12,7 @@
         padding-bottom: 110px; /* 避開底部導航 */
     }
 
-    /* 2. 標題區 (還原你的紅色匾額設計) */
+    /* 2. 標題區 (還原紅色匾額) */
     .page-header { text-align: center; padding: 20px 0 10px 0; width: 100%; position: relative; }
     .title-signboard { width: 70%; max-width: 280px; height: auto; display: block; margin: 0 auto; filter: drop-shadow(0 5px 5px rgba(93, 64, 55, 0.15)); }
 
@@ -21,7 +21,7 @@
         background: rgba(255, 255, 255, 0.95); width: 92%; max-width: 500px;
         padding: 25px; border-radius: 30px;
         box-shadow: 0 10px 30px rgba(93, 64, 55, 0.1);
-        margin: 10px auto; /* 關鍵置中 */
+        margin: 10px auto; 
         border: 2px solid #fff;
     }
 
@@ -53,7 +53,7 @@
     }
     .btn-submit:active { transform: scale(0.95); box-shadow: 0 5px 10px rgba(211, 47, 47, 0.2); }
 
-    /* 7. 底部導航 (手動版 - 讓中間大按鈕亮紅燈) */
+    /* 7. 底部導航 (只修復連結與亮燈) */
     .fake-navbar { 
         position: fixed; bottom: 0; width: 100%; 
         background: #fff; border-top: 1px solid #efebe9; 
@@ -63,15 +63,16 @@
     }
     .nav-item { text-align: center; color: #a1887f; text-decoration: none !important; font-size: 0.75rem; flex: 1; display: flex; flex-direction: column; align-items: center; }
     .nav-icon { height: 42px; width: auto; margin-bottom: 3px; filter: grayscale(100%) sepia(20%) opacity(0.8); transition: 0.3s; }
+    /* 這裡加上 active 樣式 */
     .nav-item.active .nav-icon { transform: scale(1.1); filter: none; filter: drop-shadow(0 2px 2px rgba(211, 47, 47, 0.2)); }
     .nav-item.active span { color: #d32f2f; font-weight: bold; }
     
-    /* 中間大按鈕 - 發光特效 */
     .nav-center-btn {
         width: 80px; height: 80px; background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
         border-radius: 50%; border: 6px solid #fdfcf0; display: flex; align-items: center; justify-content: center;
         transform: translateY(-35px); box-shadow: 0 8px 15px rgba(198, 40, 40, 0.3);
-        animation: pulse-red 2s infinite; /* 呼吸燈 */
+        /* 加入呼吸燈特效 */
+        animation: pulse-red 2s infinite; 
     }
     @keyframes pulse-red { 0% {box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.4);} 70% {box-shadow: 0 0 0 15px rgba(229, 57, 53, 0);} 100% {box-shadow: 0 0 0 0 rgba(229, 57, 53, 0);} }
     .nav-center-icon { height: 55px; width: auto; display: block; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2)); }
@@ -179,7 +180,7 @@
         }
     }
 
-    // 2. 自動抓取 GPS
+    // 2. 自動抓取 GPS (保留你的原版邏輯)
     $(document).ready(function() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -198,11 +199,11 @@
         }
     });
 
-    // 3. 送出表單 (防呆 + 轉圈圈)
+    // 3. 送出表單 (🔥 這裡加入轉圈圈特效)
     $('#uploadForm').submit(function(e) {
         e.preventDefault();
 
-        // 🔥 防呆機制：顯示上傳中
+        // 🟢 轉圈圈 SweetAlert
         Swal.fire({
             title: '正在將資料傳送給土地公...',
             html: '請稍候，不要關閉視窗喔！',
@@ -213,6 +214,7 @@
         });
 
         var formData = new FormData(this);
+        // 抓取暱稱和區域給 Alert 用
         var nickname = $('input[name="nickname"]').val() || "熱心鄉親";
         var area = $('select[name="area"]').val();
 
@@ -223,7 +225,6 @@
             contentType: false,
             processData: false,
             success: function(response) {
-                // 如果是重複 (duplicate) 或 成功 (success)
                 if (response.status === 'success' || response.status === 'duplicate') {
                     
                     let title = (response.status === 'duplicate') ? '📋 資料已排隊中' : '✅ 上傳成功！';
@@ -234,7 +235,7 @@
                     Swal.fire({
                         title: title,
                         html: htmlText,
-                        // 這裡可以換成你原本的 pada.jpg
+                        // 這裡使用你的 pada.jpg
                         imageUrl: '/static/pada.jpg', 
                         imageWidth: '100%',
                         confirmButtonText: '收到，來去找下一座！',
