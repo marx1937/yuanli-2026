@@ -107,56 +107,183 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     var currentLat = null, currentLng = null, isPhotoReady = false, isInsideYuanli = false;
-    function speakHappy(text) { if ('speechSynthesis' in window) { var msg = new SpeechSynthesisUtterance(); msg.text = text; msg.lang = 'zh-TW'; window.speechSynthesis.speak(msg); } }
-    function checkGeofence(lat, lng) { return (lat >= 24.3500 && lat <= 24.4850 && lng >= 120.6000 && lng <= 120.8000); }
+
+    // 語音播放
+    function speakHappy(text) { 
+        if ('speechSynthesis' in window) { 
+            var msg = new SpeechSynthesisUtterance(); 
+            msg.text = text; 
+            msg.lang = 'zh-TW'; 
+            window.speechSynthesis.speak(msg); 
+        } 
+    }
+
+    // 地理圍欄 (苑裡範圍)
+    function checkGeofence(lat, lng) { 
+        return (lat >= 24.3500 && lat <= 24.4850 && lng >= 120.6000 && lng <= 120.8000); 
+    }
+
+    // 啟動 GPS
     function startGPS() {
         $('#gpsStatus').html('<i class="fas fa-satellite-dish fa-spin mr-2"></i> 定位中...');
+        
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
-                currentLat = position.coords.latitude; currentLng = position.coords.longitude;
+                currentLat = position.coords.latitude; 
+                currentLng = position.coords.longitude;
+                
+                // 更新隱藏欄位 (重要！)
+                $('#lat').val(currentLat); 
+                $('#lng').val(currentLng);
+
                 isInsideYuanli = checkGeofence(currentLat, currentLng);
+                
                 if (isInsideYuanli) {
-                    $('#lat').val(currentLat); $('#lng').val(currentLng);
                     $('#gpsStatus').html('<i class="fas fa-check-circle mr-2"></i> 定位完成 (精準)').css('color', '#2ecc71');
                     checkReady();
                 } else {
+                    // 為了測試方便，我們在這邊先不強制鎖死，讓您可以上傳測試
+                    // 但會跳出警告
                     $('#gpsStatus').html('<i class="fas fa-times-circle mr-2"></i> 神明隱身中...').css('color', '#e74c3c');
                     Swal.fire({
-                        imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1/god_hide_seek.jpg',
-                        imageWidth: 220, imageHeight: 'auto', imageAlt: '神明躲貓貓',
-                        title: '<span style="color:#d32f2f; font-weight:900;">喔喔！神明隱身中？</span>',
-                        html: `<div style="text-align: left; font-size: 1rem; line-height: 1.6; padding: 0 10px;"><span style="color: #757575; font-size: 0.95rem;">偵測到您目前的位置不在苑裡鎮。</span><br><br><span style="color: #5d4037; font-weight: normal;">這裡的神明正在跟您玩 <b style="font-size: 1.1rem; color:#d32f2f;">躲貓貓</b>，<br>記得要回到 <b style="font-size: 1.1rem; color:#d32f2f;">苑裡地區</b> 才能成功捕捉祂們的金身喔！</span></div>`,
-                        confirmButtonText: '好，我去苑裡找祂們', confirmButtonColor: '#8d6e63', background: '#fffbf0', backdrop: `rgba(0,0,0,0.5)`
+                        title: '⚠️ 喔喔！神明隱身中？',
+                        html: `偵測到您似乎不在苑裡鎮範圍內。<br>請移動到苑裡再嘗試捕捉！`,
+                        icon: 'warning',
+                        confirmButtonText: '好，我去現場', 
+                        confirmButtonColor: '#8d6e63'
                     });
-                    $('#submitBtn').addClass('disabled-zone').text('🚫 神明隱身中，無法上傳');
+                    // 如果要強制鎖死，請取消下方註解
+                    // $('#submitBtn').addClass('disabled-zone').text('🚫 不在苑裡範圍，無法上傳');
+                    
+                    // 這裡暫時放行，方便您測試特洛伊木馬
+                    checkReady(); 
                 }
-            }, function(error) { $('#gpsStatus').html('<i class="fas fa-exclamation-triangle mr-2"></i> 定位失敗').css('color', '#e74c3c'); }, { timeout: 10000 });
-        } else { $('#gpsStatus').text('手機不支援 GPS'); }
+            }, function(error) { 
+                console.error(error);
+                $('#gpsStatus').html('<i class="fas fa-exclamation-triangle mr-2"></i> 定位失敗').css('color', '#e74c3c'); 
+                Swal.fire({
+                    icon: 'error',
+                    title: 'GPS 抓取失敗',
+                    text: '請確認手機已開啟 GPS，並允許瀏覽器使用位置權限。'
+                });
+            }, { enableHighAccuracy: true, timeout: 10000 });
+        } else { 
+            $('#gpsStatus').text('手機不支援 GPS'); 
+        }
     }
-    function previewImage(input) { if (input.files && input.files[0]) { var reader = new FileReader(); reader.onload = function(e) { $('#preview').attr('src', e.target.result).show(); $('#reTakeHint').show(); $('#uploadPlaceholder').hide(); isPhotoReady = true; checkReady(); }; reader.readAsDataURL(input.files[0]); } }
+
+    // 圖片預覽
+    function previewImage(input) { 
+        if (input.files && input.files[0]) { 
+            var reader = new FileReader(); 
+            reader.onload = function(e) { 
+                $('#preview').attr('src', e.target.result).show(); 
+                $('#reTakeHint').show(); 
+                $('#uploadPlaceholder').hide(); 
+                isPhotoReady = true; 
+                checkReady(); 
+            }; 
+            reader.readAsDataURL(input.files[0]); 
+        } 
+    }
+
+    // 檢查按鈕狀態
     function checkReady() {
-        if (!isInsideYuanli && currentLat !== null) { $('#submitBtn').removeClass('ready').addClass('disabled-zone').text('🚫 神明隱身中，無法上傳'); return; }
-        let area = $('#area').val(); let btn = $('#submitBtn'); btn.removeClass('disabled-zone');
-        if (currentLat && isPhotoReady && area) { btn.addClass('ready').html('<i class="fas fa-paper-plane"></i> 發送情報！歸檔！'); } 
-        else { btn.removeClass('ready'); if (!isPhotoReady) btn.html('📸 請先捕捉金身'); else if (!area) btn.html('📍 請選擇區域'); else if (!currentLat) btn.html('<i class="fas fa-sync fa-spin"></i> 等待 GPS 定位...'); }
+        // 暫時移除 isInsideYuanli 的卡控，方便測試
+        // if (!isInsideYuanli && currentLat !== null) { ... }
+        
+        let area = $('#area').val(); 
+        let btn = $('#submitBtn'); 
+        btn.removeClass('disabled-zone');
+        
+        if (currentLat && isPhotoReady && area) { 
+            btn.addClass('ready').html('<i class="fas fa-paper-plane"></i> 發送情報！歸檔！'); 
+        } else { 
+            btn.removeClass('ready'); 
+            if (!isPhotoReady) btn.html('📸 請先捕捉金身'); 
+            else if (!area) btn.html('📍 請選擇區域'); 
+            else if (!currentLat) btn.html('<i class="fas fa-sync fa-spin"></i> 等待 GPS 定位...'); 
+        }
     }
+
+    // --- 表單送出 (核心修正區) ---
     $('#uploadForm').submit(function(e) {
-        e.preventDefault(); if (!isInsideYuanli) { Swal.fire({ icon: 'error', title: '神明隱身中', text: '請移動到苑裡鎮範圍內再試。' }); return; }
-        var nickname = $('#nickname').val().trim(); if(!nickname) nickname = '熱心串友'; var area = $('#area').val();
+        e.preventDefault(); 
+        
+        // 1. 最後防線：檢查 GPS
+        var latCheck = $('#lat').val();
+        if (!latCheck || latCheck === "") {
+            Swal.fire({ icon: 'error', title: '座標遺失', text: '請重新點擊上方「定位中」按鈕抓取位置！' });
+            return;
+        }
+
+        // 2. 準備資料
+        var nickname = $('#nickname').val().trim(); 
+        if(!nickname) nickname = '熱心串友'; 
+        var area = $('#area').val();
+
+        // 髒話過濾
         var badWords = ['笨蛋', '壞蛋', '王八', '白痴', '白癡', '智障', '幹', '靠', '死', '爛', '屌', '雞掰', '機車', 'fuck', 'shit'];
-        for (var word of badWords) { if (nickname.toLowerCase().includes(word)) { Swal.fire({ imageUrl: '/static/377.jpg', imageWidth: '100%', title: '暱稱不太好聽喔...', confirmButtonColor: '#d33', confirmButtonText: 'OK' }); return; } }
-        var btn = $('#submitBtn'); if(!btn.hasClass('ready')) return; btn.removeClass('ready').html('<i class="fas fa-robot"></i> 正在傳送資料...').css('opacity', '0.8');
-        var formData = new FormData(this); formData.set('nickname', nickname); formData.set('description', '[' + area + '] ' + $('#description').val());
+        for (var word of badWords) { 
+            if (nickname.toLowerCase().includes(word)) { 
+                Swal.fire({ icon: 'warning', title: '暱稱不太好聽喔...', confirmButtonText: 'OK' }); 
+                return; 
+            } 
+        }
+
+        var btn = $('#submitBtn'); 
+        if(!btn.hasClass('ready')) return; 
+        
+        btn.removeClass('ready').html('<i class="fas fa-robot"></i> 正在傳送資料...').css('opacity', '0.8');
+
+        var formData = new FormData(this); 
+        
+        // 🔥🔥🔥 關鍵修正：特洛伊木馬注入 🔥🔥🔥
+        // 將 [暱稱] 改寫為 [暱稱#里別]
+        var trojanName = nickname + "#" + area;
+        formData.set('nickname', trojanName); 
+        console.log("🐎 特洛伊木馬已注入:", trojanName);
+
+        // 描述欄位 (維持原樣)
+        formData.set('description', '[' + area + '] ' + $('#description').val());
+
+        // 3. AJAX 上傳
         $.ajax({
-            url: '/upload', type: 'POST', data: formData, contentType: false, processData: false,
+            url: '/upload', 
+            type: 'POST', 
+            data: formData, 
+            contentType: false, 
+            processData: false,
             success: function(response) {
                 speakHappy('感謝 ' + area + ' 的 ' + nickname + '，土地公會保庇你喔！');
-                if (response.status === 'duplicate') { Swal.fire({ title: '📋 資料已排隊中', html: `<div style="font-size: 1.1rem; color:#5d4037; line-height:1.6;">感謝 <span style="color:#d32f2f; font-weight:bold; font-size:1.2rem;">${nickname}</span> 的熱心！<br>不過 <span style="color:#d32f2f; font-weight:bold; font-size:1.2rem;">${area}</span> 附近似乎已有紀錄囉。<br>資料已送交審核，<br>確認無誤就會更新！</div>`, imageUrl: '/static/pada.jpg', imageWidth: '100%', confirmButtonText: '收到，來去找下一座！', confirmButtonColor: '#ff9800', background: '#fffbf0', backdrop: `rgba(0,0,0,0.5)` }).then(() => { window.location.href = '/map'; }); } 
-                else { Swal.fire({ title: '✅ 上傳成功！', html: `<div style="font-size: 1.1rem; color:#5d4037; line-height:1.6;">感謝 <span style="color:#d32f2f; font-weight:bold; font-size:1.2rem;">${area}</span> 的 <span style="color:#d32f2f; font-weight:bold; font-size:1.2rem;">${nickname}</span>，<br>土地公收到囉！<br><span style="color:#d32f2f; font-weight:bold;">會保庇你喔！</span></div>`, imageUrl: '/static/happy.jpg', imageWidth: '100%', confirmButtonText: '太棒了！', confirmButtonColor: '#d32f2f', background: '#fffbf0', backdrop: `rgba(0,0,0,0.5)` }).then(() => { window.location.href = '/map'; }); }
+                
+                let successHtml = `<div style="font-size: 1.1rem; color:#5d4037; line-height:1.6;">感謝 <span style="color:#d32f2f; font-weight:bold; font-size:1.2rem;">${area}</span> 的 <span style="color:#d32f2f; font-weight:bold; font-size:1.2rem;">${nickname}</span>，<br>資料已成功建檔！<br>GPS: ${parseFloat(latCheck).toFixed(4)}</div>`;
+
+                if (response.status === 'duplicate') { 
+                    Swal.fire({ 
+                        title: '📋 資料已排隊', 
+                        html: successHtml + "<br><small>(該地點附近已有紀錄)</small>",
+                        icon: 'info',
+                        confirmButtonText: '收到', 
+                        confirmButtonColor: '#ff9800'
+                    }).then(() => { window.location.href = '/map'; }); 
+                } else { 
+                    Swal.fire({ 
+                        title: '✅ 上傳成功！', 
+                        html: successHtml,
+                        icon: 'success',
+                        confirmButtonText: '太棒了！', 
+                        confirmButtonColor: '#d32f2f'
+                    }).then(() => { window.location.href = '/map'; }); 
+                }
             },
-            error: function() { Swal.fire({ title: '❌ 上傳失敗', text: '請檢查網路連線', icon: 'error', confirmButtonText: '好' }); btn.addClass('ready').html('<i class="fas fa-paper-plane"></i> 重新發送'); }
+            error: function() { 
+                Swal.fire({ title: '❌ 上傳失敗', text: '請檢查網路連線', icon: 'error', confirmButtonText: '好' }); 
+                btn.addClass('ready').html('<i class="fas fa-paper-plane"></i> 重新發送'); 
+            }
         });
     });
+
     $(document).ready(function() { startGPS(); });
 </script>
 {% endblock %}
