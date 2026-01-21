@@ -108,7 +108,7 @@
         .list-rank { width: 30px; font-size: 1.1rem; font-weight: 900; color: #a1887f; text-align: center; }
         .list-avatar {
             width: 50px; height: 50px; border-radius: 50%; margin: 0 15px;
-            background: #f5f5f5; border: 2px solid #eee;
+            background: #f5f5f5; border: 2px solid #eee; object-fit: cover;
         }
         .list-info { flex: 1; overflow: hidden; }
         .list-name { font-weight: bold; color: #4e342e; font-size: 1.05rem; display: flex; align-items: center; gap: 5px;}
@@ -189,7 +189,7 @@
         let currentTab = 'village';
         let rawData = [];
 
-        // 預設圖片 (安全氣囊)
+        // 預設頭像 (如果真的生不出來，就會顯示這個)
         const DEFAULT_AVATAR = "https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_home.png";
 
         fetch('/api/locations').then(r => r.json()).then(data => {
@@ -209,15 +209,18 @@
             }
         }
 
-        // 🔥 關鍵修正：加入 encodeURIComponent 防止破圖 🔥
+        // 🔥 超能力頭像產生器：已修復中文破圖問題 🔥
         function getAvatar(seed, isUser) {
+            // 對中文名字進行編碼，防止破圖
+            let encodedSeed = encodeURIComponent(seed);
+
             if(!isUser) {
                 // 里別使用文字縮寫
-                return `https://ui-avatars.com/api/?name=${encodeURIComponent(seed)}&background=random&color=fff&size=128`;
+                return `https://ui-avatars.com/api/?name=${encodedSeed}&background=random&color=fff&size=128`;
             }
-            // 使用 DiceBear v9 Adventurer Neutral (中性Q版)
-            // 記得對 seed 進行編碼！
-            return `https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
+            // 使用 v9 adventurer-neutral (中性冒險家)
+            // 這裡使用了 encodedSeed，所以中文名字不會再讓網址爆炸了
+            return `https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${encodedSeed}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
         }
 
         function renderVillageRank() {
@@ -257,11 +260,12 @@
             let p2 = data[1] || {name:'虛位以待', count:0};
             let p3 = data[2] || {name:'虛位以待', count:0};
 
+            // 使用修復後的 getAvatar
             let img1 = isUser ? getAvatar(p1.name, true) : `https://res.cloudinary.com/diuoghid2/image/upload/v1/badge_gold.png`;
             let img2 = isUser ? getAvatar(p2.name, true) : `https://res.cloudinary.com/diuoghid2/image/upload/v1/badge_silver.png`;
             let img3 = isUser ? getAvatar(p3.name, true) : `https://res.cloudinary.com/diuoghid2/image/upload/v1/badge_bronze.png`;
 
-            // 加入 onerror 防呆
+            // 安全氣囊 (onerror)
             let err = `onerror="this.src='${DEFAULT_AVATAR}'"`;
 
             let html = `
@@ -296,10 +300,12 @@
             
             data.forEach((item, idx) => {
                 if (item.count === 0) return;
+                
+                // 使用修復後的 getAvatar
                 let img = getAvatar(item.name, isUser);
                 let percent = Math.min((item.count / 20) * 100, 100);
                 
-                // 加入 onerror 防呆
+                // 安全氣囊
                 let err = `onerror="this.src='${DEFAULT_AVATAR}'"`;
 
                 let levelTag = '';
