@@ -22,7 +22,7 @@
             font-family: "Microsoft JhengHei", sans-serif;
         }
 
-        /* 2. 看板區 */
+        /* 2. 看板區 (已換新圖) */
         .rank-header {
             text-align: center; padding: 25px 0 10px 0;
             position: relative; margin-bottom: 15px;
@@ -78,6 +78,8 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: -15px;
             object-fit: cover;
         }
+        
+        /* 👑 皇冠樣式 */
         .p-crown {
             position: absolute; top: -35px; width: 40px; 
             animation: bounce 2s infinite; z-index: 6;
@@ -150,7 +152,7 @@
 <body>
 
     <div class="rank-header">
-        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/rank_header.png" class="rank-banner-img">
+        <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1768742671/leaderboard_top.png" class="rank-banner-img">
     </div>
 
     <div class="tab-container">
@@ -189,7 +191,7 @@
         let currentTab = 'village';
         let rawData = [];
 
-        // 預設頭像 (如果真的生不出來，就會顯示這個)
+        // 預設頭像
         const DEFAULT_AVATAR = "https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_home.png";
 
         fetch('/api/locations').then(r => r.json()).then(data => {
@@ -209,17 +211,16 @@
             }
         }
 
-        // 🔥 超能力頭像產生器：已修復中文破圖問題 🔥
+        // 🔥 防止破圖 + 中性風格 🔥
         function getAvatar(seed, isUser) {
-            // 對中文名字進行編碼，防止破圖
+            // 對中文名字進行編碼
             let encodedSeed = encodeURIComponent(seed);
 
             if(!isUser) {
-                // 里別使用文字縮寫
+                // 里別
                 return `https://ui-avatars.com/api/?name=${encodedSeed}&background=random&color=fff&size=128`;
             }
-            // 使用 v9 adventurer-neutral (中性冒險家)
-            // 這裡使用了 encodedSeed，所以中文名字不會再讓網址爆炸了
+            // 使用 DiceBear v9 Adventurer Neutral (中性冒險家)
             return `https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${encodedSeed}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
         }
 
@@ -260,7 +261,6 @@
             let p2 = data[1] || {name:'虛位以待', count:0};
             let p3 = data[2] || {name:'虛位以待', count:0};
 
-            // 使用修復後的 getAvatar
             let img1 = isUser ? getAvatar(p1.name, true) : `https://res.cloudinary.com/diuoghid2/image/upload/v1/badge_gold.png`;
             let img2 = isUser ? getAvatar(p2.name, true) : `https://res.cloudinary.com/diuoghid2/image/upload/v1/badge_silver.png`;
             let img3 = isUser ? getAvatar(p3.name, true) : `https://res.cloudinary.com/diuoghid2/image/upload/v1/badge_bronze.png`;
@@ -301,11 +301,8 @@
             data.forEach((item, idx) => {
                 if (item.count === 0) return;
                 
-                // 使用修復後的 getAvatar
                 let img = getAvatar(item.name, isUser);
                 let percent = Math.min((item.count / 20) * 100, 100);
-                
-                // 安全氣囊
                 let err = `onerror="this.src='${DEFAULT_AVATAR}'"`;
 
                 let levelTag = '';
