@@ -129,7 +129,7 @@
         display: flex; flex-direction: column; align-items: center; gap: 10px;
     }
 
-    /* 💬 私訊小編按鈕 */
+    /* 💬 1. 私訊小編按鈕 (直接開 Messenger) */
     .btn-messenger {
         display: inline-flex; align-items: center; justify-content: center;
         background: #fff; 
@@ -147,13 +147,13 @@
         gap: 5px; margin-top: 5px; font-size: 0.9rem;
     }
     
-    /* 🔗 粉絲團連結 */
+    /* 🔗 2. 粉絲團連結 */
     .footer-fb-link { 
         color: #8d6e63; font-weight: bold; text-decoration: none; 
     }
     .footer-fb-link:hover { color: #d32f2f; }
 
-    /* 🔒 隱藏版管理員鎖頭 (超級低調) */
+    /* 🔒 3. 隱藏版管理員鎖頭 (超級低調) */
     .admin-lock {
         color: #e0e0e0; /* 預設淡灰色，幾乎看不見 */
         font-size: 0.8rem; 
@@ -240,7 +240,7 @@
 
 {% block scripts %}
 <script>
-    // 🔥 超能力跑馬燈邏輯：智慧地點判斷
+    // 🔥 超能力跑馬燈邏輯：優先抓取「里別」欄位
     let realMsgs = ["🔔 報——！歡迎來到尋神情報站！", "💡 報馬仔提醒：發現神隊友請上傳！"];
     
     fetch('/api/locations')
@@ -253,23 +253,20 @@
                 let rawName = i.nickname || i.name || "熱心鄉親";
                 let name = rawName.split('#')[0]; 
 
-                // 2. 智慧地點判斷 (依照優先順序)
+                // 2. 智慧地點判斷
                 let place = "苑裡某處"; // 預設值
                 
-                if (rawName.includes('#')) {
-                    // 優先 1：如果暱稱裡藏有「特洛伊木馬」(#里別)
+                // 優先順序：1. CSV 的「里別」欄位  2. 暱稱裡的 #里別  3. 描述
+                if (i['里別'] && i['里別'] !== "nan" && i['里別'].trim() !== "") {
+                     place = i['里別'];
+                } else if (rawName.includes('#')) {
                     place = rawName.split('#')[1]; 
                 } else if (i.area && i.area !== "其他" && i.area !== "nan") {
-                    // 優先 2：如果有 CSV 的里別欄位 (area)
                     place = i.area; 
                 } else if (i.description && i.description !== "nan") {
-                    // 優先 3：如果有描述欄位
                     place = i.description.replace(/[\[\]]/g, ' '); 
                 } else if (i.lat && i.lng) {
-                    // 優先 4：如果有 GPS 但沒地名，就顯示座標附近 (選用)
-                    // place = "座標 (" + i.lat.toFixed(2) + ", " + i.lng.toFixed(2) + ") 附近";
-                    // 還是保持神祕感好了
-                    place = "苑裡田野間";
+                     place = "苑裡田野間";
                 }
 
                 realMsgs.push(`🙏 感恩！${name} 於 [${place.trim()}] 成功尋獲神隊友！`);
