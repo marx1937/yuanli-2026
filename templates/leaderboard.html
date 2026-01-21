@@ -10,14 +10,14 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-        /* 1. 基礎設定 (延續你的美學覺醒版) */
+        /* 1. 基礎設定 */
         body {
             background-color: #fdfcf0;
             background-image: 
                 linear-gradient(to right, rgba(215, 204, 200, 0.1) 1px, transparent 1px),
                 linear-gradient(to bottom, rgba(215, 204, 200, 0.1) 1px, transparent 1px);
             background-size: 20px 20px;
-            padding-bottom: 110px; /* 避開底部導航 */
+            padding-bottom: 110px;
             margin: 0;
             font-family: "Microsoft JhengHei", sans-serif;
         }
@@ -34,7 +34,7 @@
         }
         @keyframes float-title { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
-        /* 3. 切換按鈕 (Tab) */
+        /* 3. 切換按鈕 */
         .tab-container {
             display: flex; justify-content: center; gap: 15px; margin-bottom: 20px;
         }
@@ -50,20 +50,20 @@
             background: #fff; color: #8d6e63; border: 1px solid #efebe9;
         }
 
-        /* 4. 🔥 修正：說明按鈕 (改成更有儀式感的卷軸風) */
+        /* 4. 說明按鈕 (卷軸風) */
         .info-bar { text-align: center; margin-bottom: 25px; }
         .info-scroll-btn {
             background: #fff8e1; color: #d84315;
             border: 2px solid #ffe082;
-            padding: 6px 18px; border-radius: 8px; /* 方圓角，像匾額 */
+            padding: 6px 18px; border-radius: 8px;
             font-size: 0.9rem; font-weight: bold; text-decoration: none;
             display: inline-flex; align-items: center; gap: 6px;
-            box-shadow: 0 3px 0 #ffca28; /*立體感*/
+            box-shadow: 0 3px 0 #ffca28;
             transition: 0.1s;
         }
         .info-scroll-btn:active { transform: translateY(3px); box-shadow: none; }
 
-        /* 5. 獎台區 (Podium) */
+        /* 5. 獎台區 */
         .podium-section {
             display: flex; align-items: flex-end; justify-content: center;
             height: 230px; margin-bottom: 20px; gap: 8px; padding: 0 10px;
@@ -72,7 +72,6 @@
             display: flex; flex-direction: column; align-items: center; position: relative;
         }
         
-        /* 頭像樣式 */
         .p-avatar {
             width: 70px; height: 70px; border-radius: 50%; 
             border: 4px solid #fff; z-index: 5; background: #fff;
@@ -85,7 +84,6 @@
         }
         @keyframes bounce { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-5px);} }
 
-        /* 獎台底座 */
         .p-base {
             width: 90px; text-align: center; color: white;
             border-radius: 15px 15px 0 0; padding-top: 20px;
@@ -107,9 +105,7 @@
             display: flex; align-items: center; margin-bottom: 12px;
             box-shadow: 0 3px 8px rgba(0,0,0,0.05); border: 1px solid #fff;
         }
-        .list-rank {
-            width: 30px; font-size: 1.1rem; font-weight: 900; color: #a1887f; text-align: center;
-        }
+        .list-rank { width: 30px; font-size: 1.1rem; font-weight: 900; color: #a1887f; text-align: center; }
         .list-avatar {
             width: 50px; height: 50px; border-radius: 50%; margin: 0 15px;
             background: #f5f5f5; border: 2px solid #eee;
@@ -118,30 +114,20 @@
         .list-name { font-weight: bold; color: #4e342e; font-size: 1.05rem; display: flex; align-items: center; gap: 5px;}
         .list-sub { font-size: 0.85rem; color: #9e9e9e; margin-top: 2px; }
         
-        /* 進度條 */
-        .list-bar-bg {
-            height: 6px; width: 100%; background: #efebe9; border-radius: 3px; margin-top: 6px;
-            overflow: hidden;
-        }
-        .list-bar-fill {
-            height: 100%; background: linear-gradient(90deg, #ffca28, #ff6f00); border-radius: 3px;
-        }
-        .list-count {
-            font-size: 1.2rem; font-weight: 900; color: #d32f2f; margin-left: 10px;
-            min-width: 40px; text-align: right;
-        }
+        .list-bar-bg { height: 6px; width: 100%; background: #efebe9; border-radius: 3px; margin-top: 6px; overflow: hidden; }
+        .list-bar-fill { height: 100%; background: linear-gradient(90deg, #ffca28, #ff6f00); border-radius: 3px; }
+        .list-count { font-size: 1.2rem; font-weight: 900; color: #d32f2f; margin-left: 10px; min-width: 40px; text-align: right; }
 
-        /* 🔥 修正：等級標籤 (木牌質感) */
+        /* 等級標籤 (木牌質感) */
         .lvl-tag {
             font-size: 0.7rem; padding: 2px 8px; border-radius: 4px;
             font-weight: normal; color: #5d4037; border: 1px solid #8d6e63;
-            background-color: #efebe9; /* 木頭底色 */
-            display: inline-block; transform: scale(0.9);
+            background-color: #efebe9; display: inline-block; transform: scale(0.9);
         }
-        .lvl-max { background: #d32f2f; color: #fff; border-color: #b71c1c; } /* 紅底白字 */
-        .lvl-3 { background: #ffca28; color: #5d4037; border-color: #ff8f00; } /* 金底黑字 */
+        .lvl-max { background: #d32f2f; color: #fff; border-color: #b71c1c; }
+        .lvl-3 { background: #ffca28; color: #5d4037; border-color: #ff8f00; }
 
-        /* 底部導航列 */
+        /* 底部導航 */
         .fake-navbar { 
             position: fixed; bottom: 0; width: 100%; 
             background: #fff; border-top: 1px solid #efebe9; 
@@ -203,6 +189,9 @@
         let currentTab = 'village';
         let rawData = [];
 
+        // 預設圖片 (安全氣囊)
+        const DEFAULT_AVATAR = "https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_home.png";
+
         fetch('/api/locations').then(r => r.json()).then(data => {
             rawData = data;
             renderVillageRank();
@@ -220,12 +209,15 @@
             }
         }
 
-        // 🔥 超能力頭像產生器：使用「冒險家 (Adventurer-Neutral)」風格
-        // 這個風格都是 Q 版人物，分不出男女，只有可愛，完美解決性別尷尬問題！
+        // 🔥 關鍵修正：加入 encodeURIComponent 防止破圖 🔥
         function getAvatar(seed, isUser) {
-            if(!isUser) return `https://ui-avatars.com/api/?name=${seed}&background=random&color=fff&size=128`;
-            // 使用 DiceBear Adventurer Neutral (中性冒險家)
-            return `https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=${seed}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
+            if(!isUser) {
+                // 里別使用文字縮寫
+                return `https://ui-avatars.com/api/?name=${encodeURIComponent(seed)}&background=random&color=fff&size=128`;
+            }
+            // 使用 DiceBear v9 Adventurer Neutral (中性Q版)
+            // 記得對 seed 進行編碼！
+            return `https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
         }
 
         function renderVillageRank() {
@@ -256,12 +248,6 @@
             let sorted = Object.keys(counts).map(k => ({name: k, count: counts[k]}))
                                           .sort((a,b) => b.count - a.count);
             
-            // 在這裡補上里別資訊 (取該使用者出現最多次的里別)
-            sorted.forEach(user => {
-                user.village = "苑裡鎮"; // 預設
-                // 簡易邏輯：暫時不計算最常出現，先顯示通用
-            });
-
             renderPodium(sorted, true);
             renderList(sorted.slice(3, 53), true); // Top 50
         }
@@ -271,14 +257,16 @@
             let p2 = data[1] || {name:'虛位以待', count:0};
             let p3 = data[2] || {name:'虛位以待', count:0};
 
-            // 前三名如果是個人，使用特殊的「神明感」頭像種子，或保留中性風格
             let img1 = isUser ? getAvatar(p1.name, true) : `https://res.cloudinary.com/diuoghid2/image/upload/v1/badge_gold.png`;
             let img2 = isUser ? getAvatar(p2.name, true) : `https://res.cloudinary.com/diuoghid2/image/upload/v1/badge_silver.png`;
             let img3 = isUser ? getAvatar(p3.name, true) : `https://res.cloudinary.com/diuoghid2/image/upload/v1/badge_bronze.png`;
 
+            // 加入 onerror 防呆
+            let err = `onerror="this.src='${DEFAULT_AVATAR}'"`;
+
             let html = `
                 <div class="podium-col p-2">
-                    <img src="${img2}" class="p-avatar">
+                    <img src="${img2}" class="p-avatar" ${err}>
                     <div class="p-base">
                         <div class="p-name">${p2.name}</div>
                         <div class="p-score">${p2.count} 尊</div>
@@ -286,14 +274,14 @@
                 </div>
                 <div class="podium-col p-1">
                     <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/crown.png" class="p-crown">
-                    <img src="${img1}" class="p-avatar">
+                    <img src="${img1}" class="p-avatar" ${err}>
                     <div class="p-base">
                         <div class="p-name">${p1.name}</div>
                         <div class="p-score">${p1.count} 尊</div>
                     </div>
                 </div>
                 <div class="podium-col p-3">
-                    <img src="${img3}" class="p-avatar">
+                    <img src="${img3}" class="p-avatar" ${err}>
                     <div class="p-base">
                         <div class="p-name">${p3.name}</div>
                         <div class="p-score">${p3.count} 尊</div>
@@ -305,25 +293,26 @@
 
         function renderList(data, isUser=false) {
             let html = '';
-            let maxCount = data.length > 0 ? data[0].count : 1; // 用列表第一名做基準
-
+            
             data.forEach((item, idx) => {
                 if (item.count === 0) return;
                 let img = getAvatar(item.name, isUser);
-                let percent = Math.min((item.count / 20) * 100, 100); // 視覺效果，20尊滿格
+                let percent = Math.min((item.count / 20) * 100, 100);
+                
+                // 加入 onerror 防呆
+                let err = `onerror="this.src='${DEFAULT_AVATAR}'"`;
 
-                // 等級標籤 (木牌風)
                 let levelTag = '';
                 if (isUser) {
                     if (item.count >= 20) levelTag = '<span class="lvl-tag lvl-max">在世土地公</span>';
                     else if (item.count >= 10) levelTag = '<span class="lvl-tag lvl-3">虔誠爐主</span>';
-                    else levelTag = ''; // 低等級不顯示，保持乾淨
+                    else levelTag = ''; 
                 }
 
                 html += `
                     <div class="list-item">
                         <div class="list-rank">${idx+4}</div>
-                        <img src="${img}" class="list-avatar">
+                        <img src="${img}" class="list-avatar" ${err}>
                         <div class="list-info">
                             <div class="list-name">${item.name} ${levelTag}</div>
                             ${isUser ? '<div class="list-sub">持續累積功德中...</div>' : ''}
@@ -340,7 +329,6 @@
             $('#list-area').html(html);
         }
 
-        // 彈出榜單說明
         function showLevelInfo() {
             Swal.fire({
                 title: '📜 英雄榜文',
