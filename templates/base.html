@@ -1,125 +1,19 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>苑裡尋神情報站</title>
-    
-    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="尋神地圖">
-    <meta name="theme-color" content="#1a1a1a"> 
-    
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="apple-touch-icon" href="https://res.cloudinary.com/diuoghid2/image/upload/v1768525265/logo.png">
-
-    <style>
-        /* 📜 魔法書規範：宣紙米背景 */
-        body { 
-            background-color: #fdfcf0; 
-            background-image: radial-gradient(#d7ccc8 1.5px, transparent 1.5px);
-            background-size: 24px 24px;
-            min-height: 100vh;
-            font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
-            padding-bottom: 110px !important;
-            overflow-x: hidden;
-            margin: 0;
-            color: #5d4037;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* --- 底部導覽列 (偽裝戰術) --- */
-        .fake-navbar { 
-            position: fixed; bottom: 0; width: 100%; 
-            background: #fff; border-top: 1px solid #efebe9; 
-            padding: 0 5px; height: 90px; 
-            display: flex; justify-content: space-around; align-items: center; 
-            z-index: 2000; box-shadow: 0 -5px 20px rgba(93, 64, 55, 0.05);
-        }
-        
-        .nav-item { 
-            text-align: center; color: #a1887f; text-decoration: none !important; 
-            font-size: 0.75rem; flex: 1; display: flex; flex-direction: column; align-items: center; 
-        }
-        .nav-item:hover { text-decoration: none; color: #8d6e63; }
-        
-        .nav-icon { 
-            height: 42px; width: auto; margin-bottom: 3px; 
-            filter: grayscale(100%) sepia(20%) opacity(0.8);
-            transition: 0.3s; 
-        }
-        
-        .nav-item.active .nav-icon { 
-            transform: scale(1.1); filter: none; 
-            filter: drop-shadow(0 2px 2px rgba(211, 47, 47, 0.2)); 
-        }
-        .nav-item.active span { color: #d32f2f; font-weight: bold; }
-
-        .nav-center-btn {
-            width: 80px; height: 80px; 
-            background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
-            border-radius: 50%; border: 6px solid #fdfcf0;
-            display: flex; align-items: center; justify-content: center;
-            transform: translateY(-35px); 
-            box-shadow: 0 8px 15px rgba(198, 40, 40, 0.3);
-            text-decoration: none !important;
-        }
-        .nav-center-icon { 
-            height: 55px; width: auto; display: block; 
-            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2)); 
-        }
-
-        /* Loading 動畫呼吸燈 */
-        @keyframes heartbeat {
-            0% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.8; }
-        }
-
-        {% block styles %}{% endblock %}
-    </style>
-</head>
-<body>
-
-    <div id="app-loader" style="
-        position: fixed; 
-        top: 0; left: 0; width: 100%; height: 100%; 
-        background-color: #1a1a1a; 
-        z-index: 99999; 
-        display: flex; flex-direction: column; justify-content: center; align-items: center;
-        transition: opacity 0.6s ease-out, visibility 0.6s;
-    ">
-        <i class="fas fa-torii-gate" style="
-            color: #d32f2f; font-size: 3.5rem; margin-bottom: 20px; 
-            filter: drop-shadow(0 0 10px rgba(211, 47, 47, 0.5));
-            animation: heartbeat 1.5s infinite ease-in-out;
-        "></i>
-        <h3 style="color: #fdfcf0; font-weight: bold; letter-spacing: 2px; margin: 0;">苑裡尋神情報站</h3>
-        <p style="color: #888; font-size: 0.9rem; margin-top: 10px; font-family: monospace;">SYSTEM INITIALIZING...</p>
-    </div>
-
-    {% block content %}{% endblock %}
-
     {% if active_page == 'home' %}
     <div id="install-amulet" onclick="showInstallGuide()" style="
         position: fixed; 
-        bottom: 110px; /* 避開底部導覽列 */
-        right: 15px; 
+        bottom: 110px; 
+        right: 10px; /* 稍微往右靠一點，更不擋畫面 */
         z-index: 1500; 
         cursor: pointer;
-        display: none; /* 預設隱藏 */
+        display: none; 
         animation: float-amulet 3s ease-in-out infinite;
-        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+        filter: drop-shadow(0 3px 5px rgba(0,0,0,0.3));
         transition: transform 0.2s;
     ">
         <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1768899372/install_amulet.png" 
-             style="width: 75px; height: auto;" 
+             style="width: 50px; height: auto;" 
              alt="把神明請回家">
     </div>
-
     <style>
         @keyframes float-amulet {
             0% { transform: translateY(0px) rotate(0deg); }
@@ -130,13 +24,10 @@
     </style>
 
     <script>
+        // ... (這裡的 script 維持原樣即可) ...
         function checkInstallState() {
-            // 檢查是否已經是 APP 模式
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-            // 檢查是否是手機
             const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-
-            // 只有在「手機瀏覽器」且「還沒安裝」的時候才顯示
             if (!isStandalone && isMobile) {
                 document.getElementById('install-amulet').style.display = 'block';
             }
@@ -157,7 +48,7 @@
                 title: titleText,
                 html: htmlContent,
                 imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1768899372/install_amulet.png',
-                imageWidth: 80,
+                imageWidth: 80, /* 彈窗裡的圖維持大一點沒關係，比較看得清楚 */
                 imageHeight: 80,
                 imageAlt: 'Install Icon',
                 confirmButtonText: '收到！',
@@ -169,55 +60,3 @@
         window.addEventListener('load', checkInstallState);
     </script>
     {% endif %}
-    <div class="fake-navbar">
-        <a href="/" class="nav-item {% if active_page == 'home' %}active{% endif %}">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_home.png" class="nav-icon" alt="首頁">
-            <span>首頁</span>
-        </a>
-        <a href="/map" class="nav-item {% if active_page == 'map' %}active{% endif %}">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_map.png" class="nav-icon" alt="地圖">
-            <span>地圖</span>
-        </a>
-        <a href="/upload" class="nav-center-btn">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_upload.png" class="nav-center-icon" alt="上傳">
-        </a>
-        <a href="/gallery" class="nav-item {% if active_page == 'gallery' %}active{% endif %}">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_gallery.png" class="nav-icon" alt="圖庫">
-            <span>圖庫</span>
-        </a>
-        <a href="/leaderboard" class="nav-item {% if active_page == 'leaderboard' %}active{% endif %}">
-            <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1/nav_leaderboard.png" class="nav-icon" alt="榜單">
-            <span>榜單</span>
-        </a>
-    </div>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    
-    <script>
-        // 1. 處理 Loading 畫面消失邏輯
-        window.addEventListener('load', function() {
-            var loader = document.getElementById('app-loader');
-            // 設定一個小緩衝，讓使用者看得到 Logo，不會閃一下就不見
-            setTimeout(function() {
-                if(loader) {
-                    loader.style.opacity = '0';
-                    loader.style.visibility = 'hidden';
-                    // 為了保險，稍後直接移除 DOM
-                    setTimeout(function(){ loader.style.display = 'none'; }, 600);
-                }
-            }, 800); 
-        });
-
-        // 2. 清除舊的 Service Worker
-        if(window.navigator && navigator.serviceWorker) {
-            navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                for(let registration of registrations) { 
-                    registration.unregister(); 
-                }
-            });
-        }
-    </script>
-
-    {% block scripts %}{% endblock %}
-</body>
-</html>
