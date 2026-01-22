@@ -126,16 +126,16 @@
             let isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
             let titleText = isIOS ? "把神明請回家！" : "安裝尋神 APP";
             
-            // 🔥 Android 最終版：圖片手動定位，飛出視窗 🔥
+            // 🔥 Android 最終版：圖片位置微調 (往下往左挪) 🔥
             let androidContent = `
                    <div style="position: relative; text-align:left; color:#424242; font-size:1.2rem; line-height:1.8; font-weight:bold;">
 
-                     <div style="position: absolute; top: -70px; right: -50px; z-index: 10; pointer-events: none;">
+                     <div style="position: absolute; top: -45px; right: -25px; z-index: 10; pointer-events: none;">
                          <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1769067857/install_guide_god_pointing.png"
-                              style="width: 290px; height: auto; filter: drop-shadow(3px 5px 8px rgba(0,0,0,0.3)); transform: rotate(2deg);">
+                              style="width: 280px; height: auto; filter: drop-shadow(3px 5px 8px rgba(0,0,0,0.3)); transform: rotate(2deg);">
                      </div>
 
-                     <div style="margin-top: 110px; padding-left: 5px;">
+                     <div style="margin-top: 100px; padding-left: 5px;">
                          <div style="margin-bottom:15px; display:flex; align-items:center;">
                             <span style="font-size:1.3rem; margin-right:8px;">1. 點擊右上角</span> 
                             <span style="display:inline-block; background:#e0e0e0; border-radius:50%; width:36px; height:36px; text-align:center; line-height:36px;">
@@ -172,15 +172,10 @@
                 title: `<span style="font-size:1.6rem; color:#424242; font-weight:800;">${titleText}</span>`,
                 html: htmlContent,
                 
-                // ❌ 移除內建圖片參數，因為我們已經在 htmlContent 裡手動加了
-                // imageUrl: '...', 
-                // imageWidth: ..., 
-                
                 confirmButtonText: '好！把神明請回家',
                 confirmButtonColor: '#d32f2f', 
                 background: '#fffbf0', 
                 backdrop: `rgba(45, 20, 20, 0.8)`,
-                // 讓彈窗內容靠上對齊，留空間給下面的文字
                 customClass: {
                     htmlContainer: 'swal2-html-container-visible'
                 }
