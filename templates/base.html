@@ -82,6 +82,7 @@
     </div>
 
     {% block content %}{% endblock %}
+
     {% if active_page == 'home' %}
     <div id="install-amulet" onclick="showInstallGuide()" style="
         position: fixed; bottom: 110px; right: 10px; z-index: 1500; cursor: pointer; display: none; 
@@ -103,15 +104,40 @@
             const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
             if (!isStandalone && isMobile) { document.getElementById('install-amulet').style.display = 'block'; }
         }
+        
         function showInstallGuide() {
             let isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
             let titleText = isIOS ? "把神明請回家！" : "安裝尋神 APP";
+            
+            // 🔥 優化重點：大字體 + 清楚圖示 + 步驟分行 🔥
             let htmlContent = isIOS 
-                ? `<div style="text-align:left; font-size:0.95rem; line-height:1.6; color:#5d4037;">1. 點擊瀏覽器 <i class="fas fa-share-square" style="color:#007aff;"></i> <b>分享</b><br>2. 選擇 <i class="far fa-plus-square"></i> <b>加入主畫面</b></div>`
-                : `<div style="color:#5d4037;">點擊瀏覽器右上角選單，選擇<b>「安裝應用程式」</b>或<b>「加到主畫面」</b>即可！</div>`;
+                ? `<div style="text-align:left; font-size:1.1rem; line-height:1.8; color:#3e2723; font-weight:bold;">
+                     <div style="margin-bottom:8px;">
+                        <span style="color:#d32f2f; font-size:1.2rem;">❶</span> 點擊下方 <i class="fas fa-share-square" style="color:#007aff;"></i> <b>分享</b>
+                     </div>
+                     <div>
+                        <span style="color:#d32f2f; font-size:1.2rem;">❷</span> 往下滑選 <i class="far fa-plus-square" style="color:#555;"></i> <b>加入主畫面</b>
+                     </div>
+                     <div style="margin-top:10px; font-size:0.9rem; color:#888; text-align:center;">
+                        (完成後就能全螢幕尋神囉！)
+                     </div>
+                   </div>`
+                : `<div style="color:#3e2723; font-size:1.1rem; line-height:1.6;">
+                     點擊瀏覽器右上角選單 <i class="fas fa-ellipsis-v" style="color:#777;"></i><br>
+                     選擇 <b>「安裝應用程式」</b><br>
+                     或 <b>「加到主畫面」</b> 即可！
+                   </div>`;
+
             Swal.fire({
-                title: titleText, html: htmlContent, imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1768899372/install_amulet.png',
-                imageWidth: 80, imageHeight: 80, confirmButtonText: '收到！', confirmButtonColor: '#d32f2f', background: '#fffbf0', backdrop: `rgba(45, 20, 20, 0.6)`
+                title: titleText, 
+                html: htmlContent, 
+                imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1768899372/install_amulet.png',
+                imageWidth: 90, 
+                imageHeight: 90, 
+                confirmButtonText: '好，我試試！', 
+                confirmButtonColor: '#d32f2f', 
+                background: '#fffbf0', 
+                backdrop: `rgba(45, 20, 20, 0.7)`
             });
         }
         window.addEventListener('load', checkInstallState);
