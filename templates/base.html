@@ -61,15 +61,15 @@
             100% { transform: scale(1); opacity: 0.8; }
         }
 
-        /* Z-Index 修正：確保彈窗壓在所有東西上面 */
+        /* Z-Index 修正 */
         div.swal2-container {
             z-index: 200000 !important;
         }
 
-        /* ↗️ 箭頭動畫：往右上跳動 */
+        /* 👆 手指動畫：輕輕往右上戳 */
         @keyframes point-up-right {
-            0% { transform: translate(0, 0); opacity: 0.8; }
-            100% { transform: translate(8px, -8px); opacity: 1; } 
+            0% { transform: translate(0, 0) rotate(45deg); }
+            100% { transform: translate(5px, -5px) rotate(45deg); } 
         }
 
         {% block styles %}{% endblock %}
@@ -120,22 +120,23 @@
             let isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
             let titleText = isIOS ? "把神明請回家！" : "安裝尋神 APP";
             
-            // 🔥 Android 平衡版：圖片縮小、標題上移、顏色深灰 🔥
+            // 🔥 Android 顏值救援版：改成手指、排版更緊湊 🔥
             let androidContent = `
-                   <div style="text-align:left; color:#424242; font-size:1.3rem; line-height:2.0; font-weight:bold; position: relative;">
+                   <div style="text-align:left; color:#424242; font-size:1.25rem; line-height:1.8; font-weight:bold; position: relative;">
                      
-                     <div style="position: absolute; top: -30px; right: -10px; color: #d32f2f; font-size: 3rem; animation: point-up-right 0.8s infinite alternate; z-index:200001; filter: drop-shadow(2px 2px 0px #fff);">
-                        <i class="fas fa-location-arrow"></i>
+                     <div style="margin-bottom:20px; position:relative;">
+                        1. 點擊右上角 <span style="display:inline-block; background:#f1f3f4; border-radius:50%; width:34px; height:34px; text-align:center; line-height:34px;"><i class="fas fa-ellipsis-v" style="font-size:1rem; color:#5f6368;"></i></span>
+                        
+                        <div style="position: absolute; top: 15px; left: 160px; color: #d32f2f; font-size: 2rem; animation: point-up-right 0.8s infinite alternate; z-index:200001;">
+                            <i class="fas fa-hand-point-up"></i>
+                        </div>
                      </div>
 
-                     <div style="margin-bottom:15px;">
-                        1. 點擊右上角 <span style="display:inline-block; background:#f1f3f4; border-radius:50%; width:36px; height:36px; text-align:center; line-height:36px; box-shadow:0 1px 2px rgba(0,0,0,0.1);"><i class="fas fa-ellipsis-v" style="font-size:1.1rem; color:#5f6368;"></i></span>
-                     </div>
                      <div>
-                        2. 找到這顆按鈕：<br>
-                        <div style="display:flex; align-items:center; gap:10px; background:#f8f9fa; border:1px solid #e0e0e0; color:#5f6368; padding:8px 16px; border-radius:24px; margin-top:8px; width: fit-content;">
-                            <i class="fas fa-mobile-alt" style="color:#777; font-size:1.1rem;"></i> 
-                            <span style="font-weight:normal;">安裝應用程式</span>
+                        2. 選擇這個選項：<br>
+                        <div style="display:flex; align-items:center; gap:10px; background:#f5f5f5; color:#757575; padding:8px 14px; border-radius:8px; margin-top:5px; width: fit-content;">
+                            <i class="fas fa-arrow-circle-down" style="font-size:1.1rem;"></i> 
+                            <span style="font-weight:500; font-size:1.1rem;">安裝應用程式</span>
                         </div>
                      </div>
                    </div>`;
@@ -155,11 +156,9 @@
             let htmlContent = isIOS ? iosContent : androidContent;
 
             Swal.fire({
-                // ✅ 標題優化：字體 1.5rem (約24px)，顏色深灰 #424242
                 title: `<span style="font-size:1.5rem; color:#424242; font-weight:800;">${titleText}</span>`,
                 html: htmlContent, 
                 imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1768899372/install_amulet.png',
-                // ✅ 圖片瘦身：改為 110px (原本160)
                 imageWidth: 110, 
                 imageHeight: 110, 
                 confirmButtonText: '好！把神明請回家',
