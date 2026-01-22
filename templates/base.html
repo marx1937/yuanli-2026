@@ -61,15 +61,15 @@
             100% { transform: scale(1); opacity: 0.8; }
         }
 
-        /* 🔥 Z-Index 修正：確保彈窗壓在所有東西上面 (包含導覽列) */
+        /* Z-Index 修正：確保彈窗壓在所有東西上面 */
         div.swal2-container {
             z-index: 200000 !important;
         }
 
-        /* ↗️ 箭頭動畫修正：往右上角跳動，不旋轉 */
+        /* ↗️ 箭頭動畫：往右上跳動 */
         @keyframes point-up-right {
             0% { transform: translate(0, 0); opacity: 0.8; }
-            100% { transform: translate(8px, -8px); opacity: 1; } /* 往右上戳 */
+            100% { transform: translate(8px, -8px); opacity: 1; } 
         }
 
         {% block styles %}{% endblock %}
@@ -120,11 +120,11 @@
             let isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
             let titleText = isIOS ? "把神明請回家！" : "安裝尋神 APP";
             
-            // 🔥 Android 修正版：箭頭角度修正 + 按鈕視覺弱化 🔥
+            // 🔥 Android 平衡版：圖片縮小、標題上移、顏色深灰 🔥
             let androidContent = `
-                   <div style="text-align:left; color:#3e2723; font-size:1.3rem; line-height:2.0; font-weight:bold; position: relative; padding-top: 10px;">
+                   <div style="text-align:left; color:#424242; font-size:1.3rem; line-height:2.0; font-weight:bold; position: relative;">
                      
-                     <div style="position: absolute; top: -45px; right: -25px; color: #d32f2f; font-size: 3rem; animation: point-up-right 0.8s infinite alternate; z-index:200001; filter: drop-shadow(2px 2px 0px #fff);">
+                     <div style="position: absolute; top: -30px; right: -10px; color: #d32f2f; font-size: 3rem; animation: point-up-right 0.8s infinite alternate; z-index:200001; filter: drop-shadow(2px 2px 0px #fff);">
                         <i class="fas fa-location-arrow"></i>
                      </div>
 
@@ -155,11 +155,13 @@
             let htmlContent = isIOS ? iosContent : androidContent;
 
             Swal.fire({
-                title: `<span style="font-size:1.8rem; font-weight:900;">${titleText}</span>`,
+                // ✅ 標題優化：字體 1.5rem (約24px)，顏色深灰 #424242
+                title: `<span style="font-size:1.5rem; color:#424242; font-weight:800;">${titleText}</span>`,
                 html: htmlContent, 
                 imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1768899372/install_amulet.png',
-                imageWidth: 160, 
-                imageHeight: 160, 
+                // ✅ 圖片瘦身：改為 110px (原本160)
+                imageWidth: 110, 
+                imageHeight: 110, 
                 confirmButtonText: '好！把神明請回家',
                 confirmButtonColor: '#d32f2f', 
                 background: '#fffbf0', 
