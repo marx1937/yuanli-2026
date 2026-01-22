@@ -117,14 +117,11 @@
         function showInstallGuide() {
             let isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
             
-            // 🔥🔥🔥 這裡就是你的排版魔法！🔥🔥🔥
-            // 架構：1.圖片 -> 2.標題 -> 3.教學內容(靠左)
-            
-            // 1. 定義共用的「圖片 + 標題」區塊
+            // 1. 共用區塊：圖片放最上面 + 標題
             let headerHtml = `
                 <div style="text-align: center; margin-bottom: 20px;">
                     <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1769067857/install_guide_god_pointing.png" 
-                         style="width: 250px; height: auto; margin-bottom: 10px;">
+                         style="width: 240px; height: auto; margin-bottom: 15px;">
                     
                     <div style="font-size: 1.6rem; font-weight: 900; color: #5d4037;">
                         安裝尋神 APP
@@ -132,7 +129,7 @@
                 </div>
             `;
 
-            // 2. 定義「Android 教學內容」 (靠左對齊)
+            // 2. Android 步驟內容
             let androidSteps = `
                    <div style="text-align:left; color:#424242; font-size:1.2rem; line-height:1.8; font-weight:bold; padding: 0 10px;">
                      <div style="margin-bottom:15px; display:flex; align-items:center;">
@@ -140,19 +137,19 @@
                         <span style="display:inline-block; background:#e0e0e0; border-radius:50%; width:36px; height:36px; text-align:center; line-height:36px;">
                             <i class="fas fa-ellipsis-v" style="font-size:1.1rem; color:#424242;"></i>
                         </span>
-                        <span style="font-size:0.9rem; color:#888; margin-left:8px; font-weight:normal;">(土地公指那裡 ↗)</span>
                      </div>
 
                      <div style="margin-top:10px;">
                         <span style="font-size:1.3rem;">2. 選擇這個：</span><br>
-                        <div style="display:flex; align-items:center; gap:10px; background:#f5f5f5; border:1px solid #cfcfcf; color:#616161; padding:10px 18px; border-radius:10px; margin-top:8px; width: fit-content;">
-                            <i class="fas fa-arrow-circle-down" style="font-size:1.2rem;"></i> 
-                            <span style="font-weight:600; font-size:1.1rem;">安裝應用程式</span>
+                        
+                        <div style="display:flex; align-items:center; gap:10px; background:#f5f5f5; border:1px solid #cfcfcf; color:#616161; padding:10px 15px; border-radius:10px; margin-top:8px; width: fit-content;">
+                            <i class="fas fa-mobile-alt" style="font-size:1.2rem;"></i> 
+                            <span style="font-weight:600; font-size:1.05rem;">安裝應用程式 (加到主畫面)</span>
                         </div>
                      </div>
                    </div>`;
 
-            // 3. 定義「iOS 教學內容」 (靠左對齊)
+            // 3. iOS 步驟內容 (這部分是正確的，iOS 統一都叫「加入主畫面」)
             let iosSteps = `
                    <div style="text-align:left; font-size:1.3rem; line-height:1.8; color:#3e2723; font-weight:bold; padding: 0 10px;">
                      <div style="margin-bottom:15px; border-bottom:1px dashed #ccc; padding-bottom:10px;">
@@ -165,15 +162,12 @@
                      </div>
                    </div>`;
 
-            // 4. 組合最終 HTML (頭 + 身體)
+            // 4. 組合 HTML
             let finalHtml = headerHtml + (isIOS ? iosSteps : androidSteps);
 
             Swal.fire({
-                // ❌ 這裡不設定 title，因為我們已經把它寫在 HTML 裡了，這樣才能控制順序
                 title: '', 
                 html: finalHtml,
-                
-                // ❌ 這裡也不設定 imageUrl，因為圖也包在 HTML 裡了
                 
                 confirmButtonText: '好！把神明請回家',
                 confirmButtonColor: '#d32f2f', 
