@@ -66,14 +66,6 @@
             z-index: 200000 !important;
         }
 
-        /* 讓 SweetAlert 的內容區域可以 overflow，這樣圖片才能飛出去 */
-        .swal2-html-container {
-            overflow: visible !important; 
-        }
-        .swal2-popup {
-            overflow: visible !important;
-        }
-
         {% block styles %}{% endblock %}
     </style>
 </head>
@@ -124,38 +116,45 @@
         
         function showInstallGuide() {
             let isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-            let titleText = isIOS ? "把神明請回家！" : "安裝尋神 APP";
             
-            // 🔥 Android 最終版：圖片位置微調 (往下往左挪) 🔥
-            let androidContent = `
-                   <div style="position: relative; text-align:left; color:#424242; font-size:1.2rem; line-height:1.8; font-weight:bold;">
+            // 🔥🔥🔥 這裡就是你的排版魔法！🔥🔥🔥
+            // 架構：1.圖片 -> 2.標題 -> 3.教學內容(靠左)
+            
+            // 1. 定義共用的「圖片 + 標題」區塊
+            let headerHtml = `
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1769067857/install_guide_god_pointing.png" 
+                         style="width: 250px; height: auto; margin-bottom: 10px;">
+                    
+                    <div style="font-size: 1.6rem; font-weight: 900; color: #5d4037;">
+                        安裝尋神 APP
+                    </div>
+                </div>
+            `;
 
-                     <div style="position: absolute; top: -45px; right: -25px; z-index: 10; pointer-events: none;">
-                         <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1769067857/install_guide_god_pointing.png"
-                              style="width: 280px; height: auto; filter: drop-shadow(3px 5px 8px rgba(0,0,0,0.3)); transform: rotate(2deg);">
+            // 2. 定義「Android 教學內容」 (靠左對齊)
+            let androidSteps = `
+                   <div style="text-align:left; color:#424242; font-size:1.2rem; line-height:1.8; font-weight:bold; padding: 0 10px;">
+                     <div style="margin-bottom:15px; display:flex; align-items:center;">
+                        <span style="font-size:1.3rem; margin-right:8px;">1. 點擊右上角</span> 
+                        <span style="display:inline-block; background:#e0e0e0; border-radius:50%; width:36px; height:36px; text-align:center; line-height:36px;">
+                            <i class="fas fa-ellipsis-v" style="font-size:1.1rem; color:#424242;"></i>
+                        </span>
+                        <span style="font-size:0.9rem; color:#888; margin-left:8px; font-weight:normal;">(土地公指那裡 ↗)</span>
                      </div>
 
-                     <div style="margin-top: 100px; padding-left: 5px;">
-                         <div style="margin-bottom:15px; display:flex; align-items:center;">
-                            <span style="font-size:1.3rem; margin-right:8px;">1. 點擊右上角</span> 
-                            <span style="display:inline-block; background:#e0e0e0; border-radius:50%; width:36px; height:36px; text-align:center; line-height:36px;">
-                                <i class="fas fa-ellipsis-v" style="font-size:1.1rem; color:#424242;"></i>
-                            </span>
-                            <span style="font-size:0.9rem; color:#888; margin-left:8px; font-weight:normal;">(土地公指那裡 ↗)</span>
-                         </div>
-
-                         <div style="margin-top:10px;">
-                            <span style="font-size:1.3rem;">2. 選擇這個：</span><br>
-                            <div style="display:flex; align-items:center; gap:10px; background:#f5f5f5; border:1px solid #cfcfcf; color:#616161; padding:10px 18px; border-radius:10px; margin-top:8px; width: fit-content;">
-                                <i class="fas fa-arrow-circle-down" style="font-size:1.2rem;"></i> 
-                                <span style="font-weight:600; font-size:1.1rem;">安裝應用程式</span>
-                            </div>
-                         </div>
+                     <div style="margin-top:10px;">
+                        <span style="font-size:1.3rem;">2. 選擇這個：</span><br>
+                        <div style="display:flex; align-items:center; gap:10px; background:#f5f5f5; border:1px solid #cfcfcf; color:#616161; padding:10px 18px; border-radius:10px; margin-top:8px; width: fit-content;">
+                            <i class="fas fa-arrow-circle-down" style="font-size:1.2rem;"></i> 
+                            <span style="font-weight:600; font-size:1.1rem;">安裝應用程式</span>
+                        </div>
                      </div>
                    </div>`;
 
-            let iosContent = `
-                   <div style="text-align:left; font-size:1.3rem; line-height:1.8; color:#3e2723; font-weight:bold;">
+            // 3. 定義「iOS 教學內容」 (靠左對齊)
+            let iosSteps = `
+                   <div style="text-align:left; font-size:1.3rem; line-height:1.8; color:#3e2723; font-weight:bold; padding: 0 10px;">
                      <div style="margin-bottom:15px; border-bottom:1px dashed #ccc; padding-bottom:10px;">
                         <span style="background:#ffecb3; padding:2px 8px; border-radius:5px;">步驟 1</span><br>
                         點擊下方 <i class="fas fa-share-square" style="color:#007aff; font-size:1.5rem;"></i> <span style="color:#007aff;">分享</span>
@@ -166,19 +165,20 @@
                      </div>
                    </div>`;
 
-            let htmlContent = isIOS ? iosContent : androidContent;
+            // 4. 組合最終 HTML (頭 + 身體)
+            let finalHtml = headerHtml + (isIOS ? iosSteps : androidSteps);
 
             Swal.fire({
-                title: `<span style="font-size:1.6rem; color:#424242; font-weight:800;">${titleText}</span>`,
-                html: htmlContent,
+                // ❌ 這裡不設定 title，因為我們已經把它寫在 HTML 裡了，這樣才能控制順序
+                title: '', 
+                html: finalHtml,
+                
+                // ❌ 這裡也不設定 imageUrl，因為圖也包在 HTML 裡了
                 
                 confirmButtonText: '好！把神明請回家',
                 confirmButtonColor: '#d32f2f', 
                 background: '#fffbf0', 
-                backdrop: `rgba(45, 20, 20, 0.8)`,
-                customClass: {
-                    htmlContainer: 'swal2-html-container-visible'
-                }
+                backdrop: `rgba(45, 20, 20, 0.8)`
             });
         }
         
