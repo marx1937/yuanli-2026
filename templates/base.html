@@ -66,6 +66,14 @@
             z-index: 200000 !important;
         }
 
+        /* 讓 SweetAlert 的內容區域可以 overflow，這樣圖片才能飛出去 */
+        .swal2-html-container {
+            overflow: visible !important; 
+        }
+        .swal2-popup {
+            overflow: visible !important;
+        }
+
         {% block styles %}{% endblock %}
     </style>
 </head>
@@ -118,24 +126,31 @@
             let isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
             let titleText = isIOS ? "把神明請回家！" : "安裝尋神 APP";
             
-            // 🔥 Android 最終版：神明指路 (無 CSS 手指，依賴圖片指引) 🔥
+            // 🔥 Android 最終版：圖片手動定位，飛出視窗 🔥
             let androidContent = `
-                   <div style="text-align:left; color:#424242; font-size:1.2rem; line-height:1.8; font-weight:bold; padding-top:10px;">
-                     
-                     <div style="margin-bottom:15px; display:flex; align-items:center;">
-                        <span style="font-size:1.3rem; margin-right:8px;">1. 點擊右上角</span> 
-                        <span style="display:inline-block; background:#e0e0e0; border-radius:50%; width:36px; height:36px; text-align:center; line-height:36px;">
-                            <i class="fas fa-ellipsis-v" style="font-size:1.1rem; color:#424242;"></i>
-                        </span>
-                        <span style="font-size:0.9rem; color:#888; margin-left:8px; font-weight:normal;">(土地公指那裡 ↗)</span>
+                   <div style="position: relative; text-align:left; color:#424242; font-size:1.2rem; line-height:1.8; font-weight:bold;">
+
+                     <div style="position: absolute; top: -70px; right: -50px; z-index: 10; pointer-events: none;">
+                         <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1769067857/install_guide_god_pointing.png"
+                              style="width: 290px; height: auto; filter: drop-shadow(3px 5px 8px rgba(0,0,0,0.3)); transform: rotate(2deg);">
                      </div>
 
-                     <div style="margin-top:10px;">
-                        <span style="font-size:1.3rem;">2. 選擇這個：</span><br>
-                        <div style="display:flex; align-items:center; gap:10px; background:#f5f5f5; border:1px solid #cfcfcf; color:#616161; padding:10px 18px; border-radius:10px; margin-top:8px; width: fit-content;">
-                            <i class="fas fa-arrow-circle-down" style="font-size:1.2rem;"></i> 
-                            <span style="font-weight:600; font-size:1.1rem;">安裝應用程式</span>
-                        </div>
+                     <div style="margin-top: 110px; padding-left: 5px;">
+                         <div style="margin-bottom:15px; display:flex; align-items:center;">
+                            <span style="font-size:1.3rem; margin-right:8px;">1. 點擊右上角</span> 
+                            <span style="display:inline-block; background:#e0e0e0; border-radius:50%; width:36px; height:36px; text-align:center; line-height:36px;">
+                                <i class="fas fa-ellipsis-v" style="font-size:1.1rem; color:#424242;"></i>
+                            </span>
+                            <span style="font-size:0.9rem; color:#888; margin-left:8px; font-weight:normal;">(土地公指那裡 ↗)</span>
+                         </div>
+
+                         <div style="margin-top:10px;">
+                            <span style="font-size:1.3rem;">2. 選擇這個：</span><br>
+                            <div style="display:flex; align-items:center; gap:10px; background:#f5f5f5; border:1px solid #cfcfcf; color:#616161; padding:10px 18px; border-radius:10px; margin-top:8px; width: fit-content;">
+                                <i class="fas fa-arrow-circle-down" style="font-size:1.2rem;"></i> 
+                                <span style="font-weight:600; font-size:1.1rem;">安裝應用程式</span>
+                            </div>
+                         </div>
                      </div>
                    </div>`;
 
@@ -157,22 +172,21 @@
                 title: `<span style="font-size:1.6rem; color:#424242; font-weight:800;">${titleText}</span>`,
                 html: htmlContent,
                 
-                // 🔥🔥🔥 你的新圖片：神明指路版 🔥🔥🔥
-                imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1769067857/install_guide_god_pointing.png', 
-                
-                // ✅ 圖片寬度適配三人橫圖
-                imageWidth: 260,  
-                imageHeight: 'auto', 
-                imageAlt: '土地公指引',
+                // ❌ 移除內建圖片參數，因為我們已經在 htmlContent 裡手動加了
+                // imageUrl: '...', 
+                // imageWidth: ..., 
                 
                 confirmButtonText: '好！把神明請回家',
                 confirmButtonColor: '#d32f2f', 
                 background: '#fffbf0', 
-                backdrop: `rgba(45, 20, 20, 0.8)`
+                backdrop: `rgba(45, 20, 20, 0.8)`,
+                // 讓彈窗內容靠上對齊，留空間給下面的文字
+                customClass: {
+                    htmlContainer: 'swal2-html-container-visible'
+                }
             });
         }
         
-        // 頁面載入後執行檢查
         window.addEventListener('load', checkInstallState);
     </script>
     {% endif %}
