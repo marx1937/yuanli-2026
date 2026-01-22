@@ -61,16 +61,9 @@
             100% { transform: scale(1); opacity: 0.8; }
         }
 
-        /* Z-Index 修正 */
+        /* 🔥 Z-Index 修正：確保彈窗壓在所有東西上面 */
         div.swal2-container {
             z-index: 200000 !important;
-        }
-
-        /* 👆 手指點擊動畫：模擬真實按壓動作 */
-        @keyframes finger-tap {
-            0% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-5px) scale(0.9); } /* 往上戳一下變小 */
-            100% { transform: translateY(0) scale(1); }
         }
 
         {% block styles %}{% endblock %}
@@ -114,31 +107,32 @@
         function checkInstallState() {
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
             const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-            if (!isStandalone && isMobile) { document.getElementById('install-amulet').style.display = 'block'; }
+            
+            // 只有在「手機瀏覽器」且「還沒安裝」的時候顯示
+            if (!isStandalone && isMobile) {
+                document.getElementById('install-amulet').style.display = 'block';
+            }
         }
         
         function showInstallGuide() {
             let isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
             let titleText = isIOS ? "把神明請回家！" : "安裝尋神 APP";
             
-            // 🔥 Android 靈魂加強版：動態手指 + 顯眼目標 🔥
+            // 🔥 Android 最終版：神明指路 (無 CSS 手指，依賴圖片指引) 🔥
             let androidContent = `
-                   <div style="text-align:left; color:#424242; font-size:1.2rem; line-height:1.8; font-weight:bold; position: relative;">
+                   <div style="text-align:left; color:#424242; font-size:1.2rem; line-height:1.8; font-weight:bold; padding-top:10px;">
                      
-                     <div style="margin-bottom:20px; position:relative; display:flex; align-items:center;">
-                        <span style="font-size:1.4rem; margin-right:8px;">1. 點右上角</span> 
-                        <span style="display:inline-block; background:#e0e0e0; border:2px solid #bdbdbd; border-radius:50%; width:40px; height:40px; text-align:center; line-height:36px; box-shadow:0 2px 4px rgba(0,0,0,0.15);">
-                            <i class="fas fa-ellipsis-v" style="font-size:1.2rem; color:#424242;"></i>
+                     <div style="margin-bottom:15px; display:flex; align-items:center;">
+                        <span style="font-size:1.3rem; margin-right:8px;">1. 點擊右上角</span> 
+                        <span style="display:inline-block; background:#e0e0e0; border-radius:50%; width:36px; height:36px; text-align:center; line-height:36px;">
+                            <i class="fas fa-ellipsis-v" style="font-size:1.1rem; color:#424242;"></i>
                         </span>
-                        
-                        <div style="position: absolute; top: 25px; left: 125px; color: #d32f2f; font-size: 2.2rem; animation: finger-tap 1s infinite ease-in-out; z-index:200001; filter: drop-shadow(1px 1px 0px #fff);">
-                            <i class="fas fa-hand-point-up"></i>
-                        </div>
+                        <span style="font-size:0.9rem; color:#888; margin-left:8px; font-weight:normal;">(土地公指那裡 ↗)</span>
                      </div>
 
-                     <div style="margin-top:25px;">
+                     <div style="margin-top:10px;">
                         <span style="font-size:1.3rem;">2. 選擇這個：</span><br>
-                        <div style="display:flex; align-items:center; gap:10px; background:#f5f5f5; border:1px solid #cfcfcf; color:#616161; padding:8px 16px; border-radius:10px; margin-top:8px; width: fit-content;">
+                        <div style="display:flex; align-items:center; gap:10px; background:#f5f5f5; border:1px solid #cfcfcf; color:#616161; padding:10px 18px; border-radius:10px; margin-top:8px; width: fit-content;">
                             <i class="fas fa-arrow-circle-down" style="font-size:1.2rem;"></i> 
                             <span style="font-weight:600; font-size:1.1rem;">安裝應用程式</span>
                         </div>
@@ -160,17 +154,25 @@
             let htmlContent = isIOS ? iosContent : androidContent;
 
             Swal.fire({
-                title: `<span style="font-size:1.5rem; color:#424242; font-weight:800;">${titleText}</span>`,
-                html: htmlContent, 
-                imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1768899372/install_amulet.png',
-                imageWidth: 110, 
-                imageHeight: 110, 
+                title: `<span style="font-size:1.6rem; color:#424242; font-weight:800;">${titleText}</span>`,
+                html: htmlContent,
+                
+                // 🔥🔥🔥 你的新圖片：神明指路版 🔥🔥🔥
+                imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1769067857/install_guide_god_pointing.png', 
+                
+                // ✅ 圖片寬度適配三人橫圖
+                imageWidth: 260,  
+                imageHeight: 'auto', 
+                imageAlt: '土地公指引',
+                
                 confirmButtonText: '好！把神明請回家',
                 confirmButtonColor: '#d32f2f', 
                 background: '#fffbf0', 
                 backdrop: `rgba(45, 20, 20, 0.8)`
             });
         }
+        
+        // 頁面載入後執行檢查
         window.addEventListener('load', checkInstallState);
     </script>
     {% endif %}
