@@ -109,35 +109,40 @@
             let isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
             let titleText = isIOS ? "把神明請回家！" : "安裝尋神 APP";
             
-            // 🔥 優化重點：大字體 + 清楚圖示 + 步驟分行 🔥
+            // 🔥 超大字體 + 螢光筆畫重點效果 + 明顯圖示 🔥
             let htmlContent = isIOS 
-                ? `<div style="text-align:left; font-size:1.1rem; line-height:1.8; color:#3e2723; font-weight:bold;">
-                     <div style="margin-bottom:8px;">
-                        <span style="color:#d32f2f; font-size:1.2rem;">❶</span> 點擊下方 <i class="fas fa-share-square" style="color:#007aff;"></i> <b>分享</b>
+                ? `<div style="text-align:left; font-size:1.3rem; line-height:1.8; color:#3e2723; font-weight:bold;">
+                     <div style="margin-bottom:15px; border-bottom:1px dashed #ccc; padding-bottom:10px;">
+                        <span style="background:#ffecb3; padding:2px 8px; border-radius:5px;">步驟 1</span><br>
+                        點擊下方 <i class="fas fa-share-square" style="color:#007aff; font-size:1.5rem;"></i> <span style="color:#007aff;">分享</span>
                      </div>
                      <div>
-                        <span style="color:#d32f2f; font-size:1.2rem;">❷</span> 往下滑選 <i class="far fa-plus-square" style="color:#555;"></i> <b>加入主畫面</b>
-                     </div>
-                     <div style="margin-top:10px; font-size:0.9rem; color:#888; text-align:center;">
-                        (完成後就能全螢幕尋神囉！)
+                        <span style="background:#ffecb3; padding:2px 8px; border-radius:5px;">步驟 2</span><br>
+                        往下滑選 <i class="far fa-plus-square" style="color:#555; font-size:1.4rem;"></i> <b>加入主畫面</b>
                      </div>
                    </div>`
-                : `<div style="color:#3e2723; font-size:1.1rem; line-height:1.6;">
-                     點擊瀏覽器右上角選單 <i class="fas fa-ellipsis-v" style="color:#777;"></i><br>
-                     選擇 <b>「安裝應用程式」</b><br>
-                     或 <b>「加到主畫面」</b> 即可！
+                : `<div style="text-align:left; color:#3e2723; font-size:1.3rem; line-height:2.0; font-weight:bold;">
+                     <div style="margin-bottom:10px;">
+                        1. 點右上角 <i class="fas fa-ellipsis-v" style="font-size:1.4rem; color:#555; background:#eee; padding:5px 12px; border-radius:50%;"></i>
+                     </div>
+                     <div>
+                        2. 選擇 <span style="background:#ffe082; padding:0 5px;">安裝應用程式</span>
+                     </div>
+                     <div style="color:#888; font-size:1rem; margin-top:5px;">
+                        (或者選「加到主畫面」)
+                     </div>
                    </div>`;
 
             Swal.fire({
-                title: titleText, 
+                title: `<span style="font-size:1.8rem; font-weight:900;">${titleText}</span>`, // 標題也加大
                 html: htmlContent, 
                 imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1768899372/install_amulet.png',
-                imageWidth: 90, 
-                imageHeight: 90, 
+                imageWidth: 100, // 圖片加大
+                imageHeight: 100, 
                 confirmButtonText: '好，我試試！', 
                 confirmButtonColor: '#d32f2f', 
                 background: '#fffbf0', 
-                backdrop: `rgba(45, 20, 20, 0.7)`
+                backdrop: `rgba(45, 20, 20, 0.8)`
             });
         }
         window.addEventListener('load', checkInstallState);
