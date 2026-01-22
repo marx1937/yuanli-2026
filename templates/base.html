@@ -66,10 +66,11 @@
             z-index: 200000 !important;
         }
 
-        /* 👆 手指動畫：輕輕往右上戳 */
-        @keyframes point-up-right {
-            0% { transform: translate(0, 0) rotate(45deg); }
-            100% { transform: translate(5px, -5px) rotate(45deg); } 
+        /* 👆 手指點擊動畫：模擬真實按壓動作 */
+        @keyframes finger-tap {
+            0% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-5px) scale(0.9); } /* 往上戳一下變小 */
+            100% { transform: translateY(0) scale(1); }
         }
 
         {% block styles %}{% endblock %}
@@ -120,23 +121,26 @@
             let isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
             let titleText = isIOS ? "把神明請回家！" : "安裝尋神 APP";
             
-            // 🔥 Android 顏值救援版：改成手指、排版更緊湊 🔥
+            // 🔥 Android 靈魂加強版：動態手指 + 顯眼目標 🔥
             let androidContent = `
-                   <div style="text-align:left; color:#424242; font-size:1.25rem; line-height:1.8; font-weight:bold; position: relative;">
+                   <div style="text-align:left; color:#424242; font-size:1.2rem; line-height:1.8; font-weight:bold; position: relative;">
                      
-                     <div style="margin-bottom:20px; position:relative;">
-                        1. 點擊右上角 <span style="display:inline-block; background:#f1f3f4; border-radius:50%; width:34px; height:34px; text-align:center; line-height:34px;"><i class="fas fa-ellipsis-v" style="font-size:1rem; color:#5f6368;"></i></span>
+                     <div style="margin-bottom:20px; position:relative; display:flex; align-items:center;">
+                        <span style="font-size:1.4rem; margin-right:8px;">1. 點右上角</span> 
+                        <span style="display:inline-block; background:#e0e0e0; border:2px solid #bdbdbd; border-radius:50%; width:40px; height:40px; text-align:center; line-height:36px; box-shadow:0 2px 4px rgba(0,0,0,0.15);">
+                            <i class="fas fa-ellipsis-v" style="font-size:1.2rem; color:#424242;"></i>
+                        </span>
                         
-                        <div style="position: absolute; top: 15px; left: 160px; color: #d32f2f; font-size: 2rem; animation: point-up-right 0.8s infinite alternate; z-index:200001;">
+                        <div style="position: absolute; top: 25px; left: 125px; color: #d32f2f; font-size: 2.2rem; animation: finger-tap 1s infinite ease-in-out; z-index:200001; filter: drop-shadow(1px 1px 0px #fff);">
                             <i class="fas fa-hand-point-up"></i>
                         </div>
                      </div>
 
-                     <div>
-                        2. 選擇這個選項：<br>
-                        <div style="display:flex; align-items:center; gap:10px; background:#f5f5f5; color:#757575; padding:8px 14px; border-radius:8px; margin-top:5px; width: fit-content;">
-                            <i class="fas fa-arrow-circle-down" style="font-size:1.1rem;"></i> 
-                            <span style="font-weight:500; font-size:1.1rem;">安裝應用程式</span>
+                     <div style="margin-top:25px;">
+                        <span style="font-size:1.3rem;">2. 選擇這個：</span><br>
+                        <div style="display:flex; align-items:center; gap:10px; background:#f5f5f5; border:1px solid #cfcfcf; color:#616161; padding:8px 16px; border-radius:10px; margin-top:8px; width: fit-content;">
+                            <i class="fas fa-arrow-circle-down" style="font-size:1.2rem;"></i> 
+                            <span style="font-weight:600; font-size:1.1rem;">安裝應用程式</span>
                         </div>
                      </div>
                    </div>`;
