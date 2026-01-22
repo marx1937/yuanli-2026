@@ -109,7 +109,8 @@
             let isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
             let titleText = isIOS ? "把神明請回家！" : "安裝尋神 APP";
             
-            // 🔥 超大字體 + 螢光筆畫重點效果 + 明顯圖示 🔥
+            // 🔥 1. 把三點圖示做成「灰色圓形按鈕」樣式，更擬真
+            // 🔥 2. 圖片尺寸在下方設定為 160 (原本100)，讓它撐起版面
             let htmlContent = isIOS 
                 ? `<div style="text-align:left; font-size:1.3rem; line-height:1.8; color:#3e2723; font-weight:bold;">
                      <div style="margin-bottom:15px; border-bottom:1px dashed #ccc; padding-bottom:10px;">
@@ -123,22 +124,22 @@
                    </div>`
                 : `<div style="text-align:left; color:#3e2723; font-size:1.3rem; line-height:2.0; font-weight:bold;">
                      <div style="margin-bottom:10px;">
-                        1. 點右上角 <i class="fas fa-ellipsis-v" style="font-size:1.4rem; color:#555; background:#eee; padding:5px 12px; border-radius:50%;"></i>
+                        1. 點右上角 <span style="display:inline-block; background:#f0f0f0; border-radius:50%; width:36px; height:36px; text-align:center; line-height:36px;"><i class="fas fa-ellipsis-v" style="font-size:1.2rem; color:#555;"></i></span>
                      </div>
                      <div>
-                        2. 選擇 <span style="background:#ffe082; padding:0 5px;">安裝應用程式</span>
+                        2. 選擇 <span style="background:#ffe082; padding:2px 8px; border-radius:4px;">安裝應用程式</span>
                      </div>
-                     <div style="color:#888; font-size:1rem; margin-top:5px;">
+                     <div style="color:#888; font-size:1rem; margin-top:5px; margin-left:25px;">
                         (或者選「加到主畫面」)
                      </div>
                    </div>`;
 
             Swal.fire({
-                title: `<span style="font-size:1.8rem; font-weight:900;">${titleText}</span>`, // 標題也加大
+                title: `<span style="font-size:1.8rem; font-weight:900;">${titleText}</span>`,
                 html: htmlContent, 
                 imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1768899372/install_amulet.png',
-                imageWidth: 100, // 圖片加大
-                imageHeight: 100, 
+                imageWidth: 160, /* ✅ 這裡改大了！原本100，現在160，霸氣回歸 */
+                imageHeight: 160, 
                 confirmButtonText: '好，我試試！', 
                 confirmButtonColor: '#d32f2f', 
                 background: '#fffbf0', 
