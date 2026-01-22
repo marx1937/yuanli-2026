@@ -1,10 +1,11 @@
 {
-  "name": "Map My God - 苑裡土地公",
-  "short_name": "Map My God",
+  "name": "苑裡尋神情報站",
+  "short_name": "尋神地圖",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#fff1eb",
+  "background_color": "#2d1414",
   "theme_color": "#d32f2f",
+  "orientation": "portrait",
   "description": "全苑裡尋找土地公的躲貓貓遊戲！",
   "icons": [
     {
