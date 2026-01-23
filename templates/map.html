@@ -372,14 +372,25 @@
             $('#card-name').text(name); 
             $('#card-user').text(name);
             
-            // 🔥 修復 A：時間欄位修正 (使用 created_at)
+            // 🔥 時間修復
             $('#card-time').text(item.created_at ? item.created_at.substring(0, 16) : '時間未知');
             
-            // 🔥 修復 B：備註強力檢查 (有字才顯示)
+            // 🔥 備註修復 (使用正確的 note 欄位)
             let noteText = (item.note && item.note.trim() !== "") ? item.note : "無備註";
             $('#card-note').text(noteText); 
             
             $('#card-img').attr('src', img);
             
-            // 🔥 修復 C：Google 導航連結 (使用官方 API 格式)
-            $('#btn-google-nav').attr('href', `https
+            // 🔥🔥🔥 這裡修好了！使用 ES6 樣板字串 (backticks) 🔥🔥🔥
+            $('#btn-google-nav').attr('href', `https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}`);
+            
+            $('#info-card').addClass('show');
+        }
+
+        function closeCard() { $('#info-card').removeClass('show'); }
+        function calculateCounts(data) { ALL_VILLAGES.forEach(v => villageCounts[v] = 0); data.forEach(i => { let v = (i.nickname && i.nickname.includes("#")) ? i.nickname.split("#")[1] : (i.area || "其他"); if (villageCounts[v] !== undefined) villageCounts[v]++; }); }
+        function renderFilterChips() { let html = `<div class="filter-chip active" onclick="filterMap('全部', this)">全覽 <span>${allMarkers.length}</span></div>`; ALL_VILLAGES.forEach(v => { html += `<div class="filter-chip" onclick="filterMap('${v}', this)">${v} <span>${villageCounts[v]||0}</span></div>`; }); $('#filter-scroll').html(html); }
+        window.filterMap = function(v, btn) { $('.filter-chip').removeClass('active'); $(btn).addClass('active'); closeCard(); let d = (v === '全部') ? allMarkers : allMarkers.filter(i => { let check = (i.nickname && i.nickname.includes("#")) ? i.nickname.split("#")[1] : (i.area || "其他"); return check === v; }); renderMarkers(d); map.invalidateSize(); if (d.length > 0) { let group = L.featureGroup(d.map(i => L.marker([i.lat, i.lng]))); map.fitBounds(group.getBounds().pad(0.2)); } }
+    </script>
+</body>
+</html>
