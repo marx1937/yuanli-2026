@@ -11,7 +11,7 @@
         padding-bottom: 100px;
     }
 
-    /* 頂部標題區 (已移除舊的白色膠囊，改為直接顯示圖片) */
+    /* 頂部標題區 */
     .page-header { 
         text-align: center; 
         padding: 20px 0 10px 0; 
@@ -88,7 +88,7 @@
     <div class="page-header">
         <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1768691402/title_signboard.png" 
              alt="尋神情報站"
-             style="height: 85px; width: auto; max-width: 90%; object-fit: contain; filter: drop-shadow(0 3px 5px rgba(0,0,0,0.15));">
+             style="width: 95%; max-width: 600px; height: auto; object-fit: contain; filter: drop-shadow(0 5px 8px rgba(0,0,0,0.2)); margin-bottom: 5px;">
     </div>
 
     <div class="form-card">
@@ -170,7 +170,7 @@
         }
     }
 
-    // 📍 地理圍欄 (苑裡範圍)
+    // 📍 地理圍欄 (苑裡範圍) - 若要更嚴格排除外埔，可將 lat >= 24.3500 改為 24.3800
     function checkGeofence(lat, lng) { 
         return (lat >= 24.3500 && lat <= 24.4850 && lng >= 120.6000 && lng <= 120.8000); 
     }
@@ -235,7 +235,6 @@
     function checkReady() {
         let area = $('#area').val();
         let btn = $('#submitBtn');
-        
         btn.removeClass('disabled-zone');
 
         if (currentLat && isPhotoReady && area) {
@@ -252,7 +251,7 @@
     $('#uploadForm').submit(function(e) {
         e.preventDefault();
         
-        // 1. 最後防呆：檢查座標
+        // 1. 檢查座標
         var latCheck = $('#lat').val();
         if (!latCheck || latCheck === "") {
             Swal.fire({ icon: 'error', title: '座標遺失', text: '請重新點擊上方「定位中」按鈕！' });
@@ -282,12 +281,11 @@
 
         var formData = new FormData(this);
         
-        // 🔥🔥🔥 3. 特洛伊木馬注入 (Trojan Injection) 🔥🔥🔥
-        // 解決跑馬燈抓不到里別的問題
+        // 3. 特洛伊木馬注入 (解決跑馬燈問題)
         var trojanName = nickname + "#" + area;
         formData.set('nickname', trojanName);
         
-        // FormData 會自動打包正確的 note 欄位
+        // 🔥🔥🔥 備註直接通關！不需要任何 JS 處理，formData 會自己抓 name="note" 🔥🔥🔥
 
         $.ajax({
             url: '/upload', type: 'POST', data: formData, contentType: false, processData: false,
