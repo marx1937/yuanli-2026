@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>苑裡尋神情報站</title>
     
+    <meta property="og:image" content="https://res.cloudinary.com/diuoghid2/image/upload/v1768525265/logo.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="600">
+    <meta property="og:image:height" content="600">
+
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -149,7 +154,7 @@
                      </div>
                    </div>`;
 
-            // 3. iOS 步驟內容 (這部分是正確的，iOS 統一都叫「加入主畫面」)
+            // 3. iOS 步驟內容
             let iosSteps = `
                    <div style="text-align:left; font-size:1.3rem; line-height:1.8; color:#3e2723; font-weight:bold; padding: 0 10px;">
                      <div style="margin-bottom:15px; border-bottom:1px dashed #ccc; padding-bottom:10px;">
