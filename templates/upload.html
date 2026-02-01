@@ -110,6 +110,11 @@
                     </div>
                     
                     <img id="preview" alt="預覽圖">
+                    
+                    <div id="ai-status-bar" style="position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.95); padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85rem; display: none; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; color: #555;">
+                        🤖 準備中...
+                    </div>
+
                     <div class="re-take-hint" id="reTakeHint"><i class="fas fa-redo"></i> 點擊重拍</div>
 
                     <input type="file" id="photo" name="photo" accept="image/*" capture="environment" style="display:none;" onchange="previewImage(this)">
@@ -152,25 +157,83 @@
 {% block scripts %}
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
 <script>
+    // 🔥 您的模型網址 (已自動填入)
+    const MODEL_URL = "https://teachablemachine.withgoogle.com/models/z_bQ2kEvx/"; 
+
     var currentLat = null, currentLng = null;
     var isPhotoReady = false;
     var isInsideYuanli = false;
+    
+    // ⭐ AI 驗證狀態
+    var isAiVerified = false; 
+    var model, maxPredictions;
+
+    // --- 1. 初始化 AI 模型 ---
+    async function initAI() {
+        const modelURL = MODEL_URL + "model.json";
+        const metadataURL = MODEL_URL + "metadata.json";
+        try {
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+            console.log("✅ AI 模型載入成功");
+        } catch (e) {
+            console.error("AI 模型載入失敗", e);
+        }
+    }
+
+    // --- 2. 核心 AI 辨識函式 ---
+    async function predictTemple() {
+        if (!model) return; 
+
+        const img = document.getElementById('preview');
+        const statusDiv = $('#ai-status-bar');
+        
+        statusDiv.show().html('<i class="fas fa-circle-notch fa-spin"></i> 鑑定中...').css('color', '#555');
+
+        // 預測
+        const prediction = await model.predict(img);
+        
+        // 找出分數最高的
+        let bestMatch = prediction.reduce((prev, curr) => (prev.probability > curr.probability) ? prev : curr);
+
+        // 判斷邏輯 (假設您的類別命名為 "Temple")
+        // 如果您在 Teachable Machine 用的名字不是 Temple，請修改下面這一行
+        if (bestMatch.className === "Temple" && bestMatch.probability > 0.7) {
+            // ✅ 是廟宇
+            isAiVerified = true;
+            statusDiv.html('<i class="fas fa-check-circle"></i> 認證：廟宇建築').css('color', '#2ecc71');
+            speakHappy("鑑定通過！這是一間廟宇！");
+        } else {
+            // ❌ 不是廟宇
+            isAiVerified = false;
+            statusDiv.html('<i class="fas fa-times-circle"></i> 好像不是廟宇？').css('color', '#e74c3c');
+            
+            Swal.fire({
+                title: '🧐 這是廟嗎？',
+                text: 'AI 覺得這看起來不像廟宇建築喔，請對準一點再拍一次！',
+                icon: 'question',
+                confirmButtonText: '好，重拍',
+                confirmButtonColor: '#8d6e63'
+            });
+        }
+        checkReady(); 
+    }
 
     // 🔊 語音函式
     function speakHappy(text) {
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
             var msg = new SpeechSynthesisUtterance();
-            msg.text = text; 
-            msg.lang = 'zh-TW'; 
-            msg.rate = 1.0; 
-            msg.volume = 1; 
+            msg.text = text; msg.lang = 'zh-TW'; msg.rate = 1.0; msg.volume = 1; 
             window.speechSynthesis.speak(msg);
         }
     }
 
-    // 📍 地理圍欄 (苑裡範圍) - 若要更嚴格排除外埔，可將 lat >= 24.3500 改為 24.3800
+    // 📍 地理圍欄
     function checkGeofence(lat, lng) { 
         return (lat >= 24.3500 && lat <= 24.4850 && lng >= 120.6000 && lng <= 120.8000); 
     }
@@ -183,18 +246,14 @@
                 function(position) {
                     currentLat = position.coords.latitude; 
                     currentLng = position.coords.longitude;
+                    $('#lat').val(currentLat); $('#lng').val(currentLng);
                     
-                    $('#lat').val(currentLat); 
-                    $('#lng').val(currentLng);
-                    
-                    // 執行範圍檢查
                     isInsideYuanli = checkGeofence(currentLat, currentLng);
                     
                     if (isInsideYuanli) {
                         $('#gpsStatus').html('<i class="fas fa-check-circle mr-2"></i> 定位完成 (精準)').css('color', '#2ecc71');
                         checkReady();
                     } else {
-                        // ❌ 神明躲貓貓邏輯
                         $('#gpsStatus').html('<i class="fas fa-times-circle mr-2"></i> 神明隱身中...').css('color', '#e74c3c');
                         Swal.fire({
                             imageUrl: 'https://res.cloudinary.com/diuoghid2/image/upload/v1/god_hide_seek.jpg', 
@@ -218,6 +277,7 @@
         }
     }
 
+    // 📸 預覽圖片 + 觸發 AI
     function previewImage(input) {
         if (input.files && input.files[0]) {
             var reader = new FileReader();
@@ -226,32 +286,50 @@
                 $('#reTakeHint').show();
                 $('#uploadPlaceholder').hide();
                 isPhotoReady = true;
-                checkReady();
+                
+                // 重置 AI 狀態
+                isAiVerified = false; 
+                checkReady(); // 先鎖住按鈕
+
+                // ⭐ 圖片載入完成後，執行 AI
+                var imgObj = document.getElementById('preview');
+                imgObj.onload = function() {
+                    predictTemple(); 
+                }
             }
             reader.readAsDataURL(input.files[0]);
         }
     }
 
+    // ✅ 檢查所有條件
     function checkReady() {
         let area = $('#area').val();
         let btn = $('#submitBtn');
         btn.removeClass('disabled-zone');
 
-        if (currentLat && isPhotoReady && area) {
+        // 條件：座標 + 照片 + 區域 + ⭐ AI 驗證
+        if (currentLat && isPhotoReady && area && isAiVerified) {
             btn.addClass('ready').html('<i class="fas fa-paper-plane"></i> 發送情報！歸檔！');
         } else {
             btn.removeClass('ready');
             if (!isPhotoReady) btn.html('📸 請先捕捉金身');
+            else if (!isAiVerified) btn.html('🤖 等待 AI 鑑定...');
             else if (!area) btn.html('📍 請選擇區域');
             else if (!currentLat) btn.html('<i class="fas fa-sync fa-spin"></i> 等待 GPS 定位...');
         }
     }
 
-    // --- 🚀 核心送出邏輯 ---
+    // 🚀 送出表單
     $('#uploadForm').submit(function(e) {
         e.preventDefault();
         
-        // 1. 檢查座標
+        // 1. 嚴格把關：AI 必須通過
+        if (!isAiVerified) {
+            Swal.fire({icon:'error', title:'AI 尚未通過', text:'請確認拍攝的是廟宇建築喔！'});
+            return;
+        }
+
+        // 2. 檢查座標
         var latCheck = $('#lat').val();
         if (!latCheck || latCheck === "") {
             Swal.fire({ icon: 'error', title: '座標遺失', text: '請重新點擊上方「定位中」按鈕！' });
@@ -262,7 +340,7 @@
         if(!nickname) nickname = '熱心串友'; 
         var area = $('#area').val();
 
-        // 2. 髒話過濾
+        // 3. 髒話過濾
         var badWords = ['笨蛋', '壞蛋', '王八', '白痴', '白癡', '智障', '幹', '靠', '死', '爛', '屌', '雞掰', '機車', 'fuck', 'shit']; 
         for (var word of badWords) {
             if (nickname.toLowerCase().includes(word)) {
@@ -280,21 +358,15 @@
         btn.removeClass('ready').html('<i class="fas fa-robot"></i> 正在傳送資料...').css('opacity', '0.8');
 
         var formData = new FormData(this);
-        
-        // 3. 特洛伊木馬注入 (解決跑馬燈問題)
         var trojanName = nickname + "#" + area;
         formData.set('nickname', trojanName);
-        
-        // 🔥🔥🔥 備註直接通關！不需要任何 JS 處理，formData 會自己抓 name="note" 🔥🔥🔥
 
         $.ajax({
             url: '/upload', type: 'POST', data: formData, contentType: false, processData: false,
             success: function(response) {
-                // 🔊 4. 語音播放
                 var sayText = '感謝 ' + area + ' 的 ' + nickname + '，土地公會保庇你喔！';
                 speakHappy(sayText); 
 
-                // 🎨 5. 顯示結果
                 if (response.status === 'duplicate') {
                     Swal.fire({
                         title: '📋 資料已排隊中',
@@ -322,6 +394,9 @@
         });
     });
 
-    $(document).ready(function() { startGPS(); });
+    $(document).ready(function() { 
+        startGPS(); 
+        initAI(); // 啟動 AI
+    });
 </script>
 {% endblock %}
