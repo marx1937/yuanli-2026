@@ -55,7 +55,7 @@
         box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     }
 
-    /* 3. 頂部標題區 (換上匾額圖片) */
+    /* 3. 頂部標題區 */
     .page-header { 
         text-align: center; 
         padding: 20px 0 10px 0; 
@@ -63,21 +63,65 @@
         position: relative; 
     }
 
-    /* 4. 深色彈窗樣式 */
+    /* 4. 深色彈窗樣式優化 */
     .custom-swal-popup {
         background: #2c2c2c !important;
         border: 1px solid #444 !important;
         border-radius: 15px !important;
+        overflow: visible !important; /* 讓關閉按鈕可以突出去 */
     }
-    .custom-swal-title { color: #fbc02d !important; text-align: left !important; font-size: 1.3rem !important; margin-bottom: 0 !important; }
+    .custom-swal-title { color: #ffca28 !important; text-align: left !important; font-size: 1.3rem !important; margin-bottom: 0 !important; }
     .custom-swal-content { color: #eee !important; text-align: left !important; font-size: 0.95rem !important; }
+
+    /* 5. 修正後的關閉按鈕樣式 (紅底金字，像徽章) */
+    div:where(.swal2-container) button.swal2-close {
+        background: #d32f2f !important; /* 廟宇紅 */
+        color: #ffca28 !important;      /* 招財金 */
+        border: 2px solid #ffca28 !important; /* 金邊 */
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        position: absolute;
+        top: -12px;
+        right: -12px;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        opacity: 1;
+        outline: none;
+    }
+    /* 按下時的效果 */
+    div:where(.swal2-container) button.swal2-close:active {
+        transform: scale(0.9);
+        background: #b71c1c !important;
+    }
     
-    /* 按鈕群組 */
+    /* 6. 按鈕群組 (修正配色) */
     .btn-group-custom { display: flex; gap: 8px; margin-top: 15px; }
-    .btn-action { flex: 1; border-radius: 50px; font-weight: bold; padding: 10px 0; border: none; color: white; font-size: 0.9rem; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px; }
-    .btn-nav { background: #2e7d32; }
-    .btn-line { background: #ff9800; }
-    .btn-fb { background: #1877f2; }
+    .btn-action { 
+        flex: 1; 
+        border-radius: 50px; 
+        font-weight: bold; 
+        padding: 10px 0; 
+        border: none; 
+        font-size: 0.9rem; 
+        text-decoration: none; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        gap: 5px; 
+        transition: opacity 0.2s;
+    }
+    .btn-action:hover { opacity: 0.9; text-decoration: none; color: inherit; }
+
+    /* 配色方案修正 */
+    .btn-nav { background: #d32f2f; color: #fff; } /* 廟宇紅 - 導航 */
+    .btn-line { background: #ffca28; color: #5d4037; } /* 招財金 - LINE (字深褐) */
+    .btn-fb { background: #5d4037; color: #fdfcf0; } /* 沈穩褐 - FB (字米白) */
+
 </style>
 {% endblock %}
 
@@ -144,7 +188,9 @@
         let area = (item.nickname && item.nickname.includes("#")) ? item.nickname.split("#")[1] : (item.area || "苑裡");
         let note = (item.note && item.note.trim() !== "") ? item.note : "無備註";
         let time = item.created_at ? item.created_at.substring(0, 16) : "未知時間";
-        let navLink = `http://googleusercontent.com/maps.google.com/maps?daddr=${item.lat},${item.lng}`;
+        
+        // 🔥 修正導航連結：使用 Google Maps 官方 API 格式
+        let navLink = `https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}`;
         let shareUrl = window.location.href; 
 
         // 🔥 隨機分享文案
@@ -164,7 +210,7 @@
                     <img src="${item.image_url}" style="width:100%; border-radius:10px; border:2px solid #fff; margin-bottom:15px;">
                     
                     <div style="text-align:left; color:#fff;">
-                        <div style="font-size:1.4rem; font-weight:bold; color:#fbc02d; margin-bottom:5px;">
+                        <div style="font-size:1.4rem; font-weight:bold; color:#ffca28; margin-bottom:5px;">
                             <i class="fas fa-map-marker-alt"></i> ${area}
                         </div>
                         <div style="font-size:0.95rem; color:#ccc; margin-bottom:10px;">
