@@ -3,23 +3,23 @@
 
 {% block styles %}
 <style>
-    /* 1. 還原經典網格排列 (兩欄式) */
+    /* 1. 經典網格排列 (手機兩欄、電腦三欄) */
     .gallery-row {
         display: flex;
         flex-wrap: wrap;
         margin: 0 -5px;
     }
     .gallery-col {
-        flex: 0 0 50%; /* 一排兩張 */
+        flex: 0 0 50%;
         max-width: 50%;
         padding: 5px;
         margin-bottom: 10px;
     }
     @media (min-width: 768px) {
-        .gallery-col { flex: 0 0 33.33%; max-width: 33.33%; } /* 電腦版一排三張 */
+        .gallery-col { flex: 0 0 33.33%; max-width: 33.33%; }
     }
 
-    /* 2. 照片卡片樣式 */
+    /* 2. 照片卡片與徽章 */
     .photo-card {
         background: #fff;
         border-radius: 10px;
@@ -49,40 +49,38 @@
         color: white;
     }
     .photo-badge {
-        background: #d32f2f; color: white;
+        background: #d32f2f; color: white; /* 廟宇紅 */
         font-size: 0.75rem; padding: 2px 6px;
         border-radius: 4px; position: absolute; top: 10px; left: 10px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     }
 
-    /* 3. 頂部標題區 */
+    /* 3. 頂部標題區 (匾額) */
     .page-header { 
         text-align: center; 
         padding: 20px 0 10px 0; 
         width: 100%; 
-        position: relative; 
     }
 
-    /* 4. 深色彈窗樣式 (修正 overflow 以顯示關閉按鈕) */
+    /* 4. 彈窗樣式優化 (深色背景) */
     .custom-swal-popup {
         background: #2c2c2c !important;
         border: 1px solid #444 !important;
         border-radius: 15px !important;
-        overflow: visible !important; /* 關鍵：讓關閉按鈕可以突出去 */
+        overflow: visible !important; /* 讓關閉按鈕可以突出去 */
     }
     
-    /* 5. 華麗關閉按鈕 (新增) */
+    /* 5. 華麗關閉按鈕 (紅底金框) */
     div:where(.swal2-container) button.swal2-close {
-        background: #d32f2f !important; /* 廟宇紅 */
-        color: #ffca28 !important;      /* 招財金 */
-        border: 2px solid #ffca28 !important; /* 金框 */
+        background: #d32f2f !important;
+        color: #ffca28 !important;
+        border: 2px solid #ffca28 !important;
         border-radius: 50%;
         width: 36px; height: 36px;
         position: absolute;
         top: -12px; right: -12px;
         box-shadow: 0 3px 8px rgba(0,0,0,0.4);
         z-index: 100;
-        opacity: 1;
         outline: none;
         display: flex; align-items: center; justify-content: center;
     }
@@ -97,18 +95,15 @@
         border: none; 
         font-size: 0.9rem; 
         text-decoration: none; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        gap: 5px; 
+        display: flex; align-items: center; justify-content: center; gap: 5px; 
         transition: opacity 0.2s;
     }
     .btn-action:hover { opacity: 0.9; text-decoration: none; color: inherit; }
 
-    /* 配色方案修正 */
-    .btn-nav { background: #d32f2f; color: #fff; } /* 廟宇紅 - 導航 */
-    .btn-line { background: #ffca28; color: #5d4037; } /* 招財金 - LINE (字深褐) */
-    .btn-fb { background: #5d4037; color: #fdfcf0; } /* 沈穩褐 - FB (字米白) */
+    /* 配色方案 */
+    .btn-nav { background: #d32f2f; color: #fff; } /* 廟宇紅 */
+    .btn-line { background: #ffca28; color: #5d4037; } /* 招財金 */
+    .btn-fb { background: #5d4037; color: #fdfcf0; } /* 沈穩褐 */
 
 </style>
 {% endblock %}
@@ -154,7 +149,7 @@
 
                 html += `
                     <div class="gallery-col">
-                        <div class="photo-card" onclick='showDetail(${JSON.stringify(item).replace(/'/g, "&#39;")})'>
+                        <div class="photo-card" onclick='showDetail(${JSON.stringify(item).replace(/'/g, "'")})'>
                             <span class="photo-badge">${area}</span>
                             <div class="photo-img-container">
                                 <img class="photo-img" src="${thumb}" loading="lazy">
@@ -177,27 +172,35 @@
         let note = (item.note && item.note.trim() !== "") ? item.note : "無備註";
         let time = item.created_at ? item.created_at.substring(0, 16) : "未知時間";
         
-        // 1. Google 導航連結 (修正為官方標準格式，解決 404 問題)
+        // 🔥 1. 導航修復：使用 Google Maps 官方通用連結 (解決 404 問題)
         let navLink = `https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}`;
         let shareUrl = window.location.href; 
 
-        // 2. LINE 專用文案：多行排版、豐富資訊
+        // 🔥 2. LINE 文案庫 (12 句隨機變化，不再重複)
         const lineGreetings = [
             `🔥 驚見野生土地公！`,
             `🙏 苑裡這裡有神明，有拜有保庇！`,
             `📍 尋神情報更新！發現新地點！`,
-            `✨ 這尊土地公看起來很靈驗喔～`
+            `✨ 這尊土地公看起來很靈驗喔～`,
+            `🏮 剛剛路過這裡，發現一尊很美的土地公！`,
+            `🚩 苑裡鄉親注意！這裡有新的情報！`,
+            `👀 你看過這尊嗎？隱藏版的神明在這裡。`,
+            `💎 挖到寶了！這個位置竟然有土地公。`,
+            `📢 好康道相報，有拜有保佑，快來看看。`,
+            `🚶‍♂️ 散步經過發現的，分享給大家保平安。`,
+            `📸 拍到一尊很莊嚴的土地公，分享給你！`,
+            `🗺️ 苑裡尋神地圖：這裡風景不錯還有神明！`
         ];
         let randomGreeting = lineGreetings[Math.floor(Math.random() * lineGreetings.length)];
         
-        // 使用 %0A 進行換行
+        // 使用 %0A 進行換行排版
         let lineText = `${randomGreeting}%0A%0A` + 
                        `🗺️ 地點：${area}%0A` + 
                        `👤 拍攝：${name}%0A` + 
                        `💬 備註：${note}%0A%0A` + 
                        `👇 點我看地圖：`;
 
-        // 3. 社交按鈕連結
+        // 3. 社群連結生成
         let fbLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
         let lineLink = `https://line.me/R/msg/text/?${lineText} ${encodeURIComponent(shareUrl)}`;
 
