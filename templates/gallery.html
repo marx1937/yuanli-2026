@@ -3,7 +3,53 @@
 
 {% block styles %}
 <style>
-    /* 1. 經典網格排列 (手機兩欄、電腦三欄) */
+    /* --------------------------
+       1. 里別過濾器 (新增功能) 
+       -------------------------- */
+    .filter-container {
+        position: sticky; /* 讓它黏在頂部，不會隨捲動消失 */
+        top: 0;
+        z-index: 1000;
+        background: #fdfcf0; /* 與背景同色，製造無縫感 */
+        padding: 10px 5px;
+        white-space: nowrap;
+        overflow-x: auto; /* 允許水平滑動 */
+        -webkit-overflow-scrolling: touch; /* 讓 iOS 滑動更順暢 */
+        box-shadow: 0 5px 10px rgba(93, 64, 55, 0.05);
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        margin-bottom: 10px;
+    }
+    
+    /* 隱藏捲軸但保留功能 */
+    .filter-container::-webkit-scrollbar { display: none; }
+    
+    .filter-btn {
+        display: inline-block;
+        padding: 6px 16px;
+        margin-right: 8px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        color: #5d4037;
+        background: #fff;
+        border: 1px solid #d7ccc8;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    /* 選中狀態：廟宇紅底白字 */
+    .filter-btn.active {
+        background: #d32f2f;
+        color: #fff;
+        border-color: #d32f2f;
+        box-shadow: 0 3px 8px rgba(211, 47, 47, 0.3);
+        transform: scale(1.05);
+    }
+
+    /* --------------------------
+       2. 經典網格排列 
+       -------------------------- */
     .gallery-row {
         display: flex;
         flex-wrap: wrap;
@@ -14,12 +60,13 @@
         max-width: 50%;
         padding: 5px;
         margin-bottom: 10px;
+        transition: opacity 0.3s ease, transform 0.3s ease; /* 過濾時的動畫 */
     }
     @media (min-width: 768px) {
         .gallery-col { flex: 0 0 33.33%; max-width: 33.33%; }
     }
 
-    /* 2. 照片卡片與徽章 */
+    /* 3. 照片卡片 */
     .photo-card {
         background: #fff;
         border-radius: 10px;
@@ -31,7 +78,7 @@
     }
     .photo-img-container {
         width: 100%;
-        padding-top: 100%; /* 1:1 正方形裁切 */
+        padding-top: 100%;
         position: relative;
         background: #eee;
     }
@@ -49,28 +96,27 @@
         color: white;
     }
     .photo-badge {
-        background: #d32f2f; color: white; /* 廟宇紅 */
+        background: #d32f2f; color: white;
         font-size: 0.75rem; padding: 2px 6px;
         border-radius: 4px; position: absolute; top: 10px; left: 10px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     }
 
-    /* 3. 頂部標題區 (匾額) */
+    /* 4. 頂部標題區 */
     .page-header { 
         text-align: center; 
-        padding: 20px 0 10px 0; 
+        padding: 10px 0 0 0; 
         width: 100%; 
     }
 
-    /* 4. 彈窗樣式優化 (深色背景) */
+    /* 5. 彈窗樣式 */
     .custom-swal-popup {
         background: #2c2c2c !important;
         border: 1px solid #444 !important;
         border-radius: 15px !important;
-        overflow: visible !important; /* 讓關閉按鈕可以突出去 */
+        overflow: visible !important;
     }
     
-    /* 5. 華麗關閉按鈕 (紅底金框) */
     div:where(.swal2-container) button.swal2-close {
         background: #d32f2f !important;
         color: #ffca28 !important;
@@ -85,25 +131,19 @@
         display: flex; align-items: center; justify-content: center;
     }
 
-    /* 6. 按鈕群組 (修正配色) */
+    /* 6. 按鈕群組 */
     .btn-group-custom { display: flex; gap: 8px; margin-top: 15px; }
     .btn-action { 
-        flex: 1; 
-        border-radius: 50px; 
-        font-weight: bold; 
-        padding: 10px 0; 
-        border: none; 
-        font-size: 0.9rem; 
-        text-decoration: none; 
+        flex: 1; border-radius: 50px; font-weight: bold; padding: 10px 0; 
+        border: none; font-size: 0.9rem; text-decoration: none; 
         display: flex; align-items: center; justify-content: center; gap: 5px; 
         transition: opacity 0.2s;
     }
     .btn-action:hover { opacity: 0.9; text-decoration: none; color: inherit; }
 
-    /* 配色方案 */
-    .btn-nav { background: #d32f2f; color: #fff; } /* 廟宇紅 */
-    .btn-line { background: #ffca28; color: #5d4037; } /* 招財金 */
-    .btn-fb { background: #5d4037; color: #fdfcf0; } /* 沈穩褐 */
+    .btn-nav { background: #d32f2f; color: #fff; }
+    .btn-line { background: #ffca28; color: #5d4037; }
+    .btn-fb { background: #5d4037; color: #fdfcf0; }
 
 </style>
 {% endblock %}
@@ -113,8 +153,12 @@
     <div class="page-header">
         <img src="https://res.cloudinary.com/diuoghid2/image/upload/v1768691402/title_signboard.png" 
              alt="尋神情報站"
-             style="width: 95%; max-width: 600px; height: auto; object-fit: contain; filter: drop-shadow(0 5px 8px rgba(0,0,0,0.2)); margin-bottom: 5px;">
+             style="width: 90%; max-width: 500px; height: auto; object-fit: contain; filter: drop-shadow(0 5px 8px rgba(0,0,0,0.2));">
     </div>
+
+    <div id="filter-bar" class="filter-container" style="display:none;">
+        <div class="filter-btn active" onclick="filterGallery('all', this)">全部神明</div>
+        </div>
 
     <div class="container-fluid" style="padding-bottom: 100px;">
         <div class="gallery-row" id="gallery-list">
@@ -132,38 +176,84 @@
         loadGallery();
     });
 
+    let allData = []; // 儲存原始資料，供過濾使用
+
     function loadGallery() {
         let t = new Date().getTime();
         $.getJSON('/api/locations?t=' + t, function(data) {
-            let html = '';
             
             if (data.length === 0) {
                 $('#gallery-list').html('<div style="text-align:center; width:100%; margin-top:50px; color:#888;">還沒有資料喔！</div>');
                 return;
             }
 
-            data.reverse().forEach(item => {
-                let name = item.nickname ? item.nickname.split("#")[0] : "熱心串友";
-                let area = (item.nickname && item.nickname.includes("#")) ? item.nickname.split("#")[1] : (item.area || "苑裡");
-                let thumb = item.image_url.replace('/upload/', '/upload/w_300,h_300,c_fill,q_auto/');
+            allData = data.reverse(); // 存起來，並反轉讓新的在前面
+            renderGallery(allData);   // 初始渲染全部
+            generateFilterButtons(allData); // 🔥 自動生成里別按鈕
+        });
+    }
 
-                html += `
-                    <div class="gallery-col">
-                        <div class="photo-card" onclick='showDetail(${JSON.stringify(item).replace(/'/g, "'")})'>
-                            <span class="photo-badge">${area}</span>
-                            <div class="photo-img-container">
-                                <img class="photo-img" src="${thumb}" loading="lazy">
-                                <div class="photo-info-overlay">
-                                    <i class="fas fa-user-circle"></i> ${name}
-                                </div>
+    // 🔥 渲染相簿的函式 (可被重複呼叫)
+    function renderGallery(data) {
+        let html = '';
+        data.forEach(item => {
+            let name = item.nickname ? item.nickname.split("#")[0] : "熱心串友";
+            let area = (item.nickname && item.nickname.includes("#")) ? item.nickname.split("#")[1] : (item.area || "苑裡");
+            let thumb = item.image_url.replace('/upload/', '/upload/w_300,h_300,c_fill,q_auto/');
+
+            html += `
+                <div class="gallery-col" data-area="${area}">
+                    <div class="photo-card" onclick='showDetail(${JSON.stringify(item).replace(/'/g, "'")})'>
+                        <span class="photo-badge">${area}</span>
+                        <div class="photo-img-container">
+                            <img class="photo-img" src="${thumb}" loading="lazy">
+                            <div class="photo-info-overlay">
+                                <i class="fas fa-user-circle"></i> ${name}
                             </div>
                         </div>
                     </div>
-                `;
-            });
-
-            $('#gallery-list').html(html);
+                </div>
+            `;
         });
+        $('#gallery-list').html(html).hide().fadeIn(300); // 加一點淡入特效
+    }
+
+    // 🔥 自動統計有哪些里，並生成按鈕
+    function generateFilterButtons(data) {
+        let areas = new Set();
+        data.forEach(item => {
+            let area = (item.nickname && item.nickname.includes("#")) ? item.nickname.split("#")[1] : (item.area || "苑裡");
+            if(area) areas.add(area);
+        });
+
+        // 將 Set 轉為陣列並排序 (讓里別整齊排列)
+        let sortedAreas = Array.from(areas).sort();
+
+        let btnHtml = `<div class="filter-btn active" onclick="filterGallery('all', this)">全部</div>`;
+        
+        sortedAreas.forEach(area => {
+            btnHtml += `<div class="filter-btn" onclick="filterGallery('${area}', this)">${area}</div>`;
+        });
+
+        $('#filter-bar').html(btnHtml).fadeIn(); // 生成完畢後顯示過濾列
+    }
+
+    // 🔥 過濾邏輯
+    window.filterGallery = function(targetArea, btnElement) {
+        // 1. 處理按鈕樣式
+        $('.filter-btn').removeClass('active');
+        $(btnElement).addClass('active');
+
+        // 2. 篩選資料
+        if (targetArea === 'all') {
+            renderGallery(allData);
+        } else {
+            let filteredData = allData.filter(item => {
+                let area = (item.nickname && item.nickname.includes("#")) ? item.nickname.split("#")[1] : (item.area || "苑裡");
+                return area === targetArea;
+            });
+            renderGallery(filteredData);
+        }
     }
 
     window.showDetail = function(item) {
@@ -172,35 +262,25 @@
         let note = (item.note && item.note.trim() !== "") ? item.note : "無備註";
         let time = item.created_at ? item.created_at.substring(0, 16) : "未知時間";
         
-        // 🔥 1. 導航修復：使用 Google Maps 官方通用連結 (解決 404 問題)
-        let navLink = `https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}`;
+        let navLink = `http://googleusercontent.com/maps.google.com/maps?daddr=${item.lat},${item.lng}`;
         let shareUrl = window.location.href; 
 
-        // 🔥 2. LINE 文案庫 (12 句隨機變化，不再重複)
+        // 隨機文案
         const lineGreetings = [
             `🔥 驚見野生土地公！`,
             `🙏 苑裡這裡有神明，有拜有保庇！`,
             `📍 尋神情報更新！發現新地點！`,
             `✨ 這尊土地公看起來很靈驗喔～`,
-            `🏮 剛剛路過這裡，發現一尊很美的土地公！`,
-            `🚩 苑裡鄉親注意！這裡有新的情報！`,
-            `👀 你看過這尊嗎？隱藏版的神明在這裡。`,
-            `💎 挖到寶了！這個位置竟然有土地公。`,
-            `📢 好康道相報，有拜有保佑，快來看看。`,
-            `🚶‍♂️ 散步經過發現的，分享給大家保平安。`,
-            `📸 拍到一尊很莊嚴的土地公，分享給你！`,
-            `🗺️ 苑裡尋神地圖：這裡風景不錯還有神明！`
+            `🏮 剛剛路過這裡，發現一尊很美的土地公！`
         ];
         let randomGreeting = lineGreetings[Math.floor(Math.random() * lineGreetings.length)];
         
-        // 使用 %0A 進行換行排版
         let lineText = `${randomGreeting}%0A%0A` + 
                        `🗺️ 地點：${area}%0A` + 
                        `👤 拍攝：${name}%0A` + 
                        `💬 備註：${note}%0A%0A` + 
                        `👇 點我看地圖：`;
 
-        // 3. 社群連結生成
         let fbLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
         let lineLink = `https://line.me/R/msg/text/?${lineText} ${encodeURIComponent(shareUrl)}`;
 
