@@ -262,7 +262,9 @@
         let note = (item.note && item.note.trim() !== "") ? item.note : "無備註";
         let time = item.created_at ? item.created_at.substring(0, 16) : "未知時間";
         
-        let navLink = `http://googleusercontent.com/maps.google.com/maps?daddr=${item.lat},${item.lng}`;
+      let navLink = `https://www.google.com/maps?daddr=${item.lat},${item.lng}`;
+
+
         let shareUrl = window.location.href; 
 
         // 隨機文案
